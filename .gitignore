@@ -1,0 +1,10 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Assets Resources. Por ahora nadota.
+*.obj
+*.blend
+*.png
+*.mp3
+*.wav

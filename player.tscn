@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://de4tgdk06il7y"]
+
+[ext_resource type="Script" path="res://player.gd" id="1_x23co"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_xr3lx"]
+size = Vector3(0.5, 1.8, 0.5)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ycn7k"]
+radius = 0.3
+height = 1.8
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_x23co")
+
+[node name="Pivot" type="Node3D" parent="."]
+
+[node name="Character" type="MeshInstance3D" parent="Pivot"]
+mesh = SubResource("BoxMesh_xr3lx")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_ycn7k")
