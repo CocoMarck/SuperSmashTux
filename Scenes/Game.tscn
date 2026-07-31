@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://dkpng3ohg1ql1"]
 
-[ext_resource type="PackedScene" uid="uid://de4tgdk06il7y" path="res://Scenes/Objects/player.tscn" id="1_iukft"]
+[ext_resource type="PackedScene" uid="uid://de4tgdk06il7y" path="res://Scenes/Objects/player.tscn" id="1_ebmjs"]
+[ext_resource type="Environment" uid="uid://lit05fb87j4a" path="res://environments/env_game.tres" id="2_qxrlw"]
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bkxvp"]
 size = Vector3(41.528046, 2, 4)
@@ -9,6 +12,21 @@ size = Vector3(41.528046, 2, 4)
 size = Vector3(41.53715, 2, 4)
 
 [node name="Main" type="Node" unique_id=1119345977]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=986018196]
+environment = ExtResource("2_qxrlw")
+camera_attributes = SubResource("CameraAttributesPractical_gl6un")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1209438478]
+transform = Transform3D(0.99935186, 1.1327209e-08, 0.0359984, -0.035516914, 0.16300808, 0.9859853, -0.005868019, -0.9866248, 0.16290243, 0, 11.2912, 0)
+shadow_enabled = true
+
+[node name="CameraPivot" type="Marker3D" parent="." unique_id=1550034331]
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=583411287]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.020214915, 10.238355, 59.83735)
+fov = 30.0
+size = 25.418
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=64168988]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
@@ -20,16 +38,9 @@ shape = SubResource("BoxShape3D_bkxvp")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=2124560518]
 mesh = SubResource("BoxMesh_o7g8m")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1209438478]
-transform = Transform3D(0.9993518, 7.604334e-09, 0.0359984, -0.03551691, 0.16300808, 0.9859853, -0.0058680186, -0.9866248, 0.16290237, 0, 11.2912, 0)
-shadow_enabled = true
+[node name="Player1" parent="." unique_id=9210622 instance=ExtResource("1_ebmjs")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -15, 7.076, 0)
 
-[node name="Player" parent="." unique_id=9210622 instance=ExtResource("1_iukft")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 7.0756, 0)
-
-[node name="CameraPivot" type="Marker3D" parent="." unique_id=1550034331]
-
-[node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=583411287]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.020214915, 10.238355, 59.83735)
-fov = 30.0
-size = 25.418
+[node name="Player2" parent="." unique_id=1153622412 instance=ExtResource("1_ebmjs")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 15, 7.076, 0)
+player_id = 1

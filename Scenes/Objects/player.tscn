@@ -1,16 +1,20 @@
 [gd_scene format=3 uid="uid://de4tgdk06il7y"]
 
 [ext_resource type="Script" uid="uid://bygvcsy0b1osw" path="res://Scripts/player.gd" id="1_x23co"]
+[ext_resource type="Material" uid="uid://dn2jv3t2f4mog" path="res://Materials/mat_blue.tres" id="2_kvv6r"]
+[ext_resource type="Material" uid="uid://d3u0maubo42gx" path="res://Materials/mat_red.tres" id="3_picsy"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_xr3lx"]
 size = Vector3(0.5, 1.4297851, 0.5)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ycn7k"]
-radius = 0.3
-height = 1.4361328
+radius = 0.25
+height = 1.45
 
 [node name="Player" type="CharacterBody3D" unique_id=1153622412]
 script = ExtResource("1_x23co")
+mat_player_1 = ExtResource("2_kvv6r")
+mat_player_2 = ExtResource("3_picsy")
 
 [node name="Pivot" type="Node3D" parent="." unique_id=1550319720]
 
