@@ -1,9 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://dkpng3ohg1ql1"]
+[gd_scene format=3 uid="uid://dkpng3ohg1ql1"]
 
 [ext_resource type="Environment" uid="uid://lit05fb87j4a" path="res://environments/env_game.tres" id="1_jpm03"]
 [ext_resource type="PackedScene" uid="uid://de4tgdk06il7y" path="res://prefabs/character.tscn" id="2_1gtf4"]
-[ext_resource type="Material" uid="uid://d3u0maubo42gx" path="res://materials/mat_red.tres" id="3_8xqmq"]
-[ext_resource type="Material" uid="uid://dn2jv3t2f4mog" path="res://materials/mat_blue.tres" id="4_gp5m7"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
 
@@ -13,40 +11,36 @@ size = Vector3(41.528, 2, 4)
 [sub_resource type="BoxMesh" id="BoxMesh_o7g8m"]
 size = Vector3(41.5372, 2, 4)
 
-[node name="Main" type="Node"]
+[node name="Main" type="Node" unique_id=1808081603]
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=557515165]
 environment = ExtResource("1_jpm03")
 camera_attributes = SubResource("CameraAttributesPractical_gl6un")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=729570398]
 transform = Transform3D(0.999352, 1.13272e-08, 0.0359984, -0.0355169, 0.163008, 0.985985, -0.00586802, -0.986625, 0.162902, 0, 11.2912, 0)
 shadow_enabled = true
 
-[node name="CameraPivot" type="Marker3D" parent="."]
+[node name="CameraPivot" type="Marker3D" parent="." unique_id=1515645163]
 
-[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
+[node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=1767947065]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0202149, 10.2384, 59.8373)
 fov = 30.0
 size = 25.418
 
-[node name="Ground" type="StaticBody3D" parent="."]
+[node name="Ground" type="StaticBody3D" parent="." unique_id=1443107689]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1416835662]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0167999, 0, 0)
 shape = SubResource("BoxShape3D_bkxvp")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=40893465]
 mesh = SubResource("BoxMesh_o7g8m")
 
-[node name="Player1" parent="." instance=ExtResource("2_1gtf4")]
+[node name="Player1" parent="." unique_id=563692053 instance=ExtResource("2_1gtf4")]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -15, 7.076, 0)
-mat_player_1 = ExtResource("3_8xqmq")
-mat_player_2 = ExtResource("4_gp5m7")
 
-[node name="Player2" parent="." instance=ExtResource("2_1gtf4")]
+[node name="Player2" parent="." unique_id=461376309 instance=ExtResource("2_1gtf4")]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 15, 7.076, 0)
 player_id = 1
-mat_player_1 = ExtResource("3_8xqmq")
-mat_player_2 = ExtResource("4_gp5m7")
