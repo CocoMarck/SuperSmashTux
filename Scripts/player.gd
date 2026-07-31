@@ -23,13 +23,13 @@ func _physics_process(delta):
 		direction = direction.normalized()
 		$Pivot.basis = Basis.looking_at(direction)
 	
-	# Ground volicity
+	# Volocidad en terra
 	target_velocity.x = direction.x * speed
 		
 	# Volocidad vertical. Gravedad
 	var jump = (Input.is_action_pressed("jump") == true ) or (Input.is_action_pressed("move_up") == true)
 	if not is_on_floor():
-		target_velocity.y = target_velocity.y -(fall_acceleration * delta)
+		target_velocity.y -= fall_acceleration * delta
 	else:
 		if jump:
 			target_velocity.y = jump_impulse
