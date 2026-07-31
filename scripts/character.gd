@@ -18,9 +18,9 @@ func _ready() -> void:
 	# Cambiar el color del jugador dependiendo su ID.
 	match player_id:
 		PlayerId.PLAYER_1:
-			$Pivot/Character.material_override = mat_player_1
+			$Pivot/CharacterMesh.material_override = mat_player_1
 		PlayerId.PLAYER_2:
-			$Pivot/Character.material_override = mat_player_2
+			$Pivot/CharacterMesh.material_override = mat_player_2
 
 # Funcion de procesamiento de fisicas. Tambien tiene metido el movimiento.
 func _physics_process(delta):
