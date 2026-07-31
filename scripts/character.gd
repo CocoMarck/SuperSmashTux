@@ -1,15 +1,13 @@
 extends CharacterBody3D
 
-# Enumeracion de IDs posibles de jugadores.
-enum PlayerId { PLAYER_1, PLAYER_2 }
-
 # Constantes del script.
 const MAX_JUMPS = 2
 
 # Propiedades publicas del script.
-@export var player_id : PlayerId
+@export var player_id : GlobalConstants.PlayerId
 @export var mat_player_1 : Material
 @export var mat_player_2 : Material
+@export var initial_facing : Vector3 = Vector3.RIGHT
 @export var speed = 14
 @export var fall_acceleration = 48
 @export var jump_impulse = 25
@@ -20,14 +18,15 @@ var jump_count = 0
 var was_jumping = false
 
 func _ready() -> void:
-	# Inicializar el color y direccion del jugador dependiendo su ID.
+	# Cambiar el color del jugador dependiendo su ID.
 	match player_id:
-		PlayerId.PLAYER_1:
+		GlobalConstants.PlayerId.PLAYER_1:
 			$Pivot/CharacterMesh.material_override = mat_player_1
-			$Pivot.basis = Basis.looking_at(Vector3.RIGHT)
-		PlayerId.PLAYER_2:
+		GlobalConstants.PlayerId.PLAYER_2:
 			$Pivot/CharacterMesh.material_override = mat_player_2
-			$Pivot.basis = Basis.looking_at(Vector3.LEFT)
+
+	# Establecer direccion de vista inicial.
+	$Pivot.basis = Basis.looking_at(initial_facing)
 
 # Funcion de procesamiento de fisicas. Tambien tiene metido el movimiento.
 func _physics_process(delta):
@@ -36,13 +35,13 @@ func _physics_process(delta):
 
 	# Direcciones de movimiento y salto según el Id de jugador.
 	match player_id:
-		PlayerId.PLAYER_1:
+		GlobalConstants.PlayerId.PLAYER_1:
 			if Input.is_physical_key_pressed(KEY_D): # Derecha J1
 				direction.x += 1
 			if Input.is_physical_key_pressed(KEY_A): # Izquierda J1
 				direction.x -= 1
 			is_jumping = Input.is_physical_key_pressed(KEY_W) # Salto J1
-		PlayerId.PLAYER_2:
+		GlobalConstants.PlayerId.PLAYER_2:
 			if Input.is_physical_key_pressed(KEY_RIGHT): # Derecha J2
 				direction.x += 1
 			if Input.is_physical_key_pressed(KEY_LEFT): # Izquierda J2
