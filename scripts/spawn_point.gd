@@ -14,9 +14,10 @@ func _ready() -> void:
 	# Establecer la direccion de vista del personaje segun su ID.
 	match player_id:
 		GlobalConstants.PlayerId.PLAYER_1:
-			character.initial_facing = Vector3.RIGHT
+			character.init_looking_at_right = true
+		
 		GlobalConstants.PlayerId.PLAYER_2:
-			character.initial_facing = Vector3.LEFT
+			character.init_looking_at_right = false
 	
 	# Posicionar al personaje en este punto de spawn, como hijo directo de la escena.
 	character.position = global_position

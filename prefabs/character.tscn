@@ -1,37 +1,33 @@
 [gd_scene format=3 uid="uid://de4tgdk06il7y"]
 
 [ext_resource type="Script" uid="uid://bpim6e053nk7s" path="res://scripts/character.gd" id="1_pkgsf"]
-[ext_resource type="Material" uid="uid://dn2jv3t2f4mog" path="res://materials/mat_blue.tres" id="2_v5mhf"]
-[ext_resource type="Material" uid="uid://d3u0maubo42gx" path="res://materials/mat_red.tres" id="3_hk8gb"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_v5mhf"]
 radius = 0.3
 height = 1.45
 
 [sub_resource type="BoxMesh" id="BoxMesh_fdm2o"]
-size = Vector3(0.3774414, 0.16884232, 0.28615934)
+size = Vector3(0.377441, 0.168842, 0.286159)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ycn7k"]
 radius = 0.3
 height = 1.45
 
-[node name="Character" type="CharacterBody3D" unique_id=135555035]
+[node name="Character" type="CharacterBody3D" unique_id=1138438983]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
 script = ExtResource("1_pkgsf")
-mat_player_1 = ExtResource("2_v5mhf")
-mat_player_2 = ExtResource("3_hk8gb")
 
-[node name="Pivot" type="Node3D" parent="." unique_id=1810207224]
+[node name="Pivot" type="Node3D" parent="." unique_id=1124807513]
 
-[node name="CharacterMesh" type="MeshInstance3D" parent="Pivot" unique_id=411430807]
+[node name="CharacterMesh" type="MeshInstance3D" parent="Pivot" unique_id=835335952]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.185107, 0)
 mesh = SubResource("CapsuleMesh_v5mhf")
 skeleton = NodePath("../..")
 
-[node name="EyesMesh" type="MeshInstance3D" parent="Pivot" unique_id=781832674]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0078125, 0.17419243, -0.21588704)
+[node name="EyesMesh" type="MeshInstance3D" parent="Pivot" unique_id=124649953]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0078125, 0.174192, -0.215887)
 mesh = SubResource("BoxMesh_fdm2o")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=278873156]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=303483153]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.181934, 0)
 shape = SubResource("CapsuleShape3D_ycn7k")
