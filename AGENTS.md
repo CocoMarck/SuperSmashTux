@@ -13,3 +13,5 @@
 5. **DON'T CHANGE ANYTHING WITHOUT NOTIFYING THEM.** If you see something that could be improved, mention it. Don't fix it on your own.
 
 6. **RESPECT THE NAMESPACE.** The namespace logic must be mentioned in [estructura.md](./docs/estructura.md).
+
+7. **RESPOND IN NEUTRAL SPANISH BY DEFAULT.** Unless the dev explicitly asks for another language, always answer in Spanish.
