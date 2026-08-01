@@ -2,8 +2,9 @@
 
 [ext_resource type="Script" uid="uid://bpim6e053nk7s" path="res://scripts/character.gd" id="1_pkgsf"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_cs6s8"]
-size = Vector3(0.5, 1.45, 0.5)
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_humf0"]
+radius = 0.3
+height = 1.45
 
 [sub_resource type="BoxMesh" id="BoxMesh_fdm2o"]
 size = Vector3(0.377441, 0.168842, 0.286159)
@@ -53,7 +54,7 @@ tracks/2/keys = {
 
 [sub_resource type="Animation" id="Animation_xofgc"]
 resource_name = "run"
-length = 0.39999999999999997
+length = 0.4
 loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -106,7 +107,7 @@ script = ExtResource("1_pkgsf")
 
 [node name="Mesh" type="MeshInstance3D" parent="Pivot" unique_id=835335952]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.185107, 0)
-mesh = SubResource("BoxMesh_cs6s8")
+mesh = SubResource("CapsuleMesh_humf0")
 skeleton = NodePath("../..")
 
 [node name="EyesMesh" type="MeshInstance3D" parent="Pivot" unique_id=124649953]
@@ -117,6 +118,6 @@ mesh = SubResource("BoxMesh_fdm2o")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.181934, 0)
 shape = SubResource("CapsuleShape3D_ycn7k")
 
-[node name="AnimationMesh" type="AnimationPlayer" parent="." unique_id=1862923683]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1862923683]
 libraries/ = SubResource("AnimationLibrary_v5mhf")
 autoplay = &"run"

@@ -19,8 +19,8 @@ func _collect_input() -> void:
 	for value in actions.values():
 		if value == "":
 			return
-	move_left = Input.is_action_pressed(actions["move_left"])
-	move_right = Input.is_action_pressed(actions["move_right"])
-	move_up = Input.is_action_pressed(actions["move_up"])
-	move_down = Input.is_action_pressed(actions["move_down"])
-	jump = Input.is_action_pressed(actions["jump"])
+	_move_left = Input.is_action_pressed(actions["move_left"])
+	_move_right = Input.is_action_pressed(actions["move_right"])
+	_move_up = Input.is_action_pressed(actions["move_up"])
+	_move_down = Input.is_action_pressed(actions["move_down"])
+	_jump = Input.is_action_pressed(actions["jump"])
