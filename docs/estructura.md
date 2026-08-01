@@ -1,4 +1,5 @@
 # Estructura del Proyecto — SuperSmashTux
+Este documento describe la estructura de carpetas y convenciones de nombres para el proyecto Super Smash Tux.
 
 ```
 supersmashtux/
@@ -24,4 +25,6 @@ supersmashtux/
 - Nodos en escenas: **PascalCase** (estándar de Godot: `Player`, `CameraPivot`)
 - Señales y métodos: **snake_case** (`on_hit`, `_physics_process`)
 - Variables y funciones exportadas: **snake_case** (`@export var jump_velocity`)
+- Constantes: **UPPER_SNAKE_CASE** (`const MAX_HEALTH = 100`)
+- Enumeraciones: **PascalCase** (`enum PlayerState { Idle, Running, Jumping }`)
 > Referente a godot gui, y a gdscript. El C#, usar el namespace estandar.
