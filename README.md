@@ -1,4 +1,4 @@
-<h1><img src="icon.png" width="128" alt="icon" style="vertical-align: middle; margin-right: 24px;">Super Smash Tux</h1>
+<h1><img src="icon.png" width="48" alt="icon" style="vertical-align: middle; margin-right: 12px;">Super Smash Tux</h1>
 
 Videojuego de peleas inspirado en Super Smash Bros, con los personajes más famosos del software libre. Hecho en Godot 4 usando GDScript.
 
