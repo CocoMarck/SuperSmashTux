@@ -2,9 +2,8 @@
 
 [ext_resource type="Script" uid="uid://bpim6e053nk7s" path="res://scripts/character.gd" id="1_pkgsf"]
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_v5mhf"]
-radius = 0.3
-height = 1.45
+[sub_resource type="BoxMesh" id="BoxMesh_cs6s8"]
+size = Vector3(0.5, 1.45, 0.5)
 
 [sub_resource type="BoxMesh" id="BoxMesh_fdm2o"]
 size = Vector3(0.377441, 0.168842, 0.286159)
@@ -13,15 +12,101 @@ size = Vector3(0.377441, 0.168842, 0.286159)
 radius = 0.3
 height = 1.45
 
+[sub_resource type="Animation" id="Animation_cs6s8"]
+length = 0.033333335
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot/Mesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, -0.185107, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot/Mesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot/Mesh:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_xofgc"]
+resource_name = "run"
+length = 0.39999999999999997
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot/Mesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, -0.185107, 0), Vector3(0, -0.004046957, -0.071223736), Vector3(0, -0.185107, 0), Vector3(0, -0.017948132, 0.020894846), Vector3(0, -0.185107, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot/Mesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0.7130069, 0, 0), Vector3(0, 0, 0), Vector3(-0.6071564, 0, 0), Vector3(0, 0, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot/Mesh:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(1, 1, 1), Vector3(0.9999999, 0.99999994, 1.0000001), Vector3(1, 1, 1), Vector3(1, 1.0000001, 1.0000001), Vector3(1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_v5mhf"]
+_data = {
+&"RESET": SubResource("Animation_cs6s8"),
+&"run": SubResource("Animation_xofgc")
+}
+
 [node name="Character" type="CharacterBody3D" unique_id=1138438983]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
 script = ExtResource("1_pkgsf")
 
 [node name="Pivot" type="Node3D" parent="." unique_id=1124807513]
 
-[node name="CharacterMesh" type="MeshInstance3D" parent="Pivot" unique_id=835335952]
+[node name="Mesh" type="MeshInstance3D" parent="Pivot" unique_id=835335952]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.185107, 0)
-mesh = SubResource("CapsuleMesh_v5mhf")
+mesh = SubResource("BoxMesh_cs6s8")
 skeleton = NodePath("../..")
 
 [node name="EyesMesh" type="MeshInstance3D" parent="Pivot" unique_id=124649953]
@@ -31,3 +116,7 @@ mesh = SubResource("BoxMesh_fdm2o")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=303483153]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.181934, 0)
 shape = SubResource("CapsuleShape3D_ycn7k")
+
+[node name="AnimationMesh" type="AnimationPlayer" parent="." unique_id=1862923683]
+libraries/ = SubResource("AnimationLibrary_v5mhf")
+autoplay = &"run"
