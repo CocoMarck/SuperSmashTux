@@ -7,7 +7,8 @@ Videojuego de peleas inspirado en Super Smash Bros, con los personajes más famo
 
 ## Características de juego
 
-- Combate multijugador local (teclado con controles independientes para 2 jugadores).
+- Combate multijugador local para 2 jugadores.
+- Soporte para teclado y gamepad.
 
 ## Requisitos
 
