@@ -13,6 +13,7 @@ Videojuego de peleas inspirado en Super Smash Bros, con los personajes más famo
 ## Requisitos
 
 - [Godot Engine 4+](https://godotengine.org/download)
+- [Node.js 18+](https://nodejs.org) (opcional si se quiere usar MCP para agentes de IA)
 
 ## Cómo abrir el proyecto
 
@@ -21,6 +22,12 @@ Videojuego de peleas inspirado en Super Smash Bros, con los personajes más famo
 3. Corre la escena principal (`scenes/main.tscn`) desde el editor.
 
 Para más detalles sobre la estructura de carpetas y convenciones del proyecto, revisa [docs/estructura.md](./docs/estructura.md).
+
+## Desarrollo con IA
+
+El proyecto incluye un `.mcp.json` que conecta agentes de IA (Claude Code, Cursor, Cline) con Godot vía [godot-mcp](https://github.com/Coding-Solo/godot-mcp), para que puedan correr el juego y leer los errores de la consola por su cuenta.
+
+Para usarlo hace falta [Node.js 18+](https://nodejs.org) y ajustar la ruta `GODOT_PATH` dentro de `.mcp.json`, que apunta al ejecutable de Godot de cada ordenador.
 
 ## Licencia
 

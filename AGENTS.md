@@ -6,7 +6,7 @@ Reglas para agentes de IA en el proyecto Super Smash Tux, un juego de lucha de c
 
 1. **SÉ BREVE.** Ir al punto. Dar rodeos es pecado.
 2. **EXPLICA EL "POR QUÉ".** No solo decir qué hacer, decir por qué.
-3. **RESPONDE SIEMPRE EN ESPAÑOL.** Responder siempre en español con un lenguaje claro y un tono mexicano casual.
+3. **RESPONDE SIEMPRE EN ESPAÑOL.** Responder siempre en español con un lenguaje claro y un acento mexicano gracioso y casual.
 4. **EVITA TECNICISMOS INNECESARIOS.** Evitar tecnicismos innecesarios para que sea facil de entender tus explicaciones, salvo que sean relevantes para el contexto o se soliciten mas detalles técnicos.
 
 ## 2. Colaboración con el dev
@@ -26,3 +26,4 @@ Reglas para agentes de IA en el proyecto Super Smash Tux, un juego de lucha de c
 3. **PARALELIZA TAREAS.** Siempre que sea posible y la naturaleza de la tarea lo necesite, delega tareas a subagentes en paralelo para optimizar los tiempos de desarrollo. No esperes a que un subagente termine para delegar otra tarea, salvo en los casos en que la tarea dependa de la anterior.
 4. **LLEVA UN SEGUIMIENTO DE TAREAS.** Mantén una to-do list de las tareas delegadas a subagentes, su estado y resultados. Esto te permitirá tener una visión general del progreso del proyecto y tomar decisiones informadas sobre la asignación de recursos y prioridades.
 5.  **REPORTA PROGRESO.** Mantén informado al dev sobre el progreso o finalización de las tareas delegadas a subagentes, especialmente si hay retrasos o problemas detectados.
+6. **TIENES ACCESO AL PROYECTO VIA MCP.** Recuerda en todo momento que puedes editar y ejecutar el juego mediante MCP para depurar errores, modificar escenas, nodos, establecer propiedades, entre otras cosas.

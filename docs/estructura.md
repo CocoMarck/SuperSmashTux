@@ -3,13 +3,23 @@ Este documento describe la estructura de carpetas y convenciones de nombres para
 
 ```
 supersmashtux/
-├── prefabs/          # Escenas reutilizables (player, enemigos, items)
+├── prefabs/          # Escenas reutilizables (personajes, enemigos, items)
 ├── scenes/           # Escenas principales (main, niveles, menús, UI)
 ├── scripts/          # GDScripts
-├── assets/           # Assets raw (texturas, modelos, audios fuente)
+├── animations/       # Recursos de animación (.res)
+├── materials/        # Materiales (.tres)
+├── environments/     # Entornos de mundo (.tres)
+├── assets/           # Assets raw (texturas, modelos, audios fuente) — aún no creada
 ├── docs/             # Documentación, notas, ideas
-├── AGENTS.md         # Instrucciones para la IA
-└── project.godot
+├── .claude/          # Config local de Claude Code (agentes, skills, settings)
+├── AGENTS.md         # Archivo principal de instrucciones para agentes de IA
+├── README.md         # Documento de presentación del proyecto
+├── LICENSE           # Licencia Open Source GPL-3.0
+├── .mcp.json         # Servidor MCP de Godot para agentes de IA
+├── .gitignore        # Archivo para ignorar archivos y carpetas irrelevantes en Git
+├── .gitattributes    # Archivo para definir atributos de archivos en Git
+├── icon.png          # Icono del Juego
+└── project.godot     # Archivo principal del proyecto Godot
 ```
 
 ## File namespace
@@ -19,7 +29,8 @@ supersmashtux/
 | Escenas | `snake_case.tscn` | `player.tscn`, `main_menu.tscn` |
 | Scripts | `snake_case.gd` | `player.gd`, `camera_follow.gd` |
 | Assets | `snake_case.ext` | `ground_texture.png`, `jump_sfx.wav` |
-| Docs | `lower-kebak-case.md` | `estructura.md`, `titulo-descriptivo.md` |
+| Recursos | `prefijo_nombre.tres` | `mat_red.tres`, `env_game.tres` |
+| Docs | `lower-kebab-case.md` | `estructura.md`, `titulo-descriptivo.md` |
 
 ## Godot namespace
 - Nodos en escenas: **PascalCase** (estándar de Godot: `Player`, `CameraPivot`)
