@@ -8,7 +8,8 @@ El player, pos espera input.
 	"move_right": "",
 	"move_up": "",
 	"move_down": "",
-	"jump": ""
+	"jump": "",
+	"attack": ""
 }
 
 func _collect_input() -> void:
@@ -24,3 +25,4 @@ func _collect_input() -> void:
 	_move_up = Input.is_action_pressed(actions["move_up"])
 	_move_down = Input.is_action_pressed(actions["move_down"])
 	_jump = Input.is_action_pressed(actions["jump"])
+	_attack = Input.is_action_pressed(actions["attack"])

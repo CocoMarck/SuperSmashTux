@@ -15,6 +15,9 @@ size = Vector3(41.528, 2, 4)
 [sub_resource type="BoxMesh" id="BoxMesh_o7g8m"]
 size = Vector3(41.5372, 2, 4)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o6xl0"]
+albedo_color = Color(0.89411765, 1, 0.13725491, 1)
+
 [node name="Main" type="Node" unique_id=1966553712]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=52927572]
@@ -54,6 +57,7 @@ gizmo_extents = 3.0
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 14, 5, 0)
 script = ExtResource("3_jyhfs")
 actions = {
+"attack": "player1_attack",
 "jump": "player1_jump",
 "move_down": "player1_move_down",
 "move_left": "player1_move_left",
@@ -66,15 +70,16 @@ material = ExtResource("4_jyhfs")
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -14, 5, 0)
 script = ExtResource("3_jyhfs")
 actions = {
+"attack": "player2_attack",
 "jump": "player2_jump",
 "move_down": "player2_move_down",
 "move_left": "player2_move_left",
 "move_right": "player2_move_right",
 "move_up": "player2_move_up"
 }
-init_looking_at_right = true
 material = ExtResource("5_tbgi4")
 
 [node name="NPCFake" parent="." unique_id=475649309 instance=ExtResource("2_sugp2")]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 5, 0)
 script = ExtResource("6_tefeu")
+material = SubResource("StandardMaterial3D_o6xl0")
