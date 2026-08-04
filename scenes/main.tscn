@@ -52,7 +52,7 @@ shape = SubResource("BoxShape3D_bkxvp")
 mesh = SubResource("BoxMesh_o7g8m")
 
 [node name="PlatformLeft" type="StaticBody3D" parent="." unique_id=612300481]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 5.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 6.094, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformLeft" unique_id=612300482]
 shape = SubResource("BoxShape3D_plat01")
@@ -61,7 +61,7 @@ shape = SubResource("BoxShape3D_plat01")
 mesh = SubResource("BoxMesh_plat01")
 
 [node name="PlatformRight" type="StaticBody3D" parent="." unique_id=612300484]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 5.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 6.094, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformRight" unique_id=612300485]
 shape = SubResource("BoxShape3D_plat01")
@@ -80,6 +80,7 @@ gizmo_extents = 3.0
 [node name="Player1" parent="." unique_id=1138438983 instance=ExtResource("2_sugp2")]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 14, 5, 0)
 script = ExtResource("3_jyhfs")
+player_id = 0
 actions = {
 "attack": "player1_attack",
 "jump": "player1_jump",
@@ -93,6 +94,7 @@ material = ExtResource("4_jyhfs")
 [node name="Player2" parent="." unique_id=2005389870 instance=ExtResource("2_sugp2")]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -14, 5, 0)
 script = ExtResource("3_jyhfs")
+player_id = 0
 actions = {
 "attack": "player2_attack",
 "jump": "player2_jump",

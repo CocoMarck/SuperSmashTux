@@ -4,17 +4,19 @@ class_name Character
 # Constantes del script.
 const MAX_JUMPS := 2
 const HITBOX_SCENE := preload("res://prefabs/hitbox.tscn")
+const HITBOX_LIFETIME := 0.1
 
-# Propiedades publicas | Gravidad y velocidad.
-@export var speed := 18
-@export var fall_acceleration := 48
-@export var jump_impulse := 25
-@export var init_looking_at_right : bool = false
+# Propiedades publicas | Gravedad y velocidad.
+@export_group("Movimiento")
+@export var speed: int = 18
+@export var fall_acceleration: int = 48
+@export var jump_impulse: int = 25
+@export var init_looking_at_right: bool = false
 
-
-# Propiedades publicas | Materiales y malla
-@export var material : Material = null
-@export var mesh : Mesh = null
+# Propiedades publicas | Apariencia
+@export_group("Apariencia")
+@export var material: Material = null
+@export var mesh: Mesh = null
 
 # Propiedades privadas | Movimientos
 var _move_left: bool = false
@@ -26,70 +28,51 @@ var _attack: bool = false
 var _power_attack: bool = false
 
 # Propiedades privadas | Velocidad y salto
-var _direction = Vector3(0.0, 0.0, 0.0)
-var _target_velocity = Vector3.ZERO
-var _jump_count = 0
-var _was_jumping = false
-var _air_count = 0
-var _fall_acceleration_multiplier = 1
+var _direction: Vector3 = Vector3.ZERO
+var _target_velocity: Vector3 = Vector3.ZERO
+var _jump_count: int = 0
+var _was_jumping: bool = false
+var _air_count: int = 0
+var _fall_acceleration_multiplier: float = 1.0
 
 # Propiedades privadas | Hitbox daño a los enemigos locos.
-var _hitbox_count = 0
+var _hitbox_count: float = 0.0
 var _spawned_hitbox: Area3D = null
 
-# Clase interna, para movimientos de pelea
-class FightMove extends RefCounted:
-	var name: StringName
-	var duration: float
-	var damage: int
-	var stop_horizontal_move: bool
-	var stop_vertical_move: bool
-	var speed: Vector3
-	var air_attack : bool
-	var hitbox_position: Vector3
-	
-	func _init(
-		p_name: StringName, p_duration: float, p_damage: int, 
-		p_stop_horizontal_move: bool, p_stop_vertical_move: bool, p_speed: Vector3, p_air_attack, p_hitbox_position: Vector3
-	):
-		name = p_name
-		duration = p_duration
-		damage = p_damage
-		stop_horizontal_move = p_stop_horizontal_move
-		stop_vertical_move = p_stop_vertical_move
-		speed = p_speed
-		air_attack = p_air_attack
-		hitbox_position = p_hitbox_position
+# Propiedades privadas | Ataques
+var _attack_count: float = 0.0
+var _current_attack: FightMove = null
+var _attacks: Attacks = Attacks.new()
 
-# Clase interna de ataques disponibles
-class Attacks extends RefCounted:
-	# name, duration, damage, stop x move, stop y move, speed 3d, air_attack
-	var neutral := FightMove.new(
-		"neutral", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.3, 0.1, 0)
-	)
-	var dash := FightMove.new(
-		"dash", 0.3, 10, true, false, Vector3(22,0,0), false, Vector3(0.5, -0.5, 0)
-	)
-	var crouch := FightMove.new(
-		"crouch", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.6, -0.5, 0)
-	)
-	
-	var neutral_air := FightMove.new(
-		"neutral_air", 0.4, 5, false, false, Vector3(0,0,0), true, Vector3(0.5, -0.6, 0)
-	)
-	var air_move := FightMove.new(
-		"air_move", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.6, 0, 0)
-	)
-	var air_down := FightMove.new(
-		"air_down", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.1, -0.7, 0)
-	)
+# Funciones | Inicializar.
+func _ready() -> void:
+	'''
+	Inicializar el character, con sus colorines, materiales etc.
+	'''
+	# Cambiar el color del character
+	_set_mesh(mesh)
+	_set_material(material)
 
-# Propiedades privadas ataques	
-var _attack_count = 0
-var _current_attack : FightMove = null
-var _attacks = Attacks.new()
+	# Establecer direccion de vista inicial.
+	$Pivot.basis = Basis.looking_at(_get_initial_facing())
 
-# Funciones
+# Funciones | Procesamiento de físicas.
+func _physics_process(delta: float) -> void:
+	'''
+	Funcion de procesamiento de fisicas.
+	'''
+	_collect_input()
+	var gravity_signals = _vertical_force(delta, _fall_acceleration_multiplier)
+	var move_signals = _move(delta, gravity_signals)
+	var move_states = _get_move_states(move_signals)
+	_fight(delta, move_states)
+	_anim(delta, move_states, move_signals["direction"])
+
+	# Procesar todo
+	velocity = _target_velocity
+	move_and_slide()
+
+# Funciones de apariencia
 func _get_initial_facing() -> Vector3:
 	if init_looking_at_right:
 		return Vector3.RIGHT
@@ -99,8 +82,8 @@ func _get_initial_facing() -> Vector3:
 func _set_material( m: Material ) -> void:
 	'''
 	Establecer material al jugador.
-	Aunque preferiblemente sea nomas color. 
-	Pero por ahroa, asi ta bien.
+	Aunque preferiblemente sea nomas color.
+	Pero por ahora, asi está bien.
 	'''
 	if material != null:
 		$Pivot/Mesh.material_override = m
@@ -130,18 +113,6 @@ func _clear_hitbox() -> void:
 		_spawned_hitbox.queue_free()
 		_spawned_hitbox = null
 
-# Funciones Inicializar
-func _ready() -> void:
-	'''
-	Inicializar el character, con sus colorines, materiales etc.
-	'''
-	# Cambiar el color del character
-	_set_mesh(mesh)
-	_set_material(material)
-	
-	# Establecer direccion de vista inicial.
-	$Pivot.basis = Basis.looking_at( _get_initial_facing() )
-
 # Funciones movimiento
 func _get_move_direction() -> Vector3:
 	'''
@@ -158,7 +129,7 @@ func _collect_input() -> void:
 	
 func _vertical_force(delta: float, multiplier: float = 1) -> Dictionary:
 	'''
-	Fuerza vertical. Imitación de gravidad. Estilo 2d.
+	Fuerza vertical. Imitación de gravedad. Estilo 2d.
 	'''
 	var on_floor := is_on_floor()
 	if on_floor:
@@ -197,7 +168,7 @@ func _move(delta: float, vertical_force_signals: Dictionary) -> Dictionary:
 	if horizontal_move:
 		_direction = _get_move_direction()
 	
-	# Gravedad desender mas rapido
+	# Gravedad descender mas rapido
 	if not on_floor:
 		if _move_down:
 			_fall_acceleration_multiplier = 2
@@ -273,7 +244,7 @@ func _get_move_states(signals: Dictionary) -> Dictionary:
 		"air_down": air_down,
 	}
 
-func _fight(delta: float, states: Dictionary):
+func _fight(delta: float, states: Dictionary) -> void:
 	'''
 	Este evento sobrepaza el move. 
 	Si es necesario deja inoovil al player (para terminar ataque correctamente). Tambien sobrescribe estados.
@@ -322,7 +293,7 @@ func _fight(delta: float, states: Dictionary):
 			_hitbox_count = 0
 	if _spawned_hitbox != null:
 		_hitbox_count += delta
-		if _hitbox_count >= 0.1:
+		if _hitbox_count >= HITBOX_LIFETIME:
 			_clear_hitbox()
 
 func _anim(delta: float, states: Dictionary, direction: Vector3) -> void:
@@ -332,22 +303,12 @@ func _anim(delta: float, states: Dictionary, direction: Vector3) -> void:
 	'''
 	# Movimientos de pelea
 	if _current_attack != null:
-		if _current_attack.name == "neutral":
-			$AnimationPlayer.play("neutral_attack")
-		elif _current_attack.name == "dash":
-			$AnimationPlayer.play("dash_attack")
-		elif _current_attack.name == "crouch":
-			$AnimationPlayer.play("crouch_attack")
-		elif _current_attack.name == "neutral_air":
+		if _current_attack.animation_name != &"":
+			$AnimationPlayer.play(_current_attack.animation_name)
+		else:
 			$AnimationPlayer.stop()
-			$Pivot/Mesh.rotation_degrees.x = 45
-		elif _current_attack.name == "air_move":
-			$AnimationPlayer.stop()
-			$Pivot/Mesh.rotation_degrees.x = 90
-		elif _current_attack.name == "air_down":
-			$AnimationPlayer.stop()
-			$Pivot/Mesh.rotation_degrees.x = 0
-	
+			$Pivot/Mesh.rotation_degrees.x = _current_attack.mesh_rotation_x
+
 	else:
 		# Animacion | Movimiento en el piso
 		if states["neutral"]:
@@ -365,31 +326,3 @@ func _anim(delta: float, states: Dictionary, direction: Vector3) -> void:
 	# Animación | Mover direccion visual del player.
 	if states["moving"]:
 		$Pivot.basis = Basis.looking_at(direction)
-
-# Funciones lo chido.
-func _physics_process(delta: float) -> void:
-	'''
-	Funcion de procesamiento de fisicas.
-	'''
-	_collect_input()
-	var gravity_signals = _vertical_force(delta, _fall_acceleration_multiplier)
-	var move_signals = _move(delta, gravity_signals)
-	var move_states = _get_move_states(move_signals)
-	_fight(delta, move_states)
-	_anim(delta, move_states, move_signals["direction"])
-	
-	# Procesar todo
-	velocity = _target_velocity
-	move_and_slide()
-	
-	# Debug
-	'''
-	var move_states_text = ""
-	for key in move_states.keys():
-		move_states_text += "- {key}: {value}\n".format(
-			{"key":key, "value": move_states[key]}
-		)
-	print(
-		"Instance ID: {id}\n".format({"id": get_instance_id()}) , move_states_text
-	)
-	'''

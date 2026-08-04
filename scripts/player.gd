@@ -3,6 +3,8 @@ extends Character
 El player, pos espera input.
 '''
 
+@export var player_id: GlobalConstants.PlayerId
+
 @export var actions = {
 	"move_left": "",
 	"move_right": "",
