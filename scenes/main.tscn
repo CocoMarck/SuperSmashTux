@@ -1,11 +1,10 @@
 [gd_scene format=3 uid="uid://dkpng3ohg1ql1"]
 
 [ext_resource type="Environment" uid="uid://lit05fb87j4a" path="res://environments/env_game.tres" id="1_jpm03"]
-[ext_resource type="PackedScene" uid="uid://de4tgdk06il7y" path="res://prefabs/character.tscn" id="2_sugp2"]
-[ext_resource type="Script" uid="uid://duy5nqredibew" path="res://scripts/player.gd" id="3_jyhfs"]
+[ext_resource type="Script" uid="uid://bbefl7k3gi1fy" path="res://scripts/spawn_point.gd" id="2_o6xl0"]
 [ext_resource type="Material" uid="uid://d3u0maubo42gx" path="res://materials/mat_red.tres" id="4_jyhfs"]
 [ext_resource type="Material" uid="uid://dn2jv3t2f4mog" path="res://materials/mat_blue.tres" id="5_tbgi4"]
-[ext_resource type="Script" uid="uid://bat2l7q6oyqwd" path="res://scripts/npc.gd" id="6_tefeu"]
+[ext_resource type="Material" uid="uid://eprtccar7aks" path="res://materials/mat_yellow.tres" id="5_tefeu"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
 
@@ -20,9 +19,6 @@ size = Vector3(8, 1, 4)
 
 [sub_resource type="BoxMesh" id="BoxMesh_plat01"]
 size = Vector3(8, 1, 4)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o6xl0"]
-albedo_color = Color(0.89411765, 1, 0.13725491, 1)
 
 [node name="Main" type="Node" unique_id=1966553712]
 
@@ -70,43 +66,28 @@ shape = SubResource("BoxShape3D_plat01")
 mesh = SubResource("BoxMesh_plat01")
 
 [node name="SpawnPoint1" type="Marker3D" parent="." unique_id=414765233]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.010618, 5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 12, 0)
 gizmo_extents = 3.0
+script = ExtResource("2_o6xl0")
+material_player_1 = ExtResource("4_jyhfs")
+material_player_2 = ExtResource("5_tbgi4")
+material_npc = ExtResource("5_tefeu")
 
 [node name="SpawnPoint2" type="Marker3D" parent="." unique_id=149246284]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 12, 0)
 gizmo_extents = 3.0
-
-[node name="Player1" parent="." unique_id=1138438983 instance=ExtResource("2_sugp2")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 14, 5, 0)
-script = ExtResource("3_jyhfs")
-player_id = 0
-actions = {
-"attack": "player1_attack",
-"jump": "player1_jump",
-"move_down": "player1_move_down",
-"move_left": "player1_move_left",
-"move_right": "player1_move_right",
-"move_up": "player1_move_up"
-}
-material = ExtResource("4_jyhfs")
-
-[node name="Player2" parent="." unique_id=2005389870 instance=ExtResource("2_sugp2")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -14, 5, 0)
-script = ExtResource("3_jyhfs")
+script = ExtResource("2_o6xl0")
 player_id = 1
-actions = {
-"attack": "player2_attack",
-"jump": "player2_jump",
-"move_down": "player2_move_down",
-"move_left": "player2_move_left",
-"move_right": "player2_move_right",
-"move_up": "player2_move_up"
-}
 init_looking_at_right = true
-material = ExtResource("5_tbgi4")
+material_player_1 = ExtResource("4_jyhfs")
+material_player_2 = ExtResource("5_tbgi4")
+material_npc = ExtResource("5_tefeu")
 
-[node name="NPCFake" parent="." unique_id=475649309 instance=ExtResource("2_sugp2")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 5, 0)
-script = ExtResource("6_tefeu")
-material = SubResource("StandardMaterial3D_o6xl0")
+[node name="SpawnPoint3" type="Marker3D" parent="." unique_id=1589215959]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+gizmo_extents = 3.0
+script = ExtResource("2_o6xl0")
+entity_type = 1
+material_player_1 = ExtResource("4_jyhfs")
+material_player_2 = ExtResource("5_tbgi4")
+material_npc = ExtResource("5_tefeu")

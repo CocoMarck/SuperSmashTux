@@ -25,6 +25,7 @@ func _init(
 	p_air_attack: bool, p_hitbox_position: Vector3,
 	p_animation_name: StringName = &"", p_mesh_rotation_x: float = 0.0
 ):
+	# Asignar los parametros de construccion a las propiedades de la clase.
 	name = p_name
 	duration = p_duration
 	damage = p_damage
