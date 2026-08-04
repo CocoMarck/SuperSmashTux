@@ -26,6 +26,11 @@ const LEDGE_RELEASE_TIME := 0.35   # cooldown tras soltarse, pa no re-agarrarse 
 @export var material: Material = null
 @export var mesh: Mesh = null
 
+# Propiedades publicas | HP y porcentaje de daño.
+@export_group("Health")
+var hp :int = 100
+var damage_percentage :float = 0
+
 # Propiedades privadas | Deteccion de inputs.
 var _move_left: bool = false
 var _move_right: bool = false
@@ -37,6 +42,7 @@ var _power_attack: bool = false
 
 # Propiedades privadas | Velocidad y salto.
 var _direction: Vector3 = Vector3.ZERO
+var _x_not_zero_value :float = 0.0
 var _jump_count: int = 0
 var _was_jumping: bool = false
 var _fall_acceleration_multiplier: float = 1.0
@@ -49,8 +55,41 @@ var _spawned_hitbox: Area3D = null
 # Propiedades privadas | Ataques.
 var _attack_count: float = 0.0
 var _current_attack: FightMove = null
-var _attacks: Attacks = Attacks.new()
-var _attack_was_pressed: bool = false
+var _attacks: Attacks = Attacks.new(
+	# name: StringName="", duration: float, p_damage: int, stop_horizontal_move: bool, stop_vertical_move: bool,
+	# speed: Vector3, air_attack: bool, hitbox_position: Vector3, animation_name: StringName, mesh_rotation_x: float, 
+	# hitbox_time_ratio: float, inversed_hitbox_ratio: bool, power_direction: Vector3
+	FightMove.new(
+		"neutral", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.3, 0.1, 0), &"neutral_attack", 0.0,
+		0.5, true, Vector3(1,1,0)
+	),
+	FightMove.new(
+		"dash", 0.3, 10, true, false, Vector3(22,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
+		0.5, true, Vector3(1.5,1,0)
+	),
+	FightMove.new(
+		"crouch", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.6, -0.5, 0), &"crouch_attack",
+		0.0, 0.5, true, Vector3(1,1,0)
+	),
+	FightMove.new(
+		"neutral_air", 0.4, 5, false, false, Vector3(0,0,0), true, Vector3(0.5, -0.6, 0), &"", 45.0,
+		0.5, true, Vector3(1,1,0)
+	),
+	FightMove.new(
+		"air_move", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.6, 0, 0), &"", 90.0,
+		0.5, true, Vector3(1.5,1,0)
+	),
+	FightMove.new(
+		"air_down", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.1, -0.7, 0), &"", 0.0,
+		0.5, true, Vector3(1,1.5,0)
+	)
+)
+var _attack_direction : Vector3 = Vector3(0.0, 0.0, 0.0)
+
+# Propiedades privadas damage
+var _normal_damage_move_power :float = 200
+var _current_damage_directon: Vector3 = Vector3.ZERO 
+var _taking_damage :bool = false
 
 # Propiedades privadas | Plataformas de un solo sentido.
 var _was_move_down: bool = false
@@ -91,15 +130,47 @@ func _physics_process(delta: float) -> void:
 	_collect_input()
 	var gravity_signals = _vertical_force(delta, _fall_acceleration_multiplier)
 	var move_signals = _move(delta, gravity_signals)
+	_set_x_not_zero_value()
 	var move_states = _get_move_states(move_signals)
-	_fight(delta, move_states)
 	_one_way_platforms(delta, gravity_signals["on_floor"])
-	_anim(delta, move_states, move_signals["direction"])
 	_ledge_grab(delta)
+	if not _taking_damage:
+		_fight(delta, move_states)
+	else:
+		_damage_move()
+	_anim(delta, move_states, move_signals["direction"])
 
 	# Procesar todo
 	velocity = _target_velocity
 	move_and_slide()
+	
+# Funciones damage recivido
+func set_damage(damage:int):
+	hp -= damage
+
+func set_damage_percentage(damage:int) -> void:
+	damage_percentage += damage*0.01
+
+func set_damage_move(damage:float, direction:Vector3) -> void:
+	_current_damage_directon = direction
+	_taking_damage = true
+
+func _damage_move() -> void:
+	_target_velocity.x += (_normal_damage_move_power*_current_damage_directon.x) * damage_percentage
+	_target_velocity.y += (_normal_damage_move_power*_current_damage_directon.y) * damage_percentage
+	_taking_damage = false
+
+func _set_x_not_zero_value() -> void:
+	'''
+	Para saber en donde esta mirando el player.
+	'''
+	if _direction.x != 0.0:
+		_x_not_zero_value = _direction.x
+	elif _x_not_zero_value == 0.0:
+		if init_looking_at_right:
+			_x_not_zero_value = 1.0
+		else:
+			_x_not_zero_value = -1.0
 
 # Funciones de apariencia
 func _get_initial_facing() -> Vector3:
@@ -134,15 +205,14 @@ func _get_default_material() -> Material:
 	return null
 
 # Funciones hitbox de ataque.
-func _spawn_hitbox(p_position: Vector3) -> void:
+func _spawn_hitbox(p_position: Vector3, p_damage: int, p_direction: Vector3) -> void:
 	'''
 	Spawn de hitbox por movimiento de ataque.
 	Swap de ejes: el "adelante" (x) del FightMove cae en z del Pivot, y z en x invertido.
 	Se indica posision y tamaño de hitbox.
 	'''
-	_clear_hitbox()
 	var fixed_position := Vector3(p_position.z, p_position.y, p_position.x*-1)
-	_spawned_hitbox = Hitbox.new(fixed_position, Vector3(0.5, 0.5, 0.5), self)
+	_spawned_hitbox = Hitbox.new(fixed_position, Vector3(0.5, 0.5, 0.5), self, p_damage, p_direction)
 	$Pivot.add_child(_spawned_hitbox)
 
 func _clear_hitbox() -> void:
@@ -176,12 +246,14 @@ func _move(delta: float, vertical_force_signals: Dictionary) -> Dictionary:
 	# No mover si esta atacando en piso.
 	var attacking = _current_attack != null
 	var horizontal_move := true
+	var can_jump = true
 	if (attacking):
 		horizontal_move = _current_attack.stop_horizontal_move == false
+		can_jump = false
 	
 	# Variables necesarias
 	var on_floor = vertical_force_signals["on_floor"]
-	var is_jumping := (_jump or _move_up)
+	var is_jumping := (_jump or _move_up) and can_jump
 	var jump_pressed := is_jumping and not _was_jumping
 	_was_jumping = is_jumping
 	
@@ -272,37 +344,50 @@ func _fight(delta: float, states: Dictionary) -> void:
 	Se puede hacer modificando `_target_velocity.x` a cero. Y states a false o true segun el caso.
 	El ataque se detecta por flanco (edge), asi que hay que soltar y volver a pulsar para atacar de nuevo.
 	'''
-	var attack_pressed := _attack and not _attack_was_pressed
-	_attack_was_pressed = _attack
-
-	if attack_pressed and _current_attack == null:
+	if _attack and _current_attack == null:
+		_attack_direction.x = 0.0
+		_attack_direction.y = 0.0
+		_attack_direction.z = 0.0
+		
 		# Ataque en piso
 		var init_attack = true
 		if states["neutral"]:
 			_current_attack = _attacks.neutral
+			_attack_direction.x = _x_not_zero_value 
 		elif states["running"]:
 			_current_attack = _attacks.dash
+			_attack_direction.x = _x_not_zero_value
 		elif states["neutral_crouch"]:
 			_current_attack = _attacks.crouch
+			_attack_direction.x = _x_not_zero_value*0.5
+			_attack_direction.y = 1.0
 
 		# Ataque en aire
 		elif states["neutral_air"]:
 			_current_attack = _attacks.neutral_air
-		elif states["air_down"]:
-			_current_attack = _attacks.air_down
+			_attack_direction.x = _x_not_zero_value
+			_attack_direction.y = -1.0
 		elif states["air_move"]:
 			_current_attack = _attacks.air_move
+			_attack_direction.x = _x_not_zero_value
+		elif states["air_down"]:
+			_current_attack = _attacks.air_down
+			_attack_direction.y = -1.0
 		else:
 			init_attack = false
 		
 		if init_attack:
 			_attack_count = 0
+			_attack_direction.x = _attack_direction.x * _current_attack.power_direction.x
+			_attack_direction.y = (_attack_direction.y*0.1) * _current_attack.power_direction.y
+			_attack_direction.z = _attack_direction.z * _current_attack.power_direction.y
 		
 	# Hacer ataque, esperando lo que dure, y haciendo que no se mueva el player si es necesario.
 	var first_attack_frame = false
 	if _current_attack != null:
-		print(_current_attack.name)
 		first_attack_frame = _attack_count == 0
+		if first_attack_frame:
+			print(_current_attack.name)
 		
 		# Movimiento a al tacar atacar
 		if _current_attack.stop_horizontal_move:
@@ -317,17 +402,21 @@ func _fight(delta: float, states: Dictionary) -> void:
 		else:
 			_attack_count += delta
 	
-	# Hitbox
-	if _current_attack != null:
+	# Hitbox. Asegurarsee de solo spawnear uno.
+	if _current_attack != null and _spawned_hitbox == null:
 		# Basado en la duracion del ataque, es lo que dura el hitbox de damage.
 		if (_current_attack.inversed_hitbox_ratio):
 			if _attack_count-delta >= _current_attack.get_hitbox_time_ratio():
-				_spawn_hitbox(_current_attack.hitbox_position)
+				_spawn_hitbox(
+					_current_attack.hitbox_position, _current_attack.damage, _attack_direction
+				)
 				_hitbox_duration = _current_attack.duration - _current_attack.get_hitbox_time_ratio()
 				_hitbox_count = 0
 		else:
 			if first_attack_frame:
-				_spawn_hitbox(_current_attack.hitbox_position)
+				_spawn_hitbox(
+					_current_attack.hitbox_position, _current_attack.damage, _attack_direction
+				)
 				_hitbox_duration = _current_attack.get_hitbox_time_ratio()
 				_hitbox_count = 0
 	if _spawned_hitbox != null:
