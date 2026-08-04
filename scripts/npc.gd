@@ -1,5 +1,5 @@
-extends Character
 class_name NPC
+extends Character
 
 # Funciones | Input del npc.
 func _collect_input() -> void:

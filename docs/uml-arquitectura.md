@@ -4,54 +4,54 @@
 
 ```mermaid
 classDiagram
-    direction LR
+	direction LR
 
-    Character <|-- Player
-    Character <|-- Npc
-    SpawnPoint ..> Character : instancia
-    SpawnPoint ..> GlobalConstants : usa PlayerId
+	Character <|-- Player
+	Character <|-- Npc
+	SpawnPoint ..> Character : instancia
+	SpawnPoint ..> GlobalConstants : usa PlayerId
 
-    class Character {
-        <<prefab>>
-        +speed: float
-        +fall_acceleration: float
-        +jump_impulse: float
-        +init_looking_at_right: bool
-        +material: Material
-        +mesh: Mesh
-        -MAX_JUMPS: int = 2
-        -_jump_count: int
-        -_air_count: int
-        -_was_jumping: bool
-        +_collect_input()
-        -_vertical_force(delta) Dictionary
-        -_move(delta, signals) Dictionary
-        -_get_move_states(signals) Dictionary
-        -_anim(delta, states, direction)
-        +_physics_process(delta)
-    }
+	class Character {
+		<<prefab>>
+		+speed: float
+		+fall_acceleration: float
+		+jump_impulse: float
+		+init_looking_at_right: bool
+		+material: Material
+		+mesh: Mesh
+		-MAX_JUMPS: int = 2
+		-_jump_count: int
+		-_air_count: int
+		-_was_jumping: bool
+		+_collect_input()
+		-_vertical_force(delta) Dictionary
+		-_move(delta, signals) Dictionary
+		-_get_move_states(signals) Dictionary
+		-_anim(delta, states, direction)
+		+_physics_process(delta)
+	}
 
-    class Player {
-        <<script>>
-        +actions: Dictionary
-        +_collect_input()
-    }
+	class Player {
+		<<script>>
+		+actions: Dictionary
+		+_collect_input()
+	}
 
-    class Npc {
-        <<script>>
-        +_collect_input()
-    }
+	class Npc {
+		<<script>>
+		+_collect_input()
+	}
 
-    class SpawnPoint {
-        <<Marker3D>>
-        +player_id: GlobalConstants.PlayerId
-        +_ready()
-    }
+	class SpawnPoint {
+		<<Marker3D>>
+		+player_id: GlobalConstants.PlayerId
+		+_ready()
+	}
 
-    class GlobalConstants {
-        <<enum holder>>
-        +PlayerId: enum
-    }
+	class GlobalConstants {
+		<<enum holder>>
+		+PlayerId: enum
+	}
 ```
 
 ## Notas

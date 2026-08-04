@@ -1,5 +1,5 @@
-extends Character
 class_name Player
+extends Character
 
 # Propiedades publicas | Identificacion y mapeo de controles del jugador.
 @export var player_id: GlobalUtils.PlayerId

@@ -1,20 +1,17 @@
-extends CharacterBody3D
 class_name Character
+extends GravityBody3D
 
 # Constantes del script.
 const MAX_JUMPS := 2
-const HITBOX_SCENE := preload("res://prefabs/hitbox.tscn")
-const HITBOX_LIFETIME := 0.1
 
 # Propiedades publicas | Gravedad y velocidad.
-@export_group("Movimiento")
+@export_group("Movement")
 @export var speed: int = 18
-@export var fall_acceleration: int = 48
 @export var jump_impulse: int = 25
 @export var init_looking_at_right: bool = false
 
 # Propiedades publicas | Apariencia.
-@export_group("Apariencia")
+@export_group("Appearance")
 @export var material: Material = null
 @export var mesh: Mesh = null
 
@@ -29,14 +26,13 @@ var _power_attack: bool = false
 
 # Propiedades privadas | Velocidad y salto.
 var _direction: Vector3 = Vector3.ZERO
-var _target_velocity: Vector3 = Vector3.ZERO
 var _jump_count: int = 0
 var _was_jumping: bool = false
-var _air_count: int = 0
 var _fall_acceleration_multiplier: float = 1.0
 
 # Propiedades privadas | Hitbox de daño a los enemigos locos.
 var _hitbox_count: float = 0.0
+var _hitbox_duration: float = 0.0
 var _spawned_hitbox: Area3D = null
 
 # Propiedades privadas | Ataques.
@@ -101,18 +97,16 @@ func _set_mesh( m: Mesh ) -> void:
 		$Pivot/Mesh.mesh = m
 
 # Funciones hitbox de ataque.
-func _spawn_hitbox(position: Vector3) -> void:
-	_spawned_hitbox = HITBOX_SCENE.instantiate()
-	# Swap de ejes: el "adelante" (x) del FightMove cae en z del Pivot, y z en x invertido.
-	var fixed_position := Vector3(position.z, position.y, position.x*-1)
-	_spawned_hitbox.position = fixed_position
+func _spawn_hitbox(p_position: Vector3) -> void:
+	'''
+	Spawn de hitbox por movimiento de ataque.
+	Swap de ejes: el "adelante" (x) del FightMove cae en z del Pivot, y z en x invertido.
+	Se indica posision y tamaño de hitbox.
+	'''
+	_clear_hitbox()
+	var fixed_position := Vector3(p_position.z, p_position.y, p_position.x*-1)
+	_spawned_hitbox = Hitbox.new(fixed_position, Vector3(0.5, 0.5, 0.5), self)
 	$Pivot.add_child(_spawned_hitbox)
-	_spawned_hitbox.body_entered.connect(_on_hitbox_body_entered)
-
-func _on_hitbox_body_entered(body: Node3D):
-	# Esto lo debe hacer el hitbox. Fucnion del hitbox prefab
-	if body is Character and body != self:
-		print(body.name, " recibio trancazo")
 
 func _clear_hitbox() -> void:
 	'''
@@ -135,26 +129,6 @@ func _collect_input() -> void:
 	Funcion para obtener acciones sobrescritas por otro script hijo de character.
 	'''
 	pass
-	
-func _vertical_force(delta: float, multiplier: float = 1) -> Dictionary:
-	'''
-	Fuerza vertical. Imitación de gravedad. Estilo 2d.
-	'''
-	var on_floor := is_on_floor()
-	if on_floor:
-		# Contadores a cero, para que no se acumule fuerza vertcal.
-		_target_velocity.y = 0
-		_air_count = 0
-	else:
-		# Acumular fuerza vertical, y contar tiempo en el aire.
-		_target_velocity.y -= (fall_acceleration * multiplier) * delta
-		_air_count += 1
-	return {
-		"air_count": _air_count,
-		"on_floor": on_floor,
-		"force": _target_velocity.y
-	}
-	
 
 func _move(delta: float, vertical_force_signals: Dictionary) -> Dictionary:
 	'''
@@ -284,8 +258,10 @@ func _fight(delta: float, states: Dictionary) -> void:
 			_attack_count = 0
 		
 	# Hacer ataque, esperando lo que dure, y haciendo que no se mueva el player si es necesario.
+	var first_attack_frame = false
 	if _current_attack != null:
 		print(_current_attack.name)
+		first_attack_frame = _attack_count == 0
 		
 		# Movimiento a al tacar atacar
 		if _current_attack.stop_horizontal_move:
@@ -294,23 +270,35 @@ func _fight(delta: float, states: Dictionary) -> void:
 		if _current_attack.stop_vertical_move:
 			_target_velocity.y = _current_attack.speed.y * _direction.y
 			
+		# Finalizar ataque.
 		if _attack_count >= _current_attack.duration:
-			_clear_hitbox()
-			_spawn_hitbox(_current_attack.hitbox_position)
 			_current_attack = null
 		else:
 			_attack_count += delta
-			# Mantener el contador en cero mientras dure el ataque; solo cuenta cuando el hitbox ya existe.
-			_hitbox_count = 0
+	
+	# Hitbox
+	if _current_attack != null:
+		# Basado en la duracion del ataque, es lo que dura el hitbox de damage.
+		if (_current_attack.inversed_hitbox_ratio):
+			if _attack_count-delta >= _current_attack.get_hitbox_time_ratio():
+				_spawn_hitbox(_current_attack.hitbox_position)
+				_hitbox_duration = _current_attack.duration - _current_attack.get_hitbox_time_ratio()
+				_hitbox_count = 0
+		else:
+			if first_attack_frame:
+				_spawn_hitbox(_current_attack.hitbox_position)
+				_hitbox_duration = _current_attack.get_hitbox_time_ratio()
+				_hitbox_count = 0
 	if _spawned_hitbox != null:
-		_hitbox_count += delta
-		if _hitbox_count >= HITBOX_LIFETIME:
+		if _hitbox_count >= _hitbox_duration:
 			_clear_hitbox()
+		_hitbox_count += delta
+
 
 func _anim(delta: float, states: Dictionary, direction: Vector3) -> void:
 	'''
 	Animaciones.
-	Si son de movimeinto pos chido, pero si son de atacke sobrepesar las de movimiento.
+	Si son de movimeinto pos chido, pero si son de ataque sobrepesar las de movimiento.
 	'''
 	# Movimientos de pelea
 	if _current_attack != null:
