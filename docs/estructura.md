@@ -1,11 +1,13 @@
 # Estructura del Proyecto — SuperSmashTux
-Este documento describe la estructura de carpetas y convenciones de nombres para el proyecto Super Smash Tux.
+
+> Este documento describe la estructura de carpetas y convenciones de nombres para el proyecto Super Smash Tux.
 
 ```
 supersmashtux/
 ├── prefabs/          # Escenas reutilizables (personajes, enemigos, items)
 ├── scenes/           # Escenas principales (main, niveles, menús, UI)
-├── scripts/          # GDScripts
+├── scripts/          # GDScripts para nodos y lógica del juego
+│   └── helpers/      # Clases de apoyo que NO son nodos: RefCounted y contenedores de datos/constantes
 ├── animations/       # Recursos de animación (.res)
 ├── materials/        # Materiales (.tres)
 ├── environments/     # Entornos de mundo (.tres)
@@ -16,6 +18,7 @@ supersmashtux/
 ├── README.md         # Documento de presentación del proyecto
 ├── LICENSE           # Licencia Open Source GPL-3.0
 ├── .mcp.json         # Servidor MCP de Godot para agentes de IA
+├── mcp-setup.bat     # Script de configuración del servidor MCP
 ├── .gitignore        # Archivo para ignorar archivos y carpetas irrelevantes en Git
 ├── .gitattributes    # Archivo para definir atributos de archivos en Git
 ├── icon.png          # Icono del Juego

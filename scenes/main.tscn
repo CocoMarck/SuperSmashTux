@@ -2,6 +2,7 @@
 
 [ext_resource type="Environment" uid="uid://lit05fb87j4a" path="res://environments/env_game.tres" id="1_jpm03"]
 [ext_resource type="Script" uid="uid://bbefl7k3gi1fy" path="res://scripts/spawn_point.gd" id="2_o6xl0"]
+[ext_resource type="Script" uid="uid://bcmv8f218b2yh" path="res://scripts/one_way_platform.gd" id="3_p1atf"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
 
@@ -46,6 +47,7 @@ mesh = SubResource("BoxMesh_o7g8m")
 
 [node name="PlatformLeft" type="StaticBody3D" parent="." unique_id=612300481]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 6.094, 0)
+script = ExtResource("3_p1atf")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformLeft" unique_id=612300482]
 shape = SubResource("BoxShape3D_plat01")
@@ -55,6 +57,7 @@ mesh = SubResource("BoxMesh_plat01")
 
 [node name="PlatformRight" type="StaticBody3D" parent="." unique_id=612300484]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 6.094, 0)
+script = ExtResource("3_p1atf")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformRight" unique_id=612300485]
 shape = SubResource("BoxShape3D_plat01")

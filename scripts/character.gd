@@ -3,6 +3,9 @@ extends GravityBody3D
 
 # Constantes del script.
 const MAX_JUMPS := 2
+const DROP_THROUGH_TIME := 0.25
+const ONE_WAY_MARGIN := 0.1
+const ONE_WAY_COYOTE_TIME := 0.3
 
 # Propiedades publicas | Gravedad y velocidad.
 @export_group("Movement")
@@ -39,6 +42,14 @@ var _spawned_hitbox: Area3D = null
 var _attack_count: float = 0.0
 var _current_attack: FightMove = null
 var _attacks: Attacks = Attacks.new()
+var _attack_was_pressed: bool = false
+
+# Propiedades privadas | Plataformas de un solo sentido.
+var _was_move_down: bool = false
+var _drop_through_count: float = 0.0
+var _one_way_ignored: Dictionary = {}
+var _last_floor_one_way: OneWayPlatform = null
+var _one_way_coyote_count: float = 0.0
 
 # Funciones | Inicializar.
 func _ready() -> void:
@@ -66,6 +77,7 @@ func _physics_process(delta: float) -> void:
 	var move_signals = _move(delta, gravity_signals)
 	var move_states = _get_move_states(move_signals)
 	_fight(delta, move_states)
+	_one_way_platforms(delta, gravity_signals["on_floor"])
 	_anim(delta, move_states, move_signals["direction"])
 
 	# Procesar todo
@@ -241,8 +253,12 @@ func _fight(delta: float, states: Dictionary) -> void:
 	Este evento sobrepasa el move. 
 	Si es necesario deja inmovil al player (para terminar ataque correctamente). Tambien sobrescribe estados.
 	Se puede hacer modificando `_target_velocity.x` a cero. Y states a false o true segun el caso.
+	El ataque se detecta por flanco (edge), asi que hay que soltar y volver a pulsar para atacar de nuevo.
 	'''
-	if _attack and _current_attack == null:
+	var attack_pressed := _attack and not _attack_was_pressed
+	_attack_was_pressed = _attack
+
+	if attack_pressed and _current_attack == null:
 		# Ataque en piso
 		var init_attack = true
 		if states["neutral"]:
@@ -333,3 +349,108 @@ func _anim(delta: float, states: Dictionary, direction: Vector3) -> void:
 	# Animación | Mover direccion visual del player.
 	if states["moving"]:
 		$Pivot.basis = Basis.looking_at(direction)
+
+# Funciones plataformas de un solo sentido.
+func _one_way_platforms(delta: float, on_floor: bool) -> void:
+	'''
+	Maneja las plataformas de un solo sentido, estilo Smash Bros: se atraviesan de abajo pa arriba,
+	pero solidas al caer encima. Con tap de abajo estando parado en una, te dejas caer a proposito.
+	'''
+	# Flanco de subida del tap de abajo, siempre se evalua pa no perder el flanco entre frames.
+	var down_pressed := _move_down and not _was_move_down
+	_was_move_down = _move_down
+
+	# Plataforma de un solo sentido en la que estamos parados ahorita, si hay.
+	var floor_one_way := _get_floor_one_way() if on_floor else null
+
+	# Arrancar caida voluntaria si se hace tap de abajo estando parado sobre una plataforma de un solo sentido.
+	if down_pressed and floor_one_way != null and floor_one_way.enabled:
+		_drop_through_count = DROP_THROUGH_TIME
+		# Empujoncito hacia abajo pa despegarse y que no se re-enganche por el snap del piso.
+		_target_velocity.y = min(_target_velocity.y, -1.0)
+
+	# Temporizador de la caida voluntaria.
+	if _drop_through_count > 0.0:
+		_drop_through_count = max(_drop_through_count - delta, 0.0)
+
+	# Coyote time: si nos salimos de la orilla caminando, la plataforma sigue solida un ratito,
+	# pa que si regresamos de volada no nos caigamos como si nada.
+	if _drop_through_count > 0.0:
+		# Si se esta cayendo a proposito, cancelar el coyote, si no la plataforma se queda solida y el tap no sirve.
+		_one_way_coyote_count = 0.0
+	elif floor_one_way != null and floor_one_way.enabled:
+		_last_floor_one_way = floor_one_way
+		_one_way_coyote_count = ONE_WAY_COYOTE_TIME
+	else:
+		_one_way_coyote_count = max(_one_way_coyote_count - delta, 0.0)
+
+	var feet_y := _get_feet_y()
+
+	# Recorrer todas las plataformas de un solo sentido y decidir si atravesarlas o no.
+	for platform in get_tree().get_nodes_in_group(OneWayPlatform.GROUP_NAME):
+		var one_way := platform as OneWayPlatform
+		if one_way == null or not is_instance_valid(one_way):
+			continue
+
+		var should_ignore := false
+		if one_way.enabled:
+			# En coyote time nomas pa la plataforma en la que estabamos parados, no pa todas.
+			var in_coyote := one_way == _last_floor_one_way and _one_way_coyote_count > 0.0
+			should_ignore = _drop_through_count > 0.0 \
+				or _target_velocity.y > 0.0 \
+				or (feet_y < one_way.get_top_y() - ONE_WAY_MARGIN and not in_coyote)
+
+		# Solo llamar add/remove cuando el estado cambia de verdad, pa no hacerlo de a gratis cada frame.
+		if _one_way_ignored.get(one_way, false) != should_ignore:
+			if should_ignore:
+				add_collision_exception_with(one_way)
+			else:
+				remove_collision_exception_with(one_way)
+			_one_way_ignored[one_way] = should_ignore
+
+	# Limpiar del cache las plataformas que ya no sean validas.
+	for cached_platform in _one_way_ignored.keys():
+		if not is_instance_valid(cached_platform):
+			_one_way_ignored.erase(cached_platform)
+
+	# Limpiar tambien la referencia de la ultima plataforma pisada, si ya no es valida.
+	if _last_floor_one_way != null and not is_instance_valid(_last_floor_one_way):
+		_last_floor_one_way = null
+		_one_way_coyote_count = 0.0
+
+func _get_floor_one_way() -> OneWayPlatform:
+	'''
+	Buscar en las colisiones del ultimo move_and_slide si topamos con alguna OneWayPlatform.
+	Devuelve la primera que encuentre, o null si no hubo ninguna.
+	'''
+	for i in range(get_slide_collision_count()):
+		var collision := get_slide_collision(i)
+		var collider := collision.get_collider()
+		if collider is OneWayPlatform:
+			return collider as OneWayPlatform
+	return null
+
+func _get_feet_y() -> float:
+	'''
+	Altura global de los pies del character, calculada desde el CollisionShape3D.
+	Ojo, la raiz esta escalada y el CollisionShape3D desplazado, por eso todo sale de global_position y global_basis.
+	'''
+	var collision_shape := $CollisionShape3D as CollisionShape3D
+	if collision_shape == null or collision_shape.shape == null:
+		return global_position.y
+
+	var half_height := 0.0
+	var shape := collision_shape.shape
+	if shape is CapsuleShape3D:
+		half_height = (shape as CapsuleShape3D).height * 0.5
+	elif shape is BoxShape3D:
+		half_height = (shape as BoxShape3D).size.y * 0.5
+	elif shape is CylinderShape3D:
+		half_height = (shape as CylinderShape3D).height * 0.5
+	elif shape is SphereShape3D:
+		half_height = (shape as SphereShape3D).radius
+	else:
+		return global_position.y
+
+	var scale_y := collision_shape.global_basis.get_scale().y
+	return collision_shape.global_position.y - (half_height * scale_y)
