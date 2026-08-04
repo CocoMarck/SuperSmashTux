@@ -94,7 +94,7 @@ material = ExtResource("4_jyhfs")
 [node name="Player2" parent="." unique_id=2005389870 instance=ExtResource("2_sugp2")]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -14, 5, 0)
 script = ExtResource("3_jyhfs")
-player_id = 0
+player_id = 1
 actions = {
 "attack": "player2_attack",
 "jump": "player2_jump",
@@ -103,6 +103,7 @@ actions = {
 "move_right": "player2_move_right",
 "move_up": "player2_move_up"
 }
+init_looking_at_right = true
 material = ExtResource("5_tbgi4")
 
 [node name="NPCFake" parent="." unique_id=475649309 instance=ExtResource("2_sugp2")]

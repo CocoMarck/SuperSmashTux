@@ -1,4 +1,5 @@
 extends Marker3D
+class_name SpawnPoint
 
 # Constantes del script.
 const CHARACTER_PREFAB = preload("res://prefabs/character.tscn")
@@ -6,26 +7,26 @@ const PLAYER_SCRIPT = preload("res://scripts/player.gd")
 const NPC_SCRIPT = preload("res://scripts/npc.gd")
 
 # Propiedades publicas del script.
-@export var entity_type: GlobalConstants.EntityType = GlobalConstants.EntityType.PLAYER
-@export var player_id: GlobalConstants.PlayerId
+@export var entity_type: GlobalUtils.EntityType = GlobalUtils.EntityType.PLAYER
+@export var player_id: GlobalUtils.PlayerId
 
 func _ready() -> void:
 	# Instanciar un nuevo personaje y asignarle el script segun el tipo de entidad.
 	var character = CHARACTER_PREFAB.instantiate()
 
 	match entity_type:
-		GlobalConstants.EntityType.PLAYER:
+		GlobalUtils.EntityType.PLAYER:
 			character.set_script(PLAYER_SCRIPT)
 			character.player_id = player_id
 
 			# Establecer la direccion de vista del jugador segun su ID.
 			match player_id:
-				GlobalConstants.PlayerId.PLAYER_1:
+				GlobalUtils.PlayerId.PLAYER_1:
 					character.init_looking_at_right = true
-				GlobalConstants.PlayerId.PLAYER_2:
+				GlobalUtils.PlayerId.PLAYER_2:
 					character.init_looking_at_right = false
 
-		GlobalConstants.EntityType.NPC:
+		GlobalUtils.EntityType.NPC:
 			character.set_script(NPC_SCRIPT)
 
 	# Posicionar al personaje en este punto de spawn, como hijo directo de la escena.

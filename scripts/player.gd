@@ -1,10 +1,8 @@
 extends Character
-'''
-El player, pos espera input.
-'''
+class_name Player
 
-@export var player_id: GlobalConstants.PlayerId
-
+# Propiedades publicas | Identificacion y mapeo de controles del jugador.
+@export var player_id: GlobalUtils.PlayerId
 @export var actions = {
 	"move_left": "",
 	"move_right": "",
@@ -14,6 +12,7 @@ El player, pos espera input.
 	"attack": ""
 }
 
+# Funciones | Input del jugador.
 func _collect_input() -> void:
 	'''
 	Obtener data de input del user.
@@ -22,6 +21,8 @@ func _collect_input() -> void:
 	for value in actions.values():
 		if value == "":
 			return
+
+	# Leer los inputs configurados para el jugador.
 	_move_left = Input.is_action_pressed(actions["move_left"])
 	_move_right = Input.is_action_pressed(actions["move_right"])
 	_move_up = Input.is_action_pressed(actions["move_up"])

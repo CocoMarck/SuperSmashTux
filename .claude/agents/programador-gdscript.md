@@ -30,6 +30,10 @@ Tu rol es ser un programador experto en GDScript para Godot 4+, especializado pr
 - Todo el código debe escribirse en inglés, mientras que los comentarios y documentación deben estar en español.
 - Asegurate de siempre respetar la indentación y estilo estándar de Godot/GDScript.
 
+### Uso de comentarios
+
+- Comentarios `#` en español, docstrings `'''...'''` solo dentro de funciones, nunca comentar lo obvio.
+
 ### Orden de miembros dentro de una clase
 
 1. `extends` / `class_name`.
@@ -40,13 +44,6 @@ Tu rol es ser un programador experto en GDScript para Godot 4+, especializado pr
    - Callbacks/eventos propios de Godot primero, en el orden del ciclo de vida (`_init`, `_ready`, `_process`/`_physics_process`, resto de callbacks como `_input`, etc.).
    - Después, el resto de las funciones propias del script.
 - Al reordenar código existente, es un movimiento puro: no cambiar lógica, valores ni comentarios, solo reubicarlos junto con el bloque que documentan.
-
-### Cómo comentar
-
-- Comentarios de sección con `#` para agrupar bloques de propiedades o funciones relacionadas (ej. `# Propiedades privadas | Movimientos`, `# Funciones hitbox de ataque.`). Son la forma normal de separar y dar contexto a grupos.
-- Docstrings con triple comilla simple (`'''...'''`) SOLO dentro de funciones/métodos, para explicar su propósito cuando no es obvio por el nombre. Nunca como comentario de cabecera de clase o archivo — si una clase necesita explicación general, usar un comentario `#` breve, no un docstring.
-- No comentar lo obvio (nombre de una variable, qué hace una línea trivial). Comentar el "por qué" o agrupar, no repetir el "qué" ya evidente por el código.
-- Mantener el tono informal en español que ya usa el repo en sus comentarios/docstrings existentes.
 
 ## Diseño de clases
 

@@ -13,12 +13,12 @@ const HITBOX_LIFETIME := 0.1
 @export var jump_impulse: int = 25
 @export var init_looking_at_right: bool = false
 
-# Propiedades publicas | Apariencia
+# Propiedades publicas | Apariencia.
 @export_group("Apariencia")
 @export var material: Material = null
 @export var mesh: Mesh = null
 
-# Propiedades privadas | Movimientos
+# Propiedades privadas | Deteccion de inputs.
 var _move_left: bool = false
 var _move_right: bool = false
 var _move_up: bool = false
@@ -27,7 +27,7 @@ var _jump: bool = false
 var _attack: bool = false
 var _power_attack: bool = false
 
-# Propiedades privadas | Velocidad y salto
+# Propiedades privadas | Velocidad y salto.
 var _direction: Vector3 = Vector3.ZERO
 var _target_velocity: Vector3 = Vector3.ZERO
 var _jump_count: int = 0
@@ -35,11 +35,11 @@ var _was_jumping: bool = false
 var _air_count: int = 0
 var _fall_acceleration_multiplier: float = 1.0
 
-# Propiedades privadas | Hitbox daño a los enemigos locos.
+# Propiedades privadas | Hitbox de daño a los enemigos locos.
 var _hitbox_count: float = 0.0
 var _spawned_hitbox: Area3D = null
 
-# Propiedades privadas | Ataques
+# Propiedades privadas | Ataques.
 var _attack_count: float = 0.0
 var _current_attack: FightMove = null
 var _attacks: Attacks = Attacks.new()
@@ -61,6 +61,8 @@ func _physics_process(delta: float) -> void:
 	'''
 	Funcion de procesamiento de fisicas.
 	'''
+	
+	# Detectar inputs, señales y otros estados del personaje
 	_collect_input()
 	var gravity_signals = _vertical_force(delta, _fall_acceleration_multiplier)
 	var move_signals = _move(delta, gravity_signals)
@@ -74,6 +76,9 @@ func _physics_process(delta: float) -> void:
 
 # Funciones de apariencia
 func _get_initial_facing() -> Vector3:
+	'''
+	Determinar hacia donde mira el character al iniciar, segun configuracion del editor.
+	'''
 	if init_looking_at_right:
 		return Vector3.RIGHT
 	else:
@@ -98,6 +103,7 @@ func _set_mesh( m: Mesh ) -> void:
 # Funciones hitbox de ataque.
 func _spawn_hitbox(position: Vector3) -> void:
 	_spawned_hitbox = HITBOX_SCENE.instantiate()
+	# Swap de ejes: el "adelante" (x) del FightMove cae en z del Pivot, y z en x invertido.
 	var fixed_position := Vector3(position.z, position.y, position.x*-1)
 	_spawned_hitbox.position = fixed_position
 	$Pivot.add_child(_spawned_hitbox)
@@ -109,6 +115,9 @@ func _on_hitbox_body_entered(body: Node3D):
 		print(body.name, " recibio trancazo")
 
 func _clear_hitbox() -> void:
+	'''
+	Eliminar el hitbox activo, si existe.
+	'''
 	if _spawned_hitbox != null:
 		_spawned_hitbox.queue_free()
 		_spawned_hitbox = null
@@ -168,7 +177,7 @@ func _move(delta: float, vertical_force_signals: Dictionary) -> Dictionary:
 	if horizontal_move:
 		_direction = _get_move_direction()
 	
-	# Gravedad descender mas rapido
+	# Gravedad descender mas rapido | Caida rapida: abajo en el aire cae al doble, saltar restaura la normal.
 	if not on_floor:
 		if _move_down:
 			_fall_acceleration_multiplier = 2
@@ -193,6 +202,7 @@ func _move(delta: float, vertical_force_signals: Dictionary) -> Dictionary:
 	# Salto | Aplicar salto normal o doble segun el caso.
 	if jump_pressed and _jump_count < MAX_JUMPS:
 		_target_velocity.y = jump_impulse
+		# Si ya estaba en el aire sin saltar (se cayo), este salto consume todos para no regalar saltos extra.
 		if _air_count > 0:
 			_jump_count = MAX_JUMPS
 		else:
@@ -212,33 +222,33 @@ func _get_move_states(signals: Dictionary) -> Dictionary:
 	var direction = signals["direction"]
 	var tv = signals["target_velocity"]
 	
-	# Normal move
+	# Movimiento normal
 	var moving = direction.x != 0.0
 	var jumping = tv.y > 0
 	var falling = not jumping and not on_floor
-	
-	# On floor fight
+
+	# Estado en piso
 	var neutral = (on_floor and not moving) and (not _move_up and not _move_down)
 	var running = on_floor and moving
 	var neutral_crouch = (on_floor and not moving) and _move_down
-	
-	# On air fight
+
+	# Estado en aire
 	var neutral_air = (not on_floor and not moving) and (not _move_up and not _move_down)
 	var air_move = not on_floor and moving
 	var air_down = not on_floor and _move_down
-	
+
 	return {
-		# Normal move
+		# Movimiento normal
 		"moving": moving,
 		"jumping": jumping,
 		"falling": falling,
-		
-		# On floor fight
+
+		# Estado en piso
 		"neutral": neutral,
 		"running": running,
 		"neutral_crouch": neutral_crouch,
-		
-		# On air fight
+
+		# Estado en aire
 		"neutral_air": neutral_air,
 		"air_move": air_move,
 		"air_down": air_down,
@@ -246,12 +256,12 @@ func _get_move_states(signals: Dictionary) -> Dictionary:
 
 func _fight(delta: float, states: Dictionary) -> void:
 	'''
-	Este evento sobrepaza el move. 
-	Si es necesario deja inoovil al player (para terminar ataque correctamente). Tambien sobrescribe estados.
+	Este evento sobrepasa el move. 
+	Si es necesario deja inmovil al player (para terminar ataque correctamente). Tambien sobrescribe estados.
 	Se puede hacer modificando `_target_velocity.x` a cero. Y states a false o true segun el caso.
 	'''
 	if _attack and _current_attack == null:
-		# On floor attack
+		# Ataque en piso
 		var init_attack = true
 		if states["neutral"]:
 			_current_attack = _attacks.neutral
@@ -259,8 +269,8 @@ func _fight(delta: float, states: Dictionary) -> void:
 			_current_attack = _attacks.dash
 		elif states["neutral_crouch"]:
 			_current_attack = _attacks.crouch
-		
-		# On air attack
+
+		# Ataque en aire
 		elif states["neutral_air"]:
 			_current_attack = _attacks.neutral_air
 		elif states["air_down"]:
@@ -290,6 +300,7 @@ func _fight(delta: float, states: Dictionary) -> void:
 			_current_attack = null
 		else:
 			_attack_count += delta
+			# Mantener el contador en cero mientras dure el ataque; solo cuenta cuando el hitbox ya existe.
 			_hitbox_count = 0
 	if _spawned_hitbox != null:
 		_hitbox_count += delta

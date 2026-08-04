@@ -1,5 +1,5 @@
 # Archivo de constantes y enumeraciones globales del proyecto.
-class_name GlobalConstants
+class_name GlobalUtils
 
 # Enumeracion de IDs posibles de jugadores.
 enum PlayerId { PLAYER_1, PLAYER_2 }
