@@ -3,9 +3,17 @@ extends GravityBody3D
 
 # Constantes del script.
 const MAX_JUMPS := 2
-const DROP_THROUGH_TIME := 0.25
-const ONE_WAY_MARGIN := 0.1
-const ONE_WAY_COYOTE_TIME := 0.3
+
+# Constantes | Plataformas de un solo sentido.
+const DROP_THROUGH_TIME := 0.25    # segundos que se ignora la plataforma tras el tap de abajo
+const ONE_WAY_MARGIN := 0.1        # franja por debajo de la cara superior de la plataforma, pa no quedarse atorado
+const ONE_WAY_COYOTE_TIME := 0.3   # tiempo de perdon al salirse de la orilla y querer regresar
+
+# Constantes | Agarre de orillas.
+const LEDGE_GRAB_REACH := 1.2      # que tan lejos por fuera de la orilla se puede agarrar
+const LEDGE_GRAB_DEPTH := 2.5      # que tan abajo de la cara superior se agarra
+const LEDGE_HANG_OFFSET := 0.5     # que tan separado de la orilla se queda colgado
+const LEDGE_RELEASE_TIME := 0.35   # cooldown tras soltarse, pa no re-agarrarse solo
 
 # Propiedades publicas | Gravedad y velocidad.
 @export_group("Movement")
@@ -51,6 +59,14 @@ var _one_way_ignored: Dictionary = {}
 var _last_floor_one_way: OneWayPlatform = null
 var _one_way_coyote_count: float = 0.0
 
+# Propiedades privadas | Agarre de orillas.
+var _hanging_ledge: GroundPlatform = null
+var _hanging_right_side: bool = false
+var _hang_position: Vector3 = Vector3.ZERO
+var _ledge_release_count: float = 0.0
+var _was_ledge_move_up: bool = false
+var _was_ledge_move_down: bool = false
+
 # Funciones | Inicializar.
 func _ready() -> void:
 	'''
@@ -79,6 +95,7 @@ func _physics_process(delta: float) -> void:
 	_fight(delta, move_states)
 	_one_way_platforms(delta, gravity_signals["on_floor"])
 	_anim(delta, move_states, move_signals["direction"])
+	_ledge_grab(delta)
 
 	# Procesar todo
 	velocity = _target_velocity
@@ -364,7 +381,7 @@ func _one_way_platforms(delta: float, on_floor: bool) -> void:
 	var floor_one_way := _get_floor_one_way() if on_floor else null
 
 	# Arrancar caida voluntaria si se hace tap de abajo estando parado sobre una plataforma de un solo sentido.
-	if down_pressed and floor_one_way != null and floor_one_way.enabled:
+	if down_pressed and floor_one_way != null:
 		_drop_through_count = DROP_THROUGH_TIME
 		# Empujoncito hacia abajo pa despegarse y que no se re-enganche por el snap del piso.
 		_target_velocity.y = min(_target_velocity.y, -1.0)
@@ -378,7 +395,7 @@ func _one_way_platforms(delta: float, on_floor: bool) -> void:
 	if _drop_through_count > 0.0:
 		# Si se esta cayendo a proposito, cancelar el coyote, si no la plataforma se queda solida y el tap no sirve.
 		_one_way_coyote_count = 0.0
-	elif floor_one_way != null and floor_one_way.enabled:
+	elif floor_one_way != null:
 		_last_floor_one_way = floor_one_way
 		_one_way_coyote_count = ONE_WAY_COYOTE_TIME
 	else:
@@ -392,13 +409,11 @@ func _one_way_platforms(delta: float, on_floor: bool) -> void:
 		if one_way == null or not is_instance_valid(one_way):
 			continue
 
-		var should_ignore := false
-		if one_way.enabled:
-			# En coyote time nomas pa la plataforma en la que estabamos parados, no pa todas.
-			var in_coyote := one_way == _last_floor_one_way and _one_way_coyote_count > 0.0
-			should_ignore = _drop_through_count > 0.0 \
-				or _target_velocity.y > 0.0 \
-				or (feet_y < one_way.get_top_y() - ONE_WAY_MARGIN and not in_coyote)
+		# En coyote time nomas pa la plataforma en la que estabamos parados, no pa todas.
+		var in_coyote := one_way == _last_floor_one_way and _one_way_coyote_count > 0.0
+		var should_ignore := _drop_through_count > 0.0 \
+			or _target_velocity.y > 0.0 \
+			or (feet_y < one_way.get_top_y() - ONE_WAY_MARGIN and not in_coyote)
 
 		# Solo llamar add/remove cuando el estado cambia de verdad, pa no hacerlo de a gratis cada frame.
 		if _one_way_ignored.get(one_way, false) != should_ignore:
@@ -438,6 +453,17 @@ func _get_feet_y() -> float:
 	var collision_shape := $CollisionShape3D as CollisionShape3D
 	if collision_shape == null or collision_shape.shape == null:
 		return global_position.y
+	return collision_shape.global_position.y - _get_body_half_height()
+
+# Funciones agarre de orillas.
+func _get_body_half_height() -> float:
+	'''
+	Medio-alto global del CollisionShape3D del character. Sirve tanto pa los pies como pa la cabeza.
+	Soporta capsula, caja, cilindro y esfera, que son los shapes de collision mas comunes por aqui.
+	'''
+	var collision_shape := $CollisionShape3D as CollisionShape3D
+	if collision_shape == null or collision_shape.shape == null:
+		return 0.0
 
 	var half_height := 0.0
 	var shape := collision_shape.shape
@@ -450,7 +476,110 @@ func _get_feet_y() -> float:
 	elif shape is SphereShape3D:
 		half_height = (shape as SphereShape3D).radius
 	else:
-		return global_position.y
+		return 0.0
 
 	var scale_y := collision_shape.global_basis.get_scale().y
-	return collision_shape.global_position.y - (half_height * scale_y)
+	return half_height * scale_y
+
+func _get_head_y() -> float:
+	'''
+	Altura global de la cabeza del character, calculada desde el CollisionShape3D.
+	Es la contraparte de _get_feet_y, pero pa arriba, nos sirve pa saber si alcanzamos una orilla.
+	'''
+	var collision_shape := $CollisionShape3D as CollisionShape3D
+	if collision_shape == null or collision_shape.shape == null:
+		return global_position.y
+	return collision_shape.global_position.y + _get_body_half_height()
+
+func _ledge_grab(delta: float) -> void:
+	'''
+	Agarre de orillas estilo Smash Bros. Si vas cayendo junto a la orilla de una GroundPlatform,
+	te cuelgas de ella. Colgado, arriba te subes con impulso y abajo te sueltas y caes.
+	Va al final del physics process, asi que pisa lo que calcularon _move, _fight y _anim sin pedirles permiso.
+	'''
+	# Flancos propios de arriba/abajo, pa no perderlos entre frames y no pisarle el flanco a las plataformas de un solo sentido.
+	var up_pressed := _move_up and not _was_ledge_move_up
+	var down_pressed := _move_down and not _was_ledge_move_down
+	_was_ledge_move_up = _move_up
+	_was_ledge_move_down = _move_down
+
+	# Cooldown pa no re-agarrarnos solitos justo despues de soltarnos.
+	if _ledge_release_count > 0.0:
+		_ledge_release_count = max(_ledge_release_count - delta, 0.0)
+
+	# Si ya andamos colgados, decidir que hacer.
+	if _hanging_ledge != null:
+		# Si la plataforma se esfumo, soltarse de volada.
+		if not is_instance_valid(_hanging_ledge):
+			_hanging_ledge = null
+			return
+
+		# Determinar a donde se debe mirar mientras uno se cuelga pa irse a conocer a diosito.
+		var inward := -1.0 if _hanging_right_side else 1.0
+
+		if up_pressed:
+			# Subirse de vuelta a la plataforma, puro impulso hacia arriba; si se mete o no ya es bronca del jugador.
+			_target_velocity.y = jump_impulse
+			_hanging_ledge = null
+			_ledge_release_count = LEDGE_RELEASE_TIME
+			return
+
+		if down_pressed:
+			# Soltarse a proposito y empezar a caer.
+			_target_velocity = Vector3.ZERO
+			_target_velocity.y = -1.0
+			_hanging_ledge = null
+			_ledge_release_count = LEDGE_RELEASE_TIME
+			return
+
+		# Nadamas quedarse ahi colgado, bien quietecito.
+		_target_velocity = Vector3.ZERO
+		global_position = _hang_position
+		_air_count = 0
+		_jump_count = 0
+		if _current_attack != null:
+			_current_attack = null
+			_clear_hitbox()
+		$AnimationPlayer.play("idle")
+		# Voltearlo de cara a la orilla. Va aqui, despues de _anim, pa que no lo voltie el movimiento.
+		$Pivot.basis = Basis.looking_at(Vector3(inward, 0.0, 0.0))
+		return
+
+	# No estamos colgados, checar si toca agarrarnos de alguna orilla.
+	if _ledge_release_count > 0.0:
+		return
+	if is_on_floor():
+		return
+	if _target_velocity.y >= 0.0:
+		return
+
+	for platform in get_tree().get_nodes_in_group(GroundPlatform.GROUP_NAME):
+		var ground := platform as GroundPlatform
+		if ground == null or not is_instance_valid(ground):
+			continue
+		if not ground.has_ledges():
+			continue
+
+		var top_y := ground.get_top_y()
+		var head_y := _get_head_y()
+		# Vertical: la cabeza debe andar por debajo del borde, pero sin pasarse de largo.
+		if head_y > top_y or head_y < top_y - LEDGE_GRAB_DEPTH:
+			continue
+
+		# Obtener las 2 orillitas de la plataforma del suelo.
+		var right_ledge_x := ground.get_ledge_x(true)
+		var left_ledge_x := ground.get_ledge_x(false)
+
+		# Horizontal: hay que venir por fuera de la plataforma, cerquita del alcance.
+		var grabbed_right := global_position.x > right_ledge_x and global_position.x - right_ledge_x <= LEDGE_GRAB_REACH
+		var grabbed_left := global_position.x < left_ledge_x and left_ledge_x - global_position.x <= LEDGE_GRAB_REACH
+
+		if grabbed_right or grabbed_left:
+			_hanging_ledge = ground
+			_hanging_right_side = grabbed_right
+			var ledge_x := right_ledge_x if grabbed_right else left_ledge_x
+			var anchor_x := (ledge_x + LEDGE_HANG_OFFSET) if grabbed_right else (ledge_x - LEDGE_HANG_OFFSET)
+			var anchor_y := global_position.y - (head_y - top_y)
+			_hang_position = Vector3(anchor_x, anchor_y, global_position.z)
+			_target_velocity = Vector3.ZERO
+			break

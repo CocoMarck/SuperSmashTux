@@ -6,9 +6,6 @@ extends StaticBody3D
 # Constantes del script.
 const GROUP_NAME := &"one_way_platforms"
 
-# Propiedades publicas
-@export var enabled: bool = true
-
 # Funciones | Inicializar.
 func _ready() -> void:
 	'''

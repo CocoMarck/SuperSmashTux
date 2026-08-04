@@ -3,6 +3,7 @@
 [ext_resource type="Environment" uid="uid://lit05fb87j4a" path="res://environments/env_game.tres" id="1_jpm03"]
 [ext_resource type="Script" uid="uid://bbefl7k3gi1fy" path="res://scripts/spawn_point.gd" id="2_o6xl0"]
 [ext_resource type="Script" uid="uid://bcmv8f218b2yh" path="res://scripts/one_way_platform.gd" id="3_p1atf"]
+[ext_resource type="Script" uid="uid://bqr8o7d3ctyo2" path="res://scripts/ground_platform.gd" id="4_grnd0"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
 
@@ -37,6 +38,7 @@ size = 25.418
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=829472546]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+script = ExtResource("4_grnd0")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1331585089]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0167999, 0, 0)
