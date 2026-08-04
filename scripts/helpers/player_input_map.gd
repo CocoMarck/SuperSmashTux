@@ -13,6 +13,7 @@ func _init(
 	p_move_left: StringName, p_move_right: StringName, p_move_up: StringName,
 	p_move_down: StringName, p_jump: StringName, p_attack: StringName
 ):
+	# Asignar las acciones configuradas en el constructor a las propiedades de la clase.
 	move_left = p_move_left
 	move_right = p_move_right
 	move_up = p_move_up

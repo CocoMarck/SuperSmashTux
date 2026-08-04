@@ -1,6 +1,13 @@
 class_name NPC
 extends Character
 
+# Funciones | Apariencia.
+func _get_default_material() -> Material:
+	'''
+	Material propio de los NPC.
+	'''
+	return GlobalUtils.NPC_MATERIAL
+
 # Funciones | Input del npc.
 func _collect_input() -> void:
 	'''

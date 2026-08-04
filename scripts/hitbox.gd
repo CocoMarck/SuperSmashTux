@@ -1,10 +1,6 @@
 class_name Hitbox
 extends Area3D
 
-'''
-
-'''
-
 # Propiedades privadas
 var _parent : Node3D = null
 
@@ -15,6 +11,7 @@ var _mesh := MeshInstance3D.new()
 var _box_mesh := BoxMesh.new()
 
 func _init(p_position: Vector3, p_size: Vector3, p_parent: Node3D):
+	# Posicion y padre del hitbox
 	position = p_position
 	_parent = p_parent
 	
@@ -30,7 +27,6 @@ func _init(p_position: Vector3, p_size: Vector3, p_parent: Node3D):
 	add_child(_shape)
 	add_child(_mesh)
 	body_entered.connect(_on_hitbox_body_entered)
-	
 
 func _on_hitbox_body_entered(body: Node3D) -> void:
 	'''
@@ -40,11 +36,3 @@ func _on_hitbox_body_entered(body: Node3D) -> void:
 		return
 	if body is Character:
 		print(body.name, " recibio trancazo")
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass

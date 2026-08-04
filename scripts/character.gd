@@ -45,8 +45,10 @@ func _ready() -> void:
 	'''
 	Inicializar el character, con sus colorines, materiales etc.
 	'''
-	# Cambiar el color del character
+	# Cambiar el color del character. Si no se puso material a mano en el editor, usar el del tipo de personaje.
 	_set_mesh(mesh)
+	if material == null:
+		material = _get_default_material()
 	_set_material(material)
 
 	# Establecer direccion de vista inicial.
@@ -86,7 +88,7 @@ func _set_material( m: Material ) -> void:
 	Aunque preferiblemente sea nomas color.
 	Pero por ahora, asi está bien.
 	'''
-	if material != null:
+	if m != null:
 		$Pivot/Mesh.material_override = m
 
 func _set_mesh( m: Mesh ) -> void:
@@ -95,6 +97,12 @@ func _set_mesh( m: Mesh ) -> void:
 	'''
 	if m != null:
 		$Pivot/Mesh.mesh = m
+
+func _get_default_material() -> Material:
+	'''
+	Material por defecto segun el tipo de personaje. Los scripts hijos lo sobrescriben.
+	'''
+	return null
 
 # Funciones hitbox de ataque.
 func _spawn_hitbox(p_position: Vector3) -> void:

@@ -1,9 +1,7 @@
 class_name GravityBody3D
 extends CharacterBody3D
 
-'''
-Gravedad 2D, para `CharacterBody3d`. Sencillon.
-'''
+# Gravedad 2D, para `CharacterBody3d`. Sencillon.
 
 # Propiedades publicas 
 @export_group("Gravity")
@@ -28,8 +26,8 @@ func _vertical_force(delta: float, multiplier: float = 1) -> Dictionary:
 		_target_velocity.y -= (fall_acceleration * multiplier) * delta
 		_air_count += 1
 	if on_ceiling:
-		# Evitar saltar al techo, y segir con llendo hacia arriba. Nembe no, eso ta mal.
-		_target_velocity.y = -(fall_acceleration * multiplier)*delta
+		# Evitar saltar al techo, y segir con llendo hacia arriba. Nembe no, eso ta muy mal oshe.
+		_target_velocity.y = -(fall_acceleration * multiplier) * delta
 	return {
 		"air_count": _air_count,
 		"on_floor": on_floor,
