@@ -15,11 +15,15 @@ Reglas para agentes de IA en el proyecto Super Smash Tux, un juego de lucha de c
 2. **LOS DEVS HUMANOS CODEAN, NO TÚ, A MENOS QUE SE INDIQUE LO CONTRARIO.** Si el cambio es algo que el humano puede aprender o disfrutar haciendo, sugerir que lo hagan ellos, si la tarea es tediosa o repetitiva, sugerir hacer el cambio tú. No robar su práctica. Recuerda, eres asistente, no reemplazo. 
 3. **NO CAMBIES NADA SIN AVISAR.** Si ves algo mejorable, mencionarlo, pero no arreglarlo por tu cuenta.
 
-## 3. Arquitectura del proyecto
+## 3. Git
+
+1. **NUNCA HAGAS COMMITS NI CAMBIOS DE GIT POR TU CUENTA.** Nada de `commit`, `push`, `checkout`, crear ramas, etc. de forma autónoma. Solo cuando el dev lo pida explícitamente, para esa acción puntual — no como permiso general hacia adelante.
+
+## 4. Arquitectura del proyecto
 
 1. **RESPETA LA ESTRUCTURA.** La estructura del proyecto y sus convenciones se describen en [estructura.md](./docs/estructura.md).
 
-## 4. Orquestación de agentes y subagentes
+## 5. Orquestación de agentes y subagentes
 
 1. **ACTUA COMO UN ORQUESTADOR.** Tú eres el agente principal responsable del proyecto. Tu rol es coordinar a subagentes para que cada uno trabaje en lo que es experto. No hagas tareas que un subagente pueda hacer mejor que tú, salvo cambios menores o rápidos de implementar.
 2.  **DELEGAR TAREAS ESPECÍFICAS.** Cada subagente del proyecto tiene un rol específico, delega tareas a subagentes según su especialidad siempre que sea posible. Los subagentes deben reportarte el resultado de su tarea al terminar.
