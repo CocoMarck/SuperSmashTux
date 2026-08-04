@@ -3,9 +3,10 @@ class_name Character
 
 # Constantes del script.
 const MAX_JUMPS := 2
+const HITBOX_SCENE := preload("res://prefabs/hitbox.tscn")
 
 # Propiedades publicas | Gravidad y velocidad.
-@export var speed := 14
+@export var speed := 18
 @export var fall_acceleration := 48
 @export var jump_impulse := 25
 @export var init_looking_at_right : bool = false
@@ -32,6 +33,10 @@ var _was_jumping = false
 var _air_count = 0
 var _fall_acceleration_multiplier = 1
 
+# Propiedades privadas | Hitbox daño a los enemigos locos.
+var _hitbox_count = 0
+var _spawned_hitbox: Area3D = null
+
 # Clase interna, para movimientos de pelea
 class FightMove extends RefCounted:
 	var name: StringName
@@ -41,10 +46,11 @@ class FightMove extends RefCounted:
 	var stop_vertical_move: bool
 	var speed: Vector3
 	var air_attack : bool
+	var hitbox_position: Vector3
 	
 	func _init(
 		p_name: StringName, p_duration: float, p_damage: int, 
-		p_stop_horizontal_move: bool, p_stop_vertical_move: bool, p_speed: Vector3, p_air_attack
+		p_stop_horizontal_move: bool, p_stop_vertical_move: bool, p_speed: Vector3, p_air_attack, p_hitbox_position: Vector3
 	):
 		name = p_name
 		duration = p_duration
@@ -53,33 +59,34 @@ class FightMove extends RefCounted:
 		stop_vertical_move = p_stop_vertical_move
 		speed = p_speed
 		air_attack = p_air_attack
+		hitbox_position = p_hitbox_position
 
-# Clase interna de atackes disponibles
+# Clase interna de ataques disponibles
 class Attacks extends RefCounted:
 	# name, duration, damage, stop x move, stop y move, speed 3d, air_attack
 	var neutral := FightMove.new(
-		"neutral", 0.1, 5, true, false, Vector3(0,0,0), false
+		"neutral", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.3, 0.1, 0)
 	)
 	var dash := FightMove.new(
-		"dash", 0.3, 10, true, false, Vector3(20,0,0), false
+		"dash", 0.3, 10, true, false, Vector3(22,0,0), false, Vector3(0.5, -0.5, 0)
 	)
 	var crouch := FightMove.new(
-		"crouch", 0.2, 5, true, false, Vector3(0,0,0), false
+		"crouch", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.6, -0.5, 0)
 	)
 	
 	var neutral_air := FightMove.new(
-		"neutral_air", 0.4, 5, false, false, Vector3(0,0,0), true
+		"neutral_air", 0.4, 5, false, false, Vector3(0,0,0), true, Vector3(0.5, -0.6, 0)
 	)
 	var air_move := FightMove.new(
-		"air_move", 0.3, 10, false, false, Vector3(0,0,0), true
+		"air_move", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.6, 0, 0)
 	)
 	var air_down := FightMove.new(
-		"air_down", 0.3, 10, false, false, Vector3(0,0,0), true
+		"air_down", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.1, -0.7, 0)
 	)
 
 # Propiedades privadas ataques	
 var _attack_count = 0
-var _current_attack = null
+var _current_attack : FightMove = null
 var _attacks = Attacks.new()
 
 # Funciones
@@ -105,6 +112,25 @@ func _set_mesh( m: Mesh ) -> void:
 	if m != null:
 		$Pivot/Mesh.mesh = m
 
+# Funciones hitbox de ataque.
+func _spawn_hitbox(position: Vector3) -> void:
+	_spawned_hitbox = HITBOX_SCENE.instantiate()
+	var fixed_position := Vector3(position.z, position.y, position.x*-1)
+	_spawned_hitbox.position = fixed_position
+	$Pivot.add_child(_spawned_hitbox)
+	_spawned_hitbox.body_entered.connect(_on_hitbox_body_entered)
+
+func _on_hitbox_body_entered(body: Node3D):
+	# Esto lo debe hacer el hitbox. Fucnion del hitbox prefab
+	if body is Character and body != self:
+		print(body.name, " recibio trancazo")
+
+func _clear_hitbox() -> void:
+	if _spawned_hitbox != null:
+		_spawned_hitbox.queue_free()
+		_spawned_hitbox = null
+
+# Funciones Inicializar
 func _ready() -> void:
 	'''
 	Inicializar el character, con sus colorines, materiales etc.
@@ -116,6 +142,7 @@ func _ready() -> void:
 	# Establecer direccion de vista inicial.
 	$Pivot.basis = Basis.looking_at( _get_initial_facing() )
 
+# Funciones movimiento
 func _get_move_direction() -> Vector3:
 	'''
 	Obtener direccion de movimiento. Tambien sirve para voltear el character.
@@ -287,9 +314,16 @@ func _fight(delta: float, states: Dictionary):
 			_target_velocity.y = _current_attack.speed.y * _direction.y
 			
 		if _attack_count >= _current_attack.duration:
+			_clear_hitbox()
+			_spawn_hitbox(_current_attack.hitbox_position)
 			_current_attack = null
 		else:
 			_attack_count += delta
+			_hitbox_count = 0
+	if _spawned_hitbox != null:
+		_hitbox_count += delta
+		if _hitbox_count >= 0.1:
+			_clear_hitbox()
 
 func _anim(delta: float, states: Dictionary, direction: Vector3) -> void:
 	'''
@@ -298,42 +332,41 @@ func _anim(delta: float, states: Dictionary, direction: Vector3) -> void:
 	'''
 	# Movimientos de pelea
 	if _current_attack != null:
-		$AnimationPlayer.stop()
 		if _current_attack.name == "neutral":
-			$Pivot/Mesh.rotation_degrees.x = -20
+			$AnimationPlayer.play("neutral_attack")
 		elif _current_attack.name == "dash":
-			$Pivot/Mesh.rotation_degrees.x = 60
-			$Pivot/Mesh.position.y = -0.3
+			$AnimationPlayer.play("dash_attack")
 		elif _current_attack.name == "crouch":
-			$Pivot/Mesh.rotation_degrees.x = 85
-			$Pivot/Mesh.position.y = -0.5
+			$AnimationPlayer.play("crouch_attack")
 		elif _current_attack.name == "neutral_air":
+			$AnimationPlayer.stop()
 			$Pivot/Mesh.rotation_degrees.x = 45
 		elif _current_attack.name == "air_move":
+			$AnimationPlayer.stop()
 			$Pivot/Mesh.rotation_degrees.x = 90
 		elif _current_attack.name == "air_down":
+			$AnimationPlayer.stop()
 			$Pivot/Mesh.rotation_degrees.x = 0
 	
 	else:
 		# Animacion | Movimiento en el piso
 		if states["neutral"]:
-			$Pivot/Mesh.rotation.x = 0
-		if states["running"]:
-			if not $AnimationPlayer.is_playing():
-				$AnimationPlayer.play("run")
-		else:
-			$AnimationPlayer.stop()
-
+			$AnimationPlayer.play("idle")
+		elif states["running"]:
+			$AnimationPlayer.play("run")
 		# Animacion | Salto
-		if states["jumping"]:
-			$Pivot/Mesh.rotation.x = -50
+		elif states["jumping"]:
+			$AnimationPlayer.play("jump")
 		elif states["falling"]:
-			$Pivot/Mesh.rotation.x = 50
+			$AnimationPlayer.play("fall")
+		else:
+			$AnimationPlayer.play("idle")
 		
 	# Animación | Mover direccion visual del player.
 	if states["moving"]:
 		$Pivot.basis = Basis.looking_at(direction)
 
+# Funciones lo chido.
 func _physics_process(delta: float) -> void:
 	'''
 	Funcion de procesamiento de fisicas.
