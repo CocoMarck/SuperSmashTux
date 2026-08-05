@@ -47,7 +47,7 @@ func _on_hitbox_body_entered(body: Node3D) -> void:
 	'''
 	if body == _parent:
 		return
-	if body is Character:
+	if body is Character or body is Person:
 		print(body.name, " recibio trancazo")
 		print(body.damage_percentage)
 		body.set_damage_percentage( _damage )

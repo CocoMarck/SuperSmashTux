@@ -4,6 +4,8 @@
 [ext_resource type="Script" uid="uid://bbefl7k3gi1fy" path="res://scripts/spawn_point.gd" id="2_o6xl0"]
 [ext_resource type="Script" uid="uid://bcmv8f218b2yh" path="res://scripts/one_way_platform.gd" id="3_p1atf"]
 [ext_resource type="Script" uid="uid://bqr8o7d3ctyo2" path="res://scripts/ground_platform.gd" id="4_grnd0"]
+[ext_resource type="PackedScene" uid="uid://de4tgdk06il7y" path="res://prefabs/character.tscn" id="5_tefeu"]
+[ext_resource type="Script" uid="uid://vcq3xggvo3rq" path="res://scripts/person.gd" id="6_o6xl0"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
 
@@ -84,3 +86,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
 gizmo_extents = 2.0
 script = ExtResource("2_o6xl0")
 character_type = 1
+
+[node name="Person" parent="." unique_id=1138438983 instance=ExtResource("5_tefeu")]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -4.9382343, 18.47628, 0)
+script = ExtResource("6_o6xl0")
+walking_speed = 8
+running_speed = 18
+hp = 100
+damage_percentage = 0.0

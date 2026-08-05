@@ -11,7 +11,7 @@ extends CharacterBody3D
 var _target_velocity: Vector3 = Vector3.ZERO
 var _air_count: int = 0
 
-func _vertical_force(delta: float, multiplier: float = 1) -> Dictionary:
+func _vertical_force(delta: float, multiplier: float = 1) -> VerticalForceSignals:
 	'''
 	Fuerza vertical. Imitación de gravedad. Estilo 2D.
 	'''
@@ -28,11 +28,11 @@ func _vertical_force(delta: float, multiplier: float = 1) -> Dictionary:
 	if on_ceiling:
 		# Evitar saltar al techo, y segir con llendo hacia arriba. Nembe no, eso ta muy mal oshe.
 		_target_velocity.y = -(fall_acceleration * multiplier) * delta
-	return {
-		"air_count": _air_count,
-		"on_floor": on_floor,
-		"force": _target_velocity.y
-	}
+	return VerticalForceSignals.new(
+		on_floor, 
+		_air_count, 
+		_target_velocity.y # Force
+	)
 
 func _ready() -> void:
 	pass

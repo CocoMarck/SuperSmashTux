@@ -136,10 +136,13 @@ func _physics_process(delta: float) -> void:
 	_was_move_up = _move_up
 	_was_move_down = _move_down
 	var gravity_signals = _vertical_force(delta, _fall_acceleration_multiplier)
-	var move_signals = _move(delta, gravity_signals)
+	var vertical_force_signals = {
+		"on_floor": gravity_signals.on_floor, "air_count": gravity_signals.air_count, "force": gravity_signals.force
+	}
+	var move_signals = _move(delta, vertical_force_signals)
 	_set_x_not_zero_value()
 	var move_states = _get_move_states(move_signals)
-	_one_way_platforms(delta, gravity_signals["on_floor"])
+	_one_way_platforms(delta, vertical_force_signals["on_floor"])
 	_ledge_grab(delta)
 	if not _taking_damage:
 		_fight(delta, move_states)
