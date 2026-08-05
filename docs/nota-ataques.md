@@ -10,9 +10,11 @@
 
 ## Cómo se elige el ataque
 
-`_fight()` arranca un ataque por **flanco** del input, no mientras esté sostenido: guarda `_attack_was_pressed` y calcula `attack_pressed := _attack and not _attack_was_pressed`, así que solo dispara en el frame en que el botón pasa de suelto a presionado. Es el mismo patrón que ya usa el salto (`_was_jumping` en `_move()`) y el tap de abajo en plataformas (`_was_move_down`). `player.gd` sigue leyendo el input crudo con `Input.is_action_pressed` — es `Character` quien detecta el flanco, para que el mismo mecanismo sirva también para IA/NPCs que no pasen por `player.gd`.
+`_fight()` arranca un ataque por **flanco** del input, no mientras esté sostenido, pero ese flanco ya viene resuelto desde antes: `player.gd` lee el botón de ataque con `Input.is_action_just_pressed(input_map.attack)`, que solo devuelve `true` en el frame exacto en que se aprieta el botón. Así, `_attack` dura un único frame por pulsación y `_fight()` no necesita calcular nada extra — le alcanza con preguntar `if _attack and _current_attack == null`.
 
-Esto existe porque antes se leía `_attack` presionado sin más: al terminar un ataque (`_current_attack = null`), si el jugador seguía con el botón apretado, la condición volvía a cumplirse sola en el frame siguiente y arrancaba otro ataque — es decir, mantener presionado el botón permitía spamear ataques sin soltar. Con el flanco, cada pulsación dispara como mucho un ataque: hay que soltar y volver a apretar para atacar de nuevo.
+Esto existe porque antes se leía `_attack` con `Input.is_action_pressed` (estado sostenido, `true` mientras el botón siga apretado): al terminar un ataque (`_current_attack = null`), si el jugador seguía con el botón apretado, la condición volvía a cumplirse sola en el frame siguiente y arrancaba otro ataque — es decir, mantener presionado el botón permitía spamear ataques sin soltar. Con `is_action_just_pressed`, cada pulsación dispara como mucho un ataque: hay que soltar y volver a apretar para atacar de nuevo.
+
+Por contraste, `_jump` y los `_move_*` siguen leyéndose en `player.gd` con `Input.is_action_pressed` (estado sostenido) — ahí sí hace falta sostener el botón para seguir moviéndose o cayendo con salto cortado, por ejemplo. Para el salto, que sí necesita detectar el flanco (que solo salte una vez por pulsación), es `Character._move()` quien lo hace a mano con `_was_jumping`. `_attack` es hoy la única de estas variables que viaja como flanco puro desde el input en vez de como estado sostenido.
 
 Un ataque solo arranca además si `_current_attack == null` (no hay uno en curso ya). Con eso resuelto, mira los `states` que ya calculó `_get_move_states()` a partir del movimiento de ese frame:
 
@@ -27,7 +29,7 @@ Un ataque solo arranca además si `_current_attack == null` (no hay uno en curso
 
 Si ninguno matchea (`init_attack = false`), no pasa nada. Si sí, se resetea `_attack_count = 0` para empezar a contar la duración del golpe recién elegido.
 
-**Limitación conocida: no hay buffer de input.** Si el jugador aprieta (o suelta y vuelve a apretar) el botón de ataque mientras `_current_attack != null`, ese flanco se pierde — `attack_pressed` fue `true` en ese frame pero la condición `_current_attack == null` lo bloquea, y no queda registrado en ningún lado para encolarse. No hay forma de "encadenar" un segundo golpe apenas termine el primero; hay que esperar a que el ataque en curso termine y recién ahí volver a pulsar.
+**Limitación conocida: no hay buffer de input.** Si el jugador aprieta el botón de ataque mientras `_current_attack != null`, esa pulsación se pierde — `_attack` fue `true` en ese frame pero la condición `_current_attack == null` lo bloquea, y no queda registrado en ningún lado para encolarse. No hay forma de "encadenar" un segundo golpe apenas termine el primero; hay que esperar a que el ataque en curso termine y recién ahí volver a pulsar.
 
 ## El ataque manda sobre el movimiento
 
@@ -52,6 +54,14 @@ Ningún `FightMove` del catálogo usa hoy `inversed_hitbox_ratio = false` ni cam
 ## Ataques aéreos y aterrizaje
 
 `air_attack` marca cuáles de los 6 movimientos son aéreos (los tres del bloque "en el aire" del catálogo). `_move()` revisa esto cada frame: si el personaje toca piso (`on_floor`) mientras hay un ataque en curso y ese ataque tiene `air_attack == true`, se cancela (`_current_attack = null`) sin esperar a que termine su `duration`. Es para que un aterrizaje corte el ataque en vez de dejarlo "pegado" al personaje ya en piso.
+
+## Colgado de una orilla no se pelea
+
+En el pipeline de `_physics_process`, `_ledge_grab()` corre **antes** que `_fight()`. Por eso `_fight()` arranca con un guard: si `_hanging_ledge != null`, corta cualquier ataque en curso (`_current_attack = null`), limpia el hitbox con `_clear_hitbox()` y hace `return` sin evaluar nada más. Mientras el personaje está colgado, manda `_ledge_grab`, no el sistema de ataques.
+
+El `_clear_hitbox()` se llama a mano acá porque no se puede delegar a `_ledge_grab`: ese método solo limpia el hitbox cuando `_current_attack != null`, así que un hitbox que sobreviviera al final de su ataque quedaría pegado al personaje colgado (el `return` de este guard salta el bloque de limpieza normal al final de `_fight()`). Llamar `_clear_hitbox()` es seguro aunque no haya hitbox activo.
+
+Sin este guard, además, había un bug real: `_ledge_grab` cancelaba el ataque en curso y, acto seguido, `_fight` veía `_current_attack == null` con el botón sostenido y arrancaba uno nuevo cada frame — invisible porque la animación estaba bloqueada, pero spameaba la consola y creaba/cancelaba `FightMove` sin parar. `_anim()` tiene un guard equivalente (`if _hanging_ledge != null: return`), así que tampoco hay animación de ataque estando colgado.
 
 ## Animación o rotación de malla
 

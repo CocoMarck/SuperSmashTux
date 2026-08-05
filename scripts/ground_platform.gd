@@ -19,7 +19,7 @@ func _ready() -> void:
 # Funciones propias.
 func has_ledges() -> bool:
 	'''
-	Saber si esta plataforma tiene orillas agarrables. Solo si su primer CollisionShape3D
+	Saber si esta plataforma tiene orillas agarrables (agarrame esta). Solo si su primer CollisionShape3D
 	lleva un BoxShape3D, si no, ni caso tiene buscarle la tercera pierna al vato.
 	'''
 	return _collision_shape != null and _collision_shape.shape is BoxShape3D

@@ -39,6 +39,11 @@ var _move_down: bool = false
 var _jump: bool = false
 var _attack: bool = false
 var _power_attack: bool = false
+# Flancos de los inputs de arriba/abajo, calculados una sola vez por frame en _physics_process.
+var _up_pressed: bool = false
+var _down_pressed: bool = false
+var _was_move_up: bool = false
+var _was_move_down: bool = false
 
 # Propiedades privadas | Velocidad y salto.
 var _direction: Vector3 = Vector3.ZERO
@@ -92,7 +97,6 @@ var _current_damage_directon: Vector3 = Vector3.ZERO
 var _taking_damage :bool = false
 
 # Propiedades privadas | Plataformas de un solo sentido.
-var _was_move_down: bool = false
 var _drop_through_count: float = 0.0
 var _one_way_ignored: Dictionary = {}
 var _last_floor_one_way: OneWayPlatform = null
@@ -103,8 +107,6 @@ var _hanging_ledge: GroundPlatform = null
 var _hanging_right_side: bool = false
 var _hang_position: Vector3 = Vector3.ZERO
 var _ledge_release_count: float = 0.0
-var _was_ledge_move_up: bool = false
-var _was_ledge_move_down: bool = false
 
 # Funciones | Inicializar.
 func _ready() -> void:
@@ -128,6 +130,11 @@ func _physics_process(delta: float) -> void:
 	
 	# Detectar inputs, señales y otros estados del personaje
 	_collect_input()
+	# Flancos de arriba/abajo. Se calculan aqui, una sola vez, pa que todos los sistemas lean el mismo tap.
+	_up_pressed = _move_up and not _was_move_up
+	_down_pressed = _move_down and not _was_move_down
+	_was_move_up = _move_up
+	_was_move_down = _move_down
 	var gravity_signals = _vertical_force(delta, _fall_acceleration_multiplier)
 	var move_signals = _move(delta, gravity_signals)
 	_set_x_not_zero_value()
@@ -152,6 +159,13 @@ func set_damage_percentage(damage:int) -> void:
 	damage_percentage += damage*0.01
 
 func set_damage_move(damage:float, direction:Vector3) -> void:
+	'''
+	Recibir un trancazo. Si nos agarran colgados de una orilla, soltarse pa que el knockback si nos avente
+	y no nos regrese el snap de _ledge_grab al frame siguiente.
+	'''
+	if _hanging_ledge != null:
+		_hanging_ledge = null
+		_ledge_release_count = LEDGE_RELEASE_TIME
 	_current_damage_directon = direction
 	_taking_damage = true
 
@@ -342,8 +356,14 @@ func _fight(delta: float, states: Dictionary) -> void:
 	Este evento sobrepasa el move. 
 	Si es necesario deja inmovil al player (para terminar ataque correctamente). Tambien sobrescribe estados.
 	Se puede hacer modificando `_target_velocity.x` a cero. Y states a false o true segun el caso.
-	El ataque se detecta por flanco (edge), asi que hay que soltar y volver a pulsar para atacar de nuevo.
+	Un ataque por pulsacion: player.gd lee el boton con is_action_just_pressed, asi que _attack ya viene siendo el puro flanco.
 	'''
+	# Colgados de una orilla no se pelea, ahi manda _ledge_grab. Cortar cualquier ataque y su hitbox.
+	if _hanging_ledge != null:
+		_current_attack = null
+		_clear_hitbox()
+		return
+
 	if _attack and _current_attack == null:
 		_attack_direction.x = 0.0
 		_attack_direction.y = 0.0
@@ -430,6 +450,9 @@ func _anim(delta: float, states: Dictionary, direction: Vector3) -> void:
 	Animaciones.
 	Si son de movimeinto pos chido, pero si son de ataque sobrepesar las de movimiento.
 	'''
+	# Si andamos colgados de una orilla, _ledge_grab ya fijo la animacion y hacia donde miramos. No pisarselo.
+	if _hanging_ledge != null:
+		return
 	# Movimientos de pelea
 	if _current_attack != null:
 		if _current_attack.animation_name != &"":
@@ -462,15 +485,11 @@ func _one_way_platforms(delta: float, on_floor: bool) -> void:
 	Maneja las plataformas de un solo sentido, estilo Smash Bros: se atraviesan de abajo pa arriba,
 	pero solidas al caer encima. Con tap de abajo estando parado en una, te dejas caer a proposito.
 	'''
-	# Flanco de subida del tap de abajo, siempre se evalua pa no perder el flanco entre frames.
-	var down_pressed := _move_down and not _was_move_down
-	_was_move_down = _move_down
-
 	# Plataforma de un solo sentido en la que estamos parados ahorita, si hay.
 	var floor_one_way := _get_floor_one_way() if on_floor else null
 
 	# Arrancar caida voluntaria si se hace tap de abajo estando parado sobre una plataforma de un solo sentido.
-	if down_pressed and floor_one_way != null:
+	if _down_pressed and floor_one_way != null:
 		_drop_through_count = DROP_THROUGH_TIME
 		# Empujoncito hacia abajo pa despegarse y que no se re-enganche por el snap del piso.
 		_target_velocity.y = min(_target_velocity.y, -1.0)
@@ -584,14 +603,9 @@ func _ledge_grab(delta: float) -> void:
 	'''
 	Agarre de orillas estilo Smash Bros. Si vas cayendo junto a la orilla de una GroundPlatform,
 	te cuelgas de ella. Colgado, arriba te subes con impulso y abajo te sueltas y caes.
-	Va al final del physics process, asi que pisa lo que calcularon _move, _fight y _anim sin pedirles permiso.
+	Corre despues de _move, asi que pisa lo que calculo sin pedirle permiso. _fight y _anim corren despues
+	pero se salen temprano si andamos colgados, por eso no nos pisan de vuelta.
 	'''
-	# Flancos propios de arriba/abajo, pa no perderlos entre frames y no pisarle el flanco a las plataformas de un solo sentido.
-	var up_pressed := _move_up and not _was_ledge_move_up
-	var down_pressed := _move_down and not _was_ledge_move_down
-	_was_ledge_move_up = _move_up
-	_was_ledge_move_down = _move_down
-
 	# Cooldown pa no re-agarrarnos solitos justo despues de soltarnos.
 	if _ledge_release_count > 0.0:
 		_ledge_release_count = max(_ledge_release_count - delta, 0.0)
@@ -606,14 +620,14 @@ func _ledge_grab(delta: float) -> void:
 		# Determinar a donde se debe mirar mientras uno se cuelga pa irse a conocer a diosito.
 		var inward := -1.0 if _hanging_right_side else 1.0
 
-		if up_pressed:
+		if _up_pressed:
 			# Subirse de vuelta a la plataforma, puro impulso hacia arriba; si se mete o no ya es bronca del jugador.
 			_target_velocity.y = jump_impulse
 			_hanging_ledge = null
 			_ledge_release_count = LEDGE_RELEASE_TIME
 			return
 
-		if down_pressed:
+		if _down_pressed:
 			# Soltarse a proposito y empezar a caer.
 			_target_velocity = Vector3.ZERO
 			_target_velocity.y = -1.0
@@ -630,7 +644,7 @@ func _ledge_grab(delta: float) -> void:
 			_current_attack = null
 			_clear_hitbox()
 		$AnimationPlayer.play("idle")
-		# Voltearlo de cara a la orilla. Va aqui, despues de _anim, pa que no lo voltie el movimiento.
+		# Voltearlo de cara a la orilla. _anim corre despues pero se sale temprano si andamos colgados, asi no lo voltea.
 		$Pivot.basis = Basis.looking_at(Vector3(inward, 0.0, 0.0))
 		return
 
