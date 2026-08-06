@@ -32,9 +32,11 @@ var _x_not_zero_value: float = 0.0
 var _fall_acceleration_multiplier: float = 1.0
 
 # Propiedades privadas | Daño
-var _taking_damage :bool = false
-var _normal_damage_power : float = 200
-var _current_damage_direction: Vector3 = Vector3.ZERO
+var _normal_damage_power :float = 200
+var _knockback_active :bool = false
+var _knockback_direction :Vector3 = Vector3.ZERO
+var _knockback_time :float = 0.0
+var _knockback_duration :float = 0.35
 
 # Propiedades privadas | Inputs
 var _walking: bool = false
@@ -200,7 +202,7 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 	if signals.on_floor:
 		# En el piso
 		neutral = not moving and (not _move_up and not _move_down)
-		running = moving
+		running = moving and not _walking
 		neutral_crouch = not moving and _move_down
 		crouch_move = moving and _move_down
 		walking = _walking and moving
@@ -266,17 +268,21 @@ func set_damage_move(damage:float, direction:Vector3) -> void:
 	'''
 	Recibir un trancazo
 	'''
-	_current_damage_direction = direction
-	_taking_damage = true
+	_knockback_direction = direction
+	_knockback_active = true
+	_knockback_time = _knockback_duration
 
-func _damage_move() -> void:
+func _damage_move(delta: float) -> void:
+	_knockback_time -= delta
+	var accel := _normal_damage_power * damage_percentage
 	_target_velocity.x += (
-		(_normal_damage_power*_current_damage_direction.x) * damage_percentage
+		_knockback_direction.x * accel * delta
 	)
 	_target_velocity.y += (
-		(_normal_damage_power*_current_damage_direction.y) * damage_percentage
+		_knockback_direction.y * (accel*2) * delta
 	)
-	_taking_damage = false
+	if _knockback_time <= 0.0:
+		_knockback_active = false
 
 # Funciones | Inicializar
 func _ready() -> void:
@@ -307,8 +313,8 @@ func _physics_process(delta: float) -> void:
 	var move_states = _get_move_states(move_signals)
 
 	# Damage
-	if _taking_damage:
-		_damage_move()
+	if _knockback_active:
+		_damage_move(delta)
 
 	# Anim
 	_move_anim(delta, move_states)
