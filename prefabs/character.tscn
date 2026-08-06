@@ -339,6 +339,47 @@ tracks/2/keys = {
 "values": [Vector3(1, 1.0000002, 1.0000002), Vector3(1, 1.0000004, 1.0000004)]
 }
 
+[sub_resource type="Animation" id="Animation_bfnxi"]
+resource_name = "looking_up"
+length = 0.5
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot/Mesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, -0.25318033, 0.2246418), Vector3(0, -0.27700594, 0.26548576), Vector3(0, -0.25318033, 0.2246418)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot/Mesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0.55244, 0, 0), Vector3(0.66190034, 0, 0), Vector3(0.55244, 0, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot/Mesh:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(1, 1.0000001, 1.0000001), Vector3(1, 1.0000002, 1.0000002), Vector3(1, 1.0000001, 1.0000001)]
+}
+
 [sub_resource type="Animation" id="Animation_xb6wn"]
 resource_name = "neutral_attack"
 length = 0.2
@@ -430,6 +471,7 @@ _data = {
 &"fall": SubResource("Animation_hk8gb"),
 &"idle": SubResource("Animation_v2nwo"),
 &"jump": SubResource("Animation_xofgc"),
+&"looking_up": SubResource("Animation_bfnxi"),
 &"neutral_attack": SubResource("Animation_xb6wn"),
 &"run": ExtResource("2_xofgc"),
 &"walk": SubResource("Animation_v5mhf")

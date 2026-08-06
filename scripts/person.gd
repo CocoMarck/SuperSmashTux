@@ -27,6 +27,7 @@ var _jump_count = 0
 # Propiedadas privadas | Estados posición
 var _direction: Vector3 = Vector3.ZERO
 var _x_not_zero_value: float = 0.0
+var _last_x_direction: float = 0.0
 
 # Propiedades privadas | Multiplicadores.
 var _fall_acceleration_multiplier: float = 1.0
@@ -118,31 +119,40 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	Movimientos.
 	Retorna señales de movimientos.
 	'''
-	# Variables | Salto
-	var want_jump := (_jump or _move_up)
-	var can_jump := want_jump and not _was_jumping
+	# Variables | Salto y moverse horizontalmente
+	var want_jump := false
+	var can_jump := false
+	if _knockback_active:
+		_move_left = false
+		_move_right = false
+		_move_down = false
+		_move_up = false
+	else:
+		# Salto
+		want_jump = (_jump or _move_up) # <--- El move up se usara para ataques hacia arriba.
+		can_jump = want_jump and not _was_jumping
 	_was_jumping = want_jump
 
 	# Variables | Direccion de movimiento horizontal
 	# Solo actualizar direccion en el piso.
-	if can_jump:
-		_direction = Vector3(_x_not_zero_value, 0, 0)
-	else:
-		_direction = _get_move_direction()
+	_direction = _get_move_direction()
 
 	# En caida | Descender o no mas rapido.
-	if not signals.on_floor:
+	if signals.on_floor:
+		_fall_acceleration_multiplier = 1
+	else:
 		if _move_down:
 			_fall_acceleration_multiplier = 2
-		if want_jump:
+		if can_jump:
 			_fall_acceleration_multiplier = 1
-	else:
-		_fall_acceleration_multiplier = 1
 	
 	# En el piso
 	if signals.on_floor:
 		#  No aceptar saltos infinitos.
 		_jump_count = 0
+	else:
+		if _max_jumps == 1.0:
+			_jump_count = _max_jumps
 
 	# Cambiador de velocidad segun sea el caso.
 	var speed : int
@@ -156,14 +166,17 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 			speed = walking_speed
 			speed_multiplier = 0.75
 	else:
-		if can_jump:
-			speed_multiplier = 0.5
+		if _last_x_direction == _direction.x:
+			speed_multiplier = 1
+		else:
+			speed_multiplier = 0.75
+			
 	
 	# Velocidad horizontal
 	_target_velocity.x = _direction.x * (speed*speed_multiplier)
 
 	# Salto | Aplicar salto normal o doble salto segun sea el caso.
-	if want_jump and _jump_count < _max_jumps:
+	if can_jump and _jump_count < _max_jumps:
 		_target_velocity.y = jump_impulse
 		if signals.air_count > 0:
 			_jump_count = _max_jumps
@@ -192,26 +205,30 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 	var neutral := false
 	var walking := false
 	var running := false
+	var neutral_up := false
 	var neutral_crouch := false
 	var crouch_move := false
 
 	var neutral_air := false
 	var air_move := false
+	var air_up := false
 	var air_down := false
 
 	if signals.on_floor:
 		# En el piso
 		neutral = not moving and (not _move_up and not _move_down)
 		running = moving and not _walking
-		neutral_crouch = not moving and _move_down
-		crouch_move = moving and _move_down
+		neutral_up = not moving and _move_up and not _move_down
+		neutral_crouch = not moving and _move_down and not _move_up
+		crouch_move = moving and _move_down and not _move_up
 		walking = _walking and moving
 	
 	else:
 		# En el aire
 		neutral_air = not moving and (not _move_up and not _move_down)
 		air_move = moving
-		air_down = moving and _move_down
+		air_up = _move_up and not _move_down
+		air_down = _move_down and not _move_up
 
 	return MoveStates.new(
 		walking,
@@ -221,11 +238,13 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 		
 		neutral,
 		running,
+		neutral_up,
 		neutral_crouch,
 		crouch_move,
 
 		neutral_air,
 		air_move,
+		air_up,
 		air_down,
 	)
 
@@ -234,7 +253,9 @@ func _move_anim(delta:float, states: MoveStates) -> void:
 	Animaciones
 	'''
 	# En el piso
-	if states.neutral_crouch:
+	if states.neutral_up:
+		$AnimationPlayer.play("looking_up")
+	elif states.neutral_crouch:
 		$AnimationPlayer.play("crouch")
 	elif states.crouch_move:
 		$AnimationPlayer.play("crouch_move")
@@ -252,10 +273,12 @@ func _move_anim(delta:float, states: MoveStates) -> void:
 	else:
 		$AnimationPlayer.play("idle")
 
-func _set_pivot_direction(direction: Vector3) -> void:
-	$Pivot.basis = Basis.looking_at(
-		Vector3(_x_not_zero_value, direction.y, direction.z)
-	)
+func _set_pivot_direction(signals: MoveSignals, direction: Vector3) -> void:
+	if signals.on_floor:
+		$Pivot.basis = Basis.looking_at(
+			Vector3(_x_not_zero_value, direction.y, direction.z)
+		)
+		_last_x_direction = _x_not_zero_value
 
 # Funciones | Damage recibido
 func set_damage(damage:int):
@@ -318,7 +341,7 @@ func _physics_process(delta: float) -> void:
 
 	# Anim
 	_move_anim(delta, move_states)
-	_set_pivot_direction(move_signals.direction)
+	_set_pivot_direction(move_signals, move_signals.direction)
 
 	# Procesar todo
 	velocity = _target_velocity

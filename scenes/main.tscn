@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://bcmv8f218b2yh" path="res://scripts/one_way_platform.gd" id="3_p1atf"]
 [ext_resource type="Script" uid="uid://bqr8o7d3ctyo2" path="res://scripts/ground_platform.gd" id="4_grnd0"]
 [ext_resource type="PackedScene" uid="uid://de4tgdk06il7y" path="res://prefabs/character.tscn" id="5_tefeu"]
-[ext_resource type="Script" uid="uid://vcq3xggvo3rq" path="res://scripts/person.gd" id="6_o6xl0"]
+[ext_resource type="Script" uid="uid://ywbqr6tkpira" path="res://scripts/test_player.gd" id="6_tefeu"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
 
@@ -89,7 +89,7 @@ character_type = 1
 
 [node name="Person" parent="." unique_id=1138438983 instance=ExtResource("5_tefeu")]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -4.9382343, 18.47628, 0)
-script = ExtResource("6_o6xl0")
+script = ExtResource("6_tefeu")
 walking_speed = 8
 running_speed = 18
 hp = 100
