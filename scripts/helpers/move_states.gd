@@ -1,6 +1,7 @@
 class_name MoveStates
 extends RefCounted
 
+var walking: bool
 var moving: bool
 var jumping: bool
 var falling: bool
@@ -15,10 +16,11 @@ var air_move: bool
 var air_down: bool
 
 func _init(
-	p_moving: bool, p_jumping: bool, p_falling: bool, 
+	p_walking: bool, p_moving: bool, p_jumping: bool, p_falling: bool, 
 	p_neutral: bool, p_running: bool, p_neutral_crouch: bool, p_crouch_move: bool,
 	p_neutral_air: bool, p_air_move: bool, p_air_down: bool
 ):
+	walking = p_walking
 	moving = p_moving
 	jumping = p_jumping
 	falling = p_falling

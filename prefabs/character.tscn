@@ -26,7 +26,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector3(0, -0.185107, 0)]
+"values": [Vector3(0, -0.18437704, 0)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -51,6 +51,47 @@ tracks/2/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 0,
 "values": [Vector3(1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_g600d"]
+resource_name = "crouch"
+length = 0.5
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot/Mesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(0, -0.5663175, 0), Vector3(0, -0.59354687, 0), Vector3(0, -0.5663175, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot/Mesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(1.4715463, 0, 0), Vector3(1.5320232, 0, 0), Vector3(1.4715463, 0, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot/Mesh:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector3(1, 0.99999994, 0.99999994), Vector3(1, 0.99999994, 0.99999994), Vector3(1, 0.99999994, 0.99999994)]
 }
 
 [sub_resource type="Animation" id="Animation_yqljb"]
@@ -92,6 +133,47 @@ tracks/2/keys = {
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [Vector3(1, 1, 1), Vector3(1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_owod2"]
+resource_name = "crouch_move"
+length = 0.75
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot/Mesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.26666668, 0.5, 0.75),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, -0.5663175, 0), Vector3(0, -0.54291725, 0), Vector3(0, -0.5050515, 0), Vector3(0, -0.4165562, 0), Vector3(0, -0.5663175, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot/Mesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.26666668, 0.5, 0.75),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(1.4715463, 0, 0), Vector3(1.7473011, 0, 0), Vector3(1.7656848, 0, 0), Vector3(1.330887, 0, 0), Vector3(1.4715463, 0, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot/Mesh:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.26666668, 0.5, 0.75),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(1, 0.99999994, 0.99999994), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 0.99999994, 0.99999994), Vector3(1, 0.99999994, 0.99999994)]
 }
 
 [sub_resource type="Animation" id="Animation_6ca2f"]
@@ -300,7 +382,6 @@ tracks/2/keys = {
 
 [sub_resource type="Animation" id="Animation_v5mhf"]
 resource_name = "walk"
-length = 0.4
 loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -309,7 +390,7 @@ tracks/0/path = NodePath("Pivot/Mesh:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"times": PackedFloat32Array(0, 0.26666668, 0.43333334, 0.76666665, 1),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
 "values": [Vector3(0, -0.185107, 0), Vector3(0, -0.004046957, -0.071223736), Vector3(0, -0.185107, 0), Vector3(0, -0.017948132, 0.020894846), Vector3(0, -0.185107, 0)]
@@ -321,7 +402,7 @@ tracks/1/path = NodePath("Pivot/Mesh:rotation")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"times": PackedFloat32Array(0, 0.26666668, 0.43333334, 0.76666665, 1),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
 "values": [Vector3(0, 0, 0), Vector3(0.2617994, 0, 0), Vector3(0, 0, 0), Vector3(-0.2617994, 0, 0), Vector3(0, 0, 0)]
@@ -333,7 +414,7 @@ tracks/2/path = NodePath("Pivot/Mesh:scale")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"times": PackedFloat32Array(0, 0.26666668, 0.43333334, 0.76666665, 1),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
 "values": [Vector3(1, 1, 1), Vector3(0.9999999, 0.99999994, 1.0000001), Vector3(1, 1, 1), Vector3(1, 1.0000001, 1.0000001), Vector3(1, 1, 1)]
@@ -342,7 +423,9 @@ tracks/2/keys = {
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_v5mhf"]
 _data = {
 &"RESET": SubResource("Animation_cs6s8"),
+&"crouch": SubResource("Animation_g600d"),
 &"crouch_attack": SubResource("Animation_yqljb"),
+&"crouch_move": SubResource("Animation_owod2"),
 &"dash_attack": SubResource("Animation_6ca2f"),
 &"fall": SubResource("Animation_hk8gb"),
 &"idle": SubResource("Animation_v2nwo"),
@@ -359,7 +442,7 @@ script = ExtResource("1_pkgsf")
 [node name="Pivot" type="Node3D" parent="." unique_id=1124807513]
 
 [node name="Mesh" type="MeshInstance3D" parent="Pivot" unique_id=835335952]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.185107, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.18437704, 0)
 mesh = SubResource("CapsuleMesh_humf0")
 skeleton = NodePath("../..")
 

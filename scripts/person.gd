@@ -37,9 +37,10 @@ var _normal_damage_power : float = 200
 var _current_damage_direction: Vector3 = Vector3.ZERO
 
 # Propiedades privadas | Inputs
+var _walking: bool = false
+
 var _move_left: bool = false
 var _move_right: bool = false
-
 var _move_up: bool = false
 var _move_down: bool = false
 
@@ -142,12 +143,22 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 		_jump_count = 0
 
 	# Cambiador de velocidad segun sea el caso.
+	var speed : int
 	var speed_multiplier := 1.0
-	if _move_down or can_jump:
-		speed_multiplier = 0.5
+	if _walking:
+		speed = walking_speed
+	else:
+		speed = running_speed
+	if signals.on_floor:
+		if signals.on_floor and _move_down:
+			speed = walking_speed
+			speed_multiplier = 0.75
+	else:
+		if can_jump:
+			speed_multiplier = 0.5
 	
 	# Velocidad horizontal
-	_target_velocity.x = _direction.x * (running_speed*speed_multiplier)
+	_target_velocity.x = _direction.x * (speed*speed_multiplier)
 
 	# Salto | Aplicar salto normal o doble salto segun sea el caso.
 	if want_jump and _jump_count < _max_jumps:
@@ -177,6 +188,7 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 
 	# En el piso o en el aire
 	var neutral := false
+	var walking := false
 	var running := false
 	var neutral_crouch := false
 	var crouch_move := false
@@ -191,6 +203,7 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 		running = moving
 		neutral_crouch = not moving and _move_down
 		crouch_move = moving and _move_down
+		walking = _walking and moving
 	
 	else:
 		# En el aire
@@ -199,6 +212,7 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 		air_down = moving and _move_down
 
 	return MoveStates.new(
+		walking,
 		moving,
 		jumping,
 		falling,
@@ -218,8 +232,14 @@ func _move_anim(delta:float, states: MoveStates) -> void:
 	Animaciones
 	'''
 	# En el piso
-	if states.neutral:
+	if states.neutral_crouch:
+		$AnimationPlayer.play("crouch")
+	elif states.crouch_move:
+		$AnimationPlayer.play("crouch_move")
+	elif states.neutral:
 		$AnimationPlayer.play("idle")
+	elif states.walking:
+		$AnimationPlayer.play("walk")
 	elif states.running:
 		$AnimationPlayer.play("run")
 	# En el aire
