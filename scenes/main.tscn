@@ -6,8 +6,15 @@
 [ext_resource type="Script" uid="uid://bqr8o7d3ctyo2" path="res://scripts/ground_platform.gd" id="4_grnd0"]
 [ext_resource type="PackedScene" uid="uid://de4tgdk06il7y" path="res://prefabs/character.tscn" id="5_tefeu"]
 [ext_resource type="Script" uid="uid://ywbqr6tkpira" path="res://scripts/test_player.gd" id="6_tefeu"]
+[ext_resource type="Script" uid="uid://bcu7gm8en7srf" path="res://scripts/camera_follow.gd" id="7_camfl"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_playa"]
+size = Vector3(96, 64, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_camara"]
+size = Vector3(42, 22, 10)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bkxvp"]
 size = Vector3(41.528, 2, 4)
@@ -31,12 +38,29 @@ camera_attributes = SubResource("CameraAttributesPractical_gl6un")
 transform = Transform3D(0.999352, 1.13272e-08, 0.0359984, -0.0355169, 0.163008, 0.985985, -0.00586802, -0.986625, 0.162902, 0, 11.2912, 0)
 shadow_enabled = true
 
-[node name="CameraPivot" type="Marker3D" parent="." unique_id=137112446]
+[node name="CameraPivot" type="Marker3D" parent="." unique_id=137112446 node_paths=PackedStringArray("camera_area", "play_area")]
+script = ExtResource("7_camfl")
+camera_area = NodePath("../CameraArea")
+play_area = NodePath("../PlayArea")
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=1986782906]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0202149, 10.2384, 59.8373)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 50)
 fov = 30.0
 size = 25.418
+
+[node name="PlayArea" type="Area3D" parent="." unique_id=2074284855]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayArea" unique_id=1895952398]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0)
+shape = SubResource("BoxShape3D_playa")
+debug_color = Color(0, 0.65141195, 0.03484089, 0.41960785)
+
+[node name="CameraArea" type="Area3D" parent="." unique_id=1882558199]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CameraArea" unique_id=1492263022]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9, 0)
+shape = SubResource("BoxShape3D_camara")
+debug_color = Color(0.6581904, 0.51603204, 0, 0.41960785)
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=829472546]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
@@ -84,8 +108,6 @@ init_looking_at_right = true
 [node name="SpawnPoint3" type="Marker3D" parent="." unique_id=1589215959]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
 gizmo_extents = 2.0
-script = ExtResource("2_o6xl0")
-character_type = 1
 
 [node name="Person" parent="." unique_id=1138438983 instance=ExtResource("5_tefeu")]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -4.9382343, 18.47628, 0)
