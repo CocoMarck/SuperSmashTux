@@ -20,6 +20,12 @@ extends GravityBody3D
 
 # `_target_velocity`, pertenece a `GravityBody3D`.
 
+# Propiedades privadas | Aceleracion horizontal
+var _ground_acceleration: float = 40.0
+var _air_acceleration: float = 20.0
+var _ground_friction: float = 60.0
+var _knockback_friction: float = 12.0
+
 # Propiedades privadas | Multiples saltos
 var _max_jumps = 1
 var _jump_count = 0
@@ -33,7 +39,7 @@ var _last_x_direction: float = 0.0
 var _fall_acceleration_multiplier: float = 1.0
 
 # Propiedades privadas | Daño
-var _normal_damage_power :float = 200
+var _normal_damage_power :float = 100
 var _knockback_active :bool = false
 var _knockback_direction :Vector3 = Vector3.ZERO
 var _knockback_time :float = 0.0
@@ -170,10 +176,19 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 			speed_multiplier = 1
 		else:
 			speed_multiplier = 0.75
-			
 	
 	# Velocidad horizontal
-	_target_velocity.x = _direction.x * (speed*speed_multiplier)
+	var target_speed := _direction.x * (speed*speed_multiplier)
+	var accel := _air_acceleration
+	if _knockback_active:
+		accel = _knockback_friction
+	elif signals.on_floor:
+		if _direction.x == 0.0:
+			accel = _ground_friction
+		else:
+			accel = _ground_acceleration
+		
+	_target_velocity.x = move_toward(_target_velocity.x, target_speed, accel*delta)
 
 	# Salto | Aplicar salto normal o doble salto segun sea el caso.
 	if can_jump and _jump_count < _max_jumps:
@@ -302,7 +317,7 @@ func _damage_move(delta: float) -> void:
 		_knockback_direction.x * accel * delta
 	)
 	_target_velocity.y += (
-		_knockback_direction.y * (accel*2) * delta
+		_knockback_direction.y * (accel*10) * delta
 	)
 	if _knockback_time <= 0.0:
 		_knockback_active = false
