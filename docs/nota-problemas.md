@@ -12,4 +12,3 @@ Tema posición direccion, y eso, se batalla. Ya que se tendra que fixiear, al me
 Asegurarse que el origen de la malla sea en medio de esta. Para mejor integración. El Pivot el Node3D que almacene la malla, tambien que este el origin en medio de la malla.
 
 - **Origen al centro, frente -Z, escala 1:1 (1u = 1m), material base en Blender. Si queda escrita, todos los modelos futuros la siguen y el "se batalla" desaparece.**
-

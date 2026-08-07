@@ -1,5 +1,5 @@
-extends RefCounted
 class_name Attacks
+extends RefCounted
 
 # Ataques en el piso.
 var neutral : FightMove

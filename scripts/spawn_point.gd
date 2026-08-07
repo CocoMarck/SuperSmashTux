@@ -1,5 +1,5 @@
-extends Marker3D
 class_name SpawnPoint
+extends Marker3D
 
 # Constantes del script.
 const CHARACTER_PREFAB = preload("res://prefabs/character.tscn")

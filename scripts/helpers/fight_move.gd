@@ -1,5 +1,5 @@
-extends RefCounted
 class_name FightMove
+extends RefCounted
 
 # Propiedades publicas | Configuracion.
 var name: StringName

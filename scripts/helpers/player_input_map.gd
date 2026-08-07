@@ -1,5 +1,5 @@
-extends RefCounted
 class_name PlayerInputMap
+extends RefCounted
 
 # Nombres de las acciones del Input Map para un jugador.
 var move_left: StringName
