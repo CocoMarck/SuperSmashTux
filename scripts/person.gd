@@ -44,6 +44,7 @@ var _knockback_active :bool = false
 var _knockback_direction :Vector3 = Vector3.ZERO
 var _knockback_time :float = 0.0
 var _knockback_duration :float = 0.35
+var _damage_degrees :float = 0.0
 
 # Propiedades privadas | Inputs
 var _walking: bool = false
@@ -294,6 +295,7 @@ func _set_pivot_direction(signals: MoveSignals, direction: Vector3) -> void:
 			Vector3(_x_not_zero_value, direction.y, direction.z)
 		)
 		_last_x_direction = _x_not_zero_value
+		$Pivot.rotate_x( 0 )
 
 # Funciones | Damage recibido
 func set_damage(damage:int):
@@ -321,6 +323,15 @@ func _damage_move(delta: float) -> void:
 	)
 	if _knockback_time <= 0.0:
 		_knockback_active = false
+		$Pivot.rotation_degrees.x = 0
+	
+func _damage_anim(delta: float, signals: VerticalForceSignals) -> void:
+	if signals.on_floor:
+		_damage_degrees = 0
+	else:
+		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
+	$Pivot.rotation_degrees.x = _damage_degrees
+		
 
 # Funciones | Inicializar
 func _ready() -> void:
@@ -355,7 +366,10 @@ func _physics_process(delta: float) -> void:
 		_damage_move(delta)
 
 	# Anim
-	_move_anim(delta, move_states)
+	if _knockback_active:
+		_damage_anim(delta, gravity_signals)
+	else:
+		_move_anim(delta, move_states)
 	_set_pivot_direction(move_signals, move_signals.direction)
 
 	# Procesar todo
