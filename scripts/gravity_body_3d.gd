@@ -17,6 +17,7 @@ func _vertical_force(delta: float, multiplier: float = 1) -> VerticalForceSignal
 	'''
 	var on_floor := is_on_floor()
 	var on_ceiling := is_on_ceiling()
+	var on_wall := is_on_wall()
 	if on_floor:
 		# Contadores a cero, para que no se acumule fuerza vertcal.
 		_target_velocity.y = 0
@@ -28,8 +29,12 @@ func _vertical_force(delta: float, multiplier: float = 1) -> VerticalForceSignal
 	if on_ceiling:
 		# Evitar saltar al techo, y segir con llendo hacia arriba. Nembe no, eso ta muy mal oshe.
 		_target_velocity.y = -(fall_acceleration * multiplier) * delta
+	if on_wall:
+		_target_velocity.x = 0
 	return VerticalForceSignals.new(
 		on_floor, 
+		on_ceiling,
+		on_wall,
 		_air_count, 
 		_target_velocity.y # Force
 	)
