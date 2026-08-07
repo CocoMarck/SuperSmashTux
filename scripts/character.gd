@@ -39,7 +39,6 @@ var _move_down: bool = false
 var _jump: bool = false
 var _attack: bool = false
 var _power_attack: bool = false
-# Flancos de los inputs de arriba/abajo, calculados una sola vez por frame en _physics_process.
 var _up_pressed: bool = false
 var _down_pressed: bool = false
 var _was_move_up: bool = false
@@ -512,10 +511,10 @@ func _one_way_platforms(delta: float, on_floor: bool) -> void:
 	else:
 		_one_way_coyote_count = max(_one_way_coyote_count - delta, 0.0)
 
-	var feet_y := _get_feet_y()
+	var feet_position := _get_feet_position()
 
 	# Recorrer todas las plataformas de un solo sentido y decidir si atravesarlas o no.
-	for platform in get_tree().get_nodes_in_group(OneWayPlatform.GROUP_NAME):
+	for platform in get_tree().get_nodes_in_group(Platform.GROUP_NAME):
 		var one_way := platform as OneWayPlatform
 		if one_way == null or not is_instance_valid(one_way):
 			continue
@@ -524,7 +523,7 @@ func _one_way_platforms(delta: float, on_floor: bool) -> void:
 		var in_coyote := one_way == _last_floor_one_way and _one_way_coyote_count > 0.0
 		var should_ignore := _drop_through_count > 0.0 \
 			or _target_velocity.y > 0.0 \
-			or (feet_y < one_way.get_top_y() - ONE_WAY_MARGIN and not in_coyote)
+			or (not one_way.is_above_surface(feet_position, ONE_WAY_MARGIN) and not in_coyote)
 
 		# Solo llamar add/remove cuando el estado cambia de verdad, pa no hacerlo de a gratis cada frame.
 		if _one_way_ignored.get(one_way, false) != should_ignore:
@@ -565,6 +564,16 @@ func _get_feet_y() -> float:
 	if collision_shape == null or collision_shape.shape == null:
 		return global_position.y
 	return collision_shape.global_position.y - _get_body_half_height()
+
+func _get_feet_position() -> Vector3:
+	'''
+	Posicion global de los pies del character. Igualita que _get_feet_y pero en Vector3,
+	pa poder preguntarle a las plataformas inclinadas si andamos encima de su cara.
+	'''
+	var collision_shape := $CollisionShape3D as CollisionShape3D
+	if collision_shape == null or collision_shape.shape == null:
+		return global_position
+	return collision_shape.global_position - Vector3(0.0, _get_body_half_height(), 0.0)
 
 # Funciones agarre de orillas.
 func _get_body_half_height() -> float:
@@ -659,7 +668,7 @@ func _ledge_grab(delta: float) -> void:
 	if _target_velocity.y >= 0.0:
 		return
 
-	for platform in get_tree().get_nodes_in_group(GroundPlatform.GROUP_NAME):
+	for platform in get_tree().get_nodes_in_group(Platform.GROUP_NAME):
 		var ground := platform as GroundPlatform
 		if ground == null or not is_instance_valid(ground):
 			continue
