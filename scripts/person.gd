@@ -40,6 +40,7 @@ var _fall_acceleration_multiplier: float = 1.0
 
 # Propiedades privadas | Bloquear movimiento
 var _horizontal_move: bool = true
+var _can_jump: bool = true
 
 # Propiedades privadas | Daño
 var _normal_damage_power :float = 100
@@ -141,7 +142,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	else:
 		# Salto
 		want_jump = (_jump or _move_up) # <--- El move up se usara para ataques hacia arriba.
-		can_jump = want_jump and not _was_jumping
+		can_jump = (want_jump and _can_jump) and not _was_jumping
 	_was_jumping = want_jump
 
 	# Variables | Direccion de movimiento horizontal

@@ -197,17 +197,20 @@ func _physics_process(delta: float) -> void:
 	
 	# Fight moves
 	var attacking = _fight_move(delta, gravity_signals, move_states)
+	
+	# Bloqueo de direccion de movimiento por inputs.
+	_horizontal_move = true
+	_can_jump = true
+	if attacking:
+		_can_jump = false
+		# Si este en el piso y da trancazos, no permitir inputs de movimiento horizontal.
+		if _current_attack.air_attack == false:
+			_horizontal_move = false
 
 	# Damage
 	if _knockback_active:
 		_damage_move(delta)
 		_current_attack = null
-		
-	# Bloqueo de direccion de movimiento por inputs.
-	_horizontal_move = true
-	if attacking and gravity_signals.on_floor:
-		# Si este en el piso y da trancazos, no permitir inputs de movimiento horizontal.
-		_horizontal_move = false
 	
 	# Anim
 	if _knockback_active:
