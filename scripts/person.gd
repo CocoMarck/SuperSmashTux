@@ -38,6 +38,9 @@ var _last_x_direction: float = 0.0
 # Propiedades privadas | Multiplicadores.
 var _fall_acceleration_multiplier: float = 1.0
 
+# Propiedades privadas | Bloquear movimiento
+var _horizontal_move: bool = true
+
 # Propiedades privadas | Daño
 var _normal_damage_power :float = 100
 var _knockback_active :bool = false
@@ -58,7 +61,6 @@ var _jump: bool = false
 
 # Propiedades privadas | Flancos de inputs de arriba/abajo.
 var _was_jumping: bool = false
-var _was_move_down: bool = false
 
 # Fuciones | Direccion
 func _get_initial_facing() -> Vector3:
@@ -74,7 +76,9 @@ func _get_move_direction() -> Vector3:
 	'''
 	Obtener direccion de movimiento. Tambien sirve para voltear el character.
 	'''
-	var axis = ( float(int(_move_right) -int(_move_left)) )
+	var axis := 0.0
+	if _horizontal_move == true:
+		axis = ( float(int(_move_right) -int(_move_left)) )
 	return Vector3(axis, 0.0, 0.0)
 
 func _set_x_not_zero_value(p_direction: Vector3) -> void:
@@ -171,12 +175,12 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	if signals.on_floor:
 		if signals.on_floor and _move_down:
 			speed = walking_speed
-			speed_multiplier = 0.75
+			speed_multiplier = 0.8
 	else:
 		if _last_x_direction == _direction.x:
 			speed_multiplier = 1
 		else:
-			speed_multiplier = 0.75
+			speed_multiplier = 0.8
 	
 	# Velocidad horizontal
 	var target_speed := _direction.x * (speed*speed_multiplier)
@@ -326,6 +330,7 @@ func _damage_move(delta: float) -> void:
 		$Pivot.rotation_degrees.x = 0
 	
 func _damage_anim(delta: float, signals: VerticalForceSignals) -> void:
+	$AnimationPlayer.stop()
 	if signals.on_floor:
 		_damage_degrees = 0
 	else:
@@ -354,7 +359,7 @@ func _physics_process(delta: float) -> void:
     Este puede ser remplazado segun se necesite.
 	'''
 	_collect_input()
-	_was_move_down = _move_down
+	
 	# Move
 	var gravity_signals = _vertical_force(delta, _fall_acceleration_multiplier)
 	var move_signals = _move(delta, gravity_signals)

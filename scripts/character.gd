@@ -76,6 +76,11 @@ var _attacks: Attacks = Attacks.new(
 		0.0, 0.5, true, Vector3(1,1,0)
 	),
 	FightMove.new(
+		"neutral_up", 0.5, 5, true, false, Vector3(0,0,0), false, Vector3(0.0, 0.5, 0.0), &"neutral_up",
+		0.0, 0.5, true, Vector3(0,2,0)
+	),
+	
+	FightMove.new(
 		"neutral_air", 0.4, 5, false, false, Vector3(0,0,0), true, Vector3(0.5, -0.6, 0), &"", 45.0,
 		0.5, true, Vector3(1,1,0)
 	),
@@ -86,7 +91,15 @@ var _attacks: Attacks = Attacks.new(
 	FightMove.new(
 		"air_down", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.1, -0.7, 0), &"", 0.0,
 		0.5, true, Vector3(1,1.5,0)
-	)
+	),
+	FightMove.new(
+		"air_up", 0.5, 5, false, false, Vector3(0,0,0), true, Vector3(0.0, 0.8, 0), &"air_up",
+		0.0, 0.5, true, Vector3(0.5,1.5,0)
+	),
+	FightMove.new(
+		"air_back", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.6, -0.5, 0), &"air_back",
+		0.0, 0.5, true, Vector3(1,1,0)
+	),
 )
 var _attack_direction : Vector3 = Vector3(0.0, 0.0, 0.0)
 
@@ -330,11 +343,13 @@ func _get_move_states(signals: Dictionary) -> Dictionary:
 	var neutral = (on_floor and not moving) and (not _move_up and not _move_down)
 	var running = on_floor and moving
 	var neutral_crouch = (on_floor and not moving) and _move_down
+	var neutral_up = (on_floor and not moving) and _move_up
 
 	# Estado en aire
 	var neutral_air = (not on_floor and not moving) and (not _move_up and not _move_down)
 	var air_move = not on_floor and moving
 	var air_down = not on_floor and _move_down
+	var air_up = not on_floor and _move_up
 
 	return {
 		# Movimiento normal
@@ -346,11 +361,13 @@ func _get_move_states(signals: Dictionary) -> Dictionary:
 		"neutral": neutral,
 		"running": running,
 		"neutral_crouch": neutral_crouch,
+		"neutral_up": neutral_up,
 
 		# Estado en aire
 		"neutral_air": neutral_air,
 		"air_move": air_move,
 		"air_down": air_down,
+		"air_up": air_up
 	}
 
 func _fight(delta: float, states: Dictionary) -> void:
@@ -383,6 +400,9 @@ func _fight(delta: float, states: Dictionary) -> void:
 			_current_attack = _attacks.crouch
 			_attack_direction.x = _x_not_zero_value*0.5
 			_attack_direction.y = 1.0
+		elif states["neutral_up"]:
+			_current_attack = _attacks.neutral_up
+			_attack_direction.y = 1.0
 
 		# Ataque en aire
 		elif states["neutral_air"]:
@@ -395,6 +415,9 @@ func _fight(delta: float, states: Dictionary) -> void:
 		elif states["air_down"]:
 			_current_attack = _attacks.air_down
 			_attack_direction.y = -1.0
+		elif states["air_up"]:
+			_current_attack = _attacks.air_up
+			_attack_direction.y = 1.0
 		else:
 			init_attack = false
 		

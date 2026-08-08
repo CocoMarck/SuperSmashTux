@@ -1,5 +1,5 @@
 class_name TestPlayer
-extends Person
+extends PowerFighter
 
 # Funciones | Input del jugador.
 func _collect_input() -> void:
@@ -13,3 +13,4 @@ func _collect_input() -> void:
 	_move_up = Input.is_action_pressed("player1_move_up")
 	_move_down = Input.is_action_pressed("player1_move_down")
 	_jump = Input.is_action_pressed("player1_jump")
+	_attack = Input.is_action_just_pressed("player1_attack")
