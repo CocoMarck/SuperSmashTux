@@ -3,12 +3,12 @@ extends GravityBody3D
 
 # Propiedades publicas
 @export_group("Horizontal Movement")
-@export var walking_speed: int = 8
-@export var running_speed: int = 18
+@export var walking_speed: int = 4
+@export var running_speed: int = 10
 @export var init_looking_at_right: bool = false
 
 @export_group("Vertical Movement")
-@export var jump_impulse: int = 25
+@export var jump_impulse: int = 13
 
 @export_group("Appearence")
 @export var material: Material = null
@@ -17,6 +17,13 @@ extends GravityBody3D
 @export_group("Health")
 @export var hp :int = 100
 @export var damage_percentage :float = 0
+
+# Essential character nodes
+var _visual: Node3D
+var _pivot: Node3D
+var _mesh_instance: MeshInstance3D
+var _animation_player: AnimationPlayer
+var _collision_shape: CollisionShape3D
 
 # `_target_velocity`, pertenece a `GravityBody3D`.
 
@@ -43,7 +50,7 @@ var _horizontal_move: bool = true
 var _can_jump: bool = true
 
 # Propiedades privadas | Daño
-var _normal_damage_power :float = 100
+var _normal_damage_power :float = 50
 var _knockback_active :bool = false
 var _knockback_direction :Vector3 = Vector3.ZERO
 var _knockback_time :float = 0.0
@@ -102,14 +109,14 @@ func _set_material( p_meterial: Material ) -> void:
 	Pero por ahora, asi está bien.
 	'''
 	if p_meterial != null:
-		$Pivot/Mesh.material_override = p_meterial
+		_mesh_instance.material_override = p_meterial
 
 func _set_mesh( p_mesh: Mesh ) -> void:
 	'''
 	Establecer malla nueva
 	'''
 	if p_mesh != null:
-		$Pivot/Mesh.mesh = p_mesh
+		_mesh_instance.mesh = p_mesh
 
 func _get_default_material() -> Material:
 	'''
@@ -275,32 +282,32 @@ func _move_anim(delta:float, states: MoveStates) -> void:
 	'''
 	# En el piso
 	if states.neutral_up:
-		$AnimationPlayer.play("looking_up")
+		_animation_player.play("looking_up")
 	elif states.neutral_crouch:
-		$AnimationPlayer.play("crouch")
+		_animation_player.play("crouch")
 	elif states.crouch_move:
-		$AnimationPlayer.play("crouch_move")
+		_animation_player.play("crouch_move")
 	elif states.neutral:
-		$AnimationPlayer.play("idle")
+		_animation_player.play("idle")
 	elif states.walking:
-		$AnimationPlayer.play("walk")
+		_animation_player.play("walk")
 	elif states.running:
-		$AnimationPlayer.play("run")
+		_animation_player.play("run")
 	# En el aire
 	elif states.jumping:
-		$AnimationPlayer.play("jump")
+		_animation_player.play("jump")
 	elif states.falling:
-		$AnimationPlayer.play("fall")
+		_animation_player.play("fall")
 	else:
-		$AnimationPlayer.play("idle")
+		_animation_player.play("idle")
 
 func _set_pivot_direction(signals: MoveSignals, direction: Vector3) -> void:
 	if signals.on_floor:
-		$Pivot.basis = Basis.looking_at(
+		_pivot.basis = Basis.looking_at(
 			Vector3(_x_not_zero_value, direction.y, direction.z)
 		)
 		_last_x_direction = _x_not_zero_value
-		$Pivot.rotate_x( 0 )
+		_pivot.rotate_x( 0 )
 
 # Funciones | Damage recibido
 func set_damage(damage:int):
@@ -328,15 +335,15 @@ func _damage_move(delta: float) -> void:
 	)
 	if _knockback_time <= 0.0:
 		_knockback_active = false
-		$Pivot.rotation_degrees.x = 0
+		_pivot.rotation_degrees.x = 0
 	
 func _damage_anim(delta: float, signals: VerticalForceSignals) -> void:
-	$AnimationPlayer.stop()
+	_animation_player.stop()
 	if signals.on_floor:
 		_damage_degrees = 0
 	else:
 		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
-	$Pivot.rotation_degrees.x = _damage_degrees
+	_pivot.rotation_degrees.x = _damage_degrees
 		
 
 # Funciones | Inicializar
@@ -344,6 +351,13 @@ func _ready() -> void:
 	'''
 	Inicializar el character, con sus colorines, materiales etc.
 	'''
+	# Essentail nodes
+	_visual = $Visual
+	_pivot = $Visual/Pivot
+	_mesh_instance = $Visual/Pivot/Skeleton3D/MeshInstance3D
+	_animation_player = $Visual/Pivot/AnimationPlayer
+	_collision_shape = $CollisionShape3D
+	
 	# Apariencia
 	_set_mesh(mesh)
 	if material == null:
@@ -351,7 +365,7 @@ func _ready() -> void:
 	_set_material(material)
 
 	# Direccion
-	$Pivot.basis = Basis.looking_at(_get_initial_facing())
+	_pivot.basis = Basis.looking_at(_get_initial_facing())
 
 # Funciones | Procesar
 func _physics_process(delta: float) -> void:

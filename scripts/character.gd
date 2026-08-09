@@ -17,8 +17,8 @@ const LEDGE_RELEASE_TIME := 0.35   # cooldown tras soltarse, pa no re-agarrarse 
 
 # Propiedades publicas | Gravedad y velocidad.
 @export_group("Movement")
-@export var speed: int = 18
-@export var jump_impulse: int = 25
+@export var speed: int = 10
+@export var jump_impulse: int = 13
 @export var init_looking_at_right: bool = false
 
 # Propiedades publicas | Apariencia.
@@ -68,7 +68,7 @@ var _attacks: Attacks = Attacks.new(
 		0.5, true, Vector3(1,1,0)
 	),
 	FightMove.new(
-		"dash", 0.3, 10, true, false, Vector3(22,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
+		"dash", 0.3, 10, true, false, Vector3(12,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
 		0.5, true, Vector3(1.5,1,0)
 	),
 	FightMove.new(
