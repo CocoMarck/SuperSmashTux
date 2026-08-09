@@ -338,10 +338,11 @@ func _damage_move(delta: float) -> void:
 		_pivot.rotation_degrees.x = 0
 	
 func _damage_anim(delta: float, signals: VerticalForceSignals) -> void:
-	_animation_player.stop()
 	if signals.on_floor:
 		_damage_degrees = 0
+		_animation_player.play("damage")
 	else:
+		_animation_player.play("air_damage")
 		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
 	_pivot.rotation_degrees.x = _damage_degrees
 		
@@ -355,7 +356,7 @@ func _ready() -> void:
 	_visual = $Visual
 	_pivot = $Visual/Pivot
 	_mesh_instance = $Visual/Pivot/Skeleton3D/MeshInstance3D
-	_animation_player = $Visual/Pivot/AnimationPlayer
+	_animation_player = $Visual/AnimationPlayer
 	_collision_shape = $CollisionShape3D
 	
 	# Apariencia

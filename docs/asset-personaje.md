@@ -39,6 +39,7 @@ Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las 
 - `idle`: Parado sin moverse
 - `run`: Correr.
 - `walk`: Caminar.
+- `looking_up`: Mirar arriba.
 - `crouch`: Agacharse sin moverse.
 - `crouch_move`: Movimiento agachado.
 - `damage`: Recibiendo daño en el piso.
