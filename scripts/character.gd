@@ -13,7 +13,7 @@ const ONE_WAY_COYOTE_TIME := 0.3   # tiempo de perdon al salirse de la orilla y 
 const LEDGE_GRAB_REACH := 0.35      # que tan lejos por fuera de la orilla se puede agarrar
 const LEDGE_GRAB_DEPTH := 2.5      # que tan abajo de la cara superior se agarra
 const LEDGE_HANG_OFFSET := 0.3     # que tan separado de la orilla se queda colgado
-const LEDGE_RELEASE_TIME := 0.4   # cooldown tras soltarse, pa no re-agarrarse solo
+const LEDGE_RELEASE_TIME := 0.3   # cooldown tras soltarse, pa no re-agarrarse solo
 
 # Propiedades publicas | Gravedad y velocidad.
 @export_group("Movement")
@@ -118,6 +118,7 @@ var _hanging_ledge: GroundPlatform = null
 var _hanging_right_side: bool = false
 var _hang_position: Vector3 = Vector3.ZERO
 var _ledge_release_count: float = 0.0
+var _max_head_y_in_air: float = -INF
 
 # Funciones | Inicializar.
 func _ready() -> void:
@@ -654,10 +655,13 @@ func _release_hanging_ledge() -> void:
 	'''
 	Soltar la cornisa que traiamos agarrada y avisarle a la plataforma pa que quede libre pa otro.
 	Aguanta que la plataforma ya no exista, asi que se puede llamar sin miedo.
+	Tambien se le olvida que tan alto anduvo la cabeza, pa que soltarse y brincar tantito no cuente
+	como venir de arriba y no nos re-agarre solito.
 	'''
 	if _hanging_ledge != null and is_instance_valid(_hanging_ledge):
 		_hanging_ledge.release_ledge(_hanging_right_side, self)
 	_hanging_ledge = null
+	_max_head_y_in_air = _get_head_y()
 
 func _ledge_grab(delta: float) -> void:
 	'''
@@ -669,6 +673,12 @@ func _ledge_grab(delta: float) -> void:
 	# Cooldown pa no re-agarrarnos solitos justo despues de soltarnos.
 	if _ledge_release_count > 0.0:
 		_ledge_release_count = max(_ledge_release_count - delta, 0.0)
+
+	# Que tan alto ha andado la cabeza desde que despegamos. Sirve pa distinguir al que viene
+	# cayendo desde arriba de la orilla, del que nomas brinco desde abajo y rozo la zona de agarre.
+	if is_on_floor():
+		_max_head_y_in_air = -INF
+	_max_head_y_in_air = max(_max_head_y_in_air, _get_head_y())
 
 	# Si ya andamos colgados, decidir que hacer.
 	if _hanging_ledge != null:
@@ -727,6 +737,10 @@ func _ledge_grab(delta: float) -> void:
 		var head_y := _get_head_y()
 		# Vertical: la cabeza debe andar por debajo del borde, pero sin pasarse de largo.
 		if head_y > top_y or head_y < top_y - LEDGE_GRAB_DEPTH:
+			continue
+		# Y hay que venir de arriba: si la cabeza nunca le paso por encima a esta orilla,
+		# es que brincamos desde abajo sin alcanzarla, y ahi no hay agarre que valga.
+		if _max_head_y_in_air <= top_y:
 			continue
 
 		# Obtener las 2 orillitas de la plataforma del suelo.
