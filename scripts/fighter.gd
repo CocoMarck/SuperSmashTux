@@ -13,41 +13,60 @@ var _attacks: Attacks = Attacks.new(
 	# name: StringName="", duration: float, p_damage: int, stop_horizontal_move: bool, stop_vertical_move: bool,
 	# speed: Vector3, air_attack: bool, hitbox_position: Vector3, animation_name: StringName, mesh_rotation_x: float, 
 	# hitbox_time_ratio: float, inversed_hitbox_ratio: bool, power_direction: Vector3
+
+	# En el piso
 	FightMove.new(
-		"neutral", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.3, 0.1, 0), &"neutral_attack", 0.0,
+		"ground_neutral", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.3, 0.1, 0), &"ground_neutral_attack", 0.0,
 		0.5, true, Vector3(1,1,0)
+	),
+	FightMove.new(
+		"down", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.6, -0.5, 0), &"down_attack",
+		0.0, 0.5, true, Vector3(1,1,0)
+	),
+	FightMove.new(
+		"up", 0.5, 5, true, false, Vector3(0,0,0), false, Vector3(0.0, 0.5, 0.0), &"up_attack",
+		0.0, 0.5, true, Vector3(0,2,0)
 	),
 	FightMove.new(
 		"dash", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
 		0.5, true, Vector3(1.5,1,0)
 	),
 	FightMove.new(
-		"crouch", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.6, -0.5, 0), &"crouch_attack",
-		0.0, 0.5, true, Vector3(1,1,0)
-	),
-	FightMove.new(
-		"neutral_up", 0.5, 5, true, false, Vector3(0,0,0), false, Vector3(0.0, 0.5, 0.0), &"neutral_up",
-		0.0, 0.5, true, Vector3(0,2,0)
-	),
-	
-	FightMove.new(
-		"neutral_air", 0.4, 5, false, false, Vector3(0,0,0), true, Vector3(0.5, -0.6, 0), &"", 45.0,
-		0.5, true, Vector3(1,1,0)
-	),
-	FightMove.new(
-		"air_move", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.6, 0, 0), &"", 90.0,
+		"forward", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"forward_attack", 0.0,
 		0.5, true, Vector3(1.5,1,0)
 	),
 	FightMove.new(
-		"air_down", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.1, -0.7, 0), &"", 0.0,
+		"heavy_side", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"heavy_side_attack", 0.0,
+		0.5, true, Vector3(1.5,1,0)
+	),
+	FightMove.new(
+		"heavy_up", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"heavy_side_attack", 0.0,
+		0.5, true, Vector3(1.5,1,0)
+	),
+	FightMove.new(
+		"heavy_down", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"heavy_down", 0.0,
+		0.5, true, Vector3(1.5,1,0)
+	),
+	
+	# En el aire
+	FightMove.new(
+		"air_neutral", 0.4, 5, false, false, Vector3(0,0,0), true, Vector3(0.5, -0.6, 0), &"air_neutral_attack", 45.0,
+		0.5, true, Vector3(1,1,0)
+	),
+	FightMove.new(
+		"air_down", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.1, -0.7, 0), &"air_down_attack", 0.0,
 		0.5, true, Vector3(1,1.5,0)
 	),
 	FightMove.new(
-		"air_up", 0.5, 5, false, false, Vector3(0,0,0), true, Vector3(0.0, 0.8, 0), &"air_up",
+		"air_up", 0.5, 5, false, false, Vector3(0,0,0), true, Vector3(0.0, 0.8, 0), &"air_up_attack",
 		0.0, 0.5, true, Vector3(0.5,1.5,0)
 	),
 	FightMove.new(
-		"air_back", 0.5, 5, false, false, Vector3(0,0,0), true, Vector3(0.6, -0.5, 0), &"air_back",
+		"air_forward", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.6, 0, 0), &"air_forward_attack", 90.0,
+		0.5, true, Vector3(1.5,1,0)
+	),
+	FightMove.new(
+		"air_back", 0.5, 5, false, false, Vector3(0,0,0), true, Vector3(0.6, -0.5, 0), &"air_back_attack",
 		0.0, 0.5, true, Vector3(1,1,0)
 	),
 )
@@ -89,26 +108,26 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		# Ataque en piso
 		var init_attack = true
 		if states.neutral:
-			_current_attack = _attacks.neutral
+			_current_attack = _attacks.ground_neutral
 			_attack_direction.x = _x_not_zero_value 
 		elif states.running:
 			_current_attack = _attacks.dash
 			_attack_direction.x = _x_not_zero_value
 		elif states.neutral_crouch:
-			_current_attack = _attacks.crouch
+			_current_attack = _attacks.down
 			_attack_direction.x = _x_not_zero_value*0.5
 			_attack_direction.y = 1.0
 		elif states.neutral_up:
-			_current_attack = _attacks.neutral_up
+			_current_attack = _attacks.up
 			_attack_direction.y = 1.0
 
 		# Ataque en aire
 		elif states.neutral_air:
-			_current_attack = _attacks.neutral_air
+			_current_attack = _attacks.air_neutral
 			_attack_direction.x = _x_not_zero_value
 			_attack_direction.y = -1.0
 		elif states.air_move:
-			_current_attack = _attacks.air_move
+			_current_attack = _attacks.air_forward
 			_attack_direction.x = _x_not_zero_value
 		elif states.air_down:
 			_current_attack = _attacks.air_down
@@ -193,7 +212,7 @@ func _physics_process(delta: float) -> void:
 	_collect_input()
 	
 	# Move
-	var gravity_signals = _vertical_force(delta, _fall_acceleration_multiplier)
+	var gravity_signals = _vertical_force(delta, _move_down, _fall_acceleration_multiplier)
 	var move_signals = _move(delta, gravity_signals)
 	_set_x_not_zero_value(move_signals.direction)
 	var move_states = _get_move_states(move_signals)

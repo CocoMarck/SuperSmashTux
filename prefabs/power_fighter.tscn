@@ -9,69 +9,75 @@ size = Vector3(0.377441, 0.168842, 0.286159)
 
 [sub_resource type="Animation" id="Animation_i104f"]
 
-[sub_resource type="Animation" id="Animation_xlth3"]
+[sub_resource type="Animation" id="Animation_at5ks"]
 
-[sub_resource type="Animation" id="Animation_gw28j"]
-
-[sub_resource type="Animation" id="Animation_a45e3"]
-
-[sub_resource type="Animation" id="Animation_hgp4e"]
-
-[sub_resource type="Animation" id="Animation_3wfkv"]
-
-[sub_resource type="Animation" id="Animation_rssre"]
-
-[sub_resource type="Animation" id="Animation_k2tj7"]
-
-[sub_resource type="Animation" id="Animation_ntgff"]
-
-[sub_resource type="Animation" id="Animation_0iuav"]
-
-[sub_resource type="Animation" id="Animation_xblix"]
-
-[sub_resource type="Animation" id="Animation_m5vya"]
-
-[sub_resource type="Animation" id="Animation_wxvr2"]
-
-[sub_resource type="Animation" id="Animation_pe4x2"]
-resource_name = "looking_up"
-
-[sub_resource type="Animation" id="Animation_nl3u8"]
+[sub_resource type="Animation" id="Animation_thqb3"]
 
 [sub_resource type="Animation" id="Animation_w2tbc"]
 
+[sub_resource type="Animation" id="Animation_gw28j"]
+
+[sub_resource type="Animation" id="Animation_hgp4e"]
+
+[sub_resource type="Animation" id="Animation_rssre"]
+
+[sub_resource type="Animation" id="Animation_ntgff"]
+
+[sub_resource type="Animation" id="Animation_3wfkv"]
+
+[sub_resource type="Animation" id="Animation_0iuav"]
+
 [sub_resource type="Animation" id="Animation_blph7"]
 
-[sub_resource type="Animation" id="Animation_x305q"]
+[sub_resource type="Animation" id="Animation_xlth3"]
+
+[sub_resource type="Animation" id="Animation_k2tj7"]
+
+[sub_resource type="Animation" id="Animation_m5vya"]
+
+[sub_resource type="Animation" id="Animation_a45e3"]
+
+[sub_resource type="Animation" id="Animation_xblix"]
+
+[sub_resource type="Animation" id="Animation_wxvr2"]
+
+[sub_resource type="Animation" id="Animation_nl3u8"]
+
+[sub_resource type="Animation" id="Animation_pe4x2"]
+resource_name = "looking_up"
 
 [sub_resource type="Animation" id="Animation_uyb0u"]
 
 [sub_resource type="Animation" id="Animation_kc48b"]
 
+[sub_resource type="Animation" id="Animation_x305q"]
+
 [sub_resource type="Animation" id="Animation_vmr4w"]
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_k2tj7"]
 _data = {
-&"air_back": SubResource("Animation_i104f"),
-&"air_damage": SubResource("Animation_xlth3"),
-&"air_up": SubResource("Animation_gw28j"),
-&"back_collision": SubResource("Animation_a45e3"),
+&"air_back_attack": SubResource("Animation_i104f"),
+&"air_down_attack": SubResource("Animation_at5ks"),
+&"air_forward_attack": SubResource("Animation_thqb3"),
+&"air_neutral_attack": SubResource("Animation_w2tbc"),
+&"air_up_attack": SubResource("Animation_gw28j"),
 &"crouch": SubResource("Animation_hgp4e"),
-&"crouch_attack": SubResource("Animation_3wfkv"),
-&"crouch_move": SubResource("Animation_rssre"),
-&"damage": SubResource("Animation_k2tj7"),
+&"crouch_walk": SubResource("Animation_rssre"),
 &"dash_attack": SubResource("Animation_ntgff"),
+&"down_attack": SubResource("Animation_3wfkv"),
 &"fall": SubResource("Animation_0iuav"),
-&"front_collision": SubResource("Animation_xblix"),
+&"ground_neutral_attack": SubResource("Animation_blph7"),
+&"hurt_air": SubResource("Animation_xlth3"),
+&"hurt_ground": SubResource("Animation_k2tj7"),
 &"idle": SubResource("Animation_m5vya"),
+&"impact_back": SubResource("Animation_a45e3"),
+&"impact_front": SubResource("Animation_xblix"),
 &"jump": SubResource("Animation_wxvr2"),
-&"looking_up": SubResource("Animation_pe4x2"),
-&"lying_down": SubResource("Animation_nl3u8"),
-&"neutral_air": SubResource("Animation_w2tbc"),
-&"neutral_attack": SubResource("Animation_blph7"),
-&"neutral_up": SubResource("Animation_x305q"),
+&"knockdown": SubResource("Animation_nl3u8"),
+&"look_up": SubResource("Animation_pe4x2"),
 &"run": SubResource("Animation_uyb0u"),
-&"turn_around": SubResource("Animation_kc48b"),
+&"turn": SubResource("Animation_kc48b"),
+&"up_attack": SubResource("Animation_x305q"),
 &"walk": SubResource("Animation_vmr4w")
 }
 

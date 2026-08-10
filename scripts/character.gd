@@ -4,10 +4,7 @@ extends GravityBody3D
 # Constantes del script.
 const MAX_JUMPS := 2
 
-# Constantes | Plataformas de un solo sentido.
-const DROP_THROUGH_TIME := 0.25    # segundos que se ignora la plataforma tras el tap de abajo
-const ONE_WAY_MARGIN := 0.1        # franja por debajo de la cara superior de la plataforma, pa no quedarse atorado
-const ONE_WAY_COYOTE_TIME := 0.3   # tiempo de perdon al salirse de la orilla y querer regresar
+# Constantes | Plataformas de un solo sentido. Ahora en `GravityBody3d`
 
 # Constantes | Agarre de orillas.
 const LEDGE_HANG_OFFSET := 0.3     # que tan separado de la orilla se queda colgado
@@ -60,41 +57,60 @@ var _attacks: Attacks = Attacks.new(
 	# name: StringName="", duration: float, p_damage: int, stop_horizontal_move: bool, stop_vertical_move: bool,
 	# speed: Vector3, air_attack: bool, hitbox_position: Vector3, animation_name: StringName, mesh_rotation_x: float, 
 	# hitbox_time_ratio: float, inversed_hitbox_ratio: bool, power_direction: Vector3
+
+	# En el piso
 	FightMove.new(
-		"neutral", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.3, 0.1, 0), &"neutral_attack", 0.0,
+		"ground_neutral", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.3, 0.1, 0), &"ground_neutral_attack", 0.0,
 		0.5, true, Vector3(1,1,0)
 	),
 	FightMove.new(
-		"dash", 0.3, 10, true, false, Vector3(8,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
-		0.5, true, Vector3(1.5,1,0)
-	),
-	FightMove.new(
-		"crouch", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.6, -0.5, 0), &"crouch_attack",
+		"down", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.6, -0.5, 0), &"down_attack",
 		0.0, 0.5, true, Vector3(1,1,0)
 	),
 	FightMove.new(
-		"neutral_up", 0.5, 5, true, false, Vector3(0,0,0), false, Vector3(0.0, 0.5, 0.0), &"neutral_up",
+		"up", 0.5, 5, true, false, Vector3(0,0,0), false, Vector3(0.0, 0.5, 0.0), &"up_attack",
 		0.0, 0.5, true, Vector3(0,2,0)
 	),
-	
 	FightMove.new(
-		"neutral_air", 0.4, 5, false, false, Vector3(0,0,0), true, Vector3(0.5, -0.6, 0), &"", 45.0,
-		0.5, true, Vector3(1,1,0)
-	),
-	FightMove.new(
-		"air_move", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.6, 0, 0), &"", 90.0,
+		"dash", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
 		0.5, true, Vector3(1.5,1,0)
 	),
 	FightMove.new(
-		"air_down", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.1, -0.7, 0), &"", 0.0,
+		"forward", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"forward_attack", 0.0,
+		0.5, true, Vector3(1.5,1,0)
+	),
+	FightMove.new(
+		"heavy_side", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"heavy_side_attack", 0.0,
+		0.5, true, Vector3(1.5,1,0)
+	),
+	FightMove.new(
+		"heavy_up", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"heavy_side_attack", 0.0,
+		0.5, true, Vector3(1.5,1,0)
+	),
+	FightMove.new(
+		"heavy_down", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"heavy_down", 0.0,
+		0.5, true, Vector3(1.5,1,0)
+	),
+	
+	# En el aire
+	FightMove.new(
+		"air_neutral", 0.4, 5, false, false, Vector3(0,0,0), true, Vector3(0.5, -0.6, 0), &"air_neutral_attack", 45.0,
+		0.5, true, Vector3(1,1,0)
+	),
+	FightMove.new(
+		"air_down", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.1, -0.7, 0), &"air_down_attack", 0.0,
 		0.5, true, Vector3(1,1.5,0)
 	),
 	FightMove.new(
-		"air_up", 0.5, 5, false, false, Vector3(0,0,0), true, Vector3(0.0, 0.8, 0), &"air_up",
+		"air_up", 0.5, 5, false, false, Vector3(0,0,0), true, Vector3(0.0, 0.8, 0), &"air_up_attack",
 		0.0, 0.5, true, Vector3(0.5,1.5,0)
 	),
 	FightMove.new(
-		"air_back", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.6, -0.5, 0), &"air_back",
+		"air_forward", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.6, 0, 0), &"air_forward_attack", 90.0,
+		0.5, true, Vector3(1.5,1,0)
+	),
+	FightMove.new(
+		"air_back", 0.5, 5, false, false, Vector3(0,0,0), true, Vector3(0.6, -0.5, 0), &"air_back_attack",
 		0.0, 0.5, true, Vector3(1,1,0)
 	),
 )
@@ -105,11 +121,7 @@ var _normal_damage_move_power :float = 200
 var _current_damage_directon: Vector3 = Vector3.ZERO 
 var _taking_damage :bool = false
 
-# Propiedades privadas | Plataformas de un solo sentido.
-var _drop_through_count: float = 0.0
-var _one_way_ignored: Dictionary = {}
-var _last_floor_one_way: OneWayPlatform = null
-var _one_way_coyote_count: float = 0.0
+# Propiedades privadas | Plataformas de un solo sentido. Ahora en `GravityBody3d`
 
 # Propiedades privadas | Agarre de orillas.
 var _hanging_ledge: GroundPlatform = null
@@ -122,6 +134,9 @@ func _ready() -> void:
 	'''
 	Inicializar el character, con sus colorines, materiales etc.
 	'''
+	# Essential nodes
+	_collision_shape = $CollisionShape3D
+	
 	# Cambiar el color del character. Si no se puso material a mano en el editor, usar el del tipo de personaje.
 	_set_mesh(mesh)
 	if material == null:
@@ -144,7 +159,7 @@ func _physics_process(delta: float) -> void:
 	_down_pressed = _move_down and not _was_move_down
 	_was_move_up = _move_up
 	_was_move_down = _move_down
-	var gravity_signals = _vertical_force(delta, _fall_acceleration_multiplier)
+	var gravity_signals = _vertical_force(delta, _down_pressed, _fall_acceleration_multiplier)
 	var vertical_force_signals = {
 		"on_floor": gravity_signals.on_floor, "air_count": gravity_signals.air_count, "force": gravity_signals.force
 	}
@@ -152,7 +167,6 @@ func _physics_process(delta: float) -> void:
 	var move_signals = _move(delta, vertical_force_signals)
 	_set_x_not_zero_value()
 	var move_states = _get_move_states(move_signals)
-	_one_way_platforms(delta, vertical_force_signals["on_floor"])
 	_ledge_grab(delta)
 	if not _taking_damage:
 		_fight(delta, move_states)
@@ -406,26 +420,26 @@ func _fight(delta: float, states: Dictionary) -> void:
 		# Ataque en piso
 		var init_attack = true
 		if states["neutral"]:
-			_current_attack = _attacks.neutral
+			_current_attack = _attacks.ground_neutral
 			_attack_direction.x = _x_not_zero_value 
 		elif states["running"]:
 			_current_attack = _attacks.dash
 			_attack_direction.x = _x_not_zero_value
 		elif states["neutral_crouch"]:
-			_current_attack = _attacks.crouch
+			_current_attack = _attacks.down
 			_attack_direction.x = _x_not_zero_value*0.5
 			_attack_direction.y = 1.0
 		elif states["neutral_up"]:
-			_current_attack = _attacks.neutral_up
+			_current_attack = _attacks.up
 			_attack_direction.y = 1.0
 
 		# Ataque en aire
 		elif states["neutral_air"]:
-			_current_attack = _attacks.neutral_air
+			_current_attack = _attacks.air_neutral
 			_attack_direction.x = _x_not_zero_value
 			_attack_direction.y = -1.0
 		elif states["air_move"]:
-			_current_attack = _attacks.air_move
+			_current_attack = _attacks.air_forward
 			_attack_direction.x = _x_not_zero_value
 		elif states["air_down"]:
 			_current_attack = _attacks.air_down
@@ -519,125 +533,7 @@ func _anim(delta: float, states: Dictionary, direction: Vector3) -> void:
 	if states["moving"]:
 		$Pivot.basis = Basis.looking_at(direction)
 
-# Funciones plataformas de un solo sentido.
-func _one_way_platforms(delta: float, on_floor: bool) -> void:
-	'''
-	Maneja las plataformas de un solo sentido, estilo Smash Bros: se atraviesan de abajo pa arriba,
-	pero solidas al caer encima. Con tap de abajo estando parado en una, te dejas caer a proposito.
-	'''
-	# Plataforma de un solo sentido en la que estamos parados ahorita, si hay.
-	var floor_one_way := _get_floor_one_way() if on_floor else null
-
-	# Arrancar caida voluntaria si se hace tap de abajo estando parado sobre una plataforma de un solo sentido.
-	if _down_pressed and floor_one_way != null:
-		_drop_through_count = DROP_THROUGH_TIME
-		# Empujoncito hacia abajo pa despegarse y que no se re-enganche por el snap del piso.
-		_target_velocity.y = min(_target_velocity.y, -1.0)
-
-	# Temporizador de la caida voluntaria.
-	if _drop_through_count > 0.0:
-		_drop_through_count = max(_drop_through_count - delta, 0.0)
-
-	# Coyote time: si nos salimos de la orilla caminando, la plataforma sigue solida un ratito,
-	# pa que si regresamos de volada no nos caigamos como si nada.
-	if _drop_through_count > 0.0:
-		# Si se esta cayendo a proposito, cancelar el coyote, si no la plataforma se queda solida y el tap no sirve.
-		_one_way_coyote_count = 0.0
-	elif floor_one_way != null:
-		_last_floor_one_way = floor_one_way
-		_one_way_coyote_count = ONE_WAY_COYOTE_TIME
-	else:
-		_one_way_coyote_count = max(_one_way_coyote_count - delta, 0.0)
-
-	var feet_position := _get_feet_position()
-
-	# Recorrer todas las plataformas de un solo sentido y decidir si atravesarlas o no.
-	for platform in get_tree().get_nodes_in_group(Platform.GROUP_NAME):
-		var one_way := platform as OneWayPlatform
-		if one_way == null or not is_instance_valid(one_way):
-			continue
-
-		# En coyote time nomas pa la plataforma en la que estabamos parados, no pa todas.
-		var in_coyote := one_way == _last_floor_one_way and _one_way_coyote_count > 0.0
-		var should_ignore := _drop_through_count > 0.0 \
-			or _target_velocity.y > 0.0 \
-			or (not one_way.is_above_surface(feet_position, ONE_WAY_MARGIN) and not in_coyote)
-
-		# Solo llamar add/remove cuando el estado cambia de verdad, pa no hacerlo de a gratis cada frame.
-		if _one_way_ignored.get(one_way, false) != should_ignore:
-			if should_ignore:
-				add_collision_exception_with(one_way)
-			else:
-				remove_collision_exception_with(one_way)
-			_one_way_ignored[one_way] = should_ignore
-
-	# Limpiar del cache las plataformas que ya no sean validas.
-	for cached_platform in _one_way_ignored.keys():
-		if not is_instance_valid(cached_platform):
-			_one_way_ignored.erase(cached_platform)
-
-	# Limpiar tambien la referencia de la ultima plataforma pisada, si ya no es valida.
-	if _last_floor_one_way != null and not is_instance_valid(_last_floor_one_way):
-		_last_floor_one_way = null
-		_one_way_coyote_count = 0.0
-
-func _get_floor_one_way() -> OneWayPlatform:
-	'''
-	Buscar en las colisiones del ultimo move_and_slide si topamos con alguna OneWayPlatform.
-	Devuelve la primera que encuentre, o null si no hubo ninguna.
-	'''
-	for i in range(get_slide_collision_count()):
-		var collision := get_slide_collision(i)
-		var collider := collision.get_collider()
-		if collider is OneWayPlatform:
-			return collider as OneWayPlatform
-	return null
-
-func _get_feet_y() -> float:
-	'''
-	Altura global de los pies del character, calculada desde el CollisionShape3D.
-	Ojo, la raiz esta escalada y el CollisionShape3D desplazado, por eso todo sale de global_position y global_basis.
-	'''
-	var collision_shape := $CollisionShape3D as CollisionShape3D
-	if collision_shape == null or collision_shape.shape == null:
-		return global_position.y
-	return collision_shape.global_position.y - _get_body_half_height()
-
-func _get_feet_position() -> Vector3:
-	'''
-	Posicion global de los pies del character. Igualita que _get_feet_y pero en Vector3,
-	pa poder preguntarle a las plataformas inclinadas si andamos encima de su cara.
-	'''
-	var collision_shape := $CollisionShape3D as CollisionShape3D
-	if collision_shape == null or collision_shape.shape == null:
-		return global_position
-	return collision_shape.global_position - Vector3(0.0, _get_body_half_height(), 0.0)
-
-# Funciones agarre de orillas.
-func _get_body_half_height() -> float:
-	'''
-	Medio-alto global del CollisionShape3D del character. Sirve tanto pa los pies como pa la cabeza.
-	Soporta capsula, caja, cilindro y esfera, que son los shapes de collision mas comunes por aqui.
-	'''
-	var collision_shape := $CollisionShape3D as CollisionShape3D
-	if collision_shape == null or collision_shape.shape == null:
-		return 0.0
-
-	var half_height := 0.0
-	var shape := collision_shape.shape
-	if shape is CapsuleShape3D:
-		half_height = (shape as CapsuleShape3D).height * 0.5
-	elif shape is BoxShape3D:
-		half_height = (shape as BoxShape3D).size.y * 0.5
-	elif shape is CylinderShape3D:
-		half_height = (shape as CylinderShape3D).height * 0.5
-	elif shape is SphereShape3D:
-		half_height = (shape as SphereShape3D).radius
-	else:
-		return 0.0
-
-	var scale_y := collision_shape.global_basis.get_scale().y
-	return half_height * scale_y
+# Funciones plataformas de un solo sentido. Ahora en `GravityBody3d`
 
 func _get_head_y() -> float:
 	'''

@@ -23,7 +23,6 @@ var _visual: Node3D
 var _pivot: Node3D
 var _mesh_instance: MeshInstance3D
 var _animation_player: AnimationPlayer
-var _collision_shape: CollisionShape3D
 
 # `_target_velocity`, pertenece a `GravityBody3D`.
 
@@ -282,11 +281,11 @@ func _move_anim(delta:float, states: MoveStates) -> void:
 	'''
 	# En el piso
 	if states.neutral_up:
-		_animation_player.play("looking_up")
+		_animation_player.play("look_up")
 	elif states.neutral_crouch:
 		_animation_player.play("crouch")
 	elif states.crouch_move:
-		_animation_player.play("crouch_move")
+		_animation_player.play("crouch_walk")
 	elif states.neutral:
 		_animation_player.play("idle")
 	elif states.walking:
@@ -340,9 +339,9 @@ func _damage_move(delta: float) -> void:
 func _damage_anim(delta: float, signals: VerticalForceSignals) -> void:
 	if signals.on_floor:
 		_damage_degrees = 0
-		_animation_player.play("damage")
+		_animation_player.play("hurt_ground")
 	else:
-		_animation_player.play("air_damage")
+		_animation_player.play("hurt_air")
 		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
 	_pivot.rotation_degrees.x = _damage_degrees
 		
@@ -380,7 +379,7 @@ func _physics_process(delta: float) -> void:
 	_collect_input()
 	
 	# Move
-	var gravity_signals = _vertical_force(delta, _fall_acceleration_multiplier)
+	var gravity_signals = _vertical_force(delta, _move_down, _fall_acceleration_multiplier)
 	var move_signals = _move(delta, gravity_signals)
 	_set_x_not_zero_value(move_signals.direction)
 	var move_states = _get_move_states(move_signals)

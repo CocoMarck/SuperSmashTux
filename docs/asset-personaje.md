@@ -47,6 +47,7 @@ Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las 
 - `inpact_front`: Colision de frente en cualquier lado.
 - `impact_back`: Colision de espaldas en cualquier lado.
 - `turn`: Dar vuelta. (Saltando no puede dar vuelta).
+- `hold_platform`: Agarrarse de plataforma.
 
 #### Fighter
 - `ground_neutral_attack`: Cendo no se mueve y esta parado.
