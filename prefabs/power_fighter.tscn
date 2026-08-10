@@ -99,7 +99,7 @@ mesh = SubResource("CapsuleMesh_hgp4e")
 skeleton = NodePath("../../../..")
 
 [node name="EyesMesh" type="MeshInstance3D" parent="Visual/Pivot/Skeleton3D/MeshInstance3D" unique_id=763472008]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0078125, 0.359299, -0.42493862)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0078125, 0.4965855, -0.279921)
 mesh = SubResource("BoxMesh_rssre")
 skeleton = NodePath("../../..")
 

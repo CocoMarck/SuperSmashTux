@@ -3,6 +3,14 @@ extends Marker3D
 # Camara dinamica: encuadra a todos los peleadores, se aleja cuando se separan y se acerca cuando se juntan. 
 # Usa dos cajas (camera_area y play_area) que arman tres zonas de encuadre.
 
+# Propiedades publicas | Game Manager.
+@export_group("Game Manager")
+@export var game_manager: GameManager   # obligatorio: fuente de verdad del area jugable y de quien anda esperando su respawn
+
+# Propiedades publicas | Area de juego.
+@export_group("Areas")
+@export var camera_area: Area3D    # caja interior: hasta aqui sigue la camara; mas alla se queda pegada al borde
+
 # Propiedades publicas | Zoom.
 @export_group("Zoom")
 @export var zoom_min_distance: float = 12.0    # que tan cerca puede llegar la camara
@@ -14,10 +22,9 @@ extends Marker3D
 @export var zoom_out_speed: float = 3.0    # que tan rapido se aleja cuando los peleadores se separan
 @export var zoom_in_speed: float = 2.0     # que tan rapido se acerca cuando los peleadores se juntan
 
-# Propiedades publicas | Area de juego.
-@export_group("Areas")
-@export var camera_area: Area3D    # caja interior: hasta aqui sigue la camara; mas alla se queda pegada al borde
-@export var play_area: Area3D      # caja exterior: quien sale de ella deja de contar pal encuadre por completo
+# Propiedades publicas | Temblor.
+@export_group("Shake")
+@export var shake_strength: float = 0.1   # que tan fuerte tiembla la camara mientras alguien espera respawn
 
 # Propiedades privadas.
 @onready var _camera: Camera3D = get_node_or_null("Camera3D")
@@ -25,12 +32,17 @@ var _position: Vector2 = Vector2.ZERO
 var _distance: float = 0.0
 var _target_position: Vector2 = Vector2.ZERO
 var _target_distance: float = 0.0
+var _shake_offset: Vector2 = Vector2.ZERO
 
 # Funciones | Inicializar.
 func _ready() -> void:
 	'''
 	Arrancar el estado de la camara desde lo que ya trae la escena, pa que el primer frame no pegue un salto.
 	'''
+	if game_manager == null:
+		push_error("CameraFollow: falta asignar game_manager en el Inspector. La camara no va a funcionar.")
+		set_physics_process(false)
+		return
 	if _camera == null:
 		return
 	_position = Vector2(global_position.x, global_position.y)
@@ -53,8 +65,16 @@ func _physics_process(delta: float) -> void:
 		scene_root = get_tree().root
 	var fighters: Array[Character] = []
 	_collect_characters(scene_root, fighters)
-	if not fighters.is_empty():
-		_update_target(fighters)
+	var fighter_positions: Array[Vector3] = []
+	for fighter in fighters:
+		fighter_positions.append(fighter.global_position)
+	var pending_positions: Array[Vector3] = game_manager.get_pending_respawn_positions()
+	if not fighter_positions.is_empty() or not pending_positions.is_empty():
+		_update_target(fighter_positions, pending_positions)
+
+	# La ventana la controla GameManager.is_shake_active(), dura respawn_delay y se dispara en
+	# cualquier muerte, no solo si el personaje va a volver.
+	_shake_offset = Vector2(randf_range(-shake_strength, shake_strength), randf_range(-shake_strength, shake_strength)) if game_manager.is_shake_active() else Vector2.ZERO
 
 	_apply_smoothing(delta)
 	_apply_transform()
@@ -80,34 +100,55 @@ func _distance_for_size(size: Vector2, aspect: float, half_fov_tan: float) -> fl
 	var half := size * 0.5
 	return maxf(half.y, half.x / aspect) / half_fov_tan
 
-func _update_target(fighters: Array[Character]) -> void:
+func _accumulate_positions(positions: Array[Vector3], has_camera_bounds: bool, camera_bounds: AABB, rect: Rect2, rect_started: bool) -> Dictionary:
+	'''
+	Recortar cada posicion contra camera_area y sumarla al rect de encuadre.
+	Recibe el rect acumulado hasta ahora y devuelve el resultado, asi lo pueden encadenar
+	varios grupos de posiciones (peleadores vivos, respawns pendientes) con su propio filtro previo.
+	'''
+	for pos in positions:
+		# Recortar la posicion al borde de camera_area: asi sigue contando pal encuadre,
+		# pero la camara se queda detenida en el limite en vez de seguirla mas lejos.
+		if has_camera_bounds:
+			pos = pos.clamp(camera_bounds.position, camera_bounds.end)
+		var origin := Vector2(pos.x, pos.y)
+		var entry_rect := Rect2(origin, Vector2.ZERO)
+		if rect_started:
+			rect = rect.merge(entry_rect)
+		else:
+			rect = entry_rect
+			rect_started = true
+	return {"rect": rect, "rect_started": rect_started}
+
+func _update_target(fighter_positions: Array[Vector3], pending_respawn_positions: Array[Vector3] = []) -> void:
 	'''
 	Recalcular el rect que encuadra a los peleadores, y de ahi sacar la posicion y distancia objetivo.
-	Tres zonas: dentro de camera_area cuenta tal cual, entre camera_area y play_area cuenta pero
-	recortado al borde de camera_area (la camara ya no lo sigue mas alla), y fuera de play_area no cuenta.
+	Tres zonas para los peleadores vivos: dentro de camera_area cuenta tal cual, entre camera_area y
+	play_area cuenta pero recortado al borde de camera_area (la camara ya no lo sigue mas alla), y fuera
+	de play_area no cuenta. Las posiciones de quien espera respawn no se filtran contra play_area: su
+	posicion es justo donde murio, que por definicion cae fuera del play_area.
 	'''
-	var play_bounds := _get_area_bounds(play_area)
+	var play_bounds := game_manager.get_play_area_bounds()
 	var has_play_bounds := play_bounds.size != Vector3.ZERO
 	var camera_bounds := _get_area_bounds(camera_area)
 	var has_camera_bounds := camera_bounds.size != Vector3.ZERO
 
 	var rect := Rect2()
 	var rect_started := false
-	for fighter in fighters:
-		var pos := fighter.global_position
+
+	var filtered_fighters: Array[Vector3] = []
+	for pos in fighter_positions:
 		if has_play_bounds and not play_bounds.has_point(pos):
 			continue
-		# Recortar la posicion al borde de camera_area: asi el peleador sigue contando pal encuadre,
-		# pero la camara se queda detenida en el limite en vez de seguirlo mas lejos.
-		if has_camera_bounds:
-			pos = pos.clamp(camera_bounds.position, camera_bounds.end)
-		var origin := Vector2(pos.x, pos.y)
-		var fighter_rect := Rect2(origin, Vector2.ZERO)
-		if rect_started:
-			rect = rect.merge(fighter_rect)
-		else:
-			rect = fighter_rect
-			rect_started = true
+		filtered_fighters.append(pos)
+
+	var acc := _accumulate_positions(filtered_fighters, has_camera_bounds, camera_bounds, rect, rect_started)
+	rect = acc["rect"]
+	rect_started = acc["rect_started"]
+
+	acc = _accumulate_positions(pending_respawn_positions, has_camera_bounds, camera_bounds, rect, rect_started)
+	rect = acc["rect"]
+	rect_started = acc["rect_started"]
 
 	if not rect_started:
 		return
@@ -175,6 +216,7 @@ func _apply_transform() -> void:
 	'''
 	Mandar la posicion y distancia calculadas al pivot y a la camara.
 	El pivot lleva el encuadre en X/Y, la camara hija nomas la distancia en Z.
+	Si alguien anda esperando su respawn, se le suma un tembloron aleatorio pa el efecto caricaturesco.
 	'''
-	global_position = Vector3(_position.x, _position.y, global_position.z)
+	global_position = Vector3(_position.x + _shake_offset.x, _position.y + _shake_offset.y, global_position.z)
 	_camera.position = Vector3(0.0, 0.0, _distance)

@@ -14,6 +14,7 @@ const SLOT_4_MATERIAL: Material = preload("res://materials/mat_green.tres")
 	GlobalUtils.CharacterType.PLAYER, GlobalUtils.CharacterType.PLAYER,
 ]
 @export_range(1, 99, 1) var lives_per_character: int = 3
+@export_range(0.0, 5.0, 0.05) var respawn_delay: float = 0.3   # segundos de espera antes de reaparecer
 
 # Propiedades publicas | Referencias de escena.
 @export_group("Scene References")
@@ -25,7 +26,9 @@ var _spawn_point_of_character: Dictionary[Character, SpawnPoint] = {}
 var _lives_of_character: Dictionary[Character, int] = {}
 var _death_count_of_character: Dictionary[Character, int] = {}
 var _npc_id_of_character: Dictionary[Character, GlobalUtils.NPCId] = {}
+var _death_position_of_character: Dictionary[Character, Vector3] = {}
 var _play_area_bounds: AABB = AABB()
+var _shake_end_time_msec: int = 0
 
 # Funciones | Inicializar.
 func _ready() -> void:
@@ -55,8 +58,9 @@ func _physics_process(delta: float) -> void:
 			_forget_character(character)
 			continue
 		if not character.is_inside_tree():
-			# Recien spawneado, su add_child todavia esta diferido. Se salta este frame nomas,
-			# sigue registrado y se revisa normal en cuanto entre al arbol.
+			# Recien spawneado (add_child todavia diferido) o recien muerto (esperando su
+			# respawn_delay fuera del arbol). Se salta este frame nomas, sigue registrado y
+			# se revisa normal en cuanto vuelva a entrar al arbol.
 			continue
 		if not _play_area_bounds.has_point(character.global_position):
 			_handle_character_death(character)
@@ -135,9 +139,12 @@ func _spawn_all_characters() -> void:
 
 func _handle_character_death(character: Character) -> void:
 	'''
-	Un personaje se salio del area jugable. Si le quedan vidas, respawnea en su punto
-	original; si no, se olvida de el y se elimina del arbol.
+	Un personaje se salio del area jugable. Si le quedan vidas, se saca del arbol de inmediato
+	(desaparece del juego al toque, nomas se guarda la instancia) y se vuelve a meter tras un
+	pequeño retraso, reapareciendo en su punto original; si no le quedan vidas, se olvida de el
+	y se elimina del arbol pa siempre con queue_free().
 	'''
+	_shake_end_time_msec = Time.get_ticks_msec() + int(respawn_delay * 1000.0)
 	var death_count: int = _death_count_of_character.get(character, 0) + 1
 	_death_count_of_character[character] = death_count
 	print("%s: morido por la patria x%d" % [_get_character_label(character), death_count])
@@ -145,9 +152,48 @@ func _handle_character_death(character: Character) -> void:
 	if lives_left <= 0:
 		_forget_character(character)
 		character.queue_free()
-	else:
-		_lives_of_character[character] = lives_left
-		character.respawn(_spawn_point_of_character[character].global_position)
+		return
+	_lives_of_character[character] = lives_left
+	var parent := character.get_parent()
+	if parent != null:
+		_death_position_of_character[character] = character.global_position
+		parent.remove_child(character)
+	if respawn_delay > 0.0:
+		await get_tree().create_timer(respawn_delay).timeout
+	if not is_instance_valid(character):
+		return
+	get_tree().current_scene.add_child(character)
+	character.respawn(_spawn_point_of_character[character].global_position)
+	_death_position_of_character.erase(character)
+
+func get_play_area_bounds() -> AABB:
+	'''
+	AABB del area jugable, ya calculado en _ready(). Fuente de verdad unica: cualquier otro
+	script que necesite saber los limites del area jugable (ej. camera_follow.gd) debe pedirselo
+	aqui en vez de recalcularlo por su cuenta.
+	'''
+	return _play_area_bounds
+
+func get_pending_respawn_positions() -> Array[Vector3]:
+	'''
+	Ultima posicion donde murio quien anda esperando su delay pa reaparecer (fuera del arbol
+	ahorita, pero con vidas de sobra). Sirve pa que la camara lo siga encuadrando ahi mismo,
+	como si siguiera parado en ese lugar, y no se le eche encima al sobreviviente antes de tiempo.
+	'''
+	var positions: Array[Vector3] = []
+	for character in _lives_of_character.keys():
+		if is_instance_valid(character) and not character.is_inside_tree():
+			if _death_position_of_character.has(character):
+				positions.append(_death_position_of_character[character])
+	return positions
+
+func is_shake_active() -> bool:
+	'''
+	Si hay que seguir temblando la camara: cualquier muerte (definitiva o con respawn pendiente)
+	dispara esta ventana por respawn_delay segundos, para que el efecto caricaturesco se vea
+	siempre que alguien sale del area jugable, no solo cuando va a volver.
+	'''
+	return Time.get_ticks_msec() < _shake_end_time_msec
 
 func _forget_character(character: Character) -> void:
 	'''
@@ -157,6 +203,7 @@ func _forget_character(character: Character) -> void:
 	_lives_of_character.erase(character)
 	_death_count_of_character.erase(character)
 	_npc_id_of_character.erase(character)
+	_death_position_of_character.erase(character)
 
 func _get_character_label(character: Character) -> String:
 	'''

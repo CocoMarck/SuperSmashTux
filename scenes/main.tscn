@@ -12,7 +12,7 @@
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_playa"]
-size = Vector3(24, 19, 4)
+size = Vector3(24, 21, 4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_camara"]
 size = Vector3(12, 7.7060547, 2)
@@ -50,12 +50,10 @@ camera_attributes = SubResource("CameraAttributesPractical_gl6un")
 transform = Transform3D(0.6961406, -0.6440442, 0.31716764, 0.15394281, 0.56543684, 0.8102981, -0.7012058, -0.51525575, 0.49276972, 0, 11.2912, 0)
 shadow_enabled = true
 
-[node name="CameraPivot" type="Marker3D" parent="." unique_id=137112446 node_paths=PackedStringArray("camera_area", "play_area")]
+[node name="CameraPivot" type="Marker3D" parent="." unique_id=137112446 node_paths=PackedStringArray("game_manager", "camera_area")]
 script = ExtResource("7_camfl")
-zoom_min_distance = 30.0
-zoom_max_distance = 60.0
+game_manager = NodePath("../GameManager")
 camera_area = NodePath("../CameraArea")
-play_area = NodePath("../PlayArea")
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=1986782906]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 29)
@@ -65,7 +63,7 @@ size = 25.418
 [node name="PlayArea" type="Area3D" parent="." unique_id=2074284855]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlayArea" unique_id=1895952398]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("BoxShape3D_playa")
 debug_color = Color(0, 0.65141195, 0.03484089, 0.41960785)
 
@@ -89,51 +87,51 @@ transform = Transform3D(0.3, 0, 0, 0, 0.3, 0, 0, 0, 0.3, 0, 0, 0)
 mesh = SubResource("BoxMesh_o7g8m")
 
 [node name="PlatformLeft" type="StaticBody3D" parent="." unique_id=612300481]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 4.094, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.950624, -0.1349524, 0)
 script = ExtResource("3_p1atf")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformLeft" unique_id=612300482]
-transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 8.049376, -4.2289524, 0)
+transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 0, 0, 0)
 shape = SubResource("BoxShape3D_plat01")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="PlatformLeft" unique_id=612300483]
-transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 8.049376, -4.2289524, 0)
+transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 0, 0, 0)
 mesh = SubResource("BoxMesh_plat01")
 
 [node name="PlatformRight" type="StaticBody3D" parent="." unique_id=612300484]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 4.094, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.888706, -0.1349524, 0)
 script = ExtResource("3_p1atf")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlatformRight" unique_id=612300485]
-transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, -8.111294, -4.2289524, 0)
+transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 0, 0, 0)
 shape = SubResource("BoxShape3D_plat01")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="PlatformRight" unique_id=612300486]
-transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, -8.111294, -4.2289524, 0)
+transform = Transform3D(0.33, 0, 0, 0, 0.33, 0, 0, 0, 0.33, 0, 0, 0)
 mesh = SubResource("BoxMesh_plat01")
 
 [node name="RoofLeft" type="StaticBody3D" parent="." unique_id=1347968376]
-transform = Transform3D(0.93969256, -0.3420201, 0, 0.3420201, 0.93969256, 0, 0, 0, 1, -8, 14.9118, 0)
+transform = Transform3D(0.93969256, -0.3420201, 0, 0.3420201, 0.93969256, 0, 0, 0, 1, -2.7, 3.8, 0)
 script = ExtResource("3_p1atf")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RoofLeft" unique_id=867199618]
-transform = Transform3D(0.33000028, -2.9802322e-08, 0, 2.9802322e-08, 0.33000028, 0, 0, 0, 0.33, 1.3754774, -12.306757, 0)
+transform = Transform3D(0.33000028, -2.9802322e-08, 0, 2.9802322e-08, 0.33000028, 0, 0, 0, 0.33, 0, 0, 0)
 shape = SubResource("BoxShape3D_roof01")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RoofLeft" unique_id=2044057724]
-transform = Transform3D(0.33000028, -2.9802322e-08, 0, 2.9802322e-08, 0.33000028, 0, 0, 0, 0.33, 1.3754774, -12.306757, 0)
+transform = Transform3D(0.33000028, -2.9802322e-08, 0, 2.9802322e-08, 0.33000028, 0, 0, 0, 0.33, 0, 0, 0)
 mesh = SubResource("BoxMesh_roof01")
 
 [node name="RoofRight" type="StaticBody3D" parent="." unique_id=1742371311]
-transform = Transform3D(-0.93969256, 0.34202012, 1.509958e-07, 0.3420201, 0.9396926, 6.1777605e-10, -1.4167834e-07, 5.2224124e-08, -1, 8, 14.9118, 0)
+transform = Transform3D(-0.93969256, 0.34202012, 1.509958e-07, 0.3420201, 0.9396926, 6.1777605e-10, -1.4167834e-07, 5.2224124e-08, -1, 2.7, 3.8, 0)
 script = ExtResource("3_p1atf")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RoofRight" unique_id=1742676817]
-transform = Transform3D(0.33000007, -2.9802322e-08, 0, -1.4901163e-08, 0.33000013, 0, -3.5527137e-15, 8.881784e-15, 0.33, 1.274864, -12.270137, -3.502464e-07)
+transform = Transform3D(0.33000007, -2.9802322e-08, 0, -1.4901163e-08, 0.33000013, 0, -3.5527137e-15, 8.881784e-15, 0.33, 0, 0, 0)
 shape = SubResource("BoxShape3D_roof01")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RoofRight" unique_id=143297748]
-transform = Transform3D(0.33000007, -2.9802322e-08, 0, -1.4901163e-08, 0.33000013, 0, -3.5527137e-15, 8.881784e-15, 0.33, 1.274864, -12.270137, -3.502464e-07)
+transform = Transform3D(0.33000007, -2.9802322e-08, 0, -1.4901163e-08, 0.33000013, 0, -3.5527137e-15, 8.881784e-15, 0.33, 0, 0, 0)
 mesh = SubResource("BoxMesh_roof01")
 
 [node name="SpawnPoint1" type="Marker3D" parent="." unique_id=414765233]
