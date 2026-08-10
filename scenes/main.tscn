@@ -52,6 +52,8 @@ shadow_enabled = true
 
 [node name="CameraPivot" type="Marker3D" parent="." unique_id=137112446 node_paths=PackedStringArray("camera_area", "play_area")]
 script = ExtResource("7_camfl")
+zoom_min_distance = 30.0
+zoom_max_distance = 60.0
 camera_area = NodePath("../CameraArea")
 play_area = NodePath("../PlayArea")
 

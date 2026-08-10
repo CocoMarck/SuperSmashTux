@@ -10,9 +10,6 @@ const ONE_WAY_MARGIN := 0.1        # franja por debajo de la cara superior de la
 const ONE_WAY_COYOTE_TIME := 0.3   # tiempo de perdon al salirse de la orilla y querer regresar
 
 # Constantes | Agarre de orillas.
-const LEDGE_GRAB_REACH := 0.35     # que tan lejos por fuera de la orilla se puede agarrar
-const LEDGE_GRAB_DEPTH := 2.5      # que tan abajo de la cara superior se agarra
-const LEDGE_REGRAB_MARGIN := 0.05  # cuanto debe pasarse de la cornisa pa que cuente como venir de arriba
 const LEDGE_HANG_OFFSET := 0.3     # que tan separado de la orilla se queda colgado
 const LEDGE_RELEASE_TIME := 0.3    # cooldown tras soltarse, pa no re-agarrarse solo
 
@@ -119,7 +116,6 @@ var _hanging_ledge: GroundPlatform = null
 var _hanging_right_side: bool = false
 var _hang_position: Vector3 = Vector3.ZERO
 var _ledge_release_count: float = 0.0
-var _max_head_y_in_air: float = -INF
 
 # Funciones | Inicializar.
 func _ready() -> void:
@@ -140,7 +136,7 @@ func _physics_process(delta: float) -> void:
 	'''
 	Funcion de procesamiento de fisicas.
 	'''
-	
+
 	# Detectar inputs, señales y otros estados del personaje
 	_collect_input()
 	# Flancos de arriba/abajo. Se calculan aqui, una sola vez, pa que todos los sistemas lean el mismo tap.
@@ -152,6 +148,7 @@ func _physics_process(delta: float) -> void:
 	var vertical_force_signals = {
 		"on_floor": gravity_signals.on_floor, "air_count": gravity_signals.air_count, "force": gravity_signals.force
 	}
+
 	var move_signals = _move(delta, vertical_force_signals)
 	_set_x_not_zero_value()
 	var move_states = _get_move_states(move_signals)
@@ -166,7 +163,7 @@ func _physics_process(delta: float) -> void:
 	# Procesar todo
 	velocity = _target_velocity
 	move_and_slide()
-	
+
 # Funciones damage recivido
 func set_damage_percentage(damage:int) -> void:
 	damage_percentage += damage*0.01
@@ -656,30 +653,23 @@ func _release_hanging_ledge() -> void:
 	'''
 	Soltar la cornisa que traiamos agarrada y avisarle a la plataforma pa que quede libre pa otro.
 	Aguanta que la plataforma ya no exista, asi que se puede llamar sin miedo.
-	Tambien se le olvida que tan alto anduvo la cabeza, pa que soltarse y brincar tantito no cuente
-	como venir de arriba y no nos re-agarre solito.
 	'''
 	if _hanging_ledge != null and is_instance_valid(_hanging_ledge):
 		_hanging_ledge.release_ledge(_hanging_right_side, self)
 	_hanging_ledge = null
-	_max_head_y_in_air = _get_head_y()
 
 func _ledge_grab(delta: float) -> void:
 	'''
-	Agarre de orillas estilo Smash Bros. Si vas cayendo junto a la orilla de una GroundPlatform,
-	te cuelgas de ella. Colgado, arriba te subes con impulso y abajo te sueltas y caes.
+	Agarre de orillas estilo Smash Bros. Deteccion puramente espacial: cada GroundPlatform expone
+	una zona de agarre a cada lado (matematica de rangos, is_character_in_ledge_zone), aqui solo se
+	pregunta "¿ando en esa zona?" + "¿vengo cayendo?". Sin heuristicas de historial.
+	Colgado, arriba te subes con impulso y abajo te sueltas y caes.
 	Corre despues de _move, asi que pisa lo que calculo sin pedirle permiso. _fight y _anim corren despues
 	pero se salen temprano si andamos colgados, por eso no nos pisan de vuelta.
 	'''
 	# Cooldown pa no re-agarrarnos solitos justo despues de soltarnos.
 	if _ledge_release_count > 0.0:
 		_ledge_release_count = max(_ledge_release_count - delta, 0.0)
-
-	# Que tan alto ha andado la cabeza desde que despegamos. Sirve pa distinguir al que viene
-	# cayendo desde arriba de la orilla, del que nomas brinco desde abajo y rozo la zona de agarre.
-	if is_on_floor():
-		_max_head_y_in_air = -INF
-	_max_head_y_in_air = max(_max_head_y_in_air, _get_head_y())
 
 	# Si ya andamos colgados, decidir que hacer.
 	if _hanging_ledge != null:
@@ -719,7 +709,7 @@ func _ledge_grab(delta: float) -> void:
 		$Pivot.basis = Basis.looking_at(Vector3(inward, 0.0, 0.0))
 		return
 
-	# No estamos colgados, checar si toca agarrarnos de alguna orilla.
+	# No estamos colgados: checar si toca agarrarnos. Zona de agarre + venir cayendo, nada mas.
 	if _ledge_release_count > 0.0:
 		return
 	if is_on_floor():
@@ -734,33 +724,19 @@ func _ledge_grab(delta: float) -> void:
 		if not ground.has_ledges():
 			continue
 
-		var top_y := ground.get_top_y()
-		var head_y := _get_head_y()
-		# Vertical: la cabeza debe andar por debajo del borde, pero sin pasarse de largo.
-		if head_y > top_y or head_y < top_y - LEDGE_GRAB_DEPTH:
-			continue
-		# Y hay que venir de arriba: si la cabeza nunca le paso por encima a esta orilla,
-		# es que brincamos desde abajo sin alcanzarla, y ahi no hay agarre que valga.
-		if _max_head_y_in_air <= top_y + LEDGE_REGRAB_MARGIN:
-			continue
-
-		# Obtener las 2 orillitas de la plataforma del suelo.
-		var right_ledge_x := ground.get_ledge_x(true)
-		var left_ledge_x := ground.get_ledge_x(false)
-
-		# Horizontal: hay que venir por fuera de la plataforma, cerquita del alcance.
-		var grabbed_right := global_position.x > right_ledge_x and global_position.x - right_ledge_x <= LEDGE_GRAB_REACH
-		var grabbed_left := global_position.x < left_ledge_x and left_ledge_x - global_position.x <= LEDGE_GRAB_REACH
-
-		if grabbed_right or grabbed_left:
-			# Una cornisa, un personaje. Si ya hay alguien colgado de este lado, seguirle buscando en otra.
-			if not ground.take_ledge(grabbed_right, self):
+		for right_side in [true, false]:
+			if not ground.is_character_in_ledge_zone(right_side, global_position):
 				continue
+			# Una cornisa, un personaje. Si ya hay alguien colgado de este lado, seguir buscando otra.
+			if not ground.take_ledge(right_side, self):
+				continue
+
 			_hanging_ledge = ground
-			_hanging_right_side = grabbed_right
-			var ledge_x := right_ledge_x if grabbed_right else left_ledge_x
-			var anchor_x := (ledge_x + LEDGE_HANG_OFFSET) if grabbed_right else (ledge_x - LEDGE_HANG_OFFSET)
-			var anchor_y := global_position.y - (head_y - top_y)
+			_hanging_right_side = right_side
+			var top_y := ground.get_top_y()
+			var ledge_x := ground.get_ledge_x(right_side)
+			var anchor_x := (ledge_x + LEDGE_HANG_OFFSET) if right_side else (ledge_x - LEDGE_HANG_OFFSET)
+			var anchor_y := global_position.y - (_get_head_y() - top_y)
 			_hang_position = Vector3(anchor_x, anchor_y, global_position.z)
 			_target_velocity = Vector3.ZERO
-			break
+			return

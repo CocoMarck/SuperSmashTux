@@ -4,6 +4,10 @@ extends Platform
 # Plataforma de suelo normal, con orillas agarrables 
 # (debe tener un collision shape de caja 3D y no tener inclinación).
 
+# Propiedades publicas | Zona de agarre.
+@export var ledge_zone_width: float = 0.5   # que tan ancha hacia afuera es la zona de agarre de cada orilla
+@export var ledge_zone_depth: float = 0.5   # que tanto se expande hacia abajo la zona de agarre, desde la cara superior
+
 # Propiedades privadas | Quien anda colgao de cada cornisa.
 var _ledge_holders: Dictionary = {}
 
@@ -51,3 +55,19 @@ func release_ledge(right_side: bool, who: Node) -> void:
 	'''
 	if _ledge_holders.get(right_side) == who:
 		_ledge_holders.erase(right_side)
+
+func is_character_in_ledge_zone(right_side: bool, position: Vector3) -> bool:
+	'''
+	Si una posicion global cae dentro de la cajita de agarre de ese lado: una franja horizontal de
+	ledge_zone_width medida hacia afuera del borde, y ledge_zone_depth hacia abajo desde la cara
+	superior. Pura comparacion de rangos, nada de fisica ni nodos.
+	'''
+	if not has_ledges():
+		return false
+	var ledge_x := get_ledge_x(right_side)
+	var in_x := (position.x >= ledge_x and position.x <= ledge_x + ledge_zone_width) if right_side \
+		else (position.x <= ledge_x and position.x >= ledge_x - ledge_zone_width)
+	if not in_x:
+		return false
+	var top_y := get_top_y()
+	return position.y <= top_y and position.y >= top_y - ledge_zone_depth
