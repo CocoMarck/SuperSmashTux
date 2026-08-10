@@ -10,15 +10,15 @@ const ONE_WAY_MARGIN := 0.1        # franja por debajo de la cara superior de la
 const ONE_WAY_COYOTE_TIME := 0.3   # tiempo de perdon al salirse de la orilla y querer regresar
 
 # Constantes | Agarre de orillas.
-const LEDGE_GRAB_REACH := 1.2      # que tan lejos por fuera de la orilla se puede agarrar
+const LEDGE_GRAB_REACH := 0.35      # que tan lejos por fuera de la orilla se puede agarrar
 const LEDGE_GRAB_DEPTH := 2.5      # que tan abajo de la cara superior se agarra
-const LEDGE_HANG_OFFSET := 0.5     # que tan separado de la orilla se queda colgado
-const LEDGE_RELEASE_TIME := 0.35   # cooldown tras soltarse, pa no re-agarrarse solo
+const LEDGE_HANG_OFFSET := 0.45     # que tan separado de la orilla se queda colgado
+const LEDGE_RELEASE_TIME := 0.4   # cooldown tras soltarse, pa no re-agarrarse solo
 
 # Propiedades publicas | Gravedad y velocidad.
 @export_group("Movement")
-@export var speed: int = 10
-@export var jump_impulse: int = 13
+@export var speed: int = 6
+@export var jump_impulse: int = 10
 @export var init_looking_at_right: bool = false
 
 # Propiedades publicas | Apariencia.
@@ -48,7 +48,7 @@ var _direction: Vector3 = Vector3.ZERO
 var _x_not_zero_value :float = 0.0
 var _jump_count: int = 0
 var _was_jumping: bool = false
-var _fall_acceleration_multiplier: float = 1.0
+var _fall_acceleration_multiplier: float = 1.3
 
 # Propiedades privadas | Hitbox de daño a los enemigos locos.
 var _hitbox_count: float = 0.0
@@ -67,7 +67,7 @@ var _attacks: Attacks = Attacks.new(
 		0.5, true, Vector3(1,1,0)
 	),
 	FightMove.new(
-		"dash", 0.3, 10, true, false, Vector3(12,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
+		"dash", 0.3, 10, true, false, Vector3(8,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
 		0.5, true, Vector3(1.5,1,0)
 	),
 	FightMove.new(

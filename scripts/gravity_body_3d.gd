@@ -5,7 +5,7 @@ extends CharacterBody3D
 
 # Propiedades publicas 
 @export_group("Gravity")
-@export var fall_acceleration: int = 32
+@export var fall_acceleration: int = 24
 
 # Prpiedades privadas | Gravedad | Fuerza vertical | Movimiento
 var _target_velocity: Vector3 = Vector3.ZERO

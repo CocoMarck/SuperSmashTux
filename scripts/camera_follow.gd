@@ -5,13 +5,13 @@ extends Marker3D
 
 # Propiedades publicas | Zoom.
 @export_group("Zoom")
-@export var zoom_min_distance: float = 40.0    # que tan cerca puede llegar la camara
-@export var zoom_max_distance: float = 70.0    # que tan lejos puede alejarse la camara
+@export var zoom_min_distance: float = 12.0    # que tan cerca puede llegar la camara
+@export var zoom_max_distance: float = 20.0    # que tan lejos puede alejarse la camara
 
 # Propiedades publicas | Suavizado.
 @export_group("Smoothing")
-@export var pan_speed: float = 6.0         # que tan rapido sigue la posicion x/y al objetivo
-@export var zoom_out_speed: float = 8.0    # que tan rapido se aleja cuando los peleadores se separan
+@export var pan_speed: float = 4.0         # que tan rapido sigue la posicion x/y al objetivo
+@export var zoom_out_speed: float = 3.0    # que tan rapido se aleja cuando los peleadores se separan
 @export var zoom_in_speed: float = 2.0     # que tan rapido se acerca cuando los peleadores se juntan
 
 # Propiedades publicas | Area de juego.
