@@ -39,7 +39,7 @@ size = Vector3(17.028, 1, 4)
 
 [node name="GameManager" type="Node" parent="." unique_id=1756435872 node_paths=PackedStringArray("spawn_points", "play_area")]
 script = ExtResource("8_gmngr")
-character_types = Array[int]([0, 0, 0, 0])
+character_types = Array[int]([0, 0, 1, 1])
 spawn_points = [NodePath("../SpawnPoint1"), NodePath("../SpawnPoint2"), NodePath("../SpawnPoint3"), NodePath("../SpawnPoint4")]
 play_area = NodePath("../PlayArea")
 
