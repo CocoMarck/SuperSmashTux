@@ -18,7 +18,7 @@ var _attacks: Attacks = Attacks.new(
 		0.5, true, Vector3(1,1,0)
 	),
 	FightMove.new(
-		"dash", 0.3, 10, true, false, Vector3(22,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
+		"dash", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
 		0.5, true, Vector3(1.5,1,0)
 	),
 	FightMove.new(
@@ -66,7 +66,7 @@ func _spawn_hitbox(p_position: Vector3, p_damage: int, p_direction: Vector3) -> 
 	'''
 	var fixed_position := Vector3(p_position.z, p_position.y, p_position.x*-1)
 	_spawned_hitbox = Hitbox.new(fixed_position, Vector3(0.5, 0.5, 0.5), self, p_damage, p_direction)
-	$Pivot.add_child(_spawned_hitbox)
+	_pivot.add_child(_spawned_hitbox)
 
 func _clear_hitbox() -> void:
 	'''
@@ -126,8 +126,11 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 			_attack_direction.z = _attack_direction.z * _current_attack.power_direction.y
 	
 	# Cancelar ataque aerio si no esta en aire.
+	# Cancelar ataque en piso si esta en el aire
 	if _current_attack != null:
 		if signals.on_floor and _current_attack.air_attack:
+			_current_attack = null
+		elif not signals.on_floor and not _current_attack.air_attack:
 			_current_attack = null
 		else:
 			_direction.x = 0
@@ -175,10 +178,10 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 
 func _attack_anim(delta:float) -> void:
 	if _current_attack.animation_name != &"":
-		$AnimationPlayer.play(_current_attack.animation_name)
+		_animation_player.play(_current_attack.animation_name)
 	else:
-		$AnimationPlayer.stop()
-		$Pivot/Mesh.rotation_degrees.x = _current_attack.mesh_rotation_x
+		_animation_player.stop()
+		#_mesh_instance.rotation_degrees.x = _current_attack.mesh_rotation_x
 
 
 # Funciones | Procesar

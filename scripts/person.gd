@@ -245,11 +245,11 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 	if signals.on_floor:
 		# En el piso
 		neutral = not moving and (not _move_up and not _move_down)
-		running = moving and not _walking
 		neutral_up = not moving and _move_up and not _move_down
 		neutral_crouch = not moving and _move_down and not _move_up
 		crouch_move = moving and _move_down and not _move_up
 		walking = _walking and moving
+		running = moving and not walking and not crouch_move
 	
 	else:
 		# En el aire
@@ -352,6 +352,9 @@ func _ready() -> void:
 	'''
 	Inicializar el character, con sus colorines, materiales etc.
 	'''
+	# Fall
+	fall_acceleration = 30
+	
 	# Essentail nodes
 	_visual = $Visual
 	_pivot = $Visual/Pivot
