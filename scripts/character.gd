@@ -10,10 +10,11 @@ const ONE_WAY_MARGIN := 0.1        # franja por debajo de la cara superior de la
 const ONE_WAY_COYOTE_TIME := 0.3   # tiempo de perdon al salirse de la orilla y querer regresar
 
 # Constantes | Agarre de orillas.
-const LEDGE_GRAB_REACH := 0.35      # que tan lejos por fuera de la orilla se puede agarrar
+const LEDGE_GRAB_REACH := 0.35     # que tan lejos por fuera de la orilla se puede agarrar
 const LEDGE_GRAB_DEPTH := 2.5      # que tan abajo de la cara superior se agarra
+const LEDGE_REGRAB_MARGIN := 0.05  # cuanto debe pasarse de la cornisa pa que cuente como venir de arriba
 const LEDGE_HANG_OFFSET := 0.3     # que tan separado de la orilla se queda colgado
-const LEDGE_RELEASE_TIME := 0.3   # cooldown tras soltarse, pa no re-agarrarse solo
+const LEDGE_RELEASE_TIME := 0.3    # cooldown tras soltarse, pa no re-agarrarse solo
 
 # Propiedades publicas | Gravedad y velocidad.
 @export_group("Movement")
@@ -740,7 +741,7 @@ func _ledge_grab(delta: float) -> void:
 			continue
 		# Y hay que venir de arriba: si la cabeza nunca le paso por encima a esta orilla,
 		# es que brincamos desde abajo sin alcanzarla, y ahi no hay agarre que valga.
-		if _max_head_y_in_air <= top_y:
+		if _max_head_y_in_air <= top_y + LEDGE_REGRAB_MARGIN:
 			continue
 
 		# Obtener las 2 orillitas de la plataforma del suelo.
