@@ -1,0 +1,86 @@
+[gd_scene format=3 uid="uid://d1pwr0b0cypky"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_hgp4e"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_rssre"]
+size = Vector3(0.377441, 0.168842, 0.286159)
+
+[sub_resource type="Animation" id="Animation_xlth3"]
+
+[sub_resource type="Animation" id="Animation_a45e3"]
+
+[sub_resource type="Animation" id="Animation_hgp4e"]
+
+[sub_resource type="Animation" id="Animation_rssre"]
+
+[sub_resource type="Animation" id="Animation_k2tj7"]
+
+[sub_resource type="Animation" id="Animation_0iuav"]
+
+[sub_resource type="Animation" id="Animation_xblix"]
+
+[sub_resource type="Animation" id="Animation_m5vya"]
+
+[sub_resource type="Animation" id="Animation_wxvr2"]
+
+[sub_resource type="Animation" id="Animation_pe4x2"]
+resource_name = "looking_up"
+
+[sub_resource type="Animation" id="Animation_nl3u8"]
+
+[sub_resource type="Animation" id="Animation_uyb0u"]
+
+[sub_resource type="Animation" id="Animation_kc48b"]
+
+[sub_resource type="Animation" id="Animation_vmr4w"]
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_k2tj7"]
+_data = {
+&"air_damage": SubResource("Animation_xlth3"),
+&"back_collision": SubResource("Animation_a45e3"),
+&"crouch": SubResource("Animation_hgp4e"),
+&"crouch_move": SubResource("Animation_rssre"),
+&"damage": SubResource("Animation_k2tj7"),
+&"fall": SubResource("Animation_0iuav"),
+&"front_collision": SubResource("Animation_xblix"),
+&"idle": SubResource("Animation_m5vya"),
+&"jump": SubResource("Animation_wxvr2"),
+&"looking_up": SubResource("Animation_pe4x2"),
+&"lying_down": SubResource("Animation_nl3u8"),
+&"run": SubResource("Animation_uyb0u"),
+&"turn_around": SubResource("Animation_kc48b"),
+&"walk": SubResource("Animation_vmr4w")
+}
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_0iuav"]
+radius = 0.35
+height = 1.8
+
+[node name="PowerFighter" type="CharacterBody3D" unique_id=1154080169]
+
+[node name="Visual" type="Node3D" parent="." unique_id=1429974547]
+
+[node name="Pivot" type="Node3D" parent="Visual" unique_id=1703091406]
+
+[node name="Skeleton3D" type="Skeleton3D" parent="Visual/Pivot" unique_id=513130692]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Visual/Pivot/Skeleton3D" unique_id=1291016322]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.18437704, 0)
+mesh = SubResource("CapsuleMesh_hgp4e")
+skeleton = NodePath("../../../..")
+
+[node name="EyesMesh" type="MeshInstance3D" parent="Visual/Pivot/Skeleton3D/MeshInstance3D" unique_id=763472008]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0078125, 0.359299, -0.42493862)
+mesh = SubResource("BoxMesh_rssre")
+skeleton = NodePath("../../..")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Visual" unique_id=2125535730]
+root_node = NodePath("../..")
+libraries/ = SubResource("AnimationLibrary_k2tj7")
+autoplay = &"idle"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1121493186]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.181934, 0)
+shape = SubResource("CapsuleShape3D_0iuav")

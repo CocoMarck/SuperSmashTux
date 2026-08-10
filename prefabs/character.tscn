@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://de4tgdk06il7y"]
 
 [ext_resource type="Script" uid="uid://bpim6e053nk7s" path="res://scripts/character.gd" id="1_pkgsf"]
-[ext_resource type="Animation" uid="uid://b7ea7u60igfyp" path="res://animations/run.res" id="2_xofgc"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_humf0"]
 radius = 0.3
@@ -543,6 +542,46 @@ tracks/2/keys = {
 "values": [Vector3(1, 1, 1), Vector3(1, 0.99999994, 0.99999994), Vector3(1, 1, 1), Vector3(1, 1, 1)]
 }
 
+[sub_resource type="Animation" id="Animation_33sf3"]
+length = 0.39999999999999997
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot/Mesh:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.10000001, 0.20000002, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, -0.18437704, 0), Vector3(0, -0.08191344, 0), Vector3(0, -0.18437704, 0), Vector3(0, 0.016890794, 0.22322443), Vector3(0, -0.18437704, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot/Mesh:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.10000001, 0.20000002, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(0.6237593, 0, 0), Vector3(0, 0, 0), Vector3(-0.82066566, 0, 0), Vector3(0, 0, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot/Mesh:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.10000001, 0.20000002, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1)]
+}
+
 [sub_resource type="Animation" id="Animation_v5mhf"]
 resource_name = "walk"
 loop_mode = 1
@@ -598,12 +637,11 @@ _data = {
 &"looking_up": SubResource("Animation_bfnxi"),
 &"neutral_attack": SubResource("Animation_xb6wn"),
 &"neutral_up": SubResource("Animation_adroo"),
-&"run": ExtResource("2_xofgc"),
+&"run": SubResource("Animation_33sf3"),
 &"walk": SubResource("Animation_v5mhf")
 }
 
 [node name="Character" type="CharacterBody3D" unique_id=1138438983]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
 floor_snap_length = 0.5
 script = ExtResource("1_pkgsf")
 
