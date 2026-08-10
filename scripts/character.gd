@@ -12,7 +12,7 @@ const ONE_WAY_COYOTE_TIME := 0.3   # tiempo de perdon al salirse de la orilla y 
 # Constantes | Agarre de orillas.
 const LEDGE_GRAB_REACH := 0.35      # que tan lejos por fuera de la orilla se puede agarrar
 const LEDGE_GRAB_DEPTH := 2.5      # que tan abajo de la cara superior se agarra
-const LEDGE_HANG_OFFSET := 0.45     # que tan separado de la orilla se queda colgado
+const LEDGE_HANG_OFFSET := 0.3     # que tan separado de la orilla se queda colgado
 const LEDGE_RELEASE_TIME := 0.4   # cooldown tras soltarse, pa no re-agarrarse solo
 
 # Propiedades publicas | Gravedad y velocidad.
@@ -175,7 +175,7 @@ func set_damage_move(damage:float, direction:Vector3) -> void:
 	y no nos regrese el snap de _ledge_grab al frame siguiente.
 	'''
 	if _hanging_ledge != null:
-		_hanging_ledge = null
+		_release_hanging_ledge()
 		_ledge_release_count = LEDGE_RELEASE_TIME
 	_current_damage_directon = direction
 	_taking_damage = true
@@ -200,7 +200,7 @@ func respawn(at_position: Vector3) -> void:
 	# ya lanzado (_spawned_hitbox, un Area3D hijo de $Pivot). Sin esta linea quedaria vivo y
 	# podria dañar a quien este parado en el spawn apenas reaparece.
 	_clear_hitbox()
-	_hanging_ledge = null
+	_release_hanging_ledge()
 	_drop_through_count = 0.0
 	_taking_damage = false
 	$Pivot.basis = Basis.looking_at(_get_initial_facing())
@@ -650,6 +650,15 @@ func _get_head_y() -> float:
 		return global_position.y
 	return collision_shape.global_position.y + _get_body_half_height()
 
+func _release_hanging_ledge() -> void:
+	'''
+	Soltar la cornisa que traiamos agarrada y avisarle a la plataforma pa que quede libre pa otro.
+	Aguanta que la plataforma ya no exista, asi que se puede llamar sin miedo.
+	'''
+	if _hanging_ledge != null and is_instance_valid(_hanging_ledge):
+		_hanging_ledge.release_ledge(_hanging_right_side, self)
+	_hanging_ledge = null
+
 func _ledge_grab(delta: float) -> void:
 	'''
 	Agarre de orillas estilo Smash Bros. Si vas cayendo junto a la orilla de una GroundPlatform,
@@ -665,7 +674,7 @@ func _ledge_grab(delta: float) -> void:
 	if _hanging_ledge != null:
 		# Si la plataforma se esfumo, soltarse de volada.
 		if not is_instance_valid(_hanging_ledge):
-			_hanging_ledge = null
+			_release_hanging_ledge()
 			return
 
 		# Determinar a donde se debe mirar mientras uno se cuelga pa irse a conocer a diosito.
@@ -674,7 +683,7 @@ func _ledge_grab(delta: float) -> void:
 		if _up_pressed:
 			# Subirse de vuelta a la plataforma, puro impulso hacia arriba; si se mete o no ya es bronca del jugador.
 			_target_velocity.y = jump_impulse
-			_hanging_ledge = null
+			_release_hanging_ledge()
 			_ledge_release_count = LEDGE_RELEASE_TIME
 			return
 
@@ -682,7 +691,7 @@ func _ledge_grab(delta: float) -> void:
 			# Soltarse a proposito y empezar a caer.
 			_target_velocity = Vector3.ZERO
 			_target_velocity.y = -1.0
-			_hanging_ledge = null
+			_release_hanging_ledge()
 			_ledge_release_count = LEDGE_RELEASE_TIME
 			return
 
@@ -729,6 +738,9 @@ func _ledge_grab(delta: float) -> void:
 		var grabbed_left := global_position.x < left_ledge_x and left_ledge_x - global_position.x <= LEDGE_GRAB_REACH
 
 		if grabbed_right or grabbed_left:
+			# Una cornisa, un personaje. Si ya hay alguien colgado de este lado, seguirle buscando en otra.
+			if not ground.take_ledge(grabbed_right, self):
+				continue
 			_hanging_ledge = ground
 			_hanging_right_side = grabbed_right
 			var ledge_x := right_ledge_x if grabbed_right else left_ledge_x

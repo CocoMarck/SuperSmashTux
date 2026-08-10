@@ -4,6 +4,9 @@ extends Platform
 # Plataforma de suelo normal, con orillas agarrables 
 # (debe tener un collision shape de caja 3D y no tener inclinación).
 
+# Propiedades privadas | Quien anda colgao de cada cornisa.
+var _ledge_holders: Dictionary = {}
+
 # Funciones propias.
 func has_ledges() -> bool:
 	'''
@@ -21,3 +24,30 @@ func get_ledge_x(right_side: bool) -> float:
 		return global_position.x
 	var half_width := box.size.x * 0.5 * _collision_shape.global_basis.get_scale().x
 	return _collision_shape.global_position.x + (half_width if right_side else -half_width)
+
+func is_ledge_free(right_side: bool, who: Node = null) -> bool:
+	'''
+	Saber si la cornisa de ese lado esta libre. Si la trae el mismo que pregunta, tambien cuenta como libre.
+	De pasada limpia al ocupante si ya se murio, pa que la cornisa no se quede apartada por un fantasma.
+	'''
+	var holder = _ledge_holders.get(right_side)
+	if holder == null or not is_instance_valid(holder):
+		_ledge_holders.erase(right_side)
+		return true
+	return holder == who
+
+func take_ledge(right_side: bool, who: Node) -> bool:
+	'''
+	Apartar la cornisa de ese lado. Devuelve false si ya la trae alguien mas.
+	'''
+	if not is_ledge_free(right_side, who):
+		return false
+	_ledge_holders[right_side] = who
+	return true
+
+func release_ledge(right_side: bool, who: Node) -> void:
+	'''
+	Soltar la cornisa. Nomas suelta si de verdad la traia quien lo pide, pa que nadie desaloje a otro.
+	'''
+	if _ledge_holders.get(right_side) == who:
+		_ledge_holders.erase(right_side)
