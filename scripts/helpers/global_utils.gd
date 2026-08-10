@@ -7,6 +7,9 @@ enum CharacterType { PLAYER, NPC }
 # Enumeracion de IDs posibles de jugadores.
 enum PlayerId { PLAYER_1, PLAYER_2 }
 
+# Enumeracion de IDs posibles de NPCs.
+enum NPCId { NPC_1, NPC_2, NPC_3, NPC_4 }
+
 # Mapa de input de cada jugador, usado por Player para resolver sus controles segun su ID. Se construye una sola vez al cargar el script.
 static var PLAYER_INPUT_MAPS: Dictionary[PlayerId, PlayerInputMap] = {
 	PlayerId.PLAYER_1: PlayerInputMap.new(

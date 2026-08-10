@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://de4tgdk06il7y" path="res://prefabs/character.tscn" id="5_tefeu"]
 [ext_resource type="Script" uid="uid://ywbqr6tkpira" path="res://scripts/test_player.gd" id="6_tefeu"]
 [ext_resource type="Script" uid="uid://bcu7gm8en7srf" path="res://scripts/camera_follow.gd" id="7_camfl"]
+[ext_resource type="Script" uid="uid://s26dpataicef" path="res://scripts/game_manager.gd" id="8_gmngr"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
 
@@ -35,6 +36,12 @@ size = Vector3(17.028, 1, 4)
 size = Vector3(17.028, 1, 4)
 
 [node name="Main" type="Node" unique_id=1966553712]
+
+[node name="GameManager" type="Node" parent="." unique_id=1756435872 node_paths=PackedStringArray("spawn_points", "play_area")]
+script = ExtResource("8_gmngr")
+character_types = Array[int]([0, 0, 0, 0])
+spawn_points = [NodePath("../SpawnPoint1"), NodePath("../SpawnPoint2"), NodePath("../SpawnPoint3"), NodePath("../SpawnPoint4")]
+play_area = NodePath("../PlayArea")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=52927572]
 environment = ExtResource("1_jpm03")
@@ -100,7 +107,7 @@ shape = SubResource("BoxShape3D_plat01")
 mesh = SubResource("BoxMesh_plat01")
 
 [node name="RoofLeft" type="StaticBody3D" parent="." unique_id=1347968376]
-transform = Transform3D(0.9396926, -0.34202012, 0, 0.34202012, 0.9396926, 0, 0, 0, 1, -8, 16.9118, 0)
+transform = Transform3D(0.93969256, -0.3420201, 0, 0.3420201, 0.93969256, 0, 0, 0, 1, -8, 16.9118, 0)
 script = ExtResource("3_p1atf")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RoofLeft" unique_id=867199618]
@@ -110,7 +117,7 @@ shape = SubResource("BoxShape3D_roof01")
 mesh = SubResource("BoxMesh_roof01")
 
 [node name="RoofRight" type="StaticBody3D" parent="." unique_id=1742371311]
-transform = Transform3D(-0.9396926, 0.34202015, 1.1920929e-07, 0.34202012, 0.9396927, 7.196708e-09, -5.9604645e-08, 2.2351742e-08, -1, 8, 16.9118, 0)
+transform = Transform3D(-0.93969256, 0.34202012, 1.509958e-07, 0.3420201, 0.9396926, 6.1777605e-10, -1.4167834e-07, 5.2224124e-08, -1, 8, 16.9118, 0)
 script = ExtResource("3_p1atf")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RoofRight" unique_id=1742676817]
@@ -128,15 +135,21 @@ script = ExtResource("2_o6xl0")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 12, 0)
 gizmo_extents = 2.0
 script = ExtResource("2_o6xl0")
-player_id = 1
 init_looking_at_right = true
 
 [node name="SpawnPoint3" type="Marker3D" parent="." unique_id=1589215959]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 20, 0)
 gizmo_extents = 2.0
+script = ExtResource("2_o6xl0")
+
+[node name="SpawnPoint4" type="Marker3D" parent="." unique_id=534624275]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 20, 0)
+gizmo_extents = 2.0
+script = ExtResource("2_o6xl0")
+init_looking_at_right = true
 
 [node name="Person" parent="." unique_id=1138438983 instance=ExtResource("5_tefeu")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -4.9382343, 14.47628, 0)
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0.06176567, 14.47628, 0)
 script = ExtResource("6_tefeu")
 walking_speed = 8
 running_speed = 18

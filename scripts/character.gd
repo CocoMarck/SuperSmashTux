@@ -28,7 +28,6 @@ const LEDGE_RELEASE_TIME := 0.35   # cooldown tras soltarse, pa no re-agarrarse 
 
 # Propiedades publicas | HP y porcentaje de daño.
 @export_group("Health")
-var hp :int = 100
 var damage_percentage :float = 0
 
 # Propiedades privadas | Deteccion de inputs.
@@ -167,9 +166,6 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	
 # Funciones damage recivido
-func set_damage(damage:int):
-	hp -= damage
-
 func set_damage_percentage(damage:int) -> void:
 	damage_percentage += damage*0.01
 
@@ -188,6 +184,26 @@ func _damage_move() -> void:
 	_target_velocity.x += (_normal_damage_move_power*_current_damage_directon.x) * damage_percentage
 	_target_velocity.y += (_normal_damage_move_power*_current_damage_directon.y) * damage_percentage
 	_taking_damage = false
+
+func respawn(at_position: Vector3) -> void:
+	'''
+	Reaparecer limpio: posicion, velocidad, daño, saltos, ataque/hitbox en curso, agarre de
+	orilla y orientacion inicial, todo se resetea.
+	'''
+	global_position = at_position
+	_target_velocity = Vector3.ZERO
+	damage_percentage = 0.0
+	_jump_count = 0
+	_air_count = 0
+	_current_attack = null
+	# Si el personaje se murio a medio ataque, poner _current_attack a null no libera el hitbox
+	# ya lanzado (_spawned_hitbox, un Area3D hijo de $Pivot). Sin esta linea quedaria vivo y
+	# podria dañar a quien este parado en el spawn apenas reaparece.
+	_clear_hitbox()
+	_hanging_ledge = null
+	_drop_through_count = 0.0
+	_taking_damage = false
+	$Pivot.basis = Basis.looking_at(_get_initial_facing())
 
 func _set_x_not_zero_value() -> void:
 	'''
