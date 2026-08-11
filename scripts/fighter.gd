@@ -16,20 +16,20 @@ var _attacks: Attacks = Attacks.new(
 
 	# En el piso
 	FightMove.new(
-		"ground_neutral", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.3, 0.1, 0), &"ground_neutral_attack", 0.0,
-		0.5, true, Vector3(1,1,0)
+		"ground_neutral", 0.875, 5, true, false, Vector3(0,0,0), false, Vector3(0.8, 0.0, 0), &"ground_neutral_attack", 0.0,
+		0.5, true, Vector3(1,0.25,0)
 	),
 	FightMove.new(
-		"down", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.6, -0.5, 0), &"down_attack",
-		0.0, 0.5, true, Vector3(1,1,0)
+		"down", 0.5, 5, true, false, Vector3(0,0,0), false, Vector3(1.0, -1.0, 0), &"down_attack",
+		0.0, 0.5, true, Vector3(0.25,1,0)
 	),
 	FightMove.new(
-		"up", 0.5, 5, true, false, Vector3(0,0,0), false, Vector3(0.0, 0.5, 0.0), &"up_attack",
-		0.0, 0.5, true, Vector3(0,2,0)
+		"up", 0.5833, 5, true, false, Vector3(0,0,0), false, Vector3(0.1, 0.8, 0.0), &"up_attack",
+		0.0, 0.5, true, Vector3(0.25,2,0)
 	),
 	FightMove.new(
-		"dash", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
-		0.5, true, Vector3(1.5,1,0)
+		"dash", 0.8333, 10, true, false, Vector3(7,0,0), false, Vector3(1.0, -1.0, 0), &"dash_attack", 0.0,
+		0.5, true, Vector3(1.0,0.5,0)
 	),
 	FightMove.new(
 		"forward", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"forward_attack", 0.0,
@@ -50,19 +50,19 @@ var _attacks: Attacks = Attacks.new(
 	
 	# En el aire
 	FightMove.new(
-		"air_neutral", 0.4, 5, false, false, Vector3(0,0,0), true, Vector3(0.5, -0.6, 0), &"air_neutral_attack", 45.0,
+		"air_neutral", 0.9167, 5, false, false, Vector3(0,0,0), true, Vector3(0.9, -0.9, 0), &"air_neutral_attack", 0.0,
 		0.5, true, Vector3(1,1,0)
 	),
 	FightMove.new(
-		"air_down", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.1, -0.7, 0), &"air_down_attack", 0.0,
-		0.5, true, Vector3(1,1.5,0)
+		"air_down", 0.5, 10, false, false, Vector3(0,0,0), true, Vector3(0.1, -1.1, 0), &"air_down_attack", 0.0,
+		0.5, true, Vector3(1,1.25,0)
 	),
 	FightMove.new(
-		"air_up", 0.5, 5, false, false, Vector3(0,0,0), true, Vector3(0.0, 0.8, 0), &"air_up_attack",
-		0.0, 0.5, true, Vector3(0.5,1.5,0)
+		"air_up", 0.5833, 5, false, false, Vector3(0,0,0), true, Vector3(0.0, 0.8, 0), &"air_up_attack",
+		0.0, 0.5, true, Vector3(0.5,1.25,0)
 	),
 	FightMove.new(
-		"air_forward", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.6, 0, 0), &"air_forward_attack", 90.0,
+		"air_forward", 0.6667, 10, false, false, Vector3(0,0,0), true, Vector3(1.2, 0.0, 0), &"air_forward_attack", 90.0,
 		0.5, true, Vector3(1.5,1,0)
 	),
 	FightMove.new(
@@ -83,7 +83,7 @@ func _spawn_hitbox(p_position: Vector3, p_damage: int, p_direction: Vector3) -> 
 	Swap de ejes: el "adelante" (x) del FightMove cae en z del Pivot, y z en x invertido.
 	Se indica posision y tamaño de hitbox.
 	'''
-	var fixed_position := Vector3(p_position.z, p_position.y, p_position.x*-1)
+	var fixed_position := Vector3(p_position.z, p_position.y, p_position.x)
 	_spawned_hitbox = Hitbox.new(fixed_position, Vector3(0.5, 0.5, 0.5), self, p_damage, p_direction)
 	_pivot.add_child(_spawned_hitbox)
 
@@ -96,7 +96,7 @@ func _clear_hitbox() -> void:
 		_spawned_hitbox = null
 
 # Funciones | Pelear
-func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates) -> bool:
+func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates) -> void:
 	'''
 	Este evento sobrepasa el move. 
 	'''
@@ -192,8 +192,6 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		if _hitbox_time <= 0:
 			_clear_hitbox()
 		_hitbox_time -= delta
-	
-	return _current_attack != null
 
 func _attack_anim(delta:float) -> void:
 	if _current_attack.animation_name != &"":
@@ -218,12 +216,12 @@ func _physics_process(delta: float) -> void:
 	var move_states = _get_move_states(move_signals)
 	
 	# Fight moves
-	var attacking = _fight_move(delta, gravity_signals, move_states)
+	_fight_move(delta, gravity_signals, move_states)
 	
 	# Bloqueo de direccion de movimiento por inputs.
 	_horizontal_move = true
 	_can_jump = true
-	if attacking:
+	if _current_attack != null:
 		_can_jump = false
 		# Si este en el piso y da trancazos, no permitir inputs de movimiento horizontal.
 		if _current_attack.air_attack == false:
@@ -237,7 +235,7 @@ func _physics_process(delta: float) -> void:
 	# Anim
 	if _knockback_active:
 		_damage_anim(delta, gravity_signals)
-	elif attacking:
+	elif _current_attack != null:
 		_attack_anim(delta)
 	else:
 		_move_anim(delta, move_states)

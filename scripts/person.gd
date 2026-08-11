@@ -337,7 +337,10 @@ func _damage_move(delta: float) -> void:
 		_pivot.rotation_degrees.x = 0
 	
 func _damage_anim(delta: float, signals: VerticalForceSignals) -> void:
-	if signals.on_floor:
+	if signals.air_count < 0.1:
+		_damage_degrees = 0
+		_animation_player.play("hurt_ground")
+	elif signals.on_floor:
 		_damage_degrees = 0
 		_animation_player.play("hurt_ground")
 	else:

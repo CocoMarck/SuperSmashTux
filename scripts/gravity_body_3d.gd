@@ -17,7 +17,7 @@ const ONE_WAY_COYOTE_TIME :float = 0.3   # tiempo de perdon al salirse de la ori
 
 # Prpiedades privadas | Gravedad | Fuerza vertical | Movimiento
 var _target_velocity: Vector3 = Vector3.ZERO
-var _air_count: int = 0
+var _air_count: float = 0.0
 
 # Propiedades privadas | Shape
 var _collision_shape: CollisionShape3D
@@ -147,7 +147,7 @@ func _vertical_force(
 	else:
 		# Acumular fuerza vertical, y contar tiempo en el aire.
 		_target_velocity.y -= (fall_acceleration * multiplier) * delta
-		_air_count += 1
+		_air_count += delta
 	if on_ceiling:
 		# Evitar saltar al techo, y segir con llendo hacia arriba. Nembe no, eso ta muy mal oshe.
 		_target_velocity.y = -(fall_acceleration * multiplier) * delta
