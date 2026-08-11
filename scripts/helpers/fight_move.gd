@@ -1,54 +1,92 @@
 class_name FightMove
 extends RefCounted
 
-# Propiedades publicas | Configuracion.
+'''
+Movimiento de ataque. Clase que tiene la data necesaria para hacer los movimientos de ataque.
+
+Indica del movimiento: 
+- Nombre de ataque (se usara de animación).
+- Si es agarre o no.
+- Duración de movimiento. En segundos.
+- Si es ataque en el aire.
+- Inmunidad o no.
+- Si remplazo velocidad vertical, horizontal.
+- Veolocidad de desplazamiento durante el ataque.
+- Direccion de impulso del ataque.
+
+Indica del hitbox:
+- Daño de hitbox
+- Posición de hitbox
+- Tamaño de hitbox
+- Rotación del hitbox
+- Ratio de hitbox. Respecto al movimiento. Porcentaje de `0.0` a `1.0`.
+- Ratio inverso con respecto a la duraccion del movimiento
+'''
+
+# Propiedades publicas configuracion
 var name: StringName
 var duration: float
-var damage: int
-var power_direction: Vector3
-
-# Propiedades publicas | Movimiento.
-var stop_horizontal_move: bool
-var stop_vertical_move: bool
 var speed: Vector3
-
-# Propiedades publicas | Ataque.
+var direction: Vector3
 var air_attack: bool
+var grab_attack: bool
+var override_horizontal_move: bool
+var override_vertical_move: bool
+var inmortal: bool
+
+# Propidedes publicas hitbox
+var hitbox_damage: int
+var hitbox_size: Vector3
 var hitbox_position: Vector3
 var hitbox_time_ratio: float
+var hitbox_rotation: float
 var inversed_hitbox_ratio: bool
 
-# Propiedades publicas | Animacion.
-var animation_name: StringName
-var mesh_rotation_x: float # <-- Esto es legacy. Se borrara cuando se usen full animaciones. Como debe ser.
+# Propiedades privadas valores default.
+var _defaults := {
+	"name": &"snake_case",
+	"duration": 0.5,
+	"speed": Vector3(0,0,0),
+	"direction": Vector3(0,0,0),
+	"air_attack": false,
+	"grab_attack": false,
+	"override_horizontal_move": true,
+	"override_vertical_move": false,
+	"inmortal": false,
+	"hitbox_damage": 20,
+	"hitbox_size": Vector3(0.5,0.5,0.5),
+	"hitbox_position": Vector3(0,0,0),
+	"hitbox_time_ratio": 0.5,
+	"hitbox_rotation": 0.0,
+	"inversed_hitbox_ratio": true
+}
 
-func _init(
-	p_name: StringName="", p_duration: float=0.0, p_damage: int=0.0,
-	p_stop_horizontal_move: bool=false, p_stop_vertical_move: bool=false, p_speed: Vector3=Vector3.ZERO, 
-	p_air_attack: bool=false, p_hitbox_position: Vector3=Vector3.ZERO,
-	p_animation_name: StringName = &"", p_mesh_rotation_x: float = 0.0, p_hitbox_time_ratio: float = 0.5, p_inversed_hitbox_ratio: bool = true, 
-	p_power_direction: Vector3 = Vector3(1,1,1)
-):
-	# Asignar los parametros de construccion a las propiedades de la clase.
-	name = p_name
-	duration = p_duration
-	damage = p_damage
-	power_direction = p_power_direction
-	
-	stop_horizontal_move = p_stop_horizontal_move
-	stop_vertical_move = p_stop_vertical_move
-	speed = p_speed
-	air_attack = p_air_attack
-	
-	hitbox_position = p_hitbox_position
-	
-	# Animation
-	animation_name = p_animation_name
-	mesh_rotation_x = p_mesh_rotation_x # <-- Esto es legacy. Se borrara cuando se usen full animaciones. Como debe ser.
-	
-	# Tiempo de hitbox
-	hitbox_time_ratio = p_hitbox_time_ratio
-	inversed_hitbox_ratio = p_inversed_hitbox_ratio
+
+func _init( 
+	p_config: Dictionary
+) -> void:
+	# Config fixeado con defaults
+	var config := _defaults.duplicate()
+	config.merge(p_config, true)  # true = p_config gana
+
+	# Movimiento
+	name = config["name"]
+	duration = config["duration"]
+	speed = config["speed"]
+	direction = config["direction"]
+	air_attack = config["air_attack"]
+	grab_attack = config["grab_attack"]
+	override_horizontal_move = config["override_horizontal_move"]
+	override_vertical_move = config["override_vertical_move"]
+	inmortal = config["inmortal"]
+
+	# Hitbox
+	hitbox_damage = config["hitbox_damage"]
+	hitbox_size = config["hitbox_size"]
+	hitbox_position = config["hitbox_position"]
+	hitbox_time_ratio = config["hitbox_time_ratio"]
+	hitbox_rotation = config["hitbox_rotation"]
+	inversed_hitbox_ratio = config["inversed_hitbox_ratio"]
 
 func get_hitbox_time_ratio() -> float:
 	return (duration * hitbox_time_ratio)

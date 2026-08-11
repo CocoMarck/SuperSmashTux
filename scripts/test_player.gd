@@ -14,3 +14,4 @@ func _collect_input() -> void:
 	_move_down = Input.is_action_pressed("player1_move_down")
 	_jump = Input.is_action_pressed("player1_jump")
 	_attack = Input.is_action_just_pressed("player1_attack")
+	_walking = Input.is_action_pressed("player1_walk")

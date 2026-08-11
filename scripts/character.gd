@@ -54,64 +54,268 @@ var _spawned_hitbox: Area3D = null
 var _attack_count: float = 0.0
 var _current_attack: FightMove = null
 var _attacks: Attacks = Attacks.new(
-	# name: StringName="", duration: float, p_damage: int, stop_horizontal_move: bool, stop_vertical_move: bool,
-	# speed: Vector3, air_attack: bool, hitbox_position: Vector3, animation_name: StringName, mesh_rotation_x: float, 
-	# hitbox_time_ratio: float, inversed_hitbox_ratio: bool, power_direction: Vector3
-
 	# En el piso
 	FightMove.new(
-		"ground_neutral", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.3, 0.1, 0), &"ground_neutral_attack", 0.0,
-		0.5, true, Vector3(1,1,0)
+		{
+			"name": &"ground_neutral_attack",
+			"duration": 0.2,
+			"speed": Vector3(0,0,0),
+			"air_attack": false,
+			"grab_attack": false,
+			"override_horizontal_move": true,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 5,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(0.8,0,0),
+			"direction": Vector3(1,0.25,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	FightMove.new(
-		"down", 0.2, 5, true, false, Vector3(0,0,0), false, Vector3(0.6, -0.5, 0), &"down_attack",
-		0.0, 0.5, true, Vector3(1,1,0)
+		{
+			"name": &"down_attack",
+			"duration": 0.2,
+			"speed": Vector3(0,0,0),
+			"air_attack": false,
+			"grab_attack": false,
+			"override_horizontal_move": true,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 5,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(1.0,-1.0,0),
+			"direction": Vector3(0.25,0.75,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	FightMove.new(
-		"up", 0.5, 5, true, false, Vector3(0,0,0), false, Vector3(0.0, 0.5, 0.0), &"up_attack",
-		0.0, 0.5, true, Vector3(0,2,0)
+		{
+			"name": &"up_attack",
+			"duration": 0.5,
+			"speed": Vector3(0,0,0),
+			"air_attack": false,
+			"grab_attack": false,
+			"override_horizontal_move": true,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 5,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(0.1,0.8,0),
+			"direction": Vector3(0.25,2,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	FightMove.new(
-		"dash", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"dash_attack", 0.0,
-		0.5, true, Vector3(1.5,1,0)
+		{
+			"name": &"dash_attack",
+			"duration": 0.3,
+			"speed": Vector3(7,0,0),
+			"air_attack": false,
+			"grab_attack": false,
+			"override_horizontal_move": true,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 5,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(1.0,-1.0,0),
+			"direction": Vector3(1.0,0.5,0.0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	FightMove.new(
-		"forward", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"forward_attack", 0.0,
-		0.5, true, Vector3(1.5,1,0)
+		{
+			"name": &"forward_attack",
+			"duration": 0.3,
+			"speed": Vector3(10,0,0),
+			"air_attack": false,
+			"grab_attack": false,
+			"override_horizontal_move": true,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 10,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(0.5,-0.5,0),
+			"direction": Vector3(1.5,1,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	FightMove.new(
-		"heavy_side", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"heavy_side_attack", 0.0,
-		0.5, true, Vector3(1.5,1,0)
+		{
+			"name": &"heavy_side_attack",
+			"duration": 0.5,
+			"speed": Vector3(0,0,0),
+			"air_attack": false,
+			"grab_attack": false,
+			"override_horizontal_move": true,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 5,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(1.0,-1.0,0),
+			"direction": Vector3(0.25,1,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	FightMove.new(
-		"heavy_up", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"heavy_side_attack", 0.0,
-		0.5, true, Vector3(1.5,1,0)
+		{
+			"name": &"heavy_up_attack",
+			"duration": 0.5,
+			"speed": Vector3(0,0,0),
+			"air_attack": false,
+			"grab_attack": false,
+			"override_horizontal_move": true,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 5,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(1.0,-1.0,0),
+			"direction": Vector3(0.25,1,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	FightMove.new(
-		"heavy_down", 0.3, 10, true, false, Vector3(10,0,0), false, Vector3(0.5, -0.5, 0), &"heavy_down", 0.0,
-		0.5, true, Vector3(1.5,1,0)
+		{
+			"name": &"heavy_down_attack",
+			"duration": 0.5,
+			"speed": Vector3(0,0,0),
+			"air_attack": false,
+			"grab_attack": false,
+			"override_horizontal_move": true,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 5,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(1.0,-1.0,0),
+			"direction": Vector3(0.25,1,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	
 	# En el aire
 	FightMove.new(
-		"air_neutral", 0.4, 5, false, false, Vector3(0,0,0), true, Vector3(0.5, -0.6, 0), &"air_neutral_attack", 45.0,
-		0.5, true, Vector3(1,1,0)
+		{
+			"name": &"air_neutral_attack",
+			"duration": 1.0,
+			"speed": Vector3(0,0,0),
+			"air_attack": true,
+			"grab_attack": false,
+			"override_horizontal_move": false,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 5,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(0.9, -0.9, 0),
+			"direction": Vector3(1,1,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	FightMove.new(
-		"air_down", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.1, -0.7, 0), &"air_down_attack", 0.0,
-		0.5, true, Vector3(1,1.5,0)
+		{
+			"name": &"air_down_attack",
+			"duration": 0.5,
+			"speed": Vector3(0,0,0),
+			"air_attack": true,
+			"grab_attack": false,
+			"override_horizontal_move": false,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 10,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(0.1, -1.1, 0),
+			"direction": Vector3(1,1.25,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	FightMove.new(
-		"air_up", 0.5, 5, false, false, Vector3(0,0,0), true, Vector3(0.0, 0.8, 0), &"air_up_attack",
-		0.0, 0.5, true, Vector3(0.5,1.5,0)
+		{
+			"name": &"air_up_attack",
+			"duration": 0.5,
+			"speed": Vector3(0,0,0),
+			"air_attack": true,
+			"grab_attack": false,
+			"override_horizontal_move": false,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 5,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(0.0, 0.8, 0),
+			"direction": Vector3(0.5,1.25,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	FightMove.new(
-		"air_forward", 0.3, 10, false, false, Vector3(0,0,0), true, Vector3(0.6, 0, 0), &"air_forward_attack", 90.0,
-		0.5, true, Vector3(1.5,1,0)
+		{
+			"name": &"air_forward_attack",
+			"duration": 0.6667,
+			"speed": Vector3(0,0,0),
+			"air_attack": true,
+			"grab_attack": false,
+			"override_horizontal_move": false,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 10,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(1.2, 0.0, 0),
+			"direction": Vector3(1.5,1,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 	FightMove.new(
-		"air_back", 0.5, 5, false, false, Vector3(0,0,0), true, Vector3(0.6, -0.5, 0), &"air_back_attack",
-		0.0, 0.5, true, Vector3(1,1,0)
+		{
+			"name": &"air_back_attack",
+			"duration": 0.5,
+			"speed": Vector3(0,0,0),
+			"air_attack": true,
+			"grab_attack": false,
+			"override_horizontal_move": false,
+			"override_vertical_move": false,
+			"inmortal": false,
+			
+			"hitbox_damage": 10,
+			"hitbox_size": Vector3(0.5,0.5,0.5),
+			"hitbox_position": Vector3(1.2, 0.0, 0),
+			"direction": Vector3(1.5,1,0),
+			"hitbox_time_ratio": 0.5,
+			"hitbox_rotation": 0.0,
+			"inversed_hitbox_ratio": true
+		}
 	),
 )
 var _attack_direction : Vector3 = Vector3(0.0, 0.0, 0.0)
@@ -263,14 +467,14 @@ func _get_default_material() -> Material:
 	return null
 
 # Funciones hitbox de ataque.
-func _spawn_hitbox(p_position: Vector3, p_damage: int, p_direction: Vector3) -> void:
+func _spawn_hitbox(p_size: Vector3, p_position: Vector3, p_damage: int, p_direction: Vector3) -> void:
 	'''
 	Spawn de hitbox por movimiento de ataque.
 	Swap de ejes: el "adelante" (x) del FightMove cae en z del Pivot, y z en x invertido.
 	Se indica posision y tamaño de hitbox.
 	'''
 	var fixed_position := Vector3(p_position.z, p_position.y, p_position.x*-1)
-	_spawned_hitbox = Hitbox.new(fixed_position, Vector3(0.5, 0.5, 0.5), self, p_damage, p_direction)
+	_spawned_hitbox = Hitbox.new(fixed_position, p_size, self, p_damage, p_direction)
 	$Pivot.add_child(_spawned_hitbox)
 
 func _clear_hitbox() -> void:
@@ -306,7 +510,7 @@ func _move(delta: float, vertical_force_signals: Dictionary) -> Dictionary:
 	var horizontal_move := true
 	var can_jump = true
 	if (attacking):
-		horizontal_move = _current_attack.stop_horizontal_move == false
+		horizontal_move = _current_attack.override_horizontal_move == false
 		can_jump = false
 	
 	# Variables necesarias
@@ -452,9 +656,9 @@ func _fight(delta: float, states: Dictionary) -> void:
 		
 		if init_attack:
 			_attack_count = 0
-			_attack_direction.x = _attack_direction.x * _current_attack.power_direction.x
-			_attack_direction.y = (_attack_direction.y*0.1) * _current_attack.power_direction.y
-			_attack_direction.z = _attack_direction.z * _current_attack.power_direction.y
+			_attack_direction.x = _attack_direction.x * _current_attack.direction.x
+			_attack_direction.y = (_attack_direction.y*0.1) * _current_attack.direction.y
+			_attack_direction.z = _attack_direction.z * _current_attack.direction.y
 		
 	# Hacer ataque, esperando lo que dure, y haciendo que no se mueva el player si es necesario.
 	var first_attack_frame = false
@@ -464,10 +668,10 @@ func _fight(delta: float, states: Dictionary) -> void:
 			print(_current_attack.name)
 		
 		# Movimiento a al tacar atacar
-		if _current_attack.stop_horizontal_move:
+		if _current_attack.override_horizontal_move:
 			states["running"] = false
 			_target_velocity.x = _current_attack.speed.x * _direction.x
-		if _current_attack.stop_vertical_move:
+		if _current_attack.override_vertical_move:
 			_target_velocity.y = _current_attack.speed.y * _direction.y
 			
 		# Finalizar ataque.
@@ -482,14 +686,14 @@ func _fight(delta: float, states: Dictionary) -> void:
 		if (_current_attack.inversed_hitbox_ratio):
 			if _attack_count-delta >= _current_attack.get_hitbox_time_ratio():
 				_spawn_hitbox(
-					_current_attack.hitbox_position, _current_attack.damage, _attack_direction
+					_current_attack.hitbox_size, _current_attack.hitbox_position, _current_attack.hitbox_damage, _attack_direction
 				)
 				_hitbox_duration = _current_attack.duration - _current_attack.get_hitbox_time_ratio()
 				_hitbox_count = 0
 		else:
 			if first_attack_frame:
 				_spawn_hitbox(
-					_current_attack.hitbox_position, _current_attack.damage, _attack_direction
+					_current_attack.hitbox_size, _current_attack.hitbox_position, _current_attack.hitbox_damage, _attack_direction
 				)
 				_hitbox_duration = _current_attack.get_hitbox_time_ratio()
 				_hitbox_count = 0
@@ -509,11 +713,10 @@ func _anim(delta: float, states: Dictionary, direction: Vector3) -> void:
 		return
 	# Movimientos de pelea
 	if _current_attack != null:
-		if _current_attack.animation_name != &"":
-			$AnimationPlayer.play(_current_attack.animation_name)
+		if _current_attack.name != &"":
+			$AnimationPlayer.play(_current_attack.name)
 		else:
 			$AnimationPlayer.stop()
-			$Pivot/Mesh.rotation_degrees.x = _current_attack.mesh_rotation_x
 
 	else:
 		# Animacion | Movimiento en el piso
