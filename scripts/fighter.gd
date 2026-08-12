@@ -3,6 +3,18 @@ extends Person
 
 # Propiedades privadas | Input
 var _attack: bool = false
+var _grab: bool = false
+var _shield: bool = false
+
+# Propiedades privadas | Grab
+var _grab_time: float = 0.0
+var _grab_duration: float = 0.3
+
+# Propiedades privadas | Shield
+var _shield_time: float = 0.0
+var _shield_duration: float = 1.0
+## Tambien poner de regeneracion, erpo opr ahora no.
+
 
 # Propiedades privadas | Ataque
 var _attack_count: float = 0.0
@@ -404,6 +416,41 @@ func _attack_anim(delta:float) -> void:
 		_animation_player.stop()
 		#_mesh_instance.rotation_degrees.x = _current_attack.mesh_rotation_x
 
+func _attacking() -> bool:
+	return _current_attack != null
+
+# Funciones | Agarre
+func _grabbing() -> bool:
+	return _grab_time > 0
+
+func _grab_move(delta: float, signals: VerticalForceSignals) -> void:
+	if signals.on_floor:
+		if _grab:
+			if _grab_time <= 0.0:
+				_grab_time = _grab_duration
+	
+	if _grab_time > 0.0:
+		_grab_time -= delta
+
+# Funciones | Shield
+func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
+	if signals.on_floor:
+		if _shield:
+			if _shield_time <= 0.0:
+				_shield_time = _shield_duration
+	
+	if _shield_time > 0.0:
+		_shield_time -= delta
+		if _shield == false:
+			_shield_time = 0.0
+	
+	# Daño por exceso de uso de escudo
+	if _shield == true and _shield_time <= 0.0:
+		if signals.on_floor:
+			_target_velocity.y = jump_impulse
+
+func _with_shield() -> bool:
+	return _shield_time > 0
 
 # Funciones | Procesar
 func _physics_process(delta: float) -> void:
@@ -419,27 +466,42 @@ func _physics_process(delta: float) -> void:
 	_set_x_not_zero_value(move_signals.direction)
 	var move_states = _get_move_states(move_signals)
 	
-	# Fight moves
-	_fight_move(delta, gravity_signals, move_states)
+	# Fight and Defence moves
+	if not (_shield and _grab):
+		_grab_move(delta, gravity_signals)
+		_shield_move(delta, gravity_signals)
+	var grab_or_shield = _grabbing() or _with_shield()
+	if grab_or_shield:
+		# Anular ataque si se hace grab o escudo.
+		_current_attack = null
+	else:
+		# Solo permitir atacar cuando no se hace grab o se pone escudo
+		_fight_move(delta, gravity_signals, move_states)
 	
-	# Bloqueo de direccion de movimiento por inputs.
+	# Bloqueo de direccion por movimiento de inputs.
 	_horizontal_move = true
-	_can_jump = true
-	if _current_attack != null:
-		_can_jump = false
+	_allow_jump = true
+	if _attacking():
+		_allow_jump = false
 		# Si este en el piso y da trancazos, no permitir inputs de movimiento horizontal.
 		if _current_attack.air_attack == false:
 			_horizontal_move = false
+	elif _grabbing() or _with_shield():
+		_horizontal_move = false
+		_allow_jump = false
 
 	# Damage
 	if _knockback_active:
 		_damage_move(delta)
+		# Anular ataque y grab
 		_current_attack = null
+		_grab_time = 0.0
+		_shield_time = 0.0
 	
 	# Anim
 	if _knockback_active:
 		_damage_anim(delta, gravity_signals)
-	elif _current_attack != null:
+	elif _attacking():
 		_attack_anim(delta)
 	else:
 		_move_anim(delta, move_states)
