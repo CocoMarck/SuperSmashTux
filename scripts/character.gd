@@ -738,16 +738,6 @@ func _anim(delta: float, states: Dictionary, direction: Vector3) -> void:
 
 # Funciones plataformas de un solo sentido. Ahora en `GravityBody3d`
 
-func _get_head_y() -> float:
-	'''
-	Altura global de la cabeza del character, calculada desde el CollisionShape3D.
-	Es la contraparte de _get_feet_y, pero pa arriba, nos sirve pa saber si alcanzamos una orilla.
-	'''
-	var collision_shape := $CollisionShape3D as CollisionShape3D
-	if collision_shape == null or collision_shape.shape == null:
-		return global_position.y
-	return collision_shape.global_position.y + _get_body_half_height()
-
 func _release_hanging_ledge() -> void:
 	'''
 	Soltar la cornisa que traiamos agarrada y avisarle a la plataforma pa que quede libre pa otro.

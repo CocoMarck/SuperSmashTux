@@ -1,6 +1,20 @@
 class_name Person
 extends GravityBody3D
 
+'''
+Person
+Objeto de persona. Tiene lo necesario para tener fisicas 2D en un mundo 3D.
+- Puede correr, caminar, ir agachado, y saltar. 
+- Tiene compatibilidad con mas de un salto.
+- Puede agarrarse de plataformas.
+- Recibe daño y tiene hp.
+- Tiene flancos de input de movimiento para poder hacer acciones especiales. O limitar acciones.
+'''
+
+# Constantes | Agarre de orillas.
+const LEDGE_HANG_OFFSET := 0.3     # que tan separado de la orilla se queda colgado
+const LEDGE_RELEASE_TIME := 0.3    # cooldown tras soltarse, pa no re-agarrarse solo
+
 # Propiedades publicas
 @export_group("Horizontal Movement")
 @export var walking_speed: int = 4
@@ -66,8 +80,20 @@ var _move_down: bool = false
 
 var _jump: bool = false
 
-# Propiedades privadas | Flancos de inputs de arriba/abajo.
+# Propiedades privadas | Flancos de inputs
+# Los flancos de input perminten ataques al same time de dos teclas.
 var _was_jumping: bool = false
+var _was_move_down: bool = false
+var _down_pressed: bool = false
+var _was_move_up: bool = false
+var _up_pressed: bool = false
+
+
+# Propiedades privadas | Agarre de orillas.
+var _hanging_ledge: GroundPlatform = null
+var _hanging_right_side: bool = false
+var _hang_position: Vector3 = Vector3.ZERO
+var _ledge_release_count: float = 0.0
 
 # Fuciones | Direccion
 func _get_initial_facing() -> Vector3:
@@ -146,10 +172,18 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 		_move_down = false
 		_move_up = false
 	else:
-		# Salto
+		# Flancos Salto
 		want_jump = (_jump or _move_up) # <--- El move up se usara para ataques hacia arriba.
 		can_jump = (want_jump and _allow_jump) and not _was_jumping
+
+		# Flancos Down
+		_down_pressed = _move_down and not _was_move_down
+
+		# Flancos up
+		_up_pressed = _move_up and not _was_move_up
 	_was_jumping = want_jump
+	_was_move_down = _move_down
+	_was_move_up = _move_up
 
 	# Variables | Direccion de movimiento horizontal
 	# Solo actualizar direccion en el piso.
@@ -300,10 +334,10 @@ func _move_anim(delta:float, states: MoveStates) -> void:
 	else:
 		_animation_player.play("idle")
 
-func _set_pivot_direction(signals: MoveSignals, direction: Vector3) -> void:
-	if signals.on_floor:
+func _set_pivot_direction(signals: MoveSignals) -> void:
+	if signals.on_floor or _holding_onto_the_ledge():
 		_pivot.basis = Basis.looking_at(
-			Vector3(_x_not_zero_value, direction.y, direction.z)
+			Vector3(_x_not_zero_value, signals.direction.y, signals.direction.z)
 		)
 		_last_x_direction = _x_not_zero_value
 		_pivot.rotate_x( 0 )
@@ -347,7 +381,106 @@ func _damage_anim(delta: float, signals: VerticalForceSignals) -> void:
 		_animation_player.play("hurt_air")
 		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
 	_pivot.rotation_degrees.x = _damage_degrees
-		
+
+
+# Funciones | Agarre de orillas
+func _release_hanging_ledge() -> void:
+	'''
+	Soltar la cornisa que traiamos agarrada y avisarle a la plataforma pa que quede libre pa otro.
+	Aguanta que la plataforma ya no exista, asi que se puede llamar sin miedo.
+	'''
+	if _hanging_ledge != null and is_instance_valid(_hanging_ledge):
+		_hanging_ledge.release_ledge(_hanging_right_side, self)
+	_hanging_ledge = null
+
+func _ledge_grab(
+	delta: float, vertical_force_signals: VerticalForceSignals, move_signals: MoveSignals
+) -> void:
+	'''
+	Agarre de orillas estilo Smash Bros. Deteccion puramente espacial: cada GroundPlatform expone
+	una zona de agarre a cada lado (matematica de rangos, is_character_in_ledge_zone), aqui solo se
+	pregunta "¿ando en esa zona?" + "¿vengo cayendo?". Sin heuristicas de historial.
+	Colgado, arriba te subes con impulso y abajo te sueltas y caes.
+	Corre despues de _move, asi que pisa lo que calculo sin pedirle permiso. _fight y _anim corren despues
+	pero se salen temprano si andamos colgados, por eso no nos pisan de vuelta.
+	
+	Remplaza direccion horizontal.
+	'''
+	# Cooldown pa no re-agarrarnos solitos justo despues de soltarnos.
+	if _ledge_release_count > 0.0:
+		_ledge_release_count = max(_ledge_release_count - delta, 0.0)
+
+	# Si ya andamos colgados, decidir que hacer.
+	if _hanging_ledge != null:
+		# Si la plataforma se esfumo, soltarse de volada.
+		if not is_instance_valid(_hanging_ledge):
+			_release_hanging_ledge()
+			return
+
+		# Determinar a donde se debe mirar mientras uno se cuelga pa irse a conocer a diosito.
+		var inward := -1.0 if _hanging_right_side else 1.0
+
+		if _up_pressed:
+			# Subirse de vuelta a la plataforma, puro impulso hacia arriba; si se mete o no ya es bronca del jugador.
+			_target_velocity.y = jump_impulse
+			_release_hanging_ledge()
+			_ledge_release_count = LEDGE_RELEASE_TIME
+			return
+
+		if _down_pressed:
+			# Soltarse a proposito y empezar a caer.
+			_target_velocity = Vector3.ZERO
+			_target_velocity.y = -1.0
+			_release_hanging_ledge()
+			_ledge_release_count = LEDGE_RELEASE_TIME
+			return
+
+		# Nadamas quedarse ahi colgado, bien quietecito.
+		_target_velocity = Vector3.ZERO
+		global_position = _hang_position
+		_air_count = 0
+		_jump_count = 0
+		# Voltearlo de cara a la orilla. _anim corre despues pero se sale temprano si andamos colgados, asi no lo voltea.
+		move_signals.direction.x = inward
+		return
+
+	# No estamos colgados: checar si toca agarrarnos. Zona de agarre + venir cayendo, nada mas.
+	if _ledge_release_count > 0.0:
+		return
+	if vertical_force_signals.on_floor:
+		return
+	if _target_velocity.y >= 0.0:
+		return
+
+	for platform in get_tree().get_nodes_in_group(Platform.GROUP_NAME):
+		var ground := platform as GroundPlatform
+		if ground == null or not is_instance_valid(ground):
+			continue
+		if not ground.has_ledges():
+			continue
+
+		for right_side in [true, false]:
+			if not ground.is_character_in_ledge_zone(right_side, global_position):
+				continue
+			# Una cornisa, un personaje. Si ya hay alguien colgado de este lado, seguir buscando otra.
+			if not ground.take_ledge(right_side, self):
+				continue
+
+			_hanging_ledge = ground
+			_hanging_right_side = right_side
+			var top_y := ground.get_top_y()
+			var ledge_x := ground.get_ledge_x(right_side)
+			var anchor_x := (ledge_x + LEDGE_HANG_OFFSET) if right_side else (ledge_x - LEDGE_HANG_OFFSET)
+			var anchor_y := global_position.y - (_get_head_y() - top_y)
+			_hang_position = Vector3(anchor_x, anchor_y, global_position.z)
+			_target_velocity = Vector3.ZERO
+			return
+
+func _holding_onto_the_ledge() -> bool:
+	return _hanging_ledge != null
+
+func _ledge_grab_anim(delta) -> void:
+	_animation_player.play("idle")
 
 # Funciones | Inicializar
 func _ready() -> void:
@@ -382,10 +515,15 @@ func _physics_process(delta: float) -> void:
 	_collect_input()
 	
 	# Move
-	var gravity_signals = _vertical_force(delta, _move_down, _fall_acceleration_multiplier)
+	var gravity_signals = _vertical_force(delta, _down_pressed, _fall_acceleration_multiplier)
 	var move_signals = _move(delta, gravity_signals)
-	_set_x_not_zero_value(move_signals.direction)
 	var move_states = _get_move_states(move_signals)
+	_ledge_grab(delta, gravity_signals, move_signals)
+	_set_x_not_zero_value(move_signals.direction)
+	
+	# Ledge grab
+	if _holding_onto_the_ledge() and _knockback_active:
+		_release_hanging_ledge()
 
 	# Damage
 	if _knockback_active:
@@ -394,9 +532,11 @@ func _physics_process(delta: float) -> void:
 	# Anim
 	if _knockback_active:
 		_damage_anim(delta, gravity_signals)
+	elif _holding_onto_the_ledge():
+		_ledge_grab_anim(delta)
 	else:
 		_move_anim(delta, move_states)
-	_set_pivot_direction(move_signals, move_signals.direction)
+	_set_pivot_direction(move_signals)
 
 	# Procesar todo
 	velocity = _target_velocity

@@ -461,10 +461,16 @@ func _physics_process(delta: float) -> void:
 	_collect_input()
 	
 	# Move
-	var gravity_signals = _vertical_force(delta, _move_down, _fall_acceleration_multiplier)
+	var gravity_signals = _vertical_force(delta, _down_pressed, _fall_acceleration_multiplier)
 	var move_signals = _move(delta, gravity_signals)
-	_set_x_not_zero_value(move_signals.direction)
 	var move_states = _get_move_states(move_signals)
+	if not _knockback_active:
+		_ledge_grab(delta, gravity_signals, move_signals)
+	_set_x_not_zero_value(move_signals.direction)
+	
+	# Ledge grab
+	if _holding_onto_the_ledge() and _knockback_active:
+		_release_hanging_ledge()
 	
 	# Fight and Defence moves
 	if not (_shield and _grab):
@@ -493,7 +499,9 @@ func _physics_process(delta: float) -> void:
 	# Damage
 	if _knockback_active:
 		_damage_move(delta)
-		# Anular ataque y grab
+	
+	# Anular ataque, grab, y shield
+	if  _knockback_active or _holding_onto_the_ledge():
 		_current_attack = null
 		_grab_time = 0.0
 		_shield_time = 0.0
@@ -501,11 +509,13 @@ func _physics_process(delta: float) -> void:
 	# Anim
 	if _knockback_active:
 		_damage_anim(delta, gravity_signals)
+	elif _holding_onto_the_ledge():
+		_ledge_grab_anim(delta)
 	elif _attacking():
 		_attack_anim(delta)
 	else:
 		_move_anim(delta, move_states)
-	_set_pivot_direction(move_signals, move_signals.direction)
+	_set_pivot_direction(move_signals)
 
 	# Procesar todo
 	velocity = _target_velocity

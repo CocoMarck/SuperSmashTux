@@ -162,6 +162,15 @@ func _vertical_force(
 		_target_velocity.y # Force
 	)
 
+# Se usa para plataformas locas.
+func _get_head_y() -> float:
+	'''
+	Altura global de la cabeza del character, calculada desde el CollisionShape3D.
+	Es la contraparte de _get_feet_y, pero pa arriba, nos sirve pa saber si alcanzamos una orilla.
+	'''
+	return _collision_shape.global_position.y + _get_body_half_height()
+
+# Ready y physics process
 func _ready() -> void:
 	# El shape que se necesita si o si.
 	_collision_shape = $CollisionShape3D
