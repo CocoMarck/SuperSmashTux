@@ -5,7 +5,7 @@ extends Platform
 # (debe tener un collision shape de caja 3D y no tener inclinación).
 
 # Propiedades publicas | Zona de agarre.
-@export var ledge_zone_width: float = 0.5   # que tan ancha hacia afuera es la zona de agarre de cada orilla
+@export var ledge_zone_width: float = 1.0   # que tan ancha hacia afuera es la zona de agarre de cada orilla
 @export var ledge_zone_depth: float = 0.5   # que tanto se expande hacia abajo la zona de agarre, desde la cara superior
 
 # Propiedades privadas | Quien anda colgao de cada cornisa.

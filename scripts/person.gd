@@ -17,8 +17,8 @@ const LEDGE_RELEASE_TIME := 0.3    # cooldown tras soltarse, pa no re-agarrarse 
 
 # Propiedades publicas
 @export_group("Horizontal Movement")
-@export var walking_speed: int = 4
-@export var running_speed: int = 10
+@export var walking_speed: int = 3
+@export var running_speed: int = 8
 @export var init_looking_at_right: bool = false
 
 @export_group("Vertical Movement")
@@ -43,7 +43,7 @@ var _animation_player: AnimationPlayer
 # Propiedades privadas | Aceleracion horizontal
 var _ground_acceleration: float = 40.0
 var _air_acceleration: float = 20.0
-var _ground_friction: float = 60.0
+var _ground_friction: float = 80.0
 var _knockback_friction: float = 12.0
 
 # Propiedades privadas | Multiples saltos
