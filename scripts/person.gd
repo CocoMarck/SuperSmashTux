@@ -71,7 +71,7 @@ var _knockback_duration :float = 0.35
 var _damage_degrees :float = 0.0
 
 # Propiedades privadas | Inputs
-var _walking: bool = false
+var _walk: bool = false
 
 var _move_left: bool = false
 var _move_right: bool = false
@@ -157,6 +157,25 @@ func _collect_input() -> void:
 	pass
 
 
+# Funciones | Respawn
+func respawn(at_position: Vector3) -> void:
+	'''
+	Reaparecer limpio: posicion, velocidad, daño, saltos, ataque/hitbox en curso, agarre de
+	orilla y orientacion inicial, todo se resetea.
+	'''
+	global_position = at_position
+	_target_velocity = Vector3.ZERO
+	damage_percentage = 0.0
+	_jump_count = 0
+	_air_count = 0
+	# Si el personaje se murio a medio ataque, poner _current_attack a null no libera el hitbox
+	# ya lanzado (_spawned_hitbox, un Area3D hijo de $Pivot). Sin esta linea quedaria vivo y
+	# podria dañar a quien este parado en el spawn apenas reaparece.
+	_release_hanging_ledge()
+	_drop_through_count = 0.0
+	_set_x_not_zero_value( _get_initial_facing() )
+
+
 # Funciones | Mover
 func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	'''
@@ -209,7 +228,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	# Cambiador de velocidad segun sea el caso.
 	var speed : int
 	var speed_multiplier := 1.0
-	if _walking:
+	if _walk:
 		speed = walking_speed
 	else:
 		speed = running_speed
@@ -281,7 +300,7 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 		neutral_up = not moving and _move_up and not _move_down
 		neutral_crouch = not moving and _move_down and not _move_up
 		crouch_move = moving and _move_down and not _move_up
-		walking = _walking and moving
+		walking = _walk and moving
 		running = moving and not walking and not crouch_move
 	
 	else:

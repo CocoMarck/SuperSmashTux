@@ -1,5 +1,5 @@
 class_name NPC
-extends Character
+extends PowerFighter
 
 # Funciones | Apariencia.
 func _get_default_material() -> Material:

@@ -4,9 +4,7 @@
 [ext_resource type="Script" uid="uid://bbefl7k3gi1fy" path="res://scripts/spawn_point.gd" id="2_o6xl0"]
 [ext_resource type="Script" uid="uid://bcmv8f218b2yh" path="res://scripts/one_way_platform.gd" id="3_p1atf"]
 [ext_resource type="Script" uid="uid://bqr8o7d3ctyo2" path="res://scripts/ground_platform.gd" id="4_grnd0"]
-[ext_resource type="Script" uid="uid://ywbqr6tkpira" path="res://scripts/test_player.gd" id="6_tefeu"]
 [ext_resource type="Script" uid="uid://bcu7gm8en7srf" path="res://scripts/camera_follow.gd" id="7_camfl"]
-[ext_resource type="PackedScene" uid="uid://imhrpdnjl8kq" path="res://prefabs/standard_power_fighter.tscn" id="7_tipki"]
 [ext_resource type="Script" uid="uid://s26dpataicef" path="res://scripts/game_manager.gd" id="8_gmngr"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
@@ -155,6 +153,3 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, 0)
 gizmo_extents = 0.5
 script = ExtResource("2_o6xl0")
 init_looking_at_right = true
-
-[node name="StandardPowerFighter" parent="." unique_id=581340581 instance=ExtResource("7_tipki")]
-script = ExtResource("6_tefeu")

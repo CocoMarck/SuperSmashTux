@@ -369,6 +369,8 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 			_current_attack = null
 		else:
 			_direction.x = 0
+		if _current_attack == null:
+			_clear_hitbox()
 		
 	# Hacer ataque, esperando lo que dure, y haciendo que no se mueva el player si es necesario.
 	var first_attack_frame = false
@@ -473,7 +475,8 @@ func _physics_process(delta: float) -> void:
 		_release_hanging_ledge()
 	
 	# Fight and Defence moves
-	if not (_shield and _grab):
+	if ( not (_shield and _grab) ) and not _attacking(): 
+		# No permitir grab y shield a la vez. No permitir hacer agarre o escudo cuando se ataca.
 		_grab_move(delta, gravity_signals)
 		_shield_move(delta, gravity_signals)
 	var grab_or_shield = _grabbing() or _with_shield()
@@ -513,6 +516,8 @@ func _physics_process(delta: float) -> void:
 		_ledge_grab_anim(delta)
 	elif _attacking():
 		_attack_anim(delta)
+	elif grab_or_shield:
+		_animation_player.play("idle")
 	else:
 		_move_anim(delta, move_states)
 	_set_pivot_direction(move_signals)

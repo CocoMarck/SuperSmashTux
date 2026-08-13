@@ -22,11 +22,11 @@ const SLOT_4_MATERIAL: Material = preload("res://materials/mat_green.tres")
 @export var play_area: Area3D
 
 # Propiedades privadas | Estado por personaje.
-var _spawn_point_of_character: Dictionary[Character, SpawnPoint] = {}
-var _lives_of_character: Dictionary[Character, int] = {}
-var _death_count_of_character: Dictionary[Character, int] = {}
-var _npc_id_of_character: Dictionary[Character, GlobalUtils.NPCId] = {}
-var _death_position_of_character: Dictionary[Character, Vector3] = {}
+var _spawn_point_of_character: Dictionary[PowerFighter, SpawnPoint] = {}
+var _lives_of_character: Dictionary[PowerFighter, int] = {}
+var _death_count_of_character: Dictionary[PowerFighter, int] = {}
+var _npc_id_of_character: Dictionary[PowerFighter, GlobalUtils.NPCId] = {}
+var _death_position_of_character: Dictionary[PowerFighter, Vector3] = {}
 var _play_area_bounds: AABB = AABB()
 var _shake_end_time_msec: int = 0
 
@@ -137,7 +137,7 @@ func _spawn_all_characters() -> void:
 		_spawn_point_of_character[character] = spawn_point
 		_lives_of_character[character] = lives_per_character
 
-func _handle_character_death(character: Character) -> void:
+func _handle_character_death(character: PowerFighter) -> void:
 	'''
 	Un personaje se salio del area jugable. Si le quedan vidas, se saca del arbol de inmediato
 	(desaparece del juego al toque, nomas se guarda la instancia) y se vuelve a meter tras un
@@ -195,7 +195,7 @@ func is_shake_active() -> bool:
 	'''
 	return Time.get_ticks_msec() < _shake_end_time_msec
 
-func _forget_character(character: Character) -> void:
+func _forget_character(character: PowerFighter) -> void:
 	'''
 	Sacar a un personaje de los diccionarios de estado.
 	'''
@@ -205,7 +205,7 @@ func _forget_character(character: Character) -> void:
 	_npc_id_of_character.erase(character)
 	_death_position_of_character.erase(character)
 
-func _get_character_label(character: Character) -> String:
+func _get_character_label(character: PowerFighter) -> String:
 	'''
 	Etiqueta pa mostrar en consola: PLAYER_1/PLAYER_2 pal jugador (sacado del propio enum,
 	pa que si algun dia cambia el nombre del enum el mensaje se actualice solo), o NPC llano

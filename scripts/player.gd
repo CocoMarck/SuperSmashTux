@@ -1,5 +1,5 @@
 class_name Player
-extends Character
+extends PowerFighter
 
 # Propiedades publicas | Identificacion y mapeo de controles del jugador.
 @export var player_id: GlobalUtils.PlayerId
@@ -37,3 +37,6 @@ func _collect_input() -> void:
 	_move_down = Input.is_action_pressed(input_map.move_down)
 	_jump = Input.is_action_pressed(input_map.jump)
 	_attack = Input.is_action_just_pressed(input_map.attack)
+	_walk = Input.is_action_pressed(input_map.walk)
+	_grab = Input.is_action_just_pressed(input_map.grab)
+	_shield = Input.is_action_pressed(input_map.shield)

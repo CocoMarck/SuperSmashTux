@@ -63,7 +63,7 @@ func _physics_process(delta: float) -> void:
 	var scene_root := get_tree().current_scene
 	if scene_root == null:
 		scene_root = get_tree().root
-	var fighters: Array[Character] = []
+	var fighters: Array[PowerFighter] = []
 	_collect_characters(scene_root, fighters)
 	var fighter_positions: Array[Vector3] = []
 	for fighter in fighters:
@@ -80,13 +80,13 @@ func _physics_process(delta: float) -> void:
 	_apply_transform()
 
 # Funciones propias.
-func _collect_characters(node: Node, out: Array[Character]) -> void:
+func _collect_characters(node: Node, out: Array[PowerFighter]) -> void:
 	'''
-	Juntar todos los Character del arbol. No se baja dentro de uno, porque no hay peleadores
+	Juntar todos los PowerFighter del arbol. No se baja dentro de uno, porque no hay peleadores
 	adentro de otro peleador.
 	'''
 	for child in node.get_children():
-		var character := child as Character
+		var character := child as PowerFighter
 		if character != null:
 			out.append(character)
 			continue

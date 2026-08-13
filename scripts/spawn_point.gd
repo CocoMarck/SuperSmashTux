@@ -2,14 +2,14 @@ class_name SpawnPoint
 extends Marker3D
 
 # Constantes del script.
-const CHARACTER_PREFAB = preload("res://prefabs/character.tscn")
+const CHARACTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn")
 const PLAYER_SCRIPT = preload("res://scripts/player.gd")
 const NPC_SCRIPT = preload("res://scripts/npc.gd")
 
 # Propiedades publicas del script.
 @export var init_looking_at_right: bool = false
 
-func spawn(character_type: GlobalUtils.CharacterType, player_id: GlobalUtils.PlayerId, p_init_looking_at_right: bool) -> Character:
+func spawn(character_type: GlobalUtils.CharacterType, player_id: GlobalUtils.PlayerId, p_init_looking_at_right: bool) -> PowerFighter:
 	'''
 	Instanciar un personaje en este punto, con el tipo e ID que indique quien llama
 	(normalmente el GameManager). El add_child es diferido, pero la referencia que se
@@ -33,4 +33,4 @@ func spawn(character_type: GlobalUtils.CharacterType, player_id: GlobalUtils.Pla
 	# Posicionar al personaje en este punto de spawn, como hijo directo de la escena.
 	character.position = global_position
 	get_tree().current_scene.add_child.call_deferred(character)
-	return character as Character
+	return character as PowerFighter
