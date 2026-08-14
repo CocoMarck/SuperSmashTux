@@ -218,7 +218,7 @@ var _attacks: Attacks = Attacks.new(
 			"hitbox_damage": 10,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
 			"hitbox_position": Vector3(0.1, -1.1, 0),
-			"direction": Vector3(1,1.25,0),
+			"direction": Vector3(1,-1.0,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -267,7 +267,7 @@ var _attacks: Attacks = Attacks.new(
 	FightMove.new(
 		{
 			"name": &"air_back_attack",
-			"duration": 0.5,
+			"duration": 0.5833,
 			"speed": Vector3(0,0,0),
 			"air_attack": true,
 			"grab_attack": false,
@@ -277,8 +277,8 @@ var _attacks: Attacks = Attacks.new(
 			
 			"hitbox_damage": 10,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(1.2, 0.0, 0),
-			"direction": Vector3(1.5,1,0),
+			"hitbox_position": Vector3(-0.7, 0.0, 0),
+			"direction": Vector3(1.0,1,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -340,19 +340,21 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		# Ataque en aire
 		elif states.neutral_air:
 			_current_attack = _attacks.air_neutral
-		elif states.air_move:
-			_current_attack = _attacks.air_forward
 		elif states.air_down:
 			_current_attack = _attacks.air_down
 		elif states.air_up:
 			_current_attack = _attacks.air_up
+		elif states.air_forward:
+			_current_attack = _attacks.air_forward
+		elif states.air_back:
+			_current_attack = _attacks.air_back
 		else:
 			init_attack = false
 		
 		if init_attack:
 			_attack_count = 0
-			_attack_direction.x = _x_not_zero_value * _current_attack.direction.x
-			_attack_direction.y = _current_attack.direction.y*0.1
+			_attack_direction.x = _current_attack.direction.x * _x_not_zero_value
+			_attack_direction.y = _current_attack.direction.y * 0.1
 			#_attack_direction.z = _attack_direction.z * _current_attack.direction.y
 	
 	# Cancelar ataque aerio si no esta en aire.
@@ -374,11 +376,11 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		if first_attack_frame:
 			print(_current_attack.name)
 		
-		# Movimiento a al tacar atacar
+		# Movimiento a al atacar
 		if _current_attack.override_horizontal_move:
 			_target_velocity.x = _current_attack.speed.x * _x_not_zero_value
 		if _current_attack.override_vertical_move:
-			_target_velocity.y = _current_attack.speed.y * _x_not_zero_value
+			_target_velocity.y = _current_attack.speed.y
 			
 		# Finalizar ataque.
 		if _attack_count >= _current_attack.duration:

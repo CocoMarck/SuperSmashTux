@@ -289,8 +289,8 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 	var air_move := false
 	var air_up := false
 	var air_down := false
-	var air_back := false
 	var air_forward := false
+	var air_back := false
 
 	if signals.on_floor:
 		# En el piso
@@ -307,14 +307,8 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 		air_move = moving
 		air_up = _move_up and not _move_down
 		air_down = _move_down and not _move_up
-		air_back = moving and (signals.direction.x != _last_x_direction)
 		air_forward = moving and (signals.direction.x == _last_x_direction)
-		
-	# Debug
-	if air_back:
-		print("de espaldas en el aire")
-	#elif air_forward:
-		#print("de frente en el aire")
+		air_back = moving and (signals.direction.x != _last_x_direction)
 
 	return MoveStates.new(
 		walking,
@@ -332,6 +326,8 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 		air_move,
 		air_up,
 		air_down,
+		air_forward,
+		air_back
 	)
 
 func _move_anim(delta:float, states: MoveStates) -> void:
