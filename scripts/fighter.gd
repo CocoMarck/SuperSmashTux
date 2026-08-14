@@ -56,7 +56,7 @@ var _attacks: Attacks = Attacks.new(
 			
 			"hitbox_damage": 5,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(1.0,-1.0,0),
+			"hitbox_position": Vector3(0.5,-1.0,0),
 			"direction": Vector3(0.25,0.75,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,

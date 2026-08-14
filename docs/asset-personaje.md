@@ -1,6 +1,6 @@
 # Asset de Personaje (contrato visual)
 
-> Estructura esperada para los assets de personaje y cómo se instancian dentro de un `CharacterBody3D`. **Propuesta de convención; aplicar al crear assets nuevos.**
+> Estructura esperada para los assets de personaje y cómo se instancian dentro de un `CharacterBody3D`. **Aplicar esta convención al crear assets nuevos.**
 
 ## Estructura del asset (escena instanciable)
 
@@ -17,16 +17,33 @@ Node3D               # Raíz del asset = el "contrato" del modelo
 ```
 CharacterBody3D      # script Person/Fighter
     CollisionShape3D
-    Visual           # Instancia del asset (nodo renombrado)
+    Visual           
+        (Instancia del asset)
 ```
 
 ## Reglas
 
-- **Nombres fijos.** `Pivot`, `MeshInstance3D` y `AnimationPlayer` deben llamarse igual en todos los assets. Los scripts acceden por ruta fija (`$Visual/Pivot`, `$Visual/AnimationPlayer`); si cada asset nombrara sus nodos distinto, habría que andar codeando cambios de nombre por asset, y eso no.
+- **Nombres fijos, pero solo dentro del modelo.** `Pivot`, `Skeleton3D`/`MeshInstance3D` y `AnimationPlayer` deben llamarse igual en todos los assets — eso es lo que exportas de Blender y no cambia. El nodo que Godot pone automáticamente al instanciar el `.glb` (el hijo directo de `Visual`, con el nombre del archivo del modelo, ej. `standard_character_a_pose`) **no** se puede renombrar ni reparentar (ni arrastrando en el editor con "Editable Children", ni por script — Godot no lo permite). Por eso `person.gd` no asume ese nombre: en `_ready()` toma `_visual.get_child(0)` (lo que sea que haya ahí) y desde ese nodo navega por ruta fija hacia `Pivot`, `Pivot/Skeleton3D/MeshInstance3D` y `AnimationPlayer`. Así cualquier modelo nuevo funciona sin tocar código, sin importar cómo se llame su archivo `.glb`.
 - **`MeshInstance3D` siempre con material.** La malla debe traer material asignado (por defecto o propio). Sin material se ve invisible/blanco de más.
 - **`Skeleton3D` sí va en el asset, pero solo lo tocan las animaciones.** Las animaciones animan los huesos; **no se usa desde código** (ningún script accede a `Skeleton3D`).
 - **El `Pivot` vive dentro del asset** para que volteos, rotación de daño (spin) y animaciones viajen juntos con el modelo.
+- **El `.glb` se instancia, nunca se embebe.** Dentro de `Visual` va una instancia del `.glb` (arrastrado desde el panel de archivos), no una copia pegada a mano del mesh/skin/animaciones. Embeber duplica esos datos binarios como texto dentro del `.tscn` del prefab lo que afecta el tamaño del archivo y el rendimiento.
 
+---
+
+## Cómo agregar un personaje nuevo
+
+1. **En Blender**: modelar y armar el rig con el nodo raíz llamado `Pivot`, con la malla/esqueleto colgando de ahí (ver reglas de escala y orientación en `docs/nota-modelos-animaciones.md`). Animar con los nombres exactos que usa el código — ver la sección [Animaciones](#animaciones) más abajo para la lista completa por contexto (piso/aire, Person/Fighter/PowerFighter).
+2. **Exportar a `.glb`** y copiarlo a `assets/`.
+3. **Crear el prefab** (`.tscn` nuevo en `prefabs/`) con esta estructura:
+   ```
+   CharacterBody3D      # raíz, sin script propio (se asigna en runtime desde spawn_point.gd)
+       CollisionShape3D
+       Visual            # Node3D, con el transform de corrección de escala/orientación del modelo
+           <instancia del .glb>   # arrastrar el .glb desde el panel de archivos hasta Visual
+   ```
+   Al arrastrar el `.glb` sobre `Visual`, Godot genera el `ext_resource`/`instance=` solo — no hay que escribir nada a mano ni renombrar el nodo instanciado.
+4. **No hace falta tocar `person.gd`, `fighter.gd` ni `power_fighter.gd`.** Son genéricos: mientras el modelo respete los nombres fijos de la regla anterior, el personaje nuevo funciona sin cambios de código.
 
 ---
 

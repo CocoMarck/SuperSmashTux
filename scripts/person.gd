@@ -24,6 +24,11 @@ const LEDGE_RELEASE_TIME := 0.3    # cooldown tras soltarse, pa no re-agarrarse 
 @export_group("Vertical Movement")
 @export var jump_impulse: int = 13
 
+@export_group("Movement Tuning")
+@export var ground_acceleration: float = 40.0
+@export var ground_friction: float = 100.0
+@export var knockback_friction: float = 10.0
+
 @export_group("Appearence")
 @export var material: Material = null
 @export var mesh: Mesh = null
@@ -39,12 +44,6 @@ var _mesh_instance: MeshInstance3D
 var _animation_player: AnimationPlayer
 
 # `_target_velocity`, pertenece a `GravityBody3D`.
-
-# Propiedades privadas | Aceleracion horizontal
-var _ground_acceleration: float = 40.0
-var _air_acceleration: float = 20.0
-var _ground_friction: float = 80.0
-var _knockback_friction: float = 12.0
 
 # Propiedades privadas | Multiples saltos
 var _max_jumps = 1
@@ -232,27 +231,18 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 		speed = walking_speed
 	else:
 		speed = running_speed
-	if signals.on_floor:
-		if signals.on_floor and _move_down:
-			speed = walking_speed
-			speed_multiplier = 0.8
-	else:
-		if _last_x_direction == _direction.x:
-			speed_multiplier = 1
-		else:
-			speed_multiplier = 0.8
-	
+	if signals.on_floor and _move_down:
+		speed = walking_speed
+		speed_multiplier = 0.8
+
 	# Velocidad horizontal
 	var target_speed := _direction.x * (speed*speed_multiplier)
-	var accel := _air_acceleration
+	var accel := ground_friction if _direction.x == 0.0 else ground_acceleration
+	# Si se invierte el sentido del movimiento, frenar rapido (friction) en vez de acelerar despacio como si arrancara de cero, para evitar el "patinaje" al voltear.
+	if target_speed != 0.0 and sign(_target_velocity.x) != 0.0 and sign(_target_velocity.x) != sign(target_speed):
+		accel = ground_friction
 	if _knockback_active:
-		accel = _knockback_friction
-	elif signals.on_floor:
-		if _direction.x == 0.0:
-			accel = _ground_friction
-		else:
-			accel = _ground_acceleration
-		
+		accel = knockback_friction
 	_target_velocity.x = move_toward(_target_velocity.x, target_speed, accel*delta)
 
 	# Salto | Aplicar salto normal o doble salto segun sea el caso.
@@ -511,9 +501,13 @@ func _ready() -> void:
 	
 	# Essentail nodes
 	_visual = $Visual
-	_pivot = $Visual/Pivot
-	_mesh_instance = $Visual/Pivot/Skeleton3D/MeshInstance3D
-	_animation_player = $Visual/AnimationPlayer
+	# El hijo de Visual es la raiz del .glb importado; su nombre depende del
+	# archivo fuente (ej. "standard_character_a_pose"), asi que se toma
+	# dinamico en vez de hardcodearlo, y se navega desde ahi.
+	var model_root: Node3D = _visual.get_child(0)
+	_pivot = model_root.get_node("Pivot")
+	_mesh_instance = model_root.get_node("Pivot/Skeleton3D/MeshInstance3D")
+	_animation_player = model_root.get_node("AnimationPlayer")
 	_collision_shape = $CollisionShape3D
 	
 	# Apariencia
