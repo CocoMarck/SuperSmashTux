@@ -87,6 +87,10 @@ var _was_move_down: bool = false
 var _down_pressed: bool = false
 var _was_move_up: bool = false
 var _up_pressed: bool = false
+var _was_move_right: bool = false
+var _right_pressed: bool = false
+var _was_move_left: bool = false
+var _left_pressed: bool = false
 
 # Propiedades privadas | Agarre de orillas.
 var _hanging_ledge: GroundPlatform = null
@@ -194,14 +198,16 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 		want_jump = (_jump or _move_up) # <--- El move up se usara para ataques hacia arriba.
 		can_jump = (want_jump and _allow_jump) and not _was_jumping
 
-		# Flancos Down
+		# Flancos down, up right, left
 		_down_pressed = _move_down and not _was_move_down
-
-		# Flancos up
 		_up_pressed = _move_up and not _was_move_up
+		_left_pressed = _move_left and not _was_move_left
+		_right_pressed = _move_right and not _was_move_right
 	_was_jumping = want_jump
 	_was_move_down = _move_down
 	_was_move_up = _move_up
+	_was_move_left = _move_left
+	_was_move_right = _move_right
 
 	# Variables | Direccion de movimiento horizontal
 	# Solo actualizar direccion en el piso.

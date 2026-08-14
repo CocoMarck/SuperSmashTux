@@ -125,7 +125,7 @@ var _attacks: Attacks = Attacks.new(
 	FightMove.new(
 		{
 			"name": &"heavy_side_attack",
-			"duration": 0.5,
+			"duration": 0.7083,
 			"speed": Vector3(0,0,0),
 			"air_attack": false,
 			"grab_attack": false,
@@ -135,8 +135,8 @@ var _attacks: Attacks = Attacks.new(
 			
 			"hitbox_damage": 5,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(1.0,-1.0,0),
-			"direction": Vector3(0.25,1,0),
+			"hitbox_position": Vector3(0.8,0.1,0),
+			"direction": Vector3(1.25,1,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -324,6 +324,8 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		var init_attack = true
 		if states.neutral:
 			_current_attack = _attacks.ground_neutral
+		elif states.moving and (_left_pressed or _right_pressed):
+			_current_attack = _attacks.heavy_side
 		elif states.walking:
 			_current_attack = _attacks.forward
 		elif states.running:
