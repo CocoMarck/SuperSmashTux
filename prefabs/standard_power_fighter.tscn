@@ -3,15 +3,15 @@
 [ext_resource type="PackedScene" uid="uid://c0l1vjua7a3ib" path="res://assets/standard_character_a_pose.glb" id="1_glb0"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
-radius = 0.2
+radius = 0.3
 height = 1.8
 
 [node name="StandardPowerFighter" type="CharacterBody3D" unique_id=1727081255]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2039029034]
-shape = SubResource("CapsuleShape3D_body")
 
 [node name="Visual" type="Node3D" parent="." unique_id=808766021]
 transform = Transform3D(-0.91, 0, 7.955473e-08, 0, 0.91, 0, -7.955473e-08, 0, -0.91, 0, 0.19528109, 0)
 
 [node name="standard_character_a_pose" parent="Visual" unique_id=547457247 instance=ExtResource("1_glb0")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2039029034]
+shape = SubResource("CapsuleShape3D_body")

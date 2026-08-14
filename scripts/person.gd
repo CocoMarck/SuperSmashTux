@@ -362,7 +362,12 @@ func _move_anim(delta:float, states: MoveStates) -> void:
 		_animation_player.play("idle")
 
 func _set_pivot_direction(signals: MoveSignals) -> void:
-	if signals.on_floor or _holding_onto_the_ledge():
+	'''
+	Cambiar direccion
+	- Cuando este en el piso y se mueve a la izquierda o derecha
+	- Cuando se agarre de un ledge.
+	'''
+	if (signals.on_floor and (_move_left or _move_right)) or _holding_onto_the_ledge():
 		_pivot.basis = Basis.looking_at(
 			Vector3(_x_not_zero_value, signals.direction.y, signals.direction.z)
 		)
