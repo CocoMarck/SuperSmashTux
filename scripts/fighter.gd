@@ -13,8 +13,7 @@ var _grab_duration: float = 0.3
 # Propiedades privadas | Shield
 var _shield_time: float = 0.0
 var _shield_duration: float = 1.0
-## Tambien poner de regeneracion, erpo opr ahora no.
-
+## Tambien poner de regeneracion, pero por ahora no.
 
 # Propiedades privadas | Ataque
 var _attack_count: float = 0.0
@@ -56,7 +55,7 @@ var _attacks: Attacks = Attacks.new(
 			
 			"hitbox_damage": 5,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(0.5,-1.0,0),
+			"hitbox_position": Vector3(1.0,-1.0,0),
 			"direction": Vector3(0.25,0.75,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
@@ -66,7 +65,7 @@ var _attacks: Attacks = Attacks.new(
 	FightMove.new(
 		{
 			"name": &"up_attack",
-			"duration": 0.5833,
+			"duration": 0.4583,
 			"speed": Vector3(0,0,0),
 			"air_attack": false,
 			"grab_attack": false,
@@ -76,8 +75,8 @@ var _attacks: Attacks = Attacks.new(
 			
 			"hitbox_damage": 5,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(0.1,0.8,0),
-			"direction": Vector3(0.25,2,0),
+			"hitbox_position": Vector3(0.3,0.9,0),
+			"direction": Vector3(0.25,1.0,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -106,8 +105,8 @@ var _attacks: Attacks = Attacks.new(
 	FightMove.new(
 		{
 			"name": &"forward_attack",
-			"duration": 0.3,
-			"speed": Vector3(10,0,0),
+			"duration": 0.4583,
+			"speed": Vector3(0,0,0),
 			"air_attack": false,
 			"grab_attack": false,
 			"override_horizontal_move": true,
@@ -116,8 +115,8 @@ var _attacks: Attacks = Attacks.new(
 			
 			"hitbox_damage": 10,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(0.5,-0.5,0),
-			"direction": Vector3(1.5,1,0),
+			"hitbox_position": Vector3(1.4,-0.2,0),
+			"direction": Vector3(1.0,0.5,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -146,7 +145,7 @@ var _attacks: Attacks = Attacks.new(
 	FightMove.new(
 		{
 			"name": &"heavy_up_attack",
-			"duration": 0.5,
+			"duration": 0.5833,
 			"speed": Vector3(0,0,0),
 			"air_attack": false,
 			"grab_attack": false,
@@ -154,10 +153,10 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"inmortal": false,
 			
-			"hitbox_damage": 5,
+			"hitbox_damage": 10,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(1.0,-1.0,0),
-			"direction": Vector3(0.25,1,0),
+			"hitbox_position": Vector3(0.1,0.8,0),
+			"direction": Vector3(0.25,1.5,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -166,7 +165,7 @@ var _attacks: Attacks = Attacks.new(
 	FightMove.new(
 		{
 			"name": &"heavy_down_attack",
-			"duration": 0.5,
+			"duration": 0.625,
 			"speed": Vector3(0,0,0),
 			"air_attack": false,
 			"grab_attack": false,
@@ -325,40 +324,36 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		var init_attack = true
 		if states.neutral:
 			_current_attack = _attacks.ground_neutral
-			_attack_direction.x = _x_not_zero_value 
+		elif states.walking:
+			_current_attack = _attacks.forward
 		elif states.running:
 			_current_attack = _attacks.dash
-			_attack_direction.x = _x_not_zero_value
+		elif states.neutral_crouch and _down_pressed:
+			_current_attack = _attacks.heavy_down
 		elif states.neutral_crouch:
 			_current_attack = _attacks.down
-			_attack_direction.x = _x_not_zero_value*0.5
-			_attack_direction.y = 1.0
+		elif states.neutral_up and _up_pressed:
+			_current_attack = _attacks.heavy_up
 		elif states.neutral_up:
 			_current_attack = _attacks.up
-			_attack_direction.y = 1.0
 
 		# Ataque en aire
 		elif states.neutral_air:
 			_current_attack = _attacks.air_neutral
-			_attack_direction.x = _x_not_zero_value
-			_attack_direction.y = -1.0
 		elif states.air_move:
 			_current_attack = _attacks.air_forward
-			_attack_direction.x = _x_not_zero_value
 		elif states.air_down:
 			_current_attack = _attacks.air_down
-			_attack_direction.y = -1.0
 		elif states.air_up:
 			_current_attack = _attacks.air_up
-			_attack_direction.y = 1.0
 		else:
 			init_attack = false
 		
 		if init_attack:
 			_attack_count = 0
-			_attack_direction.x = _attack_direction.x * _current_attack.direction.x
-			_attack_direction.y = (_attack_direction.y*0.1) * _current_attack.direction.y
-			_attack_direction.z = _attack_direction.z * _current_attack.direction.y
+			_attack_direction.x = _x_not_zero_value * _current_attack.direction.x
+			_attack_direction.y = _current_attack.direction.y*0.1
+			#_attack_direction.z = _attack_direction.z * _current_attack.direction.y
 	
 	# Cancelar ataque aerio si no esta en aire.
 	# Cancelar ataque en piso si esta en el aire
@@ -470,6 +465,10 @@ func _physics_process(delta: float) -> void:
 		_ledge_grab(delta, gravity_signals, move_signals)
 	_set_x_not_zero_value(move_signals.direction)
 	
+	# Cancelar salto por ataque heavy arriba.
+	if _up_pressed and _attack and move_signals.on_floor:
+		_target_velocity.y = 0
+	
 	# Ledge grab
 	if _holding_onto_the_ledge() and _knockback_active:
 		_release_hanging_ledge()
@@ -479,7 +478,9 @@ func _physics_process(delta: float) -> void:
 		# No permitir grab y shield a la vez. No permitir hacer agarre o escudo cuando se ataca.
 		_grab_move(delta, gravity_signals)
 		_shield_move(delta, gravity_signals)
-	var grab_or_shield = _grabbing() or _with_shield()
+	var grabbing = _grabbing()
+	var with_shield = _with_shield()
+	var grab_or_shield = grabbing or with_shield
 	if grab_or_shield:
 		# Anular ataque si se hace grab o escudo.
 		_current_attack = null
@@ -508,16 +509,20 @@ func _physics_process(delta: float) -> void:
 		_current_attack = null
 		_grab_time = 0.0
 		_shield_time = 0.0
+		_clear_hitbox()
 	
 	# Anim
+	_reset_visual_values()
 	if _knockback_active:
 		_damage_anim(delta, gravity_signals)
 	elif _holding_onto_the_ledge():
 		_ledge_grab_anim(delta)
 	elif _attacking():
 		_attack_anim(delta)
-	elif grab_or_shield:
-		_animation_player.play("idle")
+	elif grabbing:
+		_animation_player.play("grab")
+	elif with_shield: 
+		_animation_player.play("guard")
 	else:
 		_move_anim(delta, move_states)
 	_set_pivot_direction(move_signals)

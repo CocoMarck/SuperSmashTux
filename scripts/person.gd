@@ -22,12 +22,7 @@ const LEDGE_RELEASE_TIME := 0.3    # cooldown tras soltarse, pa no re-agarrarse 
 @export var init_looking_at_right: bool = false
 
 @export_group("Vertical Movement")
-@export var jump_impulse: int = 13
-
-@export_group("Movement Tuning")
-@export var ground_acceleration: float = 40.0
-@export var ground_friction: float = 100.0
-@export var knockback_friction: float = 10.0
+@export var jump_impulse: int = 10
 
 @export_group("Appearence")
 @export var material: Material = null
@@ -44,6 +39,12 @@ var _mesh_instance: MeshInstance3D
 var _animation_player: AnimationPlayer
 
 # `_target_velocity`, pertenece a `GravityBody3D`.
+
+# Propiedades privadas | Aceleracion horizontal
+var _ground_acceleration: float = 40.0
+var _air_acceleration: float = 40.0
+var _ground_friction: float = 100.0
+var _knockback_friction: float = 20.0
 
 # Propiedades privadas | Multiples saltos
 var _max_jumps = 1
@@ -86,7 +87,6 @@ var _was_move_down: bool = false
 var _down_pressed: bool = false
 var _was_move_up: bool = false
 var _up_pressed: bool = false
-
 
 # Propiedades privadas | Agarre de orillas.
 var _hanging_ledge: GroundPlatform = null
@@ -231,18 +231,24 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 		speed = walking_speed
 	else:
 		speed = running_speed
-	if signals.on_floor and _move_down:
-		speed = walking_speed
-		speed_multiplier = 0.8
+	if signals.on_floor:
+		if _move_down:
+			speed = walking_speed
+			speed_multiplier = 0.8
+	else:
+		if _last_x_direction != _direction.x:
+			speed_multiplier = 0.8
 
 	# Velocidad horizontal
 	var target_speed := _direction.x * (speed*speed_multiplier)
-	var accel := ground_friction if _direction.x == 0.0 else ground_acceleration
-	# Si se invierte el sentido del movimiento, frenar rapido (friction) en vez de acelerar despacio como si arrancara de cero, para evitar el "patinaje" al voltear.
-	if target_speed != 0.0 and sign(_target_velocity.x) != 0.0 and sign(_target_velocity.x) != sign(target_speed):
-		accel = ground_friction
+	var accel := _air_acceleration
 	if _knockback_active:
-		accel = knockback_friction
+		accel = _knockback_friction
+	elif signals.on_floor:
+		if _direction.x == 0.0:
+			accel = _ground_friction
+		else:
+			accel = _ground_acceleration
 	_target_velocity.x = move_toward(_target_velocity.x, target_speed, accel*delta)
 
 	# Salto | Aplicar salto normal o doble salto segun sea el caso.
@@ -283,6 +289,8 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 	var air_move := false
 	var air_up := false
 	var air_down := false
+	var air_back := false
+	var air_forward := false
 
 	if signals.on_floor:
 		# En el piso
@@ -299,6 +307,14 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 		air_move = moving
 		air_up = _move_up and not _move_down
 		air_down = _move_down and not _move_up
+		air_back = moving and (signals.direction.x != _last_x_direction)
+		air_forward = moving and (signals.direction.x == _last_x_direction)
+		
+	# Debug
+	if air_back:
+		print("de espaldas en el aire")
+	#elif air_forward:
+		#print("de frente en el aire")
 
 	return MoveStates.new(
 		walking,
@@ -489,7 +505,16 @@ func _holding_onto_the_ledge() -> bool:
 	return _hanging_ledge != null
 
 func _ledge_grab_anim(delta) -> void:
-	_animation_player.play("idle")
+	_pivot.position.y = -0.3
+	_animation_player.play("hold_platform")
+	
+# Funciones | Animacion
+func _reset_visual_values():
+	_pivot.position.y = 0
+	_pivot.position.x = 0
+	_pivot.position.z = 0
+	_pivot.rotation_degrees.z = 0
+	_pivot.rotation_degrees.x = 0
 
 # Funciones | Inicializar
 func _ready() -> void:
@@ -497,13 +522,13 @@ func _ready() -> void:
 	Inicializar el character, con sus colorines, materiales etc.
 	'''
 	# Fall
-	fall_acceleration = 30
+	fall_acceleration = 25
 	
 	# Essentail nodes
-	_visual = $Visual
 	# El hijo de Visual es la raiz del .glb importado; su nombre depende del
 	# archivo fuente (ej. "standard_character_a_pose"), asi que se toma
 	# dinamico en vez de hardcodearlo, y se navega desde ahi.
+	_visual = $Visual
 	var model_root: Node3D = _visual.get_child(0)
 	_pivot = model_root.get_node("Pivot")
 	_mesh_instance = model_root.get_node("Pivot/Skeleton3D/MeshInstance3D")
@@ -543,6 +568,7 @@ func _physics_process(delta: float) -> void:
 		_damage_move(delta)
 
 	# Anim
+	_reset_visual_values()
 	if _knockback_active:
 		_damage_anim(delta, gravity_signals)
 	elif _holding_onto_the_ledge():
