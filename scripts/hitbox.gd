@@ -14,12 +14,15 @@ var _box_shape := BoxShape3D.new()
 
 var _mesh := MeshInstance3D.new()
 var _box_mesh := BoxMesh.new()
+var _material := StandardMaterial3D.new()
 
 var _damage :int = 5
 
 var _direction: Vector3 # <--- Direccion de dañó.
 
-func _init(p_position: Vector3, p_size: Vector3, p_parent: Node3D, p_damage: int, p_direction: Vector3):
+func _init(
+	p_position: Vector3, p_size: Vector3, p_parent: Node3D, p_damage: int, p_direction: Vector3
+):
 	position = p_position
 	_parent = p_parent
 	
@@ -34,6 +37,11 @@ func _init(p_position: Vector3, p_size: Vector3, p_parent: Node3D, p_damage: int
 	# Damage
 	_damage = p_damage
 	_direction = p_direction
+
+	# Material
+	_material.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
+	_mesh.material_override = _material
+	set_color( 1.0, 1.0, 1.0, 0.5 )
 	
 	# Inicializar todo
 	add_child(_shape)
@@ -52,6 +60,12 @@ func _on_hitbox_body_entered(body: Node3D) -> void:
 		print(body.damage_percentage)
 		body.set_damage_percentage( _damage )
 		body.set_damage_move( _damage, _direction )
+
+func set_color( r, g, b, a ) -> void:
+	_material.albedo_color = Color(r, g, b, a)
+
+func set_alpha(alpha: float) -> void:
+	_material.albedo_color.a = clampf(alpha, 0.0, 1.0)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

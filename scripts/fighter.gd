@@ -36,7 +36,7 @@ var _attacks: Attacks = Attacks.new(
 			"hitbox_damage": 5,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
 			"hitbox_position": Vector3(0.8,0,0),
-			"direction": Vector3(1,0.25,0),
+			"direction": Vector3(1,0.5,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -114,8 +114,8 @@ var _attacks: Attacks = Attacks.new(
 			"inmortal": false,
 			
 			"hitbox_damage": 10,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(1.4,-0.2,0),
+			"hitbox_size": Vector3(0.5,0.5,1.0),
+			"hitbox_position": Vector3(1.0,-0.2,0),
 			"direction": Vector3(1.0,0.5,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
@@ -174,8 +174,8 @@ var _attacks: Attacks = Attacks.new(
 			"inmortal": false,
 			
 			"hitbox_damage": 5,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(1.0,-1.0,0),
+			"hitbox_size": Vector3(0.5,0.5,2.0),
+			"hitbox_position": Vector3(0.0,-1.0,0),
 			"direction": Vector3(0.25,1,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
