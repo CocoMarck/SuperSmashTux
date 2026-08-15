@@ -2,6 +2,15 @@
 
 [ext_resource type="PackedScene" uid="uid://c0l1vjua7a3ib" path="res://assets/standard_character_a_pose.glb" id="1_glb0"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nwdyk"]
+transparency = 1
+albedo_color = Color(0.3137255, 1, 1, 0.2509804)
+
+[sub_resource type="SphereMesh" id="SphereMesh_28b0e"]
+material = SubResource("StandardMaterial3D_nwdyk")
+radius = 1.2
+height = 2.4
+
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.3
 height = 1.8
@@ -12,6 +21,10 @@ height = 1.8
 transform = Transform3D(-0.91, 0, 7.955473e-08, 0, 0.91, 0, -7.955473e-08, 0, -0.91, 0, 0.19528109, 0)
 
 [node name="standard_character_a_pose" parent="Visual" unique_id=547457247 instance=ExtResource("1_glb0")]
+
+[node name="ShieldMeshInstance3D" type="MeshInstance3D" parent="Visual" unique_id=906408313]
+transform = Transform3D(0.99999994, 0, 7.1054274e-15, 0, 0.99999994, 0, -7.1054274e-15, 0, 0.99999994, 0, -0.26892355, 0)
+mesh = SubResource("SphereMesh_28b0e")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2039029034]
 shape = SubResource("CapsuleShape3D_body")

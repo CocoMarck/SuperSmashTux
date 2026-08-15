@@ -18,8 +18,10 @@ Node3D               # Raíz del asset = el "contrato" del modelo
 CharacterBody3D      # script Person/Fighter
     CollisionShape3D
     Visual           
-        (Instancia del asset)
+        (Instancia del asset) # Index 0
+        ShieldMeshInstance3D  # Index 1
 ```
+> Respetar los index.
 
 ## Reglas
 

@@ -12,8 +12,12 @@ var _grab_duration: float = 0.3
 
 # Propiedades privadas | Shield
 var _shield_time: float = 0.0
-var _shield_duration: float = 1.0
+var _shield_duration: float = 5.0
 ## Tambien poner de regeneracion, pero por ahora no.
+var _shield_mesh_instance := MeshInstance3D.new()
+var _shield_sphere : SphereMesh
+var _init_shield_radius : float
+var _init_shield_height : float
 
 # Propiedades privadas | Ataque
 var _attack_count: float = 0.0
@@ -450,8 +454,23 @@ func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 		if signals.on_floor:
 			_target_velocity.y = jump_impulse
 
+func _get_shield_porcent() -> float:
+	if _shield_time > 0:
+		return _shield_time / _shield_duration
+	return 0.0
+
 func _with_shield() -> bool:
 	return _shield_time > 0
+
+# Funciones | Init
+func _ready() -> void:
+	super()
+	_shield_mesh_instance = $Visual/ShieldMeshInstance3D
+	_shield_mesh_instance.visible = false
+	_shield_sphere = _shield_mesh_instance.mesh
+	_init_shield_radius = _shield_sphere.radius
+	_init_shield_height = _shield_sphere.height
+	_pivot.add_child(_shield_mesh_instance)
 
 # Funciones | Procesar
 func _physics_process(delta: float) -> void:
@@ -492,6 +511,14 @@ func _physics_process(delta: float) -> void:
 		# Solo permitir atacar cuando no se hace grab o se pone escudo
 		_fight_move(delta, gravity_signals, move_states)
 	
+	# Defensa | Recivir ataques en escudo.
+	## Esto hacerlo func tipo `_shield_defence`
+	if with_shield:
+		if _knockback_active:
+			_knockback_active = false
+			_ignore_last_damage()
+			_shield_time -= (_shield_duration*_last_damage_porcentage)
+	
 	# Bloqueo de direccion por movimiento de inputs.
 	_horizontal_move = true
 	_allow_jump = true
@@ -514,6 +541,15 @@ func _physics_process(delta: float) -> void:
 		_grab_time = 0.0
 		_shield_time = 0.0
 		_clear_hitbox()
+		
+	# Visual | Escudo
+	## Esto hacerlo func tipo `_visual_shield`
+	with_shield = _with_shield()
+	_shield_mesh_instance.visible = with_shield
+	if with_shield:
+		var porcent :float = _get_shield_porcent()
+		_shield_sphere.radius = _init_shield_radius * porcent
+		_shield_sphere.height = _init_shield_height * porcent
 	
 	# Anim
 	_reset_visual_values()

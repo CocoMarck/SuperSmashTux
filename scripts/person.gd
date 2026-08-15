@@ -63,12 +63,15 @@ var _horizontal_move: bool = true
 var _allow_jump: bool = true
 
 # Propiedades privadas | Daño
+var _immunity_to_damage :bool = false
 var _normal_damage_power :float = 50
 var _knockback_active :bool = false
 var _knockback_direction :Vector3 = Vector3.ZERO
 var _knockback_time :float = 0.0
 var _knockback_duration :float = 0.35
 var _damage_degrees :float = 0.0
+var _last_damage :float = 0.0
+var _last_damage_porcentage :float = 0.0
 
 # Propiedades privadas | Inputs
 var _walk: bool = false
@@ -376,18 +379,30 @@ func _set_pivot_direction(signals: MoveSignals) -> void:
 
 # Funciones | Damage recibido
 func set_damage(damage:int):
-	hp -= damage
+	if not _immunity_to_damage:
+		hp -= damage
+		_last_damage = damage
+		
 
 func set_damage_percentage(damage:int) -> void:
-	damage_percentage += damage*0.01
+	if not _immunity_to_damage:
+		_last_damage_porcentage = damage*0.01
+		damage_percentage += _last_damage_porcentage
+
+func _ignore_last_damage() -> void:
+	if damage_percentage > 0:
+		damage_percentage -= _last_damage_porcentage
+	if hp < 100:
+		hp += _last_damage
 
 func set_damage_move(damage:float, direction:Vector3) -> void:
 	'''
 	Recibir un trancazo
 	'''
-	_knockback_direction = direction
-	_knockback_active = true
-	_knockback_time = _knockback_duration
+	if not _immunity_to_damage:
+		_knockback_direction = direction
+		_knockback_active = true
+		_knockback_time = _knockback_duration
 
 func _damage_move(delta: float) -> void:
 	_knockback_time -= delta
@@ -528,6 +543,7 @@ func _ready() -> void:
 	'''
 	Inicializar el character, con sus colorines, materiales etc.
 	'''
+	super()
 	# Fall
 	fall_acceleration = 25
 	
@@ -540,7 +556,6 @@ func _ready() -> void:
 	_pivot = model_root.get_node("Pivot")
 	_mesh_instance = model_root.get_node("Pivot/Skeleton3D/MeshInstance3D")
 	_animation_player = model_root.get_node("AnimationPlayer")
-	_collision_shape = $CollisionShape3D
 	
 	# Apariencia
 	_set_mesh(mesh)
