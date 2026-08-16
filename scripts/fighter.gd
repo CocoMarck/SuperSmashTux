@@ -13,8 +13,11 @@ var _grab_duration: float = 0.3
 # Propiedades privadas | Shield
 var _shield_time: float = 0.0
 var _shield_duration: float = 5.0
-## Tambien poner de regeneracion, pero por ahora no.
-var _shield_mesh_instance := MeshInstance3D.new()
+var _shield_regeneration_time :float = 0.0
+var _shield_regeneration_duration :float = 0.5
+var _shield_regeneration_value :float = 0.5
+
+var _shield_mesh_instance : MeshInstance3D
 var _shield_sphere : SphereMesh
 var _init_shield_radius : float
 var _init_shield_height : float
@@ -438,29 +441,39 @@ func _grab_move(delta: float, signals: VerticalForceSignals) -> void:
 		_grab_time -= delta
 
 # Funciones | Shield
-func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
+func _shield_regeneration(delta: float, signals: VerticalForceSignals) -> void:
 	if signals.on_floor:
-		if _shield:
-			if _shield_time <= 0.0:
-				_shield_time = _shield_duration
-	
+		if _shield_regeneration_time <= 0.0:
+			_shield_time += _shield_regeneration_value
+			
+		if _shield_regeneration_time <= 0:
+			_shield_regeneration_time = _shield_regeneration_duration
+			
+		_shield_regeneration_time -= delta
+	if _shield_time >= _shield_duration:
+		_shield_time = _shield_duration
+
+func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 	if _shield_time > 0.0:
 		_shield_time -= delta
-		if _shield == false:
-			_shield_time = 0.0
 	
 	# Daño por exceso de uso de escudo
-	if _shield == true and _shield_time <= 0.0:
-		if signals.on_floor:
-			_target_velocity.y = jump_impulse
+	if _shield_time <= 0.0 and signals.on_floor:
+		_target_velocity.y = jump_impulse
+
+func _shield_defence() -> void:
+	if _knockback_active:
+		_knockback_active = false
+		_ignore_last_damage()
+		_shield_time -= (_shield_duration*_last_damage_porcentage)
 
 func _get_shield_porcent() -> float:
 	if _shield_time > 0:
 		return _shield_time / _shield_duration
 	return 0.0
 
-func _with_shield() -> bool:
-	return _shield_time > 0
+func _with_shield(signals: VerticalForceSignals) -> bool:
+	return (_shield_time > 0) and (_shield and signals.on_floor) and (not _attacking())
 
 # Funciones | Init
 func _ready() -> void:
@@ -470,7 +483,7 @@ func _ready() -> void:
 	_shield_sphere = _shield_mesh_instance.mesh
 	_init_shield_radius = _shield_sphere.radius
 	_init_shield_height = _shield_sphere.height
-	_pivot.add_child(_shield_mesh_instance)
+	_shield_time = _shield_duration
 
 # Funciones | Procesar
 func _physics_process(delta: float) -> void:
@@ -500,9 +513,12 @@ func _physics_process(delta: float) -> void:
 	if ( not (_shield and _grab) ) and not _attacking(): 
 		# No permitir grab y shield a la vez. No permitir hacer agarre o escudo cuando se ataca.
 		_grab_move(delta, gravity_signals)
-		_shield_move(delta, gravity_signals)
+		if _shield:
+			_shield_move(delta, gravity_signals)
+		else:
+			_shield_regeneration(delta, gravity_signals)
 	var grabbing = _grabbing()
-	var with_shield = _with_shield()
+	var with_shield = _with_shield(gravity_signals)
 	var grab_or_shield = grabbing or with_shield
 	if grab_or_shield:
 		# Anular ataque si se hace grab o escudo.
@@ -510,14 +526,6 @@ func _physics_process(delta: float) -> void:
 	else:
 		# Solo permitir atacar cuando no se hace grab o se pone escudo
 		_fight_move(delta, gravity_signals, move_states)
-	
-	# Defensa | Recivir ataques en escudo.
-	## Esto hacerlo func tipo `_shield_defence`
-	if with_shield:
-		if _knockback_active:
-			_knockback_active = false
-			_ignore_last_damage()
-			_shield_time -= (_shield_duration*_last_damage_porcentage)
 	
 	# Bloqueo de direccion por movimiento de inputs.
 	_horizontal_move = true
@@ -527,9 +535,14 @@ func _physics_process(delta: float) -> void:
 		# Si este en el piso y da trancazos, no permitir inputs de movimiento horizontal.
 		if _current_attack.air_attack == false:
 			_horizontal_move = false
-	elif _grabbing() or _with_shield():
+	elif _grabbing() or with_shield:
 		_horizontal_move = false
 		_allow_jump = false
+		
+	# Defensa | Recivir ataques en escudo.
+	## Esto hacerlo func tipo `_shield_defence`
+	if with_shield:
+		_shield_defence()
 
 	# Damage
 	if _knockback_active:
@@ -539,12 +552,11 @@ func _physics_process(delta: float) -> void:
 	if  _knockback_active or _holding_onto_the_ledge():
 		_current_attack = null
 		_grab_time = 0.0
-		_shield_time = 0.0
 		_clear_hitbox()
 		
 	# Visual | Escudo
 	## Esto hacerlo func tipo `_visual_shield`
-	with_shield = _with_shield()
+	with_shield = _with_shield(gravity_signals)
 	_shield_mesh_instance.visible = with_shield
 	if with_shield:
 		var porcent :float = _get_shield_porcent()
