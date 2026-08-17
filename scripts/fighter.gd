@@ -16,6 +16,15 @@ var _shield_duration: float = 5.0
 var _shield_regeneration_time :float = 0.0
 var _shield_regeneration_duration :float = 0.5
 var _shield_regeneration_value :float = 0.5
+var _allow_shield: bool = true
+
+# Propiedades privadas | Shield rodar
+var _roll: bool = false
+var _roll_forward: bool = false
+var _roll_backward: bool = false
+var _roll_time: float = 0.0
+var _roll_duration: float = 0.625
+var _roll_speed: float = 3.0
 
 var _shield_mesh_instance : MeshInstance3D
 var _shield_sphere : SphereMesh
@@ -457,9 +466,14 @@ func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 	if _shield_time > 0.0:
 		_shield_time -= delta
 	
-	# Daño por exceso de uso de escudo
-	if _shield_time <= 0.0 and signals.on_floor:
-		_target_velocity.y = jump_impulse
+	# Tiene que estar en el piso
+	if  signals.on_floor:
+		if _shield_time <= 0.0:
+			# Daño por exceso de uso de escudo
+			_target_velocity.y = jump_impulse
+		else:
+			# Rodar
+			_roll = _left_pressed or _right_pressed
 
 func _shield_defence() -> void:
 	if _knockback_active:
@@ -473,7 +487,47 @@ func _get_shield_porcent() -> float:
 	return 0.0
 
 func _with_shield(signals: VerticalForceSignals) -> bool:
-	return (_shield_time > 0) and (_shield and signals.on_floor) and (not _attacking())
+	return (_shield_time > 0) and (_shield and _allow_shield and signals.on_floor) and (not _attacking())
+
+# Funciones | Shield rodar
+func _rolling() -> bool:
+	return _roll_backward or _roll_forward
+
+func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
+	if _roll and (_allow_shield):
+		if _roll_time <= 0:
+			if _left_pressed and _last_x_direction == 1:
+				_roll_backward = true
+				_roll_forward = false
+			elif _right_pressed and _last_x_direction == -1:
+				_roll_backward = true
+				_roll_forward = false
+			elif _left_pressed or _right_pressed:
+				_roll_backward = false
+				_roll_forward = true
+			_roll_time = _roll_duration
+	if signals.on_floor == false:
+		_roll_time = 0
+	if _rolling():
+		_immunity_to_damage = true
+		_allow_shield = false
+		if _roll_backward:
+			_target_velocity.x = _roll_speed * (_last_x_direction*-1)
+		elif _roll_forward:
+			_target_velocity.x = _roll_speed * _last_x_direction
+		if _roll_time <= 0:
+			_roll = false
+			_roll_forward = false
+			_roll_backward = false
+			_immunity_to_damage = false
+			_allow_shield = true
+		_roll_time -= delta
+
+func _roll_anim() -> void:
+	if _roll_backward:
+		_animation_player.play("roll_backward")
+	elif _roll_forward:
+		_animation_player.play("roll_forward")
 
 # Funciones | Init
 func _ready() -> void:
@@ -513,21 +567,24 @@ func _physics_process(delta: float) -> void:
 	if ( not (_shield and _grab) ) and not _attacking(): 
 		# No permitir grab y shield a la vez. No permitir hacer agarre o escudo cuando se ataca.
 		_grab_move(delta, gravity_signals)
-		if _shield:
+		if _shield and _allow_shield:
 			_shield_move(delta, gravity_signals)
 		else:
-			_shield_regeneration(delta, gravity_signals)
+			if not _rolling():
+				_shield_regeneration(delta, gravity_signals)
 	var grabbing = _grabbing()
 	var with_shield = _with_shield(gravity_signals)
 	var grab_or_shield = grabbing or with_shield
-	if grab_or_shield:
-		# Anular ataque si se hace grab o escudo.
+	if grab_or_shield or _rolling():
+		# Anular ataque si se hace grab, escudo, o rueda.
 		_current_attack = null
+		_clear_hitbox()
 	else:
 		# Solo permitir atacar cuando no se hace grab o se pone escudo
 		_fight_move(delta, gravity_signals, move_states)
 	
 	# Bloqueo de direccion por movimiento de inputs.
+	# Mejor bloquiar la direccion en un solo lado.
 	_horizontal_move = true
 	_allow_jump = true
 	if _attacking():
@@ -535,14 +592,14 @@ func _physics_process(delta: float) -> void:
 		# Si este en el piso y da trancazos, no permitir inputs de movimiento horizontal.
 		if _current_attack.air_attack == false:
 			_horizontal_move = false
-	elif _grabbing() or with_shield:
+	elif _grabbing() or with_shield or _rolling():
 		_horizontal_move = false
 		_allow_jump = false
 		
-	# Defensa | Recivir ataques en escudo.
-	## Esto hacerlo func tipo `_shield_defence`
+	# Defensa | Recivir ataques en escudo. Rodar.
 	if with_shield:
 		_shield_defence()
+	_roll_move(delta, gravity_signals)
 
 	# Damage
 	if _knockback_active:
@@ -571,6 +628,8 @@ func _physics_process(delta: float) -> void:
 		_ledge_grab_anim(delta)
 	elif _attacking():
 		_attack_anim(delta)
+	elif _rolling():
+		_roll_anim()
 	elif grabbing:
 		_animation_player.play("grab")
 	elif with_shield: 
