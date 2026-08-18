@@ -73,6 +73,9 @@ var _damage_degrees :float = 0.0
 var _last_damage :float = 0.0
 var _last_damage_porcentage :float = 0.0
 
+# Propiedeades privadas | Inmunidad
+var _immunity_blink_time: float = 0.0
+
 # Propiedades privadas | Inputs
 var _walk: bool = false
 
@@ -539,6 +542,38 @@ func _reset_visual_values():
 	_pivot.rotation_degrees.z = 0
 	_pivot.rotation_degrees.x = 0
 
+# Funciones | Efectos
+func inmunity_effect(delta: float) -> void:
+	if not _immunity_to_damage:
+		_immunity_blink_time = 0.0
+		_mesh_instance.visible = true
+		return
+	_immunity_blink_time += delta
+	_mesh_instance.visible = fmod(_immunity_blink_time, 0.1) < 0.05 # Pa que parpede
+
+# Funciones mover bodys
+func _push_bodys_appart(delta: float, states: MoveStates) -> void:
+	'''
+	Empujar. 
+	Por ahora es muy tosco, pero jala. Y se remplaza directamente el position de lo colisionado, por lo que puede dar bugasos.
+	'''
+	for i in range(get_slide_collision_count()):
+		var collision := get_slide_collision(i)
+		var collider := collision.get_collider()
+
+		if collider == self or not collider is GravityBody3D:
+			continue
+		
+		# Obtener la normal de la colisión (desde dónde viene el golpe)
+		if states.moving:
+			var current_speed := walking_speed
+			if states.running:
+				current_speed = running_speed
+			var normal := collision.get_normal()
+			var push_strength := 2.0  # Ajusta según necesites
+			#_target_velocity += normal * current_speed * delta
+			collider.position -= normal * current_speed * delta
+
 # Funciones | Inicializar
 func _ready() -> void:
 	'''
@@ -600,6 +635,10 @@ func _physics_process(delta: float) -> void:
 		_move_anim(delta, move_states)
 	_set_pivot_direction(move_signals)
 
+	# Effects
+	inmunity_effect(delta)
+
 	# Procesar todo
+	_push_bodys_appart(delta, move_states)
 	velocity = _target_velocity
 	move_and_slide()

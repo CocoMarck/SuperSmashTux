@@ -4,6 +4,7 @@ extends CharacterBody3D
 '''
 Gravedad 2D, para `CharacterBody3d`. Sencillon.
 Tiene funciones para colisiones con objetos de un solo sentido.
+Colisiones con otros character body
 '''
 
 # Constantes | Plataformas de un solo sentido.
@@ -27,6 +28,9 @@ var _drop_through_count: float = 0.0
 var _one_way_ignored: Dictionary = {}
 var _last_floor_one_way: OneWayPlatform = null
 var _one_way_coyote_count: float = 0.0
+
+# Propiedades privadas | Colisiones
+var _immunity_to_body_collide :bool = false
 
 # Funciones | Deteccion de colisiones especiales.
 # Funciones | Plataformas de un solo sentido.
@@ -122,12 +126,28 @@ func _one_way_platforms(delta: float, ignore: bool, on_floor: bool) -> void:
 		_last_floor_one_way = null
 		_one_way_coyote_count = 0.0
 
+# Colision con personas
+func is_immunity_to_body_collide() -> bool:
+	return _immunity_to_body_collide
+
+func _toggle_body_collisions(delta: float, on_floor: bool) -> void:
+	for body in get_tree().get_nodes_in_group("gravity_bodies"):
+		if body == self:
+			continue
+		var remove: bool = true
+		remove = on_floor and not (body.is_immunity_to_body_collide())
+		if remove:
+			remove_collision_exception_with(body)
+		else:
+			add_collision_exception_with(body)
+
 # Aplicar gravedad a solidos
 func _vertical_force(
 	delta: float, ignore_one_way_platforms: bool = false, multiplier: float = 1
 ) -> VerticalForceSignals:
 	'''
 	Fuerza vertical. Imitación de gravedad. Estilo 2D.
+	Colisiones.
 	'''
 	var on_floor := is_on_floor()
 	var on_ceiling := is_on_ceiling()
@@ -135,6 +155,11 @@ func _vertical_force(
 	
 	# Ignorar o no plataformas de un solo sentido
 	_one_way_platforms(delta, ignore_one_way_platforms, on_floor)
+
+	# Colision con gravty bodys
+	_toggle_body_collisions(delta, on_floor)
+
+	# Volver a obtener data
 	on_floor = is_on_floor()
 	on_ceiling = is_on_ceiling()
 	on_wall = is_on_wall()
@@ -174,6 +199,7 @@ func _get_head_y() -> float:
 func _ready() -> void:
 	# El shape que se necesita si o si.
 	_collision_shape = $CollisionShape3D
+	add_to_group("gravity_bodies")
 
 func _physics_process(delta: float) -> void:
 	'''

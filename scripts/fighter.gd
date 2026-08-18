@@ -509,6 +509,7 @@ func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
 		_roll_time = 0
 	if _rolling():
 		_immunity_to_damage = true
+		_immunity_to_body_collide = true
 		_allow_shield = false
 		if _roll_backward:
 			_target_velocity.x = _roll_speed * (_last_x_direction*-1)
@@ -520,6 +521,7 @@ func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
 			_roll_backward = false
 			_immunity_to_damage = false
 			_allow_shield = true
+			_immunity_to_body_collide = false
 		_roll_time -= delta
 
 func _roll_anim() -> void:
@@ -637,6 +639,10 @@ func _physics_process(delta: float) -> void:
 		_move_anim(delta, move_states)
 	_set_pivot_direction(move_signals)
 
+	# Effects
+	inmunity_effect(delta)
+
 	# Procesar todo
+	_push_bodys_appart(delta, move_states)
 	velocity = _target_velocity
 	move_and_slide()
