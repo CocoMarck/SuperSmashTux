@@ -42,6 +42,8 @@ Hijo de `GravityBody3D`. Tiene los métodos y propiedades para **moverse y recib
   - `_collect_input()` → **para players**. Por defecto es `pass`; lo llenan los hijos que leen teclado.
   - `_ai_process(signals)` → **para NPCs**. Propuesto, ver `docs/nota-ai-npc.md`. Aún no existe en el código.
 - **Flancos de input**: `_up_pressed` / `_down_pressed` (con su memoria `_was_move_up` / `_was_move_down`) y `_was_jumping` para el salto. Sirven para drop-through y para acciones especiales simultáneas con dos teclas.
+- **Disabled**: Estado en el cual esta incapacitado para moverse adecuadante el person (Solo puede moverse horizontalmente en el aire). Se desbloquea movimiento adecuado en el piso, por x tiempo, o porque se recibio input de moverse.
+- **Knocked out**: Estado en cual esta inmobil el jugador por x cantidad de tiempo.
 
 **Pipeline `_physics_process`** (vive en `Person`, los hijos lo sobreescriben para meter su gameplay):
 

@@ -463,11 +463,10 @@ func _shield_regeneration(delta: float, signals: VerticalForceSignals) -> void:
 		_shield_time = _shield_duration
 
 func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
-	if _shield_time > 0.0:
-		_shield_time -= delta
-	
 	# Tiene que estar en el piso
-	if  signals.on_floor:
+	if signals.on_floor:
+		if _shield_time > 0.0:
+			_shield_time -= delta
 		if _shield_time <= 0.0:
 			# Daño por exceso de uso de escudo
 			_target_velocity.y = jump_impulse
@@ -506,6 +505,7 @@ func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
 				_roll_backward = false
 				_roll_forward = true
 			_roll_time = _roll_duration
+			_x_not_zero_value = _last_x_direction # Sobrescribir direccion (Por cuando salto y va de espaldas)
 	if signals.on_floor == false:
 		_roll_time = 0
 	if _rolling():
