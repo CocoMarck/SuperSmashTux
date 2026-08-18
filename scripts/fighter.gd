@@ -505,7 +505,6 @@ func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
 				_roll_backward = false
 				_roll_forward = true
 			_roll_time = _roll_duration
-			_x_not_zero_value = _last_x_direction # Sobrescribir direccion (Por cuando salto y va de espaldas)
 	if signals.on_floor == false:
 		_roll_time = 0
 	if _rolling():

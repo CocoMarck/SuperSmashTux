@@ -229,6 +229,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	if signals.on_floor:
 		#  No aceptar saltos infinitos.
 		_jump_count = 0
+		_x_not_zero_value = _last_x_direction # Forzar dirección. Para cuando cae del air de espaldas.
 	else:
 		if _max_jumps == 1.0:
 			_jump_count = _max_jumps
