@@ -120,7 +120,7 @@ var _attacks: Attacks = Attacks.new(
 			"hitbox_damage": 5,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
 			"hitbox_position": Vector3(0.5,-1.0,0),
-			"direction": Vector3(1.0,0.5,0.0),
+			"direction": Vector3(0.5,0.8,0.0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -260,8 +260,8 @@ var _attacks: Attacks = Attacks.new(
 			"inmortal": false,
 			
 			"hitbox_damage": 5,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(0.0, 0.8, 0),
+			"hitbox_size": Vector3(0.5,0.5,0.8),
+			"hitbox_position": Vector3(0.15, 0.8, 0),
 			"direction": Vector3(0.5,1.25,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
@@ -280,9 +280,9 @@ var _attacks: Attacks = Attacks.new(
 			"inmortal": false,
 			
 			"hitbox_damage": 10,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(1.2, 0.0, 0),
-			"direction": Vector3(1.5,1,0),
+			"hitbox_size": Vector3(0.5,0.5,0.9),
+			"hitbox_position": Vector3(0.75, 0.0, 0),
+			"direction": Vector3(1.2,1,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -582,12 +582,13 @@ func _physics_process(delta: float) -> void:
 		_release_hanging_ledge()
 	
 	# Fight and Defence moves
-	if _shield and _grab:
-		# No permitir grab y shield a la vez. 
-		_shield = false
+	## No permitir grab y shield.
+	if _shield or _with_shield(gravity_signals):
 		_grab = false
-	if not _attacking(): 
-		# No permitir hacer agarre o escudo cuando se ataca.
+	if _grab or _grabbing():
+		_shield = false
+	## No permitir hacer agarre o escudo cuando se ataca.
+	if not _attacking(): 	
 		_grab_move(delta, gravity_signals)
 		if (_shield or _shield_stun)  and _allow_shield:
 			_shield_move(delta, gravity_signals)
