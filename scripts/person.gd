@@ -556,6 +556,8 @@ func _push_bodys_appart(delta: float, states: MoveStates) -> void:
 	'''
 	Empujar. 
 	Por ahora es muy tosco, pero jala. Y se remplaza directamente el position de lo colisionado, por lo que puede dar bugasos.
+	
+	IMPORTANTE: Hacer un public `set_push_move` con: `_push_active`, y un `_push_move`.
 	'''
 	for i in range(get_slide_collision_count()):
 		var collision := get_slide_collision(i)
@@ -566,13 +568,12 @@ func _push_bodys_appart(delta: float, states: MoveStates) -> void:
 		
 		# Obtener la normal de la colisión (desde dónde viene el golpe)
 		if states.moving:
+			# Cambiar esto a como dice IMPORTANTE
 			var current_speed := walking_speed
 			if states.running:
 				current_speed = running_speed
 			var normal := collision.get_normal()
-			var push_strength := 2.0  # Ajusta según necesites
-			#_target_velocity += normal * current_speed * delta
-			collider.position.x += _direction.x * current_speed * delta
+			collider.position.x -= normal.x * current_speed * delta
 
 # Funciones | Inicializar
 func _ready() -> void:
