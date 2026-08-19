@@ -63,7 +63,6 @@ var _horizontal_move: bool = true
 var _allow_jump: bool = true
 
 # Propiedades privadas | Daño
-var _immunity_to_damage :bool = false
 var _normal_damage_power :float = 50
 var _knockback_active :bool = false
 var _knockback_direction :Vector3 = Vector3.ZERO
@@ -74,6 +73,7 @@ var _last_damage :float = 0.0
 var _last_damage_porcentage :float = 0.0
 
 # Propiedeades privadas | Inmunidad
+var _immunity_to_damage :bool = false
 var _immunity_blink_time: float = 0.0
 
 # Propiedades privadas | Inputs

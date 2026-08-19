@@ -1,6 +1,9 @@
 class_name Fighter
 extends Person
 
+# Constantes | Shield
+const SHIELD_STUN_DURATION :float = 0.8
+
 # Propiedades privadas | Input
 var _attack: bool = false
 var _grab: bool = false
@@ -30,6 +33,11 @@ var _shield_mesh_instance : MeshInstance3D
 var _shield_sphere : SphereMesh
 var _init_shield_radius : float
 var _init_shield_height : float
+
+# Propiedades privadas | shields stun
+var _shield_stun : bool = false
+var _shield_stun_time : float = 0.0
+
 
 # Propiedades privadas | Ataque
 var _attack_count: float = 0.0
@@ -467,9 +475,16 @@ func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 	if signals.on_floor:
 		if _shield_time > 0.0:
 			_shield_time -= delta
+			# Stun time
+			if _shield_stun_time <= 0:
+				_shield_stun = false
+			if _shield_stun:
+				_shield_stun_time -= delta
 		if _shield_time <= 0.0:
 			# Daño por exceso de uso de escudo
 			_target_velocity.y = jump_impulse
+			_shield_stun = false
+			_shield_time = 0.0
 		else:
 			# Rodar
 			_roll = _left_pressed or _right_pressed
@@ -479,6 +494,8 @@ func _shield_defence() -> void:
 		_knockback_active = false
 		_ignore_last_damage()
 		_shield_time -= (_shield_duration*_last_damage_porcentage)
+		_shield_stun = true
+		_shield_stun_time = SHIELD_STUN_DURATION
 
 func _get_shield_porcent() -> float:
 	if _shield_time > 0:
@@ -486,7 +503,7 @@ func _get_shield_porcent() -> float:
 	return 0.0
 
 func _with_shield(signals: VerticalForceSignals) -> bool:
-	return (_shield_time > 0) and (_shield and _allow_shield and signals.on_floor) and (not _attacking())
+	return (_shield_time > 0) and ((_shield or _shield_stun) and _allow_shield and signals.on_floor) and (not _attacking())
 
 # Funciones | Shield rodar
 func _rolling() -> bool:
@@ -565,10 +582,14 @@ func _physics_process(delta: float) -> void:
 		_release_hanging_ledge()
 	
 	# Fight and Defence moves
-	if ( not (_shield and _grab) ) and not _attacking(): 
-		# No permitir grab y shield a la vez. No permitir hacer agarre o escudo cuando se ataca.
+	if _shield and _grab:
+		# No permitir grab y shield a la vez. 
+		_shield = false
+		_grab = false
+	if not _attacking(): 
+		# No permitir hacer agarre o escudo cuando se ataca.
 		_grab_move(delta, gravity_signals)
-		if _shield and _allow_shield:
+		if (_shield or _shield_stun)  and _allow_shield:
 			_shield_move(delta, gravity_signals)
 		else:
 			if not _rolling():
