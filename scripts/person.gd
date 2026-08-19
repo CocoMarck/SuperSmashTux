@@ -572,7 +572,7 @@ func _push_bodys_appart(delta: float, states: MoveStates) -> void:
 			var normal := collision.get_normal()
 			var push_strength := 2.0  # Ajusta según necesites
 			#_target_velocity += normal * current_speed * delta
-			collider.position -= normal * current_speed * delta
+			collider.position.x += _direction.x * current_speed * delta
 
 # Funciones | Inicializar
 func _ready() -> void:
