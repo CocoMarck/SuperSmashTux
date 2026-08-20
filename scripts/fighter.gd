@@ -1,9 +1,6 @@
 class_name Fighter
 extends Person
 
-# Constantes | Shield
-const SHIELD_STUN_DURATION :float = 0.8
-
 # Propiedades privadas | Input
 var _attack: bool = false
 var _grab: bool = false
@@ -15,9 +12,7 @@ var _grab_duration: float = 0.3
 
 # Propiedades privadas | Shield
 var _shield_time: float = 0.0
-var _shield_duration: float = 5.0
 var _shield_regeneration_time :float = 0.0
-var _shield_regeneration_duration :float = 0.5
 var _shield_regeneration_value :float = 0.5
 var _allow_shield: bool = true
 
@@ -464,11 +459,11 @@ func _shield_regeneration(delta: float, signals: VerticalForceSignals) -> void:
 			_shield_time += _shield_regeneration_value
 			
 		if _shield_regeneration_time <= 0:
-			_shield_regeneration_time = _shield_regeneration_duration
+			_shield_regeneration_time = GameBalance.SHIELD_REGENERATION_DURATION
 			
 		_shield_regeneration_time -= delta
-	if _shield_time >= _shield_duration:
-		_shield_time = _shield_duration
+	if _shield_time >= GameBalance.SHIELD_DURATION:
+		_shield_time = GameBalance.SHIELD_DURATION
 
 func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 	# Tiene que estar en el piso
@@ -493,13 +488,13 @@ func _shield_defence() -> void:
 	if _knockback_active:
 		_knockback_active = false
 		_ignore_last_damage()
-		_shield_time -= (_shield_duration*_last_damage_porcentage)
+		_shield_time -= (GameBalance.SHIELD_DURATION*_last_damage_porcentage)
 		_shield_stun = true
-		_shield_stun_time = SHIELD_STUN_DURATION
+		_shield_stun_time = GameBalance.SHIELD_STUN_DURATION
 
 func _get_shield_porcent() -> float:
 	if _shield_time > 0:
-		return _shield_time / _shield_duration
+		return _shield_time / GameBalance.SHIELD_DURATION
 	return 0.0
 
 func _with_shield(signals: VerticalForceSignals) -> bool:
@@ -522,6 +517,7 @@ func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
 				_roll_backward = false
 				_roll_forward = true
 			_roll_time = _roll_duration
+			_shield_time -= GameBalance.SHIELD_DURATION * GameBalance.ROLL_SHIELD_COST_RATIO # Consto de usar rodada
 	if signals.on_floor == false:
 		_roll_time = 0
 	if _rolling():
@@ -555,7 +551,7 @@ func _ready() -> void:
 	_shield_sphere = _shield_mesh_instance.mesh
 	_init_shield_radius = _shield_sphere.radius
 	_init_shield_height = _shield_sphere.height
-	_shield_time = _shield_duration
+	_shield_time = GameBalance.SHIELD_DURATION
 
 # Funciones | Procesar
 func _physics_process(delta: float) -> void:
