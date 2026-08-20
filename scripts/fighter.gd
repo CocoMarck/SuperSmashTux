@@ -340,20 +340,21 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		_attack_direction.z = 0.0
 		
 		# Ataque en piso
+		var direction_buffered = _is_direction_buffer() # Margen de error de precion de direccion.
 		var init_attack = true
 		if states.neutral:
 			_current_attack = _attacks.ground_neutral
-		elif states.moving and (_left_pressed or _right_pressed):
+		elif states.moving and direction_buffered:
 			_current_attack = _attacks.heavy_side
 		elif states.walking:
 			_current_attack = _attacks.forward
 		elif states.running:
 			_current_attack = _attacks.dash
-		elif states.neutral_crouch and _down_pressed:
+		elif states.neutral_crouch and direction_buffered:
 			_current_attack = _attacks.heavy_down
 		elif states.neutral_crouch:
 			_current_attack = _attacks.down
-		elif states.neutral_up and _up_pressed:
+		elif states.neutral_up and direction_buffered:
 			_current_attack = _attacks.heavy_up
 		elif states.neutral_up:
 			_current_attack = _attacks.up

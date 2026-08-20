@@ -98,6 +98,9 @@ var _right_pressed: bool = false
 var _was_move_left: bool = false
 var _left_pressed: bool = false
 
+# Propiedades privadas buffer temporal
+var _direction_buffer_timer: float = 0.0
+
 # Propiedades privadas | Agarre de orillas.
 var _hanging_ledge: GroundPlatform = null
 var _hanging_right_side: bool = false
@@ -184,8 +187,10 @@ func respawn(at_position: Vector3) -> void:
 	_drop_through_count = 0.0
 	_set_x_not_zero_value( _get_initial_facing() )
 
-
 # Funciones | Mover
+func _is_direction_buffer() -> bool:
+	return _direction_buffer_timer > 0
+
 func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	'''
 	Movimientos.
@@ -214,6 +219,13 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	_was_move_up = _move_up
 	_was_move_left = _move_left
 	_was_move_right = _move_right
+
+	# Margen de error para flancos de input
+	if _is_direction_buffer():
+		_direction_buffer_timer -= delta
+	else:
+		if (_down_pressed or _up_pressed or _left_pressed or _right_pressed):
+			_direction_buffer_timer = GameBalance.INPUT_BUFFER_WINDOW
 
 	# Variables | Direccion de movimiento horizontal
 	# Solo actualizar direccion en el piso.
