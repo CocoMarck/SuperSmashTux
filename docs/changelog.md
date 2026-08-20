@@ -13,3 +13,4 @@
 
 ### Fighter
 - `Shield stun` **LISTO**: Nomas un datallito con el escudo, que todavía no pongo. Cuando se pone el escudo, y se recibe un golpe con el escudo, debe quedarse puesto el escudo por  "x" cantidad de tiempo, input totalmente bloqueado por esa "x" cantidad  de tiempo. Así se castiga el spamear usar escudo. Creo que 1 segundo de castigo debe ser suficiente.
+- `Fight move margen de error` **FALTA**: Para los ataques heavy, de direccion mas ataque al mismo tiempo, establecer un margen de error. Margen de error de 0.1 m o menos, por cada flanco de movimiento. O si hace falta, crear flancos nuevos de movimiento, de margen de error.

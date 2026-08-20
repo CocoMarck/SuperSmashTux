@@ -510,7 +510,7 @@ func _rolling() -> bool:
 	return _roll_backward or _roll_forward
 
 func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
-	if _roll and (_allow_shield):
+	if _roll and (_allow_shield) and (not _shield_stun):
 		if _roll_time <= 0:
 			if _left_pressed and _last_x_direction == 1:
 				_roll_backward = true
