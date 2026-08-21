@@ -352,7 +352,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 			_current_attack = _attacks.dash
 		elif states.neutral_crouch and direction_buffered:
 			_current_attack = _attacks.heavy_down
-		elif states.neutral_crouch:
+		elif states.neutral_crouch or states.crouch_move:
 			_current_attack = _attacks.down
 		elif states.neutral_up and direction_buffered:
 			_current_attack = _attacks.heavy_up
@@ -571,7 +571,7 @@ func _physics_process(delta: float) -> void:
 	_set_x_not_zero_value(move_signals.direction)
 	
 	# Cancelar salto por ataque heavy arriba.
-	if _up_pressed and _attack and move_signals.on_floor:
+	if _is_direction_buffer() and _attack and move_signals.on_floor:
 		_target_velocity.y = 0
 	
 	# Ledge grab

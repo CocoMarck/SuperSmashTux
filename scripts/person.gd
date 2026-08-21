@@ -197,6 +197,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	Retorna señales de movimientos.
 	'''
 	# Variables | Salto y moverse horizontalmente
+
 	var want_jump := false
 	var can_jump := false
 	if _knockback_active:
@@ -323,7 +324,7 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 		neutral_up = not moving and _move_up and not _move_down
 		neutral_crouch = not moving and _move_down and not _move_up
 		crouch_move = moving and _move_down and not _move_up
-		walking = _walk and moving
+		walking = _walk and moving and not crouch_move
 		running = moving and not walking and not crouch_move
 	
 	else:
