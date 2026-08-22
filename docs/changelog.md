@@ -8,7 +8,7 @@
 - `Jumping` **LISTO**
 - `Air jumping` **LISTO**: Posibilidad de saltar en el aire, por defecto no salta en el aire.
 - `Damage move` **LISTO**: Movimiento al recibir daño. Tiene stun pero corto, no deja "secuelas". Lo causan golpes no heavys. Se considera heavy, por cantidad de porcentaje de daño.
-- `Stun move` **FALTA**: Movimiento al recibir daño. Pero no permite moverse en piso solo en el aire y solo de forma horozontal y sin poder atacar. En el piso estas tumbado, pero cualquier input te levanta. Si no recibe input en el piso se quedara x segundos en el piso, y se levantara solo. Mientras te levantas, eres inmune al daño. Mientras te lavantas, pues no puedes hacer ningun input. Tienes que esperarte. No se puede hacer ningun salto en el stun move. Solo el tercer salto, pero eso esta en `PowerFighter`. El conteo del stun sucede en el piso.
+- `Stun move` **LISTO**: Movimiento al recibir daño. Pero no permite moverse en piso solo en el aire y solo de forma horozontal y sin poder atacar. En el piso estas tumbado, pero cualquier input te levanta. Si no recibe input en el piso se quedara x segundos en el piso, y se levantara solo. Mientras te levantas, eres inmune al daño. Mientras te lavantas, pues no puedes hacer ningun input. Tienes que esperarte. No se puede hacer ningun salto en el stun move. Solo el tercer salto, pero eso esta en `PowerFighter`. El conteo del stun sucede en el piso.
 - `Knocked out` **FALTA**: Completamente noqueado, en "x" segundos se habilita el poder moverse. Con un golpe, se te quita el estado de noqueado. El knockout, solo se habilita con poderes, o castigos, por ejemplo, habilidad magica para dormir o romper esucdo. 
 
 ### Fighter

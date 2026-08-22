@@ -23,7 +23,7 @@ const LEDGE_RELEASE_TIME := 0.3    # cooldown tras soltarse, pa no re-agarrarse 
 const KNOCKBACK_DURATION :float = 0.35
 
 # Person | Stun move
-const STUN_DURATION_OF_FLOOR: float = 2.0
+const STUN_DURATION_ON_FLOOR: float = 1.0
 const STUN_DAMAGE_THRESHOLD: float = 0.2 # Porcentaje minimo para habilitar stun
 const STUN_GETUP_NEUTRAL: float = 1.0 
 const STUN_GETUP_FORWARD: float = 0.5

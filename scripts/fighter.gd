@@ -54,7 +54,7 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"inmortal": false,
 			
-			"hitbox_damage": 5,
+			"hitbox_damage": 10,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
 			"hitbox_position": Vector3(0.8,0,0),
 			"direction": Vector3(1,0.5,0),
@@ -74,7 +74,7 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"inmortal": false,
 			
-			"hitbox_damage": 5,
+			"hitbox_damage": 8,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
 			"hitbox_position": Vector3(1.0,-1.0,0),
 			"direction": Vector3(0.25,0.75,0),
@@ -94,7 +94,7 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"inmortal": false,
 			
-			"hitbox_damage": 5,
+			"hitbox_damage": 7,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
 			"hitbox_position": Vector3(0.3,0.9,0),
 			"direction": Vector3(0.25,1.0,0),
@@ -134,7 +134,7 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"inmortal": false,
 			
-			"hitbox_damage": 10,
+			"hitbox_damage": 6,
 			"hitbox_size": Vector3(0.5,0.5,1.0),
 			"hitbox_position": Vector3(1.0,-0.2,0),
 			"direction": Vector3(1.0,0.5,0),
@@ -154,10 +154,10 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"inmortal": false,
 			
-			"hitbox_damage": 5,
+			"hitbox_damage": 20,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
 			"hitbox_position": Vector3(0.8,0.1,0),
-			"direction": Vector3(1.25,1,0),
+			"direction": Vector3(1,1,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -174,10 +174,10 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"inmortal": false,
 			
-			"hitbox_damage": 10,
+			"hitbox_damage": 20,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
 			"hitbox_position": Vector3(0.1,0.8,0),
-			"direction": Vector3(0.25,1.5,0),
+			"direction": Vector3(0.25,1.0,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -194,7 +194,7 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"inmortal": false,
 			
-			"hitbox_damage": 5,
+			"hitbox_damage": 10,
 			"hitbox_size": Vector3(0.5,0.5,2.0),
 			"hitbox_position": Vector3(0.0,-1.0,0),
 			"direction": Vector3(0.25,1,0),
@@ -236,10 +236,10 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"inmortal": false,
 			
-			"hitbox_damage": 10,
+			"hitbox_damage": 20,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
 			"hitbox_position": Vector3(0.1, -1.1, 0),
-			"direction": Vector3(1,-1.0,0),
+			"direction": Vector3(0.25,-1.0,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
 			"inversed_hitbox_ratio": true
@@ -488,8 +488,12 @@ func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 			_roll = _left_pressed or _right_pressed
 
 func _shield_defence() -> void:
+	'''
+	Defensa de ataques locos. Anular daño.
+	'''
 	if _knockback_active:
 		_knockback_active = false
+		_stun_move_active = false
 		_ignore_last_damage()
 		_shield_time -= (GameBalance.SHIELD_DURATION*_last_damage_porcentage)
 		_shield_stun = true
@@ -565,20 +569,20 @@ func _physics_process(delta: float) -> void:
 	_collect_input()
 	
 	# Move
-	var gravity_signals = _vertical_force(delta, _down_pressed, _fall_acceleration_multiplier)
+	var gravity_signals = _vertical_force(
+		delta, (_down_pressed and _stun_move_active == false), _fall_acceleration_multiplier
+	)
 	var move_signals = _move(delta, gravity_signals)
 	var move_states = _get_move_states(move_signals)
-	if not _knockback_active:
-		_ledge_grab(delta, gravity_signals, move_signals)
+	if _stun_move_active or _knockback_active:
+		_release_hanging_ledge()
+		_ledge_release_count = 1.0
+	_ledge_grab(delta, gravity_signals, move_signals)
 	_set_x_not_zero_value(move_signals.direction)
 	
 	# Cancelar salto por ataque heavy arriba.
 	if _is_direction_buffer() and _attack and move_signals.on_floor:
 		_target_velocity.y = 0
-	
-	# Ledge grab
-	if _holding_onto_the_ledge() and _knockback_active:
-		_release_hanging_ledge()
 	
 	# Fight and Defence moves
 	## No permitir grab y shield.
@@ -626,11 +630,15 @@ func _physics_process(delta: float) -> void:
 	# Damage
 	if _knockback_active:
 		_damage_move(delta)
+	elif _stun_move_active:
+		_stun_move(delta, gravity_signals)
 	
 	# Anular ataque, grab, y shield
-	if  _knockback_active or _holding_onto_the_ledge():
+	_allow_shield = true
+	if  _knockback_active or _stun_move_active or _holding_onto_the_ledge():
 		_current_attack = null
 		_grab_time = 0.0
+		_allow_shield = false
 		_clear_hitbox()
 		
 	# Visual | Escudo
@@ -646,6 +654,8 @@ func _physics_process(delta: float) -> void:
 	_reset_visual_values()
 	if _knockback_active:
 		_damage_anim(delta, gravity_signals)
+	elif _stun_move_active:
+		_stun_move_anim(delta, gravity_signals)
 	elif _holding_onto_the_ledge():
 		_ledge_grab_anim(delta)
 	elif _attacking():
@@ -658,7 +668,8 @@ func _physics_process(delta: float) -> void:
 		_animation_player.play("guard")
 	else:
 		_move_anim(delta, move_states)
-	_set_pivot_direction(move_signals)
+	if not (_stun_move_active or _knockback_active):
+		_set_pivot_direction(move_signals)
 
 	# Effects
 	inmunity_effect(delta)

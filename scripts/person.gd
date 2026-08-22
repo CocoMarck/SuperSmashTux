@@ -69,6 +69,10 @@ var _damage_degrees :float = 0.0
 var _last_damage :float = 0.0
 var _last_damage_porcentage :float = 0.0
 
+# Propiedades privadas | Stun move
+var _stun_move_time: float = 0.0
+var _stun_move_active: bool = false
+
 # Propiedeades privadas | Inmunidad
 var _immunity_to_damage :bool = false
 var _immunity_blink_time: float = 0.0
@@ -182,6 +186,8 @@ func respawn(at_position: Vector3) -> void:
 	# podria dañar a quien este parado en el spawn apenas reaparece.
 	_release_hanging_ledge()
 	_drop_through_count = 0.0
+	_knockback_active = false
+	_stun_move_active = false
 	_set_x_not_zero_value( _get_initial_facing() )
 
 # Funciones | Mover
@@ -417,6 +423,12 @@ func set_damage_move(damage:float, direction:Vector3) -> void:
 		_knockback_direction = direction
 		_knockback_active = true
 		_knockback_time = GameBalance.KNOCKBACK_DURATION
+		_stun_move_active = false
+		if damage >= hp*GameBalance.STUN_DAMAGE_THRESHOLD:
+			# Movimiento stun solo si se hace el porcentaje de daño indicado.
+			_stun_move_active = true
+			_stun_move_time = GameBalance.STUN_DURATION_ON_FLOOR
+			_jump_count = _max_jumps
 
 func _damage_move(delta: float) -> void:
 	_knockback_time -= delta
@@ -432,7 +444,7 @@ func _damage_move(delta: float) -> void:
 		_pivot.rotation_degrees.x = 0
 	
 func _damage_anim(delta: float, signals: VerticalForceSignals) -> void:
-	if signals.air_count < 0.1:
+	if signals.air_count < 0.2:
 		_damage_degrees = 0
 		_animation_player.play("hurt_ground")
 	elif signals.on_floor:
@@ -443,6 +455,34 @@ func _damage_anim(delta: float, signals: VerticalForceSignals) -> void:
 		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
 	_pivot.rotation_degrees.x = _damage_degrees
 
+
+# Funciones | Stun move
+func _stun_move(delta: float, signals: VerticalForceSignals) -> void:
+	_allow_jump = false
+	_horizontal_move = true
+	if signals.on_floor:
+		_stun_move_time -= delta
+		_horizontal_move = false
+		if _move_left or _move_right:
+			# Animacion inmune de levantarse. 
+			pass#_stun_move_active = false # Esto cancela stun
+	if _stun_move_time <= 0.0:
+		_stun_move_active = false
+		_pivot.rotation_degrees.x = 0
+
+func _stun_move_anim(delta: float, signals: VerticalForceSignals) -> void:
+	if signals.air_count < 0.2:
+		_damage_degrees = -90
+		_pivot.position.y = -1.0
+		_animation_player.play("knockdown")
+	elif signals.on_floor:
+		_damage_degrees = -90
+		_pivot.position.y = -1.0
+		_animation_player.play("knockdown")
+	else:
+		_animation_player.play("hurt_air")
+		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
+	_pivot.rotation_degrees.x = _damage_degrees
 
 # Funciones | Agarre de orillas
 func _release_hanging_ledge() -> void:
@@ -622,24 +662,29 @@ func _physics_process(delta: float) -> void:
 	_collect_input()
 	
 	# Move
-	var gravity_signals = _vertical_force(delta, _down_pressed, _fall_acceleration_multiplier)
+	var gravity_signals = _vertical_force(
+		delta, (_down_pressed and _stun_move_active == false), _fall_acceleration_multiplier
+	)
 	var move_signals = _move(delta, gravity_signals)
 	var move_states = _get_move_states(move_signals)
+	if _stun_move_active or _knockback_active:
+		_release_hanging_ledge()
+		_ledge_release_count = 1.0
 	_ledge_grab(delta, gravity_signals, move_signals)
 	_set_x_not_zero_value(move_signals.direction)
-	
-	# Ledge grab
-	if _holding_onto_the_ledge() and _knockback_active:
-		_release_hanging_ledge()
 
 	# Damage
 	if _knockback_active:
 		_damage_move(delta)
+	elif _stun_move_active:
+		_stun_move(delta, gravity_signals)
 
 	# Anim
 	_reset_visual_values()
 	if _knockback_active:
 		_damage_anim(delta, gravity_signals)
+	elif _stun_move_active:
+		_stun_move_anim(delta, gravity_signals)
 	elif _holding_onto_the_ledge():
 		_ledge_grab_anim(delta)
 	else:
