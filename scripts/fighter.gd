@@ -1,6 +1,8 @@
 class_name Fighter
 extends Person
 
+# Constantes Shield en `GameBalance`
+
 # Propiedades privadas | Input
 var _attack: bool = false
 var _grab: bool = false

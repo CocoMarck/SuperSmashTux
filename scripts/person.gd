@@ -11,9 +11,7 @@ Objeto de persona. Tiene lo necesario para tener fisicas 2D en un mundo 3D.
 - Tiene flancos de input de movimiento para poder hacer acciones especiales. O limitar acciones.
 '''
 
-# Constantes | Agarre de orillas.
-const LEDGE_HANG_OFFSET := 0.3     # que tan separado de la orilla se queda colgado
-const LEDGE_RELEASE_TIME := 0.3    # cooldown tras soltarse, pa no re-agarrarse solo
+# Constantes de agarre de orillas en `GameBalance`.
 
 # Propiedades publicas
 @export_group("Horizontal Movement")
@@ -63,11 +61,10 @@ var _horizontal_move: bool = true
 var _allow_jump: bool = true
 
 # Propiedades privadas | Daño
-var _normal_damage_power :float = 50
+var _normal_damage_power :float = 50 # Este valor se cambiara segun el personaje.
 var _knockback_active :bool = false
 var _knockback_direction :Vector3 = Vector3.ZERO
 var _knockback_time :float = 0.0
-var _knockback_duration :float = 0.35
 var _damage_degrees :float = 0.0
 var _last_damage :float = 0.0
 var _last_damage_porcentage :float = 0.0
@@ -419,7 +416,7 @@ func set_damage_move(damage:float, direction:Vector3) -> void:
 	if not _immunity_to_damage:
 		_knockback_direction = direction
 		_knockback_active = true
-		_knockback_time = _knockback_duration
+		_knockback_time = GameBalance.KNOCKBACK_DURATION
 
 func _damage_move(delta: float) -> void:
 	_knockback_time -= delta
@@ -488,7 +485,7 @@ func _ledge_grab(
 			# Subirse de vuelta a la plataforma, puro impulso hacia arriba; si se mete o no ya es bronca del jugador.
 			_target_velocity.y = jump_impulse
 			_release_hanging_ledge()
-			_ledge_release_count = LEDGE_RELEASE_TIME
+			_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
 			return
 
 		if _down_pressed:
@@ -496,7 +493,7 @@ func _ledge_grab(
 			_target_velocity = Vector3.ZERO
 			_target_velocity.y = -1.0
 			_release_hanging_ledge()
-			_ledge_release_count = LEDGE_RELEASE_TIME
+			_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
 			return
 
 		# Nadamas quedarse ahi colgado, bien quietecito.
@@ -534,7 +531,7 @@ func _ledge_grab(
 			_hanging_right_side = right_side
 			var top_y := ground.get_top_y()
 			var ledge_x := ground.get_ledge_x(right_side)
-			var anchor_x := (ledge_x + LEDGE_HANG_OFFSET) if right_side else (ledge_x - LEDGE_HANG_OFFSET)
+			var anchor_x := (ledge_x + GameBalance.LEDGE_HANG_OFFSET) if right_side else (ledge_x - GameBalance.LEDGE_HANG_OFFSET)
 			var anchor_y := global_position.y - (_get_head_y() - top_y)
 			_hang_position = Vector3(anchor_x, anchor_y, global_position.z)
 			_target_velocity = Vector3.ZERO

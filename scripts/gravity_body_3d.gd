@@ -7,10 +7,7 @@ Tiene funciones para colisiones con objetos de un solo sentido.
 Colisiones con otros character body
 '''
 
-# Constantes | Plataformas de un solo sentido.
-const DROP_THROUGH_TIME :float = 0.25    # segundos que se ignora la plataforma tras el tap de abajo
-const ONE_WAY_MARGIN :float = 0.1        # franja por debajo de la cara superior de la plataforma, pa no quedarse atorado
-const ONE_WAY_COYOTE_TIME :float = 0.3   # tiempo de perdon al salirse de la orilla y querer regresar
+# Constantes | Plataformas de un solo sentido en `GameBalence`.
 
 # Propiedades publicas 
 @export_group("Gravity")
@@ -75,7 +72,7 @@ func _one_way_platforms(delta: float, ignore: bool, on_floor: bool) -> void:
 
 	# Arrancar caida voluntaria si se hace tap de abajo estando parado sobre una plataforma de un solo sentido.
 	if ignore and floor_one_way != null:
-		_drop_through_count = DROP_THROUGH_TIME
+		_drop_through_count = GameBalance.DROP_THROUGH_TIME
 		# Empujoncito hacia abajo pa despegarse y que no se re-enganche por el snap del piso.
 		_target_velocity.y = min(_target_velocity.y, -1.0)
 
@@ -90,7 +87,7 @@ func _one_way_platforms(delta: float, ignore: bool, on_floor: bool) -> void:
 		_one_way_coyote_count = 0.0
 	elif floor_one_way != null:
 		_last_floor_one_way = floor_one_way
-		_one_way_coyote_count = ONE_WAY_COYOTE_TIME
+		_one_way_coyote_count = GameBalance.ONE_WAY_COYOTE_TIME
 	else:
 		_one_way_coyote_count = max(_one_way_coyote_count - delta, 0.0)
 
@@ -106,7 +103,7 @@ func _one_way_platforms(delta: float, ignore: bool, on_floor: bool) -> void:
 		var in_coyote := one_way == _last_floor_one_way and _one_way_coyote_count > 0.0
 		var should_ignore := _drop_through_count > 0.0 \
 			or _target_velocity.y > 0.0 \
-			or (not one_way.is_above_surface(feet_position, ONE_WAY_MARGIN) and not in_coyote)
+			or (not one_way.is_above_surface(feet_position, GameBalance.ONE_WAY_MARGIN) and not in_coyote)
 
 		# Solo llamar add/remove cuando el estado cambia de verdad, pa no hacerlo de a gratis cada frame.
 		if _one_way_ignored.get(one_way, false) != should_ignore:
