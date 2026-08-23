@@ -32,8 +32,8 @@ var _init_shield_radius : float
 var _init_shield_height : float
 
 # Propiedades privadas | shields stun
-var _shield_stun : bool = false
-var _shield_stun_time : float = 0.0
+var _shield_blockstun : bool = false
+var _shield_blockstun_time : float = 0.0
 
 
 # Propiedades privadas | Ataque
@@ -52,7 +52,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": true,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 10,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
@@ -60,7 +60,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(1,0.5,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	FightMove.new(
@@ -72,7 +72,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": true,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 8,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
@@ -80,7 +80,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(0.25,0.75,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	FightMove.new(
@@ -92,7 +92,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": true,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 7,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
@@ -100,7 +100,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(0.25,1.0,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	FightMove.new(
@@ -112,7 +112,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": true,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 5,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
@@ -120,7 +120,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(0.5,0.8,0.0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	FightMove.new(
@@ -132,7 +132,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": true,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 6,
 			"hitbox_size": Vector3(0.5,0.5,1.0),
@@ -140,7 +140,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(1.0,0.5,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	FightMove.new(
@@ -152,7 +152,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": true,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 20,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
@@ -160,7 +160,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(1,1,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	FightMove.new(
@@ -172,7 +172,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": true,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 20,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
@@ -180,7 +180,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(0.25,1.0,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	FightMove.new(
@@ -192,7 +192,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": true,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 10,
 			"hitbox_size": Vector3(0.5,0.5,2.0),
@@ -200,7 +200,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(0.25,1,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	
@@ -214,7 +214,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": false,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 5,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
@@ -222,7 +222,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(1,1,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	FightMove.new(
@@ -234,7 +234,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": false,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 20,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
@@ -242,7 +242,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(0.25,-1.0,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	FightMove.new(
@@ -254,7 +254,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": false,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 5,
 			"hitbox_size": Vector3(0.5,0.5,0.8),
@@ -262,7 +262,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(0.5,1.25,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	FightMove.new(
@@ -274,7 +274,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": false,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 10,
 			"hitbox_size": Vector3(0.5,0.5,0.9),
@@ -282,7 +282,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(1.2,1,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 	FightMove.new(
@@ -294,7 +294,7 @@ var _attacks: Attacks = Attacks.new(
 			"grab_attack": false,
 			"override_horizontal_move": false,
 			"override_vertical_move": false,
-			"inmortal": false,
+			"immortal": false,
 			
 			"hitbox_damage": 10,
 			"hitbox_size": Vector3(0.5,0.5,0.5),
@@ -302,7 +302,7 @@ var _attacks: Attacks = Attacks.new(
 			"direction": Vector3(1.0,1,0),
 			"hitbox_time_ratio": 0.5,
 			"hitbox_rotation": 0.0,
-			"inversed_hitbox_ratio": true
+			"inverted_hitbox_ratio": true
 		}
 	),
 )
@@ -415,7 +415,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 	# Hitbox. Asegurarsee de solo spawnear uno.
 	if _current_attack != null and _spawned_hitbox == null:
 		# Basado en la duracion del ataque, es lo que dura el hitbox de damage.
-		if (_current_attack.inversed_hitbox_ratio):
+		if (_current_attack.inverted_hitbox_ratio):
 			if _attack_count-delta >= _current_attack.get_hitbox_time_ratio():
 				_spawn_hitbox(
 					_current_attack.hitbox_size, _current_attack.hitbox_position, _current_attack.hitbox_damage, _attack_direction
@@ -473,15 +473,15 @@ func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 	if signals.on_floor:
 		if _shield_time > 0.0:
 			_shield_time -= delta
-			# Stun time
-			if _shield_stun_time <= 0:
-				_shield_stun = false
-			if _shield_stun:
-				_shield_stun_time -= delta
+			# Blockstun time
+			if _shield_blockstun_time <= 0:
+				_shield_blockstun = false
+			if _shield_blockstun:
+				_shield_blockstun_time -= delta
 		if _shield_time <= 0.0:
 			# Daño por exceso de uso de escudo
 			_target_velocity.y = jump_impulse
-			_shield_stun = false
+			_shield_blockstun = false
 			_shield_time = 0.0
 		else:
 			# Rodar
@@ -493,11 +493,11 @@ func _shield_defence() -> void:
 	'''
 	if _knockback_active:
 		_knockback_active = false
-		_stun_move_active = false
+		_heavy_hitstun_active = false
 		_ignore_last_damage()
-		_shield_time -= (GameBalance.SHIELD_DURATION*_last_damage_porcentage)
-		_shield_stun = true
-		_shield_stun_time = GameBalance.SHIELD_STUN_DURATION
+		_shield_time -= (GameBalance.SHIELD_DURATION*_last_damage_percentage)
+		_shield_blockstun = true
+		_shield_blockstun_time = GameBalance.SHIELD_STUN_DURATION
 
 func _get_shield_porcent() -> float:
 	if _shield_time > 0:
@@ -505,14 +505,14 @@ func _get_shield_porcent() -> float:
 	return 0.0
 
 func _with_shield(signals: VerticalForceSignals) -> bool:
-	return (_shield_time > 0) and ((_shield or _shield_stun) and _allow_shield and signals.on_floor) and (not _attacking())
+	return (_shield_time > 0) and ((_shield or _shield_blockstun) and _allow_shield and signals.on_floor) and (not _attacking())
 
 # Funciones | Shield rodar
 func _rolling() -> bool:
 	return _roll_backward or _roll_forward
 
 func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
-	if _roll and (_allow_shield) and (not _shield_stun):
+	if _roll and (_allow_shield) and (not _shield_blockstun):
 		if _roll_time <= 0:
 			if _left_pressed and _last_x_direction == 1:
 				_roll_backward = true
@@ -570,11 +570,11 @@ func _physics_process(delta: float) -> void:
 	
 	# Move
 	var gravity_signals = _vertical_force(
-		delta, (_down_pressed and _stun_move_active == false), _fall_acceleration_multiplier
+		delta, (_down_pressed and _heavy_hitstun_active == false), _fall_acceleration_multiplier
 	)
 	var move_signals = _move(delta, gravity_signals)
 	var move_states = _get_move_states(move_signals)
-	if _stun_move_active or _knockback_active:
+	if _heavy_hitstun_active or _knockback_active:
 		_release_hanging_ledge()
 		_ledge_release_count = 1.0
 	_ledge_grab(delta, gravity_signals, move_signals)
@@ -593,7 +593,7 @@ func _physics_process(delta: float) -> void:
 	## No permitir hacer agarre o escudo cuando se ataca.
 	if not _attacking(): 	
 		_grab_move(delta, gravity_signals)
-		if (_shield or _shield_stun)  and _allow_shield:
+		if (_shield or _shield_blockstun)  and _allow_shield:
 			_shield_move(delta, gravity_signals)
 		else:
 			if not _rolling():
@@ -622,20 +622,20 @@ func _physics_process(delta: float) -> void:
 		_horizontal_move = false
 		_allow_jump = false
 		
-	# Defensa | Recivir ataques en escudo. Rodar.
+	# Defensa | Recibir ataques en escudo. Rodar.
 	if with_shield:
 		_shield_defence()
 	_roll_move(delta, gravity_signals)
 
 	# Damage
 	if _knockback_active:
-		_damage_move(delta)
-	elif _stun_move_active:
-		_stun_move(delta, gravity_signals)
+		_apply_hitstun(delta)
+	elif _heavy_hitstun_active:
+		_apply_heavy_hitstun(delta, gravity_signals)
 	
 	# Anular ataque, grab, y shield
 	_allow_shield = true
-	if  _knockback_active or _stun_move_active or _holding_onto_the_ledge():
+	if  _knockback_active or _heavy_hitstun_active or _holding_onto_the_ledge():
 		_current_attack = null
 		_grab_time = 0.0
 		_allow_shield = false
@@ -653,9 +653,9 @@ func _physics_process(delta: float) -> void:
 	# Anim
 	_reset_visual_values()
 	if _knockback_active:
-		_damage_anim(delta, gravity_signals)
-	elif _stun_move_active:
-		_stun_move_anim(delta, gravity_signals)
+		_hitstun_anim(delta, gravity_signals)
+	elif _heavy_hitstun_active:
+		_heavy_hitstun_anim(delta, gravity_signals)
 	elif _holding_onto_the_ledge():
 		_ledge_grab_anim(delta)
 	elif _attacking():
@@ -668,13 +668,13 @@ func _physics_process(delta: float) -> void:
 		_animation_player.play("guard")
 	else:
 		_move_anim(delta, move_states)
-	if not (_stun_move_active or _knockback_active):
+	if not (_heavy_hitstun_active or _knockback_active):
 		_set_pivot_direction(move_signals)
 
 	# Effects
-	inmunity_effect(delta)
+	immunity_effect(delta)
 
 	# Procesar todo
-	_push_bodys_appart(delta, move_states)
+	_push_bodies_apart(delta, move_states)
 	velocity = _target_velocity
 	move_and_slide()

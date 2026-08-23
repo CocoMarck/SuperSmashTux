@@ -32,7 +32,7 @@ var air_attack: bool
 var grab_attack: bool
 var override_horizontal_move: bool
 var override_vertical_move: bool
-var inmortal: bool
+var immortal: bool
 
 # Propidedes publicas hitbox
 var hitbox_damage: int
@@ -40,7 +40,7 @@ var hitbox_size: Vector3
 var hitbox_position: Vector3
 var hitbox_time_ratio: float
 var hitbox_rotation: float
-var inversed_hitbox_ratio: bool
+var inverted_hitbox_ratio: bool
 
 # Propiedades privadas valores default.
 var _defaults := {
@@ -58,7 +58,7 @@ var _defaults := {
 	"hitbox_position": Vector3(0,0,0),
 	"hitbox_time_ratio": 0.5,
 	"hitbox_rotation": 0.0,
-	"inversed_hitbox_ratio": true
+	"inverted_hitbox_ratio": true
 }
 
 
@@ -78,7 +78,7 @@ func _init(
 	grab_attack = config["grab_attack"]
 	override_horizontal_move = config["override_horizontal_move"]
 	override_vertical_move = config["override_vertical_move"]
-	inmortal = config["inmortal"]
+	immortal = config["immortal"]
 
 	# Hitbox
 	hitbox_damage = config["hitbox_damage"]
@@ -86,7 +86,7 @@ func _init(
 	hitbox_position = config["hitbox_position"]
 	hitbox_time_ratio = config["hitbox_time_ratio"]
 	hitbox_rotation = config["hitbox_rotation"]
-	inversed_hitbox_ratio = config["inversed_hitbox_ratio"]
+	inverted_hitbox_ratio = config["inverted_hitbox_ratio"]
 
 func get_hitbox_time_ratio() -> float:
 	return (duration * hitbox_time_ratio)
