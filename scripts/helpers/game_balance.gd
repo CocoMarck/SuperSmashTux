@@ -24,12 +24,12 @@ const KNOCKBACK_DURATION :float = 0.35
 
 # Person | Stun move
 const STUN_DURATION_ON_FLOOR: float = 1.0
-const STUN_DAMAGE_THRESHOLD: float = 0.2 # Porcentaje minimo para habilitar stun
-const STUN_GETUP_NEUTRAL: float = 1.0 
-const STUN_GETUP_FORWARD: float = 0.5
-const STUN_GETUP_BACKWARD: float = 0.5
-const STUN_GETUP_UP: float = 0.4
-const STUN_GETUP_DOWN: float = 0.4
+const STUN_DAMAGE_THRESHOLD: float = 0.15 # Porcentaje minimo para habilitar stun
+const STUN_GETUP_NEUTRAL_DURATION: float = 1.0 
+const STUN_GETUP_FORWARD_DURATION: float = 0.5
+const STUN_GETUP_BACKWARD_DURATION: float = 0.5
+const STUN_GETUP_UP_DURATION: float = 0.4
+const STUN_GETUP_DOWN_DURATION: float = 0.4
 
 # Person | Knockout
 const KNOCKOUT_DURATION: float = 5.0

@@ -69,9 +69,10 @@ var _damage_degrees :float = 0.0
 var _last_damage :float = 0.0
 var _last_damage_porcentage :float = 0.0
 
-# Propiedades privadas | Stun move
+# Propiedades privadas | Stun
 var _stun_move_time: float = 0.0
 var _stun_move_active: bool = false
+var _stun_get_up_time: float = 0.0
 
 # Propiedeades privadas | Inmunidad
 var _immunity_to_damage :bool = false
@@ -189,6 +190,106 @@ func respawn(at_position: Vector3) -> void:
 	_knockback_active = false
 	_stun_move_active = false
 	_set_x_not_zero_value( _get_initial_facing() )
+	
+# Funciones | Agarre de orillas
+func _release_hanging_ledge() -> void:
+	'''
+	Soltar la cornisa que traiamos agarrada y avisarle a la plataforma pa que quede libre pa otro.
+	Aguanta que la plataforma ya no exista, asi que se puede llamar sin miedo.
+	'''
+	if _hanging_ledge != null and is_instance_valid(_hanging_ledge):
+		_hanging_ledge.release_ledge(_hanging_right_side, self)
+	_hanging_ledge = null
+
+func _ledge_grab(
+	delta: float, vertical_force_signals: VerticalForceSignals, move_signals: MoveSignals
+) -> void:
+	'''
+	Agarre de orillas estilo Smash Bros. Deteccion puramente espacial: cada GroundPlatform expone
+	una zona de agarre a cada lado (matematica de rangos, is_character_in_ledge_zone), aqui solo se
+	pregunta "¿ando en esa zona?" + "¿vengo cayendo?". Sin heuristicas de historial.
+	Colgado, arriba te subes con impulso y abajo te sueltas y caes.
+	Corre despues de _move, asi que pisa lo que calculo sin pedirle permiso. _fight y _anim corren despues
+	pero se salen temprano si andamos colgados, por eso no nos pisan de vuelta.
+	
+	Remplaza direccion horizontal.
+	'''
+	# Cooldown pa no re-agarrarnos solitos justo despues de soltarnos.
+	if _ledge_release_count > 0.0:
+		_ledge_release_count = max(_ledge_release_count - delta, 0.0)
+
+	# Si ya andamos colgados, decidir que hacer.
+	if _hanging_ledge != null:
+		# Si la plataforma se esfumo, soltarse de volada.
+		if not is_instance_valid(_hanging_ledge):
+			_release_hanging_ledge()
+			return
+
+		# Determinar a donde se debe mirar mientras uno se cuelga pa irse a conocer a diosito.
+		var inward := -1.0 if _hanging_right_side else 1.0
+
+		if _up_pressed:
+			# Subirse de vuelta a la plataforma, puro impulso hacia arriba; si se mete o no ya es bronca del jugador.
+			_target_velocity.y = jump_impulse
+			_release_hanging_ledge()
+			_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
+			return
+
+		if _down_pressed:
+			# Soltarse a proposito y empezar a caer.
+			_target_velocity = Vector3.ZERO
+			_target_velocity.y = -1.0
+			_release_hanging_ledge()
+			_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
+			return
+
+		# Nadamas quedarse ahi colgado, bien quietecito.
+		_target_velocity = Vector3.ZERO
+		global_position = _hang_position
+		_air_count = 0
+		_jump_count = 0
+		# Voltearlo de cara a la orilla. _anim corre despues pero se sale temprano si andamos colgados, asi no lo voltea.
+		move_signals.direction.x = inward
+		return
+
+	# No estamos colgados: checar si toca agarrarnos. Zona de agarre + venir cayendo, nada mas.
+	if _ledge_release_count > 0.0:
+		return
+	if vertical_force_signals.on_floor:
+		return
+	if _target_velocity.y >= 0.0:
+		return
+
+	for platform in get_tree().get_nodes_in_group(Platform.GROUP_NAME):
+		var ground := platform as GroundPlatform
+		if ground == null or not is_instance_valid(ground):
+			continue
+		if not ground.has_ledges():
+			continue
+
+		for right_side in [true, false]:
+			if not ground.is_character_in_ledge_zone(right_side, global_position):
+				continue
+			# Una cornisa, un personaje. Si ya hay alguien colgado de este lado, seguir buscando otra.
+			if not ground.take_ledge(right_side, self):
+				continue
+
+			_hanging_ledge = ground
+			_hanging_right_side = right_side
+			var top_y := ground.get_top_y()
+			var ledge_x := ground.get_ledge_x(right_side)
+			var anchor_x := (ledge_x + GameBalance.LEDGE_HANG_OFFSET) if right_side else (ledge_x - GameBalance.LEDGE_HANG_OFFSET)
+			var anchor_y := global_position.y - (_get_head_y() - top_y)
+			_hang_position = Vector3(anchor_x, anchor_y, global_position.z)
+			_target_velocity = Vector3.ZERO
+			return
+
+func _holding_onto_the_ledge() -> bool:
+	return _hanging_ledge != null
+
+func _ledge_grab_anim(delta) -> void:
+	_pivot.position.y = -0.3
+	_animation_player.play("hold_platform")
 
 # Funciones | Mover
 func _is_direction_buffer() -> bool:
@@ -283,6 +384,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	# Salto | Aplicar salto normal o doble salto segun sea el caso.
 	if can_jump and _jump_count < _max_jumps:
 		_target_velocity.y = jump_impulse
+		_stun_move_time = 0.0 # Cancelar stun move si es que hay.
 		if signals.air_count > 0:
 			_jump_count = _max_jumps
 		else:
@@ -428,7 +530,6 @@ func set_damage_move(damage:float, direction:Vector3) -> void:
 			# Movimiento stun solo si se hace el porcentaje de daño indicado.
 			_stun_move_active = true
 			_stun_move_time = GameBalance.STUN_DURATION_ON_FLOOR
-			_jump_count = _max_jumps
 
 func _damage_move(delta: float) -> void:
 	_knockback_time -= delta
@@ -455,23 +556,36 @@ func _damage_anim(delta: float, signals: VerticalForceSignals) -> void:
 		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
 	_pivot.rotation_degrees.x = _damage_degrees
 
-
 # Funciones | Stun move
 func _stun_move(delta: float, signals: VerticalForceSignals) -> void:
-	_allow_jump = false
+	_allow_jump = true
 	_horizontal_move = true
 	if signals.on_floor:
+		_allow_jump = false
 		_stun_move_time -= delta
 		_horizontal_move = false
-		if _move_left or _move_right:
-			# Animacion inmune de levantarse. 
-			pass#_stun_move_active = false # Esto cancela stun
-	if _stun_move_time <= 0.0:
-		_stun_move_active = false
-		_pivot.rotation_degrees.x = 0
+	_stun_get_up_move(delta, signals)
 
+func _stun_get_up_move(delta: float, signals: VerticalForceSignals):
+	# Animacion inmune de levantarse.
+	if _stun_move_time <= 0.0:
+		_immunity_to_damage = true
+		if (_stun_get_up_time <= 0.0) or (not signals.on_floor):
+			_stun_move_active = false
+			_pivot.rotation_degrees.x = 0
+			_immunity_to_damage = false
+		_stun_get_up_time -= delta
+	else:
+		if signals.on_floor:
+			_stun_get_up_time = GameBalance.STUN_GETUP_NEUTRAL_DURATION
+			if _move_left or _move_right:
+				_stun_move_time = 0.0 # Esto solo cancela stun
+			
 func _stun_move_anim(delta: float, signals: VerticalForceSignals) -> void:
-	if signals.air_count < 0.2:
+	if  _stun_move_time <= 0.0:
+		_damage_degrees = 0
+		_animation_player.play("idle")
+	elif signals.air_count < 0.2:
 		_damage_degrees = -90
 		_pivot.position.y = -1.0
 		_animation_player.play("knockdown")
@@ -483,106 +597,6 @@ func _stun_move_anim(delta: float, signals: VerticalForceSignals) -> void:
 		_animation_player.play("hurt_air")
 		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
 	_pivot.rotation_degrees.x = _damage_degrees
-
-# Funciones | Agarre de orillas
-func _release_hanging_ledge() -> void:
-	'''
-	Soltar la cornisa que traiamos agarrada y avisarle a la plataforma pa que quede libre pa otro.
-	Aguanta que la plataforma ya no exista, asi que se puede llamar sin miedo.
-	'''
-	if _hanging_ledge != null and is_instance_valid(_hanging_ledge):
-		_hanging_ledge.release_ledge(_hanging_right_side, self)
-	_hanging_ledge = null
-
-func _ledge_grab(
-	delta: float, vertical_force_signals: VerticalForceSignals, move_signals: MoveSignals
-) -> void:
-	'''
-	Agarre de orillas estilo Smash Bros. Deteccion puramente espacial: cada GroundPlatform expone
-	una zona de agarre a cada lado (matematica de rangos, is_character_in_ledge_zone), aqui solo se
-	pregunta "¿ando en esa zona?" + "¿vengo cayendo?". Sin heuristicas de historial.
-	Colgado, arriba te subes con impulso y abajo te sueltas y caes.
-	Corre despues de _move, asi que pisa lo que calculo sin pedirle permiso. _fight y _anim corren despues
-	pero se salen temprano si andamos colgados, por eso no nos pisan de vuelta.
-	
-	Remplaza direccion horizontal.
-	'''
-	# Cooldown pa no re-agarrarnos solitos justo despues de soltarnos.
-	if _ledge_release_count > 0.0:
-		_ledge_release_count = max(_ledge_release_count - delta, 0.0)
-
-	# Si ya andamos colgados, decidir que hacer.
-	if _hanging_ledge != null:
-		# Si la plataforma se esfumo, soltarse de volada.
-		if not is_instance_valid(_hanging_ledge):
-			_release_hanging_ledge()
-			return
-
-		# Determinar a donde se debe mirar mientras uno se cuelga pa irse a conocer a diosito.
-		var inward := -1.0 if _hanging_right_side else 1.0
-
-		if _up_pressed:
-			# Subirse de vuelta a la plataforma, puro impulso hacia arriba; si se mete o no ya es bronca del jugador.
-			_target_velocity.y = jump_impulse
-			_release_hanging_ledge()
-			_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
-			return
-
-		if _down_pressed:
-			# Soltarse a proposito y empezar a caer.
-			_target_velocity = Vector3.ZERO
-			_target_velocity.y = -1.0
-			_release_hanging_ledge()
-			_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
-			return
-
-		# Nadamas quedarse ahi colgado, bien quietecito.
-		_target_velocity = Vector3.ZERO
-		global_position = _hang_position
-		_air_count = 0
-		_jump_count = 0
-		# Voltearlo de cara a la orilla. _anim corre despues pero se sale temprano si andamos colgados, asi no lo voltea.
-		move_signals.direction.x = inward
-		return
-
-	# No estamos colgados: checar si toca agarrarnos. Zona de agarre + venir cayendo, nada mas.
-	if _ledge_release_count > 0.0:
-		return
-	if vertical_force_signals.on_floor:
-		return
-	if _target_velocity.y >= 0.0:
-		return
-
-	for platform in get_tree().get_nodes_in_group(Platform.GROUP_NAME):
-		var ground := platform as GroundPlatform
-		if ground == null or not is_instance_valid(ground):
-			continue
-		if not ground.has_ledges():
-			continue
-
-		for right_side in [true, false]:
-			if not ground.is_character_in_ledge_zone(right_side, global_position):
-				continue
-			# Una cornisa, un personaje. Si ya hay alguien colgado de este lado, seguir buscando otra.
-			if not ground.take_ledge(right_side, self):
-				continue
-
-			_hanging_ledge = ground
-			_hanging_right_side = right_side
-			var top_y := ground.get_top_y()
-			var ledge_x := ground.get_ledge_x(right_side)
-			var anchor_x := (ledge_x + GameBalance.LEDGE_HANG_OFFSET) if right_side else (ledge_x - GameBalance.LEDGE_HANG_OFFSET)
-			var anchor_y := global_position.y - (_get_head_y() - top_y)
-			_hang_position = Vector3(anchor_x, anchor_y, global_position.z)
-			_target_velocity = Vector3.ZERO
-			return
-
-func _holding_onto_the_ledge() -> bool:
-	return _hanging_ledge != null
-
-func _ledge_grab_anim(delta) -> void:
-	_pivot.position.y = -0.3
-	_animation_player.play("hold_platform")
 	
 # Funciones | Animacion
 func _reset_visual_values():
