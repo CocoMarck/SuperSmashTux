@@ -530,7 +530,6 @@ func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
 	if _rolling():
 		_immunity_to_damage = true
 		_immunity_to_body_collide = true
-		_allow_shield = false
 		if _roll_backward:
 			_target_velocity.x = _roll_speed * (_last_x_direction*-1)
 		elif _roll_forward:
@@ -540,7 +539,6 @@ func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
 			_roll_forward = false
 			_roll_backward = false
 			_immunity_to_damage = false
-			_allow_shield = true
 			_immunity_to_body_collide = false
 		_roll_time -= delta
 
@@ -635,7 +633,7 @@ func _physics_process(delta: float) -> void:
 	
 	# Anular ataque, grab, y shield
 	_allow_shield = true
-	if  _knockback_active or _heavy_hitstun_active or _holding_onto_the_ledge():
+	if  _knockback_active or _heavy_hitstun_active or _holding_onto_the_ledge() or _rolling():
 		_current_attack = null
 		_grab_time = 0.0
 		_allow_shield = false
