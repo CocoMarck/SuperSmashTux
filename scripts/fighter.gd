@@ -308,28 +308,37 @@ var _attacks: Attacks = Attacks.new(
 )
 
 # Propiedades privadas | Hitbox
-var _hitbox_time: float = 0.0
-var _spawned_hitbox: Area3D = null
+var _spawned_hitbox_damage: Area3D = null
 
 
 # Funciones | hitbox de ataque.
-func _spawn_hitbox(p_size: Vector3, p_position: Vector3, p_damage: int, p_direction: Vector3) -> void:
+func _spawn_hitbox_damage(p_size: Vector3, p_position: Vector3, p_damage: int, p_direction: Vector3, p_lifetime: float) -> void:
 	'''
 	Spawn de hitbox por movimiento de ataque.
 	Swap de ejes: el "adelante" (x) del FightMove cae en z del Pivot, y z en x invertido.
 	Se indica posision y tamaño de hitbox.
 	'''
 	var fixed_position := Vector3(p_position.z, p_position.y, p_position.x)
-	_spawned_hitbox = Hitbox.new(fixed_position, p_size, self, p_damage, p_direction)
-	_pivot.add_child(_spawned_hitbox)
+	_spawned_hitbox_damage = HitboxDamage.new(
+		{
+			"position": fixed_position, 
+			"size": p_size, 
+			"parent": self, 
+			"damage": p_damage,
+			"direction": p_direction,
+			"lifetime": p_lifetime,
+			"color": Color(1.0, 0.0, 1.0, 0.3)
+		}
+	)
+	_pivot.add_child(_spawned_hitbox_damage)
 
-func _clear_hitbox() -> void:
+func _clear_hitbox_damage() -> void:
 	'''
 	Eliminar el hitbox activo, si existe.
 	'''
-	if _spawned_hitbox != null:
-		_spawned_hitbox.queue_free()
-		_spawned_hitbox = null
+	if _spawned_hitbox_damage != null:
+		_spawned_hitbox_damage.queue_free()
+		_spawned_hitbox_damage = null
 
 # Funciones | Pelear
 func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates) -> void:
@@ -391,7 +400,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		else:
 			_direction.x = 0
 		if _current_attack == null:
-			_clear_hitbox()
+			_clear_hitbox_damage()
 		
 	# Hacer ataque, esperando lo que dure, y haciendo que no se mueva el player si es necesario.
 	var first_attack_frame = false
@@ -413,24 +422,26 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 			_attack_count += delta
 	
 	# Hitbox. Asegurarsee de solo spawnear uno.
-	if _current_attack != null and _spawned_hitbox == null:
+	if _current_attack != null and _spawned_hitbox_damage == null:
 		# Basado en la duracion del ataque, es lo que dura el hitbox de damage.
 		if (_current_attack.inverted_hitbox_ratio):
 			if _attack_count-delta >= _current_attack.get_hitbox_time_ratio():
-				_spawn_hitbox(
-					_current_attack.hitbox_size, _current_attack.hitbox_position, _current_attack.hitbox_damage, _attack_direction
+				_spawn_hitbox_damage(
+					_current_attack.hitbox_size, 
+					_current_attack.hitbox_position, 
+					_current_attack.hitbox_damage, 
+					_attack_direction, 
+					_current_attack.duration -_current_attack.get_hitbox_time_ratio()
 				)
-				_hitbox_time = _current_attack.duration - _current_attack.get_hitbox_time_ratio()
 		else:
 			if first_attack_frame:
-				_spawn_hitbox(
-					_current_attack.hitbox_size, _current_attack.hitbox_position, _current_attack.hitbox_damage, _attack_direction
+				_spawn_hitbox_damage(
+					_current_attack.hitbox_size,
+					_current_attack.hitbox_position, 
+					_current_attack.hitbox_damage, 
+					_attack_direction,
+					_current_attack.duration -_current_attack.get_hitbox_time_ratio()
 				)
-				_hitbox_time = _current_attack.get_hitbox_time_ratio()
-	if _spawned_hitbox != null:
-		if _hitbox_time <= 0:
-			_clear_hitbox()
-		_hitbox_time -= delta
 
 func _attack_anim(delta:float) -> void:
 	if _current_attack.name != &"":
@@ -602,7 +613,7 @@ func _physics_process(delta: float) -> void:
 	if grab_or_shield or _rolling():
 		# Anular ataque si se hace grab, escudo, o rueda.
 		_current_attack = null
-		_clear_hitbox()
+		_clear_hitbox_damage()
 	else:
 		# Solo permitir atacar cuando no se hace grab o se pone escudo
 		_fight_move(delta, gravity_signals, move_states)
@@ -637,7 +648,7 @@ func _physics_process(delta: float) -> void:
 		_current_attack = null
 		_grab_time = 0.0
 		_allow_shield = false
-		_clear_hitbox()
+		_clear_hitbox_damage()
 		
 	# Visual | Escudo
 	## Esto hacerlo func tipo `_visual_shield`
