@@ -2,9 +2,9 @@
 
 ## `2026-08-19`
 ### Hitobox refactor **FALTA**
-- `Hitbox`: (Hojo de Area3D. Papa: física + debug + lifetime, comportamiento genérico)
-- `HitboxDamage`: (daño + knockback, el comportamiento actual)
-- `HitboxGrab`: (detecta y avisa al padre que agarre; no daña)
+- `Hitbox` **LISTO**: (Hojo de Area3D. Papa: física + debug + lifetime, comportamiento genérico)
+- `HitboxDamage` **LISTO**: (daño + knockback, el comportamiento actual)
+- `HitboxGrab` **FALTA**: (detecta y avisa al padre que agarre; no daña)
 
 ### Person
 - `Running` **LISTO**

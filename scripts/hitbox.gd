@@ -74,9 +74,12 @@ func _ready() -> void:
 func _good_lifetime() -> bool:
 	return _init_lifetime > 0.0
 
+func _remove():
+	self.queue_free()
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	if _good_lifetime():
 		if _lifetime <= 0:
-			self.queue_free()
+			_remove()
 		_lifetime -= delta

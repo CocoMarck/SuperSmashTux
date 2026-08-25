@@ -462,6 +462,16 @@ func _grab_move(delta: float, signals: VerticalForceSignals) -> void:
 		if _grab:
 			if _grab_time <= 0.0:
 				_grab_time = _grab_duration
+				var hitbox = HitboxGrab.new({
+					"parent": self, 
+					"position": Vector3(0,0,1.0),
+					"size": Vector3(0.5,0.5,1.0),
+					"color": Color(0.5, 0.0, 1.0, 0.4),
+					"lifetime": 0.1,
+					"direction": Vector3.ZERO,
+				})
+				#hitbox.position = hitbox["position"]
+				_pivot.add_child(hitbox)
 	
 	if _grab_time > 0.0:
 		_grab_time -= delta
