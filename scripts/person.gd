@@ -556,6 +556,7 @@ func _apply_hitstun(delta: float) -> void:
 	)
 	if _knockback_time <= 0.0:
 		_knockback_active = false
+		_ledge_release_count = 0.0 # Para poder agarrarse
 		_pivot.rotation_degrees.x = 0
 	
 func _hitstun_anim(delta: float, signals: VerticalForceSignals) -> void:
@@ -588,6 +589,7 @@ func _heavy_hitstun_get_up_move(delta: float, signals: VerticalForceSignals):
 			_heavy_hitstun_active = false
 			_pivot.rotation_degrees.x = 0
 			_immunity_to_damage = false
+			_ledge_release_count = 0.0 # Para poder agarrarse
 		_heavy_hitstun_get_up_time -= delta
 	else:
 		if signals.on_floor:
@@ -696,8 +698,9 @@ func _physics_process(delta: float) -> void:
 	var move_signals = _move(delta, gravity_signals)
 	var move_states = _get_move_states(move_signals)
 	if _heavy_hitstun_active or _knockback_active:
+		# Forzar soltarse de ledge. Y bloqiuar agarrarse del ledge.
 		_release_hanging_ledge()
-		_ledge_release_count = 1.0
+		_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
 	_ledge_grab(delta, gravity_signals, move_signals)
 	_set_x_not_zero_value(move_signals.direction)
 

@@ -600,8 +600,9 @@ func _physics_process(delta: float) -> void:
 	var move_signals = _move(delta, gravity_signals)
 	var move_states = _get_move_states(move_signals)
 	if _heavy_hitstun_active or _knockback_active:
-		_release_hanging_ledge()
-		_ledge_release_count = 1.0
+		# Forzar soltarse de ledge. Y bloqiuar agarrarse del ledge.
+		_release_hanging_ledge() 
+		_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
 	_ledge_grab(delta, gravity_signals, move_signals)
 	_set_x_not_zero_value(move_signals.direction)
 	
