@@ -307,9 +307,28 @@ var _attacks: Attacks = Attacks.new(
 	),
 )
 
-# Propiedades privadas | Hitbox
-var _spawned_hitbox_damage: Area3D = null
+# Grabbing
+var _grabbed_victim: Person = null
+var _grabbing_cooldown_time = 0.0
 
+# Propiedades privadas | Hitbox
+var _spawned_hitbox_damage: HitboxDamage = null
+var _spawned_hitbox_grab: HitboxGrab = null
+
+# Override funcs
+func _false_inputs() -> void:
+	_move_left = false
+	_move_right = false
+	_move_down = false
+	_move_up = false
+	_jump = false
+	_down_pressed = false
+	_up_pressed = false
+	_left_pressed = false
+	_right_pressed = false
+	_attack = false
+	_grab = false
+	_shield = false
 
 # Funciones | hitbox de ataque.
 func _spawn_hitbox_damage(p_size: Vector3, p_position: Vector3, p_damage: int, p_direction: Vector3, p_lifetime: float) -> void:
@@ -462,18 +481,22 @@ func _grab_move(delta: float, signals: VerticalForceSignals) -> void:
 		if _grab:
 			if _grab_move_time <= 0.0:
 				_grab_move_time = _grab_move_duration
-				var hitbox = HitboxGrab.new({
-					"parent": self, 
-					"position": Vector3(0,0,1.0),
-					"size": Vector3(0.5,0.5,1.0),
-					"color": Color(0.5, 0.0, 1.0, 0.4),
-					"lifetime": 0.1,
-					"direction": Vector3.ZERO,
-				})
-				_pivot.add_child(hitbox)
+	else:
+		_grab_move_time = 0.0
 	
 	if _grab_move_time > 0.0:
 		_grab_move_time -= delta
+		
+		if _grab_move_time <= 0:
+			var hitbox = HitboxGrab.new({
+				"parent": self, 
+				"position": Vector3(0,0,1.0),
+				"size": Vector3(0.5,0.5,1.0),
+				"color": Color(0.5, 0.0, 1.0, 0.4),
+				"lifetime": 0.1,
+				"direction": Vector3.ZERO,
+			})
+			_pivot.add_child(hitbox)
 
 # Funciones | Shield
 func _shield_regeneration(delta: float, signals: VerticalForceSignals) -> void:
@@ -568,12 +591,41 @@ func _roll_anim() -> void:
 	elif _roll_forward:
 		_animation_player.play("roll_forward")
 
-func grabbing_person(p_person: Person):
+# Funciones grabbing
+func grabbing_person(p_person: Person, p_hitbox_grab: HitboxGrab) -> void:
 	'''
 	Señal de agarre por `HitboxGrab` spawneado.
 	- Bloquear inputs de victima.
 	'''
 	print("Grabbing: ", p_person.name)
+	p_person.grabbed = true
+	_grabbed_victim = p_person
+	_spawned_hitbox_grab = p_hitbox_grab
+
+func _grabbing() -> bool:
+	return _spawned_hitbox_grab != null
+
+func _clear_grabbing():
+	if _grabbed_victim != null:
+		_grabbed_victim.grabbed = false
+		_grabbed_victim = null
+		_grabbing_cooldown_time = GameBalance.GRABBING_COOLDOWN_DURATION
+	if _grabbing():
+		_spawned_hitbox_grab.queue_free()
+
+func _grabbing_move(signals: VerticalForceSignals) -> void:
+	'''
+	Movimientos agarrando vincitma. Y cancelacion de grabbing.
+	'''
+	if _grabbing():
+		if (
+			(_move_left or _move_right) or 
+			(not signals.on_floor) or taking_damage() or grabbed or
+			(not _grabbed_victim.grabbed) or (not _grabbed_victim.is_on_floor())
+		):
+			_clear_grabbing()
+	else:
+		_clear_grabbing()
 
 # Funciones | Init
 func _ready() -> void:
@@ -599,8 +651,8 @@ func _physics_process(delta: float) -> void:
 	)
 	var move_signals = _move(delta, gravity_signals)
 	var move_states = _get_move_states(move_signals)
-	if _heavy_hitstun_active or _knockback_active:
-		# Forzar soltarse de ledge. Y bloqiuar agarrarse del ledge.
+	if taking_damage():
+		# Forzar soltarse de ledge. Y bloquiar agarrarse del ledge.
 		_release_hanging_ledge() 
 		_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
 	_ledge_grab(delta, gravity_signals, move_signals)
@@ -612,7 +664,9 @@ func _physics_process(delta: float) -> void:
 	
 	# Fight and Defence moves
 	## No permitir grab y shield.
-	if _shield or _with_shield(gravity_signals):
+	if _grabbing_cooldown_time > 0:
+		_grabbing_cooldown_time -= delta
+	if _shield or _with_shield(gravity_signals) or _grabbing() or _grabbing_cooldown_time > 0:
 		_grab = false
 	if _grab or _waiting_grab_move():
 		_shield = false
@@ -635,6 +689,9 @@ func _physics_process(delta: float) -> void:
 		# Solo permitir atacar cuando no se hace grab o se pone escudo
 		_fight_move(delta, gravity_signals, move_states)
 	
+	# Grabbing move
+	_grabbing_move(gravity_signals)
+	
 	# Bloqueo de direccion por movimiento de inputs.
 	# Mejor bloquiar la direccion en un solo lado.
 	_horizontal_move = true
@@ -644,7 +701,7 @@ func _physics_process(delta: float) -> void:
 		# Si este en el piso y da trancazos, no permitir inputs de movimiento horizontal.
 		if _current_attack.air_attack == false:
 			_horizontal_move = false
-	elif _waiting_grab_move() or with_shield or _rolling():
+	elif _waiting_grab_move() or with_shield or _rolling() or _grabbing():
 		_horizontal_move = false
 		_allow_jump = false
 		
@@ -653,7 +710,7 @@ func _physics_process(delta: float) -> void:
 		_shield_defence()
 	_roll_move(delta, gravity_signals)
 
-	# Damage
+	# Damage move
 	if _knockback_active:
 		_apply_hitstun(delta)
 	elif _heavy_hitstun_active:
@@ -661,7 +718,9 @@ func _physics_process(delta: float) -> void:
 	
 	# Anular ataque, grab, y shield
 	_allow_shield = true
-	if  _knockback_active or _heavy_hitstun_active or _holding_onto_the_ledge() or _rolling():
+	if (
+		taking_damage() or _holding_onto_the_ledge() or _rolling() or _grabbing()
+	):
 		_current_attack = null
 		_grab_move_time = 0.0
 		_allow_shield = false
@@ -694,7 +753,7 @@ func _physics_process(delta: float) -> void:
 		_animation_player.play("guard")
 	else:
 		_move_anim(delta, move_states)
-	if not (_heavy_hitstun_active or _knockback_active):
+	if not (taking_damage()):
 		_set_pivot_direction(move_signals)
 
 	# Effects

@@ -51,7 +51,7 @@ func _on_hitbox_body_entered(body: Node3D) -> void:
 		_grabbing_lifetime = GameBalance.GRAB_DURATION
 		# Usar a parent para hacer grab.
 		if _parent is Fighter:
-			_parent.grabbing_person(body)
+			_parent.grabbing_person(body, self)
 			
 
 func _process(delta: float) -> void:

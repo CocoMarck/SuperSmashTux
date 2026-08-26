@@ -80,6 +80,9 @@ var _heavy_hitstun_get_up_time: float = 0.0
 var _immunity_to_damage :bool = false
 var _immunity_blink_time: float = 0.0
 
+# Propiedades privadas | Grabbed
+var grabbed :bool = false
+
 # Propiedades privadas | Inputs
 var _walk: bool = false
 
@@ -297,20 +300,37 @@ func _ledge_grab_anim(delta) -> void:
 func _is_direction_buffer() -> bool:
 	return _direction_buffer_timer > 0
 
+func _block_inputs() -> bool:
+	return grabbed or _knockback_active
+
+func _false_inputs() -> void:
+	_move_left = false
+	_move_right = false
+	_move_down = false
+	_move_up = false
+	_jump = false
+	_down_pressed = false
+	_up_pressed = false
+	_left_pressed = false
+	_right_pressed = false
+
+func taking_damage() -> bool:
+	return _knockback_active or _heavy_hitstun_active
+
 func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	'''
 	Movimientos.
 	Retorna señales de movimientos.
 	'''
-	# Variables | Salto y moverse horizontalmente
+	# Quitar estado de grabbed si recibe daño.
+	if taking_damage():
+		grabbed = false
 
+	# Variables | Salto y moverse horizontalmente
 	var want_jump := false
 	var can_jump := false
-	if _knockback_active:
-		_move_left = false
-		_move_right = false
-		_move_down = false
-		_move_up = false
+	if _block_inputs():
+		_false_inputs()
 	else:
 		# Flancos Salto
 		want_jump = (_jump or _move_up) # <--- El move up se usara para ataques hacia arriba.
@@ -321,6 +341,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 		_up_pressed = _move_up and not _was_move_up
 		_left_pressed = _move_left and not _was_move_left
 		_right_pressed = _move_right and not _was_move_right
+	
 	_was_jumping = want_jump
 	_was_move_down = _move_down
 	_was_move_up = _move_up
@@ -697,7 +718,7 @@ func _physics_process(delta: float) -> void:
 	)
 	var move_signals = _move(delta, gravity_signals)
 	var move_states = _get_move_states(move_signals)
-	if _heavy_hitstun_active or _knockback_active:
+	if taking_damage():
 		# Forzar soltarse de ledge. Y bloqiuar agarrarse del ledge.
 		_release_hanging_ledge()
 		_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
@@ -720,7 +741,8 @@ func _physics_process(delta: float) -> void:
 		_ledge_grab_anim(delta)
 	else:
 		_move_anim(delta, move_states)
-	_set_pivot_direction(move_signals)
+	if not (taking_damage()):
+		_set_pivot_direction(move_signals)
 
 	# Effects
 	immunity_effect(delta)
