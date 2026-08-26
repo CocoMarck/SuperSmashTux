@@ -39,3 +39,9 @@ const SHIELD_STUN_DURATION :float = 0.8
 const ROLL_SHIELD_COST_RATIO : float = 0.1
 const SHIELD_DURATION: float = 5.0
 const SHIELD_REGENERATION_DURATION: float = 0.5
+
+# Fighter | Grab
+const GRAB_MOVE_SHORT_DURATION :float = 0.1
+const GRAB_MOVE_NORMAL_DURATION :float = 0.3
+const GRAB_MOVE_LONG_DURATION :float = 0.7
+const GRAB_DURATION = 0.8

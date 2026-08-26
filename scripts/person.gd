@@ -30,6 +30,8 @@ Objeto de persona. Tiene lo necesario para tener fisicas 2D en un mundo 3D.
 @export var hp :int = 100
 @export var damage_percentage :float = 0
 
+var block_move :bool = false
+
 # Essential character nodes
 var _visual: Node3D
 var _pivot: Node3D
@@ -380,6 +382,17 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 		else:
 			accel = _ground_acceleration
 	_target_velocity.x = move_toward(_target_velocity.x, target_speed, accel*delta)
+	
+	# Forzar el no saltar porque esta stuneado en el piso.
+	# eL _hitsut_active no lo necesita, porque remplaza direcatmente el movimiento: La `func _move`.
+	if _heavy_hitstun_active:
+		if signals.on_floor:
+			can_jump = false 
+		else:
+			if signals.air_count >= 0.5:
+				pass
+			else:
+				can_jump = false 
 
 	# Salto | Aplicar salto normal o doble salto segun sea el caso.
 	if can_jump and _jump_count < _max_jumps:
@@ -559,12 +572,12 @@ func _hitstun_anim(delta: float, signals: VerticalForceSignals) -> void:
 
 # Funciones | Heavy hitstun
 func _apply_heavy_hitstun(delta: float, signals: VerticalForceSignals) -> void:
-	_allow_jump = true
-	_horizontal_move = true
+	_horizontal_move = false
 	if signals.on_floor:
-		_allow_jump = false
 		_heavy_hitstun_time -= delta
-		_horizontal_move = false
+	else:
+		if signals.air_count >= 0.5:
+			_horizontal_move = true
 	_heavy_hitstun_get_up_move(delta, signals)
 
 func _heavy_hitstun_get_up_move(delta: float, signals: VerticalForceSignals):
