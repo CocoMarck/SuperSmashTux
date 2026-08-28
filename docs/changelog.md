@@ -3,8 +3,8 @@
 ## `2026-08-19`
 > Apenas me di cuenta, pero gdscirpt no tiene para variables privadas. Pero weno, igual es bueno marcarlas como `_var_private`, ya que indica que eso no se toco fuera de la clase dueña. Es una forma de documentar.
 
-### Hitobox refactor **FALTA**
-- `Hitbox` **LISTO**: (Hojo de Area3D. Papa: física + debug + lifetime, comportamiento genérico)
+### Hitobox refactor **LISTO**
+- `Hitbox` **LISTO**: (Hijo de Area3D. Papa: física + debug + lifetime, comportamiento genérico)
 - `HitboxDamage` **LISTO**: (daño + knockback, el comportamiento actual)
 - `HitboxGrab` **LISTO**: (detecta y avisa al padre que agarre; no daña)
 
@@ -18,9 +18,9 @@
 - `Apply heavy hitstun` **LISTO**: 
     - **LISTO** Movimiento al recibir daño fuerte (15% o mas). Pero no permite moverse en piso, solo en el aire de forma horozontal; sin poder atacar, y salto en el aire anula stun.
     - **LISTO** En el piso estas tumbado, pero cualquier input te levanta. Si no recibe input en el piso se quedara x segundos en el piso, y se levantara solo. Mientras te levantas, eres inmune al daño. 
-    - **LISTO** Mientras te lavantas, pues no puedes hacer ningun input. Tienes que esperarte. 
+    - **LISTO** Mientras te lavantas, pues no puedes hacer ningún input. Tienes que esperarte. 
     - **LISTO** El conteo del stun sucede en el piso, levantarse, y inmunidad al levantarse.
-- `Apply knocked out` **FALTA**: Completamente noqueado, en "x" segundos se habilita el poder moverse. Con un golpe, se te quita el estado de noqueado. El knockout, solo se habilita con poderes, o castigos, por ejemplo, habilidad magica para dormir o romper escudo. 
+- `Apply knocked out` **FALTA**: Completamente noqueado, en "x" segundos se habilita el poder moverse. Con un golpe, se te quita el estado de noqueado. El knockout, solo se habilita con poderes, o castigos, por ejemplo, habilidad mágica para dormir o romper escudo. 
 
 ### Fighter
 - `Shield` **FALTA**: 
