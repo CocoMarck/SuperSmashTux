@@ -81,7 +81,7 @@ var _immunity_to_damage :bool = false
 var _immunity_blink_time: float = 0.0
 
 # Propiedades privadas | Grabbed
-var grabbed :bool = false
+var grabbed:bool = false
 
 # Propiedades privadas | Inputs
 var _walk: bool = false
@@ -194,6 +194,8 @@ func respawn(at_position: Vector3) -> void:
 	_drop_through_count = 0.0
 	_knockback_active = false
 	_heavy_hitstun_active = false
+	_heavy_hitstun_time = 0
+	grabbed = false
 	_set_x_not_zero_value( _get_initial_facing() )
 	
 # Funciones | Agarre de orillas
@@ -551,7 +553,7 @@ func _ignore_last_damage() -> void:
 	if hp < 100:
 		hp += _last_damage
 
-func set_damage_move(damage:float, direction:Vector3) -> void:
+func set_damage_move(damage:int, direction:Vector3) -> void:
 	'''
 	Recibir un trancazo
 	'''
@@ -560,10 +562,31 @@ func set_damage_move(damage:float, direction:Vector3) -> void:
 		_knockback_active = true
 		_knockback_time = GameBalance.KNOCKBACK_DURATION
 		_heavy_hitstun_active = false
+		_heavy_hitstun_time = 0
 		if damage >= hp*GameBalance.STUN_DAMAGE_THRESHOLD:
 			# Movimiento stun solo si se hace el porcentaje de daño indicado.
 			_heavy_hitstun_active = true
 			_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
+
+func set_thrown_move(damage: int, direction: Vector3) -> void:
+	'''
+	Movimiento estando arrojado
+	'''
+	if not _immunity_to_damage:
+		grabbed = false
+		set_damage(damage)
+		set_damage_percentage(damage)
+		_knockback_direction = direction
+		_knockback_active = true
+		_knockback_time = GameBalance.KNOCKBACK_DURATION
+		_heavy_hitstun_active = true
+		_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
+
+func is_immune_to_damage() -> bool:
+	'''
+	Es para no poder modificar a lo loco inmunidad de damage.
+	'''
+	return _immunity_to_damage
 
 # Funciones | Hitstun
 func _apply_hitstun(delta: float) -> void:

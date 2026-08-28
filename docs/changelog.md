@@ -1,10 +1,12 @@
 # Changelog
 
 ## `2026-08-19`
+> Apenas me di cuenta, pero gdscirpt no tiene para variables privadas. Pero weno, igual es bueno marcarlas como `_var_private`, ya que indica que eso no se toco fuera de la clase dueña. Es una forma de documentar.
+
 ### Hitobox refactor **FALTA**
 - `Hitbox` **LISTO**: (Hojo de Area3D. Papa: física + debug + lifetime, comportamiento genérico)
 - `HitboxDamage` **LISTO**: (daño + knockback, el comportamiento actual)
-- `HitboxGrab` **FALTA**: (detecta y avisa al padre que agarre; no daña)
+- `HitboxGrab` **LISTO**: (detecta y avisa al padre que agarre; no daña)
 
 ### Person
 - `Running` **LISTO**
@@ -26,7 +28,7 @@
     - `shield pushback` **FALTA**: Tambien mover el personaje, en la dirección opuesta del ataque recibido.
 - `Mientras se rueda no regenerar escudo` **LISTO**.
 - `Fight move margen de error` **LISTO**: Input buffer temporal. Los flancos (`_left_pressed`, `_right_pressed`, etc.) duran 1 frame, lo que hace heavy attacks dificiles. Solución: timer `_direction_input_timer` (0.1s, en `GameBalance.INPUT_BUFFER_WINDOW`) en `person.gd`. Cada dirección presionada reinicia el timer. `_fight_move` usa el timer en vez de flancos puros. ~10 frames de ventana como Smash Bros. Si bien esto es para `Fighter` y hijos, esto se hara en `Person`.
-- `Grab` como movimiento de ataque **FALTA**: Requiere de refactor hitbox system.
+- `Grab` como movimiento de ataque **LISTO**: Requiere de refactor hitbox system.
 
 ### Constantes
 - Poner contestes de juego en `GameBalance` **LISTO**: Duración de stun, duración de efectos, duración de movimientos compartidos, margenes de perdon/error. Eso si, recordar usar namespace completo; `GameBalence.CONST_NAME`.

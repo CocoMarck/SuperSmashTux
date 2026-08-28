@@ -597,10 +597,21 @@ func grabbing_person(p_person: Person, p_hitbox_grab: HitboxGrab) -> void:
 	Señal de agarre por `HitboxGrab` spawneado.
 	- Bloquear inputs de victima.
 	'''
-	print("Grabbing: ", p_person.name)
-	p_person.grabbed = true
 	_grabbed_victim = p_person
 	_spawned_hitbox_grab = p_hitbox_grab
+	if (
+		_grabbed_victim.is_immune_to_damage() == false and 
+		_grabbed_victim.taking_damage() == false and
+		_grabbed_victim.grabbed == false and
+		_grabbed_victim.is_on_floor() == true
+	):
+		# Configurar
+		print("Grabbing: ", p_person.name)
+		_grabbed_victim._heavy_hitstun_active = false
+		_grabbed_victim.grabbed = true
+		_grabbed_victim.position.x = position.x + (0.2 * _last_x_direction)
+	else:
+		_clear_grabbing()
 
 func _grabbing() -> bool:
 	return _spawned_hitbox_grab != null
@@ -615,14 +626,23 @@ func _clear_grabbing():
 
 func _grabbing_move(signals: VerticalForceSignals) -> void:
 	'''
-	Movimientos agarrando vincitma. Y cancelacion de grabbing.
+	Movimientos agarrando vicitma. Y cancelacion de grabbing.
 	'''
+	if _grabbed_victim == null:
+		return
 	if _grabbing():
 		if (
-			(_move_left or _move_right) or 
 			(not signals.on_floor) or taking_damage() or grabbed or
 			(not _grabbed_victim.grabbed) or (not _grabbed_victim.is_on_floor())
 		):
+			_clear_grabbing()
+		if (_move_left or _move_right):
+			var x_direction = 1
+			if _move_left:
+				x_direction = -1
+			_grabbed_victim.set_thrown_move(
+				10, Vector3(x_direction*1.25, 0.075, 0)
+			)
 			_clear_grabbing()
 	else:
 		_clear_grabbing()
