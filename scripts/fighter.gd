@@ -328,7 +328,7 @@ func _false_inputs() -> void:
 	_right_pressed = false
 	_attack = false
 	_grab = false
-	_shield = false
+	#_shield = false # Este no. Se necesita para poder absorver golpe mientras se pone escudo.
 
 # Funciones | hitbox de ataque.
 func _spawn_hitbox_damage(p_size: Vector3, p_position: Vector3, p_damage: int, p_direction: Vector3, p_lifetime: float) -> void:
@@ -534,7 +534,7 @@ func _shield_defence() -> void:
 	'''
 	Defensa de ataques locos. Anular daño.
 	'''
-	if _knockback_active:
+	if taking_damage():
 		_knockback_active = false
 		_heavy_hitstun_active = false
 		_ignore_last_damage()
@@ -548,7 +548,12 @@ func _get_shield_porcent() -> float:
 	return 0.0
 
 func _with_shield(signals: VerticalForceSignals) -> bool:
-	return (_shield_time > 0) and ((_shield or _shield_blockstun) and _allow_shield and signals.on_floor) and (not _attacking())
+	return (
+		(_shield_time > 0) and 
+		(
+			(_shield or _shield_blockstun) and _allow_shield and signals.on_floor) and (not _attacking()
+		)
+	)
 
 # Funciones | Shield rodar
 func _rolling() -> bool:
@@ -691,7 +696,7 @@ func _physics_process(delta: float) -> void:
 	if _grab or _waiting_grab_move():
 		_shield = false
 	## No permitir hacer agarre o escudo cuando se ataca.
-	if not _attacking(): 	
+	if not _attacking():
 		_grab_move(delta, gravity_signals)
 		if (_shield or _shield_blockstun)  and _allow_shield:
 			_shield_move(delta, gravity_signals)
