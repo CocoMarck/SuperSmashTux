@@ -14,6 +14,7 @@ Videojuego de peleas inspirado en Super Smash Bros, con los personajes más famo
 
 - [Godot Engine 4+](https://godotengine.org/download)
 - [Node.js 18+](https://nodejs.org) (opcional si se quiere usar MCP para agentes de IA)
+- [Python 3.12+](https://www.python.org/downloads/) (opcional si se quiere usar MCP para agentes de IA)
 - [Blender 5.1+](https://www.blender.org/download/) (opcional si se quiere editar los modelos 3D)
 
 ## Cómo abrir el proyecto
@@ -28,7 +29,7 @@ Para más detalles sobre la estructura de carpetas y convenciones del proyecto, 
 
 ## Desarrollo con IA
 
-El proyecto incluye un archivo `.mcp.json` que conecta agentes de IA (OpenCode, Codex, etc.) con dos programas, para que puedan trabajar por su cuenta:
+El proyecto incluye un archivo `.mcp.json` que conecta agentes de IA (OpenCode, Claude Code, etc.) con dos programas, para que puedan trabajar por su cuenta:
 
 | Servidor | Qué permite | Requisitos |
 |---|---|---|
