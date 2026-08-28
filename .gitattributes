@@ -1,2 +1,9 @@
 # Normalize EOL for all files that Git considers text files.
 * text=auto eol=lf
+
+# Windows script hosts require CRLF. cmd.exe re-scans the file by byte
+# offset on every goto/call; with LF those offsets drift and the jumps
+# fail with "El sistema no encuentra la etiqueta por lotes especificada".
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf

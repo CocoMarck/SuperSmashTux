@@ -55,10 +55,10 @@ if not "%~1"=="" goto :modo_todo
 echo.
 echo Estado actual:
 call :jsonget "GODOT_PATH"
-if defined JG_VAL echo   [x] godot    ^| !JG_VAL!
+if defined JG_VAL echo   [x] godot    ^| !JG_DISP!
 if not defined JG_VAL echo   [ ] godot    ^| sin configurar
 call :jsonget "BLENDER_PATH"
-if defined JG_VAL echo   [x] blender  ^| !JG_VAL!
+if defined JG_VAL echo   [x] blender  ^| !JG_DISP!
 if not defined JG_VAL echo   [ ] blender  ^| sin configurar
 
 rem  Se usa set /p y no choice: choice solo acepta las teclas de /c,
@@ -428,11 +428,15 @@ rem                 renombro FastMCP, lo que rompe el servidor.
 >>"%TARGET%" echo   }
 >>"%TARGET%" echo }
 
+rem  En pantalla se muestran las rutas reales, no las escapadas del JSON.
+set "GODOT_DISP=!GODOT_JSON:\\=\!"
+set "BLENDER_DISP=!BLENDER_JSON:\\=\!"
+
 echo.
 echo [LISTO] .mcp.json generado.
-if defined GODOT_JSON echo   godot    ^| !GODOT_JSON!
+if defined GODOT_JSON echo   godot    ^| !GODOT_DISP!
 if not defined GODOT_JSON echo   godot    ^| sin configurar
-if defined BLENDER_JSON echo   blender  ^| !BLENDER_JSON!
+if defined BLENDER_JSON echo   blender  ^| !BLENDER_DISP!
 if not defined BLENDER_JSON echo   blender  ^| sin configurar
 echo.
 if defined BLENDER_JSON echo Abre Blender antes de usar sus herramientas: el add-on levanta
@@ -466,9 +470,12 @@ exit /b 1
 rem ---- Subrutinas -------------------------------------------
 
 rem :jsonget <clave>  -> deja en JG_VAL el valor de esa clave del
-rem  .mcp.json actual, ya escapado para JSON. Vacio si no esta.
+rem  .mcp.json actual, ya escapado para JSON, y en JG_DISP el mismo
+rem  valor con las barras sin duplicar, para mostrarlo en pantalla.
+rem  Ambas quedan vacias si la clave no esta.
 :jsonget
 set "JG_VAL="
+set "JG_DISP="
 set "JG_LINE="
 if not exist "%TARGET%" exit /b 0
 for /f "delims=" %%L in ('findstr /i /c:"%~1" "%TARGET%" 2^>nul') do set "JG_LINE=%%L"
@@ -478,6 +485,7 @@ set JG_LINE=!JG_LINE:"=!
 set "JG_LINE=!JG_LINE:,=!"
 if not defined JG_LINE exit /b 0
 set "JG_VAL=!JG_LINE!"
+set "JG_DISP=!JG_VAL:\\=\!"
 exit /b 0
 
 rem :scandrive <letra:>  -> escanea una unidad completa
