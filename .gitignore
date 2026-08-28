@@ -8,3 +8,6 @@
 *.blend
 *.mp3
 *.wav
+
+# Archivos de configuración
+*.mcp.json
