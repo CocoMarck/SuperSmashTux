@@ -23,13 +23,13 @@ Videojuego de peleas inspirado en Super Smash Bros, con los personajes más famo
 2. Abre Godot 4+ y selecciona "Importar", apuntando al directorio raíz del proyecto.
 3. Corre la escena principal (`scenes/main.tscn`) desde el editor.
 
-Si vas a trabajar con un agente de IA, ejecutá además `mcp-setup.bat` antes de arrancarlo (ver [Desarrollo con IA](#desarrollo-con-ia)).
+Si vas a trabajar con un agente de IA, ejecuta además `mcp-setup.bat` antes de arrancarlo (ver [Desarrollo con IA](#desarrollo-con-ia)).
 
 Para más detalles sobre la estructura de carpetas y convenciones del proyecto, revisa [docs/estructura.md](./docs/estructura.md).
 
 ## Desarrollo con IA
 
-El proyecto incluye un archivo `.mcp.json` que conecta agentes de IA (OpenCode, Claude Code, etc.) con dos programas, para que puedan trabajar por su cuenta:
+El proyecto incluye un archivo `.mcp.json` que conecta agentes de IA (Claude Code, OpenCode y Codex) con dos programas, para que puedan trabajar por su cuenta:
 
 | Servidor | Qué permite | Requisitos |
 |---|---|---|

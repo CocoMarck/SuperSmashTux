@@ -9,5 +9,7 @@
 *.mp3
 *.wav
 
-# Archivos de configuración
+# Archivos de configuración MCP (Claude Code, OpenCode, Codex)
 *.mcp.json
+opencode.json
+.codex/config.toml
