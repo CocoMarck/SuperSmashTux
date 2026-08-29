@@ -21,6 +21,8 @@
     - **LISTO** Mientras te lavantas, pues no puedes hacer ningún input. Tienes que esperarte. 
     - **LISTO** El conteo del stun sucede en el piso, levantarse, y inmunidad al levantarse.
 - `Apply knocked out` **LISTO**: Completamente noqueado, en "x" segundos se habilita el poder moverse. Con un golpe, se te quita el estado de noqueado. El knockout, solo se habilita con poderes, o castigos, por ejemplo, habilidad mágica para dormir o romper escudo. 
+- `_knocked_out_anim` **FALTA**: Puede ser placeholder.
+- `_grabbed_anim` **FALTA**: Puede ser placeholder.
 
 ### Fighter
 - `Shield` **LISTO**: 
@@ -29,6 +31,7 @@
 - `Mientras se rueda no regenerar escudo` **LISTO**.
 - `Fight move margen de error` **LISTO**: Input buffer temporal. Los flancos (`_left_pressed`, `_right_pressed`, etc.) duran 1 frame, lo que hace heavy attacks dificiles. Solución: timer `_direction_input_timer` (0.1s, en `GameBalance.INPUT_BUFFER_WINDOW`) en `person.gd`. Cada dirección presionada reinicia el timer. `_fight_move` usa el timer en vez de flancos puros. ~10 frames de ventana como Smash Bros. Si bien esto es para `Fighter` y hijos, esto se hara en `Person`.
 - `Grab` como movimiento de ataque **LISTO**: Requiere de refactor hitbox system. No puede hacer grab cuando el personaje esta en el suelo (Esto no fue planeado asi, por por como esta hecho el aventar a `Person`, sucedió asi, y creo que esta bien.). 
+- `grabbing_anim` **FALTA**: Puede ser placeholder.
 
 ### Constantes
 - Poner contestes de juego en `GameBalance` **LISTO**: Duración de stun, duración de efectos, duración de movimientos compartidos, margenes de perdon/error. Eso si, recordar usar namespace completo; `GameBalence.CONST_NAME`.

@@ -54,7 +54,7 @@ func _get_feet_position() -> Vector3:
 # Funciones publicas
 func get_width() -> float:
 	return (
-		_collision_shape.shape.radius * _collision_shape.global_basis.get_scale().x
+		(_collision_shape.shape.radius*2) * _collision_shape.global_basis.get_scale().x
 	)
 
 func get_height() -> float:

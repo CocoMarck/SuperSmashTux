@@ -673,7 +673,6 @@ func _apply_knockout(delta: float, signals: VerticalForceSignals) -> void:
 	):
 		_knockout_time = 0.0
 	else:
-		print("noqueado")
 		_knockout_time -= delta
 	
 # Funciones | Animacion
