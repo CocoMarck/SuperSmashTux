@@ -542,6 +542,18 @@ func _shield_defence() -> void:
 		_shield_blockstun = true
 		_shield_blockstun_time = GameBalance.SHIELD_STUN_DURATION
 
+func _apply_shield_pushback(delta):
+	'''
+	PushBack de shield
+	Por arquietectura, el pushback no puede suceder si esta rodando. Porque no se puede rodar cuadno esta acitvo el shield blockstun.
+	'''
+	if (
+		_shield_blockstun_time >= GameBalance.SHIELD_STUN_DURATION*0.25
+	):
+		# Shield pushback
+		var accel := _normal_damage_power * 1
+		_target_velocity.x += (_knockback_direction.x * accel * delta)
+
 func _get_shield_porcent() -> float:
 	if _shield_time > 0:
 		return _shield_time / GameBalance.SHIELD_DURATION
@@ -612,9 +624,9 @@ func grabbing_person(p_person: Person, p_hitbox_grab: HitboxGrab) -> void:
 	):
 		# Configurar
 		print("Grabbing: ", p_person.name)
-		_grabbed_victim._heavy_hitstun_active = false
+		#_grabbed_victim._heavy_hitstun_active = false
 		_grabbed_victim.grabbed = true
-		_grabbed_victim.position.x = position.x + (0.2 * _last_x_direction)
+		#_grabbed_victim.position.x = position.x + (0.2 * _last_x_direction)
 	else:
 		_clear_grabbing()
 
@@ -733,6 +745,9 @@ func _physics_process(delta: float) -> void:
 	# Defensa | Recibir ataques en escudo. Rodar.
 	if with_shield:
 		_shield_defence()
+	else:
+		_shield_blockstun = false
+		_shield_blockstun_time = 0
 	_roll_move(delta, gravity_signals)
 
 	# Damage move
@@ -740,9 +755,11 @@ func _physics_process(delta: float) -> void:
 		_apply_hitstun(delta)
 	elif _heavy_hitstun_active:
 		_apply_heavy_hitstun(delta, gravity_signals)
+	elif _shield_blockstun:
+		_apply_shield_pushback(delta)
 	
 	# Anular ataque, grab, y shield
-	_allow_shield = true
+	_allow_shield = true and not grabbed
 	if (
 		taking_damage() or _holding_onto_the_ledge() or _rolling() or _grabbing()
 	):
