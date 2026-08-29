@@ -523,9 +523,9 @@ func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 				_shield_blockstun_time -= delta
 		if _shield_time <= 0.0:
 			# Daño por exceso de uso de escudo
-			_target_velocity.y = jump_impulse
 			_shield_blockstun = false
 			_shield_time = 0.0
+			_knockout_time = GameBalance.KNOCKOUT_DURATION
 		else:
 			# Rodar
 			_roll = _left_pressed or _right_pressed
@@ -626,7 +626,12 @@ func grabbing_person(p_person: Person, p_hitbox_grab: HitboxGrab) -> void:
 		print("Grabbing: ", p_person.name)
 		#_grabbed_victim._heavy_hitstun_active = false
 		_grabbed_victim.grabbed = true
-		#_grabbed_victim.position.x = position.x + (0.2 * _last_x_direction)
+		_grabbed_victim.position.x = (
+			(position.x) + ( 
+				(get_width()*0.5 + _grabbed_victim.get_width()) * 
+				_last_x_direction
+			)
+		)
 	else:
 		_clear_grabbing()
 
@@ -757,11 +762,13 @@ func _physics_process(delta: float) -> void:
 		_apply_heavy_hitstun(delta, gravity_signals)
 	elif _shield_blockstun:
 		_apply_shield_pushback(delta)
+	if _knocked_out():
+		_apply_knockout(delta, gravity_signals)
 	
 	# Anular ataque, grab, y shield
 	_allow_shield = true and not grabbed
 	if (
-		taking_damage() or _holding_onto_the_ledge() or _rolling() or _grabbing()
+		taking_damage() or _holding_onto_the_ledge() or _rolling() or _grabbing() or _knocked_out()
 	):
 		_current_attack = null
 		_grab_move_time = 0.0

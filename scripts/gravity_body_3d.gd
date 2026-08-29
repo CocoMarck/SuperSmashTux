@@ -49,6 +49,18 @@ func _get_feet_position() -> Vector3:
 	pa poder preguntarle a las plataformas inclinadas si andamos encima de su cara.
 	'''
 	return _collision_shape.global_position - Vector3(0.0, _get_body_half_height(), 0.0)
+
+
+# Funciones publicas
+func get_width() -> float:
+	return (
+		_collision_shape.shape.radius * _collision_shape.global_basis.get_scale().x
+	)
+
+func get_height() -> float:
+	return (
+		_collision_shape.shape.height * _collision_shape.global_basis.get_scale().y
+	)
 	
 # Funciones agarre de orillas.
 func _get_body_half_height() -> float:
@@ -56,11 +68,7 @@ func _get_body_half_height() -> float:
 	Medio-alto global del CollisionShape3D del character. Sirve tanto pa los pies como pa la cabeza.
 	Soporta capsula, caja, cilindro y esfera, que son los shapes de collision mas comunes por aqui.
 	'''
-	var half_height := 0.0
-	half_height = _collision_shape.shape.height * 0.5
-
-	var scale_y := _collision_shape.global_basis.get_scale().y
-	return half_height * scale_y
+	return get_height() * 0.5
 
 func _one_way_platforms(delta: float, ignore: bool, on_floor: bool) -> void:
 	'''

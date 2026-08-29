@@ -93,6 +93,9 @@ var _move_down: bool = false
 
 var _jump: bool = false
 
+# Propiedades privadas | Knocket out
+var _knockout_time: float = 0.0
+
 # Propiedades privadas | Flancos de inputs
 # Los flancos de input perminten ataques al same time de dos teclas.
 var _was_jumping: bool = false
@@ -196,6 +199,7 @@ func respawn(at_position: Vector3) -> void:
 	_heavy_hitstun_active = false
 	_heavy_hitstun_time = 0
 	grabbed = false
+	_knockout_time = 0
 	_set_x_not_zero_value( _get_initial_facing() )
 	
 # Funciones | Agarre de orillas
@@ -303,7 +307,7 @@ func _is_direction_buffer() -> bool:
 	return _direction_buffer_timer > 0
 
 func _block_inputs() -> bool:
-	return grabbed or _knockback_active
+	return grabbed or _knockback_active or _knocked_out()
 
 func _false_inputs() -> void:
 	_move_left = false
@@ -657,6 +661,20 @@ func _heavy_hitstun_anim(delta: float, signals: VerticalForceSignals) -> void:
 		_animation_player.play("hurt_air")
 		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
 	_pivot.rotation_degrees.x = _damage_degrees
+
+
+# Funciones | Knocket out
+func _knocked_out():
+	return _knockout_time > 0.0
+
+func _apply_knockout(delta: float, signals: VerticalForceSignals) -> void:
+	if (
+		not signals.on_floor or taking_damage() or grabbed
+	):
+		_knockout_time = 0.0
+	else:
+		print("noqueado")
+		_knockout_time -= delta
 	
 # Funciones | Animacion
 func _reset_visual_values():
@@ -753,6 +771,8 @@ func _physics_process(delta: float) -> void:
 		_apply_hitstun(delta)
 	elif _heavy_hitstun_active:
 		_apply_heavy_hitstun(delta, gravity_signals)
+	if _knocked_out():
+		_apply_knockout(delta, gravity_signals)
 
 	# Anim
 	_reset_visual_values()

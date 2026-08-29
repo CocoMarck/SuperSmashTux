@@ -32,7 +32,7 @@ const STUN_GETUP_UP_DURATION: float = 0.4
 const STUN_GETUP_DOWN_DURATION: float = 0.4
 
 # Person | Knockout
-const KNOCKOUT_DURATION: float = 5.0
+const KNOCKOUT_DURATION: float = 2.0
 
 # Fighter | Shield
 const SHIELD_STUN_DURATION :float = 0.8
