@@ -374,7 +374,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		var init_attack = true
 		if states.neutral:
 			_current_attack = _attacks.ground_neutral
-		elif states.moving and direction_buffered:
+		elif (states.moving and not states.crouch_move) and direction_buffered:
 			_current_attack = _attacks.heavy_side
 		elif states.walking:
 			_current_attack = _attacks.forward
