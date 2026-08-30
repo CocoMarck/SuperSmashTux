@@ -54,13 +54,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 10,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(0.8,0,0),
-			"direction": Vector3(1,0.5,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 1,
+					"damage": 10,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.8,0,0),
+					"direction": Vector3(1,0.5,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				})
+			]
 		}
 	),
 	FightMove.new(
@@ -74,13 +78,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 8,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(1.0,-1.0,0),
-			"direction": Vector3(0.25,0.75,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 2,
+					"damage": 8,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(1.0,-1.0,0),
+					"direction": Vector3(0.25,0.75,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				})
+			]
 		}
 	),
 	FightMove.new(
@@ -94,13 +102,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 7,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(0.3,0.9,0),
-			"direction": Vector3(0.25,1.0,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 3,
+					"damage": 7,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.3,0.9,0),
+					"direction": Vector3(0.25,1.0,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				})
+			]
 		}
 	),
 	FightMove.new(
@@ -114,13 +126,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 5,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(0.5,-1.0,0),
-			"direction": Vector3(0.5,0.8,0.0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 4,
+					"damage": 5,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.8,-1.0,0),
+					"direction": Vector3(0.5,0.8,0.0),
+					"init_time_ratio": 0.2,
+					"duration": 0.3
+				})
+			]
 		}
 	),
 	FightMove.new(
@@ -134,13 +150,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 6,
-			"hitbox_size": Vector3(0.5,0.5,1.0),
-			"hitbox_position": Vector3(1.0,-0.2,0),
-			"direction": Vector3(1.0,0.5,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 5,
+					"damage": 6,
+					"size": Vector3(0.5,0.5,1.0),
+					"position": Vector3(1.0,-0.2,0),
+					"direction": Vector3(1.0,0.5,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.1
+				})
+			]
 		}
 	),
 	FightMove.new(
@@ -154,13 +174,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 20,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(0.8,0.1,0),
-			"direction": Vector3(1,1,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 6,
+					"damage": 20,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.8,0.1,0),
+					"direction": Vector3(1,1,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				})
+			]
 		}
 	),
 	FightMove.new(
@@ -174,13 +198,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 20,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(0.1,0.8,0),
-			"direction": Vector3(0.25,1.0,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 7,
+					"damage": 20,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.1,0.8,0),
+					"direction": Vector3(0.25,1.0,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				})
+			]
 		}
 	),
 	FightMove.new(
@@ -194,13 +222,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 10,
-			"hitbox_size": Vector3(0.5,0.5,2.0),
-			"hitbox_position": Vector3(0.0,-1.0,0),
-			"direction": Vector3(0.25,1,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 8,
+					"damage": 10,
+					"size": Vector3(0.5,0.5,2.0),
+					"position": Vector3(0.0,-1.0,0),
+					"direction": Vector3(1,1,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				})
+			]
 		}
 	),
 	
@@ -216,13 +248,44 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 5,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(0.9, -0.9, 0),
-			"direction": Vector3(1,1,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 9,
+					"damage": 5,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.9, -0.9, 0),
+					"direction": Vector3(1,-1,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				}),
+				HitboxMove.new({
+					"id": 10,
+					"damage": 5,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(-0.9, -0.9, 0),
+					"direction": Vector3(-1,-1,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				}),
+				HitboxMove.new({
+					"id": 11,
+					"damage": 5,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.9, 0.5, 0),
+					"direction": Vector3(1,1,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				}),
+				HitboxMove.new({
+					"id": 12,
+					"damage": 5,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(-0.9, 0.5, 0),
+					"direction": Vector3(-1,1,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				}),
+			]
 		}
 	),
 	FightMove.new(
@@ -236,13 +299,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 20,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(0.1, -1.1, 0),
-			"direction": Vector3(0.25,-1.0,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 13,
+					"damage": 20,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.1, -1.1, 0),
+					"direction": Vector3(0.25,-1.0,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				})
+			]
 		}
 	),
 	FightMove.new(
@@ -256,13 +323,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 5,
-			"hitbox_size": Vector3(0.5,0.5,0.8),
-			"hitbox_position": Vector3(0.15, 0.8, 0),
-			"direction": Vector3(0.5,1.25,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 14,
+					"damage": 5,
+					"size": Vector3(0.5,0.5,0.8),
+					"position": Vector3(0.15, 0.8, 0),
+					"direction": Vector3(0.5,1.25,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				})
+			]
 		}
 	),
 	FightMove.new(
@@ -276,13 +347,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 10,
-			"hitbox_size": Vector3(0.5,0.5,0.9),
-			"hitbox_position": Vector3(0.75, 0.0, 0),
-			"direction": Vector3(1.2,1,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 15,
+					"damage": 10,
+					"size": Vector3(0.5,0.5,0.9),
+					"position": Vector3(0.75, 0.0, 0),
+					"direction": Vector3(1.2,1,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				})
+			]
 		}
 	),
 	FightMove.new(
@@ -296,13 +371,17 @@ var _attacks: Attacks = Attacks.new(
 			"override_vertical_move": false,
 			"immortal": false,
 			
-			"hitbox_damage": 10,
-			"hitbox_size": Vector3(0.5,0.5,0.5),
-			"hitbox_position": Vector3(-0.7, 0.0, 0),
-			"direction": Vector3(1.0,1,0),
-			"hitbox_time_ratio": 0.5,
-			"hitbox_rotation": 0.0,
-			"inverted_hitbox_ratio": true
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 16,
+					"damage": 10,
+					"size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(-0.7, 0.0, 0),
+					"direction": Vector3(1.0,1,0),
+					"init_time_ratio": 0.5,
+					"duration": 0.2
+				})
+			]
 		}
 	),
 )
@@ -312,7 +391,7 @@ var _grabbed_victim: Person = null
 var _grabbing_cooldown_time = 0.0
 
 # Propiedades privadas | Hitbox
-var _spawned_hitbox_damage: HitboxDamage = null
+var _spawned_hitboxes_damages: Array = []
 var _spawned_hitbox_grab: HitboxGrab = null
 
 # Override funcs
@@ -331,33 +410,43 @@ func _false_inputs() -> void:
 	#_shield = false # Este no. Se necesita para poder absorver golpe mientras se pone escudo.
 
 # Funciones | hitbox de ataque.
-func _spawn_hitbox_damage(p_size: Vector3, p_position: Vector3, p_damage: int, p_direction: Vector3, p_lifetime: float) -> void:
+func _spawn_hitboxes_damages(p_id: int, p_size: Vector3, p_position: Vector3, p_damage: int, p_direction: Vector3, p_lifetime: float) -> void:
 	'''
 	Spawn de hitbox por movimiento de ataque.
 	Swap de ejes: el "adelante" (x) del FightMove cae en z del Pivot, y z en x invertido.
 	Se indica posision y tamaño de hitbox.
 	'''
 	var fixed_position := Vector3(p_position.z, p_position.y, p_position.x)
-	_spawned_hitbox_damage = HitboxDamage.new(
-		{
-			"position": fixed_position, 
-			"size": p_size, 
-			"parent": self, 
-			"damage": p_damage,
-			"direction": p_direction,
-			"lifetime": p_lifetime,
-			"color": Color(1.0, 0.0, 1.0, 0.3)
-		}
-	)
-	_pivot.add_child(_spawned_hitbox_damage)
+	var hitbox_damage : HitboxDamage = HitboxDamage.new({
+		"id": p_id,
+		"position": fixed_position, 
+		"size": p_size, 
+		"parent": self, 
+		"damage": p_damage,
+		"direction": p_direction,
+		"lifetime": p_lifetime,
+		"color": Color(1.0, 0.0, 1.0, 0.3)
+	})
+	_spawned_hitboxes_damages.append( hitbox_damage )
+	_pivot.add_child(hitbox_damage)
 
-func _clear_hitbox_damage() -> void:
+func _clear_hitboxes_damages() -> void:
 	'''
-	Eliminar el hitbox activo, si existe.
+	Eliminar el hitboxes activos, si existen.
 	'''
-	if _spawned_hitbox_damage != null:
-		_spawned_hitbox_damage.queue_free()
-		_spawned_hitbox_damage = null
+	for hitbox_damage in _spawned_hitboxes_damages:
+		if hitbox_damage != null:
+			hitbox_damage.queue_free()
+			hitbox_damage = null
+	_spawned_hitboxes_damages.clear()
+
+func _clean_hitboxes_damages() -> void:
+	var clean_hitboxes_damages :Array = []
+	for hitbox_damage in _spawned_hitboxes_damages:
+		if hitbox_damage != null:
+			clean_hitboxes_damages.append(hitbox_damage)
+	_spawned_hitboxes_damages = clean_hitboxes_damages
+	
 
 # Funciones | Pelear
 func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates) -> void:
@@ -419,7 +508,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		else:
 			_direction.x = 0
 		if _current_attack == null:
-			_clear_hitbox_damage()
+			_clear_hitboxes_damages()
 		
 	# Hacer ataque, esperando lo que dure, y haciendo que no se mueva el player si es necesario.
 	var first_attack_frame = false
@@ -441,26 +530,32 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 			_attack_count += delta
 	
 	# Hitbox. Asegurarsee de solo spawnear uno.
-	if _current_attack != null and _spawned_hitbox_damage == null:
+	if _current_attack != null:
 		# Basado en la duracion del ataque, es lo que dura el hitbox de damage.
-		if (_current_attack.inverted_hitbox_ratio):
-			if _attack_count-delta >= _current_attack.get_hitbox_time_ratio():
-				_spawn_hitbox_damage(
-					_current_attack.hitbox_size, 
-					_current_attack.hitbox_position, 
-					_current_attack.hitbox_damage, 
-					_attack_direction, 
-					_current_attack.duration -_current_attack.get_hitbox_time_ratio()
-				)
-		else:
-			if first_attack_frame:
-				_spawn_hitbox_damage(
-					_current_attack.hitbox_size,
-					_current_attack.hitbox_position, 
-					_current_attack.hitbox_damage, 
-					_attack_direction,
-					_current_attack.duration -_current_attack.get_hitbox_time_ratio()
-				)
+		for hitbox_move in _current_attack.hitboxes_moves:
+			var time_ratio = _current_attack.get_time_ratio(hitbox_move.init_time_ratio)
+			var hitbox_time = _attack_count-delta
+			if hitbox_time >= time_ratio:
+				_clean_hitboxes_damages()
+				var direction = Vector3(0,0,0)
+				direction.x = hitbox_move.direction.x * _x_not_zero_value
+				direction.y = hitbox_move.direction.y * 0.1
+				if hitbox_time < time_ratio+hitbox_move.duration:
+					# Solo spawnear hitbox si no esta repetido. Se hace con id.
+					var repeated_hitbox = false
+					for hitbox_damage in _spawned_hitboxes_damages:
+						if hitbox_damage.id == hitbox_move.id:
+							repeated_hitbox = true
+							break
+					if not repeated_hitbox:
+						_spawn_hitboxes_damages(
+							hitbox_move.id,
+							hitbox_move.size, 
+							hitbox_move.position, 
+							hitbox_move.damage, 
+							direction, 
+							hitbox_move.duration
+						)
 
 func _attack_anim(delta:float) -> void:
 	if _current_attack.name != &"":
@@ -726,7 +821,7 @@ func _physics_process(delta: float) -> void:
 	if grab_or_shield or _rolling():
 		# Anular ataque si se hace grab, escudo, o rueda.
 		_current_attack = null
-		_clear_hitbox_damage()
+		_clear_hitboxes_damages()
 	else:
 		# Solo permitir atacar cuando no se hace grab o se pone escudo
 		_fight_move(delta, gravity_signals, move_states)
@@ -773,7 +868,7 @@ func _physics_process(delta: float) -> void:
 		_current_attack = null
 		_grab_move_time = 0.0
 		_allow_shield = false
-		_clear_hitbox_damage()
+		_clear_hitboxes_damages()
 		
 	# Visual | Escudo
 	## Esto hacerlo func tipo `_visual_shield`

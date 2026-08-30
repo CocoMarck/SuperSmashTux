@@ -4,7 +4,7 @@
 > Apenas me di cuenta, pero gdscirpt no tiene para variables privadas. Pero weno, igual es bueno marcarlas como `_var_private`, ya que indica que eso no se toco fuera de la clase dueña. Es una forma de documentar.
 
 ### Hitobox refactor **LISTO**
-- `Hitbox` **LISTO**: (Hijo de Area3D. Papa: física + debug + lifetime, comportamiento genérico)
+- `Hitbox` **LISTO**: (Hijo de Area3D. Papa: física + debug + lifetime, comportamiento genérico). Contiene `id`, para identificarlo.
 - `HitboxDamage` **LISTO**: (daño + knockback, el comportamiento actual)
 - `HitboxGrab` **LISTO**: (detecta y avisa al padre que agarre; no daña)
 
@@ -32,6 +32,7 @@
 - `Fight move margen de error` **LISTO**: Input buffer temporal. Los flancos (`_left_pressed`, `_right_pressed`, etc.) duran 1 frame, lo que hace heavy attacks dificiles. Solución: timer `_direction_input_timer` (0.1s, en `GameBalance.INPUT_BUFFER_WINDOW`) en `person.gd`. Cada dirección presionada reinicia el timer. `_fight_move` usa el timer en vez de flancos puros. ~10 frames de ventana como Smash Bros. Si bien esto es para `Fighter` y hijos, esto se hara en `Person`.
 - `Grab` como movimiento de ataque **LISTO**: Requiere de refactor hitbox system. No puede hacer grab cuando el personaje esta en el suelo (Esto no fue planeado asi, por por como esta hecho el aventar a `Person`, sucedió asi, y creo que esta bien.). 
 - `grabbing_anim` **FALTA**: Puede ser placeholder.
+- `spawn hitboxes damages` **LISTO***: Varios hitbox damage por move. Aun no jala tan bien pero jala.
 
 ### Constantes
 - Poner contestes de juego en `GameBalance` **LISTO**: Duración de stun, duración de efectos, duración de movimientos compartidos, margenes de perdon/error. Eso si, recordar usar namespace completo; `GameBalence.CONST_NAME`.
@@ -45,3 +46,6 @@
 - **FALTA**: Normalizar a obtener width y hegiht valor completo, con shape, y serán funciones publicas. Escalar si se requiere, pero con multiplicador. Ejemplo `get_width()*0.5`.
     - Funciones publicas **LISTO**: `get_width, get_height`. Y ya esta.
     - Eliminar la func legacy `_get_body_half_height() ` **FALTA**: Simplemente seria un `get_height()*0.5`.
+
+### PowerFighter
+- `Tercer salto`: Tendra anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso.

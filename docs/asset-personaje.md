@@ -50,7 +50,7 @@ CharacterBody3D      # script Person/Fighter
 ---
 
 ## Animaciones
-Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las anims, o no si, posiblemente sucedera crash.
+Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las anims, o no si, posiblemente sucederá crash.
 
 ### En el piso
 
@@ -63,47 +63,52 @@ Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las 
 - `crouch_walk`: Movimiento agachado.
 - `hurt_ground`: Recibiendo daño en el piso.
 - `knockdown`: Tumbado en el piso. Lleva a estado al person.
-- `inpact_front`: Colision de frente en cualquier lado.
-- `impact_back`: Colision de espaldas en cualquier lado.
+- `inpact_front`: Colisión de frente en cualquier lado.
+- `impact_back`: Colisión de espaldas en cualquier lado.
 - `turn`: Dar vuelta. (Saltando no puede dar vuelta).
 - `hold_platform`: Agarrarse de plataforma.
+- `knockout`: Noqueado.
 
 #### Fighter
-- `ground_neutral_attack`: Cendo no se mueve y esta parado.
+- `ground_neutral_attack`: Cuando no se mueve y esta parado.
 - `down_attack`: Cuando esta agachado y sin moverse.
 - `dash_attack`: Corriendo y atacar.
 - `forward_attack`: Caminando y attack.
-- `up_attack`: Sin moverse, y precionar ataque arriba.
-- `heavy_side_attack`: Cuando se preciona al mismo tiempo ataque y der o izq.
-- `heavy_up_attack`: Sin moverse, y precionar al mismo tiempo ataque y arriba.
-- `heavy_down_attack`: Sin moverse, y precionar al mismo tiempo ataque y abajo.
+- `up_attack`: Sin moverse, y presionar ataque arriba.
+- `heavy_side_attack`: Cuando se presiona al mismo tiempo ataque y der o izq.
+- `heavy_up_attack`: Sin moverse, y presionar al mismo tiempo ataque y arriba.
+- `heavy_down_attack`: Sin moverse, y presionar al mismo tiempo ataque y abajo.
 - `pickup`: Agarrar item.
 - `grab`: Agarrar a la gente.
 - `guard`: Animación de defensa. Protección.
 - `roll_forward`: Vuelta estilo parkur.
 - `roll_backward`: Vuelta estilo parkur.
+- `throw_forward`: Arrojar victima al frente.
+- `throw_backward`: Arrojar victima atrás.
+
 
 #### PowerFighter
-- `power_neutral`: Proyectil, rafaga de energia, o carga de ataque.
+- `power_neutral`: Proyectil, ráfaga de energía, o carga de ataque.
 - `power_side`: Poder hacia un lado.
-- `power_up`: Poder hacia arriba que da propulicón. Puede hacer daño o no.
+- `power_up`: Poder hacia arriba que da propulsión. Puede hacer daño o no.
 - `power_down`: Poder hacia abajo, puede ser ataque o no.
 
 ### En el aire
 #### Person
 - `jump`: Saltando.
+- `air_jump`: Salto en el aire.
 - `fall`: Cayendo.
 - `hurt_air`: Daño recibido en el aire.
 
 #### Fighter
 - `air_neutral_attack`: En el aire, sin moverse y atacar.
-- `air_back_attack`: En el aire moviendose a de espaldas y atacar.
-- `air_forward_attack`: En el aire moviendose a un lado y atacar.
-- `air_down_attack`: En el aire y atacar precionando abajo. Ya sea moviendose o no.
-- `air_up_attack`: En el aire y atacar precionando arriba. Ya sea moviendose o no.
+- `air_back_attack`: En el aire moviéndose a de espaldas y atacar.
+- `air_forward_attack`: En el aire moviéndose a un lado y atacar.
+- `air_down_attack`: En el aire y atacar presionando abajo. Ya sea moviéndose o no.
+- `air_up_attack`: En el aire y atacar presionando arriba. Ya sea moviéndose o no.
 
 #### PowerFighter
 - `air_jump`: Salto en el aire.
-- `power_air_up`: Lo mismo que power up. Pero animacion en el aire.
-- `power_air_down`: Lo mismo que power down. Pero animacion en el aire.
-- `power_air_side`: Lo mismo que power side. Pero animacion en el aire.
+- `power_air_up`: Lo mismo que power up. Pero animación en el aire.
+- `power_air_down`: Lo mismo que power down. Pero animación en el aire.
+- `power_air_side`: Lo mismo que power side. Pero animación en el aire.

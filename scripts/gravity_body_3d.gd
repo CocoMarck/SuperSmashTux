@@ -48,10 +48,10 @@ func _get_feet_position() -> Vector3:
 	Posicion global de los pies del character. Igualita que _get_feet_y pero en Vector3,
 	pa poder preguntarle a las plataformas inclinadas si andamos encima de su cara.
 	'''
-	return _collision_shape.global_position - Vector3(0.0, _get_body_half_height(), 0.0)
+	return _collision_shape.global_position - Vector3(0.0, get_height()*0.5, 0.0)
 
 
-# Funciones publicas
+# Funciones publicas | Size de collider
 func get_width() -> float:
 	return (
 		(_collision_shape.shape.radius*2) * _collision_shape.global_basis.get_scale().x
@@ -63,13 +63,6 @@ func get_height() -> float:
 	)
 	
 # Funciones agarre de orillas.
-func _get_body_half_height() -> float:
-	'''
-	Medio-alto global del CollisionShape3D del character. Sirve tanto pa los pies como pa la cabeza.
-	Soporta capsula, caja, cilindro y esfera, que son los shapes de collision mas comunes por aqui.
-	'''
-	return get_height() * 0.5
-
 func _one_way_platforms(delta: float, ignore: bool, on_floor: bool) -> void:
 	'''
 	Maneja las plataformas de un solo sentido, estilo Smash Bros: se atraviesan de abajo pa arriba,
@@ -198,7 +191,7 @@ func _get_head_y() -> float:
 	Altura global de la cabeza del character, calculada desde el CollisionShape3D.
 	Es la contraparte de _get_feet_y, pero pa arriba, nos sirve pa saber si alcanzamos una orilla.
 	'''
-	return _collision_shape.global_position.y + _get_body_half_height()
+	return _collision_shape.global_position.y + get_height()*0.5
 
 # Ready y physics process
 func _ready() -> void:

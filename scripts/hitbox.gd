@@ -7,6 +7,7 @@ Hace daño a cualquier cosa.
 '''
 
 # Propiedades privadas
+var id : int
 var _parent : Node3D = null
 
 var _shape := CollisionShape3D.new()
@@ -23,6 +24,7 @@ var _init_lifetime: float
 
 var _defaults: Dictionary = {
 	"parent": Node3D.new(),
+	"id": 1,
 	"position": Vector3.ZERO,
 	"size": Vector3(1,1,1),
 	"color": Color(1.0, 1.0, 1.0, 0.4),
@@ -37,6 +39,7 @@ func _init(
 	var config := _defaults.duplicate()
 	config.merge(p_config, true)  # true = p_config gana
 
+	id = config["id"]
 	position = config["position"]
 	_parent = config["parent"]
 	_lifetime = config["lifetime"]

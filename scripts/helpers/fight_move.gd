@@ -35,12 +35,7 @@ var override_vertical_move: bool
 var immortal: bool
 
 # Propidedes publicas hitbox
-var hitbox_damage: int
-var hitbox_size: Vector3
-var hitbox_position: Vector3
-var hitbox_time_ratio: float
-var hitbox_rotation: float
-var inverted_hitbox_ratio: bool
+var hitboxes_moves : Array # <-- Array de `HitboxMove`
 
 # Propiedades privadas valores default.
 var _defaults := {
@@ -53,12 +48,7 @@ var _defaults := {
 	"override_horizontal_move": true,
 	"override_vertical_move": false,
 	"inmortal": false,
-	"hitbox_damage": 20,
-	"hitbox_size": Vector3(0.5,0.5,0.5),
-	"hitbox_position": Vector3(0,0,0),
-	"hitbox_time_ratio": 0.5,
-	"hitbox_rotation": 0.0,
-	"inverted_hitbox_ratio": true
+	"hitboxes_moves": [],
 }
 
 
@@ -81,12 +71,10 @@ func _init(
 	immortal = config["immortal"]
 
 	# Hitbox
-	hitbox_damage = config["hitbox_damage"]
-	hitbox_size = config["hitbox_size"]
-	hitbox_position = config["hitbox_position"]
-	hitbox_time_ratio = config["hitbox_time_ratio"]
-	hitbox_rotation = config["hitbox_rotation"]
-	inverted_hitbox_ratio = config["inverted_hitbox_ratio"]
+	hitboxes_moves = config["hitboxes_moves"]
 
-func get_hitbox_time_ratio() -> float:
-	return (duration * hitbox_time_ratio)
+func get_time_ratio(ratio: float) -> float:
+	return (duration * ratio)
+
+func get_hitbox_move_time_ratio(p_index: int) -> float:
+	return get_time_ratio(hitboxes_moves[p_index].init_time_ratio)
