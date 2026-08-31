@@ -38,14 +38,14 @@
 - Poner contestes de juego en `GameBalance` **LISTO**: Duración de stun, duración de efectos, duración de movimientos compartidos, margenes de perdon/error. Eso si, recordar usar namespace completo; `GameBalence.CONST_NAME`.
 
 ## `2026-08-28`
-- **FALTA**: En `Person` y `Fighter`, existen muchas funcs que depender de `bool` y `time`. Jala, pero se puede optimizar para el lector de code. Que simplemente se cambie ese bool, por una func que diga si time es mayor que cero. Ejemplo `func knocked_out(): knockout_time > 0`
+- **LISTO**: En `Person` y `Fighter`, existen muchas funcs que depender de `bool` y `time`. Jala, pero se puede optimizar para el lector de code. Que simplemente se cambie ese bool, por una func que diga si time es mayor que cero. Ejemplo `func knocked_out(): knockout_time > 0`
 
 > Aveces ando en modo automático, y pongo cosas redundantes
 
 ### GravityBody
-- **FALTA**: Normalizar a obtener width y hegiht valor completo, con shape, y serán funciones publicas. Escalar si se requiere, pero con multiplicador. Ejemplo `get_width()*0.5`.
+- **LISTO**: Normalizar a obtener width y hegiht valor completo, con shape, y serán funciones publicas. Escalar si se requiere, pero con multiplicador. Ejemplo `get_width()*0.5`.
     - Funciones publicas **LISTO**: `get_width, get_height`. Y ya esta.
     - Eliminar la func legacy `_get_body_half_height() ` **FALTA**: Simplemente seria un `get_height()*0.5`.
 
 ### PowerFighter
-- `Tercer salto`: Tendra anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso.
+- `Tercer salto` **LISTO**: Tendra anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso.
