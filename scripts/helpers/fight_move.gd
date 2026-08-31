@@ -28,6 +28,7 @@ var name: StringName
 var duration: float
 var speed: Vector3
 var direction: Vector3
+var jump_power: float
 var air_attack: bool
 var grab_attack: bool
 var override_horizontal_move: bool
@@ -43,11 +44,12 @@ var _defaults := {
 	"duration": 0.5,
 	"speed": Vector3(0,0,0),
 	"direction": Vector3(0,0,0),
+	"jump_power": 0.0,
 	"air_attack": false,
 	"grab_attack": false,
 	"override_horizontal_move": true,
 	"override_vertical_move": false,
-	"inmortal": false,
+	"immortal": false,
 	"hitboxes_moves": [],
 }
 
@@ -64,6 +66,7 @@ func _init(
 	duration = config["duration"]
 	speed = config["speed"]
 	direction = config["direction"]
+	jump_power = config["jump_power"]
 	air_attack = config["air_attack"]
 	grab_attack = config["grab_attack"]
 	override_horizontal_move = config["override_horizontal_move"]

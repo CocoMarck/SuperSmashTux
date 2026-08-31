@@ -64,7 +64,6 @@ var _allow_jump: bool = true
 
 # Propiedades privadas | Daño
 var _normal_damage_power :float = 50 # Este valor se cambiara segun el personaje.
-var _knockback_active :bool = false
 var _knockback_direction :Vector3 = Vector3.ZERO
 var _knockback_time :float = 0.0
 var _damage_degrees :float = 0.0
@@ -73,8 +72,8 @@ var _last_damage_percentage :float = 0.0
 
 # Propiedades privadas | Stun
 var _heavy_hitstun_time: float = 0.0
-var _heavy_hitstun_active: bool = false
 var _heavy_hitstun_get_up_time: float = 0.0
+var _heavy_hitstun_wait_to_get_up: bool = false
 
 # Propiedeades privadas | Inmunidad
 var _immunity_to_damage :bool = false
@@ -195,8 +194,6 @@ func respawn(at_position: Vector3) -> void:
 	# podria dañar a quien este parado en el spawn apenas reaparece.
 	_release_hanging_ledge()
 	_drop_through_count = 0.0
-	_knockback_active = false
-	_heavy_hitstun_active = false
 	_heavy_hitstun_time = 0
 	grabbed = false
 	_knockout_time = 0
@@ -307,7 +304,7 @@ func _is_direction_buffer() -> bool:
 	return _direction_buffer_timer > 0
 
 func _block_inputs() -> bool:
-	return grabbed or _knockback_active or _knocked_out()
+	return grabbed or _knockback_active() or _knocked_out()
 
 func _false_inputs() -> void:
 	_move_left = false
@@ -321,7 +318,7 @@ func _false_inputs() -> void:
 	_right_pressed = false
 
 func taking_damage() -> bool:
-	return _knockback_active or _heavy_hitstun_active
+	return _knockback_active() or _heavy_hitstun_active()
 
 func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	'''
@@ -401,7 +398,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	# Velocidad horizontal
 	var target_speed := _direction.x * (speed*speed_multiplier)
 	var accel := _air_acceleration
-	if _knockback_active:
+	if _knockback_active():
 		accel = _knockback_friction
 	elif signals.on_floor:
 		if _direction.x == 0.0:
@@ -412,7 +409,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	
 	# Forzar el no saltar porque esta stuneado en el piso.
 	# eL _hitsut_active no lo necesita, porque remplaza direcatmente el movimiento: La `func _move`.
-	if _heavy_hitstun_active:
+	if _heavy_hitstun_active():
 		if signals.on_floor:
 			can_jump = false 
 		else:
@@ -560,17 +557,25 @@ func _ignore_last_damage() -> void:
 func set_damage_move(damage:int, direction:Vector3) -> void:
 	'''
 	Recibir un trancazo
+
+	Establecer movimiento por golpe. 
+	Y establecer si el golpe te quito saltos o no.
 	'''
 	if not _immunity_to_damage:
 		_knockback_direction = direction
-		_knockback_active = true
 		_knockback_time = GameBalance.KNOCKBACK_DURATION
-		_heavy_hitstun_active = false
 		_heavy_hitstun_time = 0
 		if damage >= hp*GameBalance.STUN_DAMAGE_THRESHOLD:
 			# Movimiento stun solo si se hace el porcentaje de daño indicado.
-			_heavy_hitstun_active = true
 			_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
+		
+		# No poder saltar. Y cancelar salto
+		if not is_on_floor():
+			# Al recibir trancasos en el aire, ya no poder saltar.
+			# Si bien en realidad simplemente solo se puede poner el maximo de saltos sin este if, porque cuando estas en el piso se reinicia el conteo de saltos. 
+			# Lo que pasa que estando en el piso y recibes un golpe que te manda a volar, si deberias poder saltar.
+			_jump_count = _max_jumps # Ya no poder saltar
+			_target_velocity.y = 0 # Cancelar velocidad vertical
 
 func set_thrown_move(damage: int, direction: Vector3) -> void:
 	'''
@@ -581,9 +586,7 @@ func set_thrown_move(damage: int, direction: Vector3) -> void:
 		set_damage(damage)
 		set_damage_percentage(damage)
 		_knockback_direction = direction
-		_knockback_active = true
 		_knockback_time = GameBalance.KNOCKBACK_DURATION
-		_heavy_hitstun_active = true
 		_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
 
 func is_immune_to_damage() -> bool:
@@ -593,6 +596,9 @@ func is_immune_to_damage() -> bool:
 	return _immunity_to_damage
 
 # Funciones | Hitstun
+func _knockback_active() -> bool:
+	return _knockback_time > 0
+
 func _apply_hitstun(delta: float) -> void:
 	_knockback_time -= delta
 	var accel := _normal_damage_power * damage_percentage
@@ -603,7 +609,6 @@ func _apply_hitstun(delta: float) -> void:
 		_knockback_direction.y * (accel*10) * delta
 	)
 	if _knockback_time <= 0.0:
-		_knockback_active = false
 		_ledge_release_count = 0.0 # Para poder agarrarse
 		_pivot.rotation_degrees.x = 0
 	
@@ -620,6 +625,9 @@ func _hitstun_anim(delta: float, signals: VerticalForceSignals) -> void:
 	_pivot.rotation_degrees.x = _damage_degrees
 
 # Funciones | Heavy hitstun
+func _heavy_hitstun_active() -> bool:
+	return _heavy_hitstun_time > 0 or _heavy_hitstun_wait_to_get_up
+
 func _apply_heavy_hitstun(delta: float, signals: VerticalForceSignals) -> void:
 	_horizontal_move = false
 	if signals.on_floor:
@@ -631,17 +639,18 @@ func _apply_heavy_hitstun(delta: float, signals: VerticalForceSignals) -> void:
 
 func _heavy_hitstun_get_up_move(delta: float, signals: VerticalForceSignals):
 	# Animacion inmune de levantarse.
-	if _heavy_hitstun_time <= 0.0:
+	if _heavy_hitstun_time <= 0:
 		_immunity_to_damage = true
 		if (_heavy_hitstun_get_up_time <= 0.0) or (not signals.on_floor):
-			_heavy_hitstun_active = false
 			_pivot.rotation_degrees.x = 0
 			_immunity_to_damage = false
 			_ledge_release_count = 0.0 # Para poder agarrarse
+			_heavy_hitstun_wait_to_get_up = false
 		_heavy_hitstun_get_up_time -= delta
 	else:
 		if signals.on_floor:
 			_heavy_hitstun_get_up_time = GameBalance.STUN_GETUP_NEUTRAL_DURATION
+			_heavy_hitstun_wait_to_get_up = true
 			if _move_left or _move_right:
 				_heavy_hitstun_time = 0.0 # Esto solo cancela stun
 			
@@ -754,7 +763,7 @@ func _physics_process(delta: float) -> void:
 	
 	# Move
 	var gravity_signals = _vertical_force(
-		delta, (_down_pressed and _heavy_hitstun_active == false), _fall_acceleration_multiplier
+		delta, (_down_pressed and _heavy_hitstun_active() == false), _fall_acceleration_multiplier
 	)
 	var move_signals = _move(delta, gravity_signals)
 	var move_states = _get_move_states(move_signals)
@@ -766,18 +775,18 @@ func _physics_process(delta: float) -> void:
 	_set_x_not_zero_value(move_signals.direction)
 
 	# Damage
-	if _knockback_active:
+	if _knockback_active():
 		_apply_hitstun(delta)
-	elif _heavy_hitstun_active:
+	elif _heavy_hitstun_active():
 		_apply_heavy_hitstun(delta, gravity_signals)
 	if _knocked_out():
 		_apply_knockout(delta, gravity_signals)
 
 	# Anim
 	_reset_visual_values()
-	if _knockback_active:
+	if _knockback_active():
 		_hitstun_anim(delta, gravity_signals)
-	elif _heavy_hitstun_active:
+	elif _heavy_hitstun_active():
 		_heavy_hitstun_anim(delta, gravity_signals)
 	elif _holding_onto_the_ledge():
 		_ledge_grab_anim(delta)

@@ -15,12 +15,12 @@ static var PLAYER_INPUT_MAPS: Dictionary[PlayerId, PlayerInputMap] = {
 	PlayerId.PLAYER_1: PlayerInputMap.new(
 		&"player1_move_left", &"player1_move_right", &"player1_move_up",
 		&"player1_move_down", &"player1_jump", &"player1_attack", 
-		&"player1_walk", &"player1_grab", &"player1_shield"
+		&"player1_walk", &"player1_grab", &"player1_shield", "player1_power_attack"
 	),
 	PlayerId.PLAYER_2: PlayerInputMap.new(
 		&"player2_move_left", &"player2_move_right", &"player2_move_up",
 		&"player2_move_down", &"player2_jump", &"player2_attack", 
-		&"player2_walk", &"player2_grab", &"player2_shield" 
+		&"player2_walk", &"player2_grab", &"player2_shield", "player2_power_attack"
 	),
 }
 

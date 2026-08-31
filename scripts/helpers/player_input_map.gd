@@ -11,10 +11,12 @@ var attack: StringName
 var walk : StringName
 var grab : StringName
 var shield : StringName
+var power_attack : StringName
 
 func _init(
 	p_move_left: StringName, p_move_right: StringName, p_move_up: StringName,
-	p_move_down: StringName, p_jump: StringName, p_attack: StringName, p_walk: StringName, p_grab: StringName, p_shield: StringName
+	p_move_down: StringName, p_jump: StringName, p_attack: StringName, p_walk: StringName, p_grab: StringName, p_shield: StringName,
+	p_power_attack: StringName
 ):
 	# Asignar las acciones configuradas en el constructor a las propiedades de la clase.
 	move_left = p_move_left
@@ -26,3 +28,4 @@ func _init(
 	walk = p_walk
 	grab = p_grab
 	shield = p_shield
+	power_attack = p_power_attack
