@@ -671,6 +671,7 @@ func _shield_defence() -> void:
 	Defensa de ataques locos. Anular daño.
 	'''
 	if taking_damage():
+		_knockback_time = 0.0
 		_heavy_hitstun_time = 0.0
 		_ignore_last_damage()
 		_shield_time -= (GameBalance.SHIELD_DURATION*_last_damage_percentage)
@@ -698,7 +699,7 @@ func _with_shield(signals: VerticalForceSignals) -> bool:
 	return (
 		(_shield_time > 0) and 
 		(
-			(_shield or _shield_blockstun) and _allow_shield and signals.on_floor) and (not _attacking()
+			(_shield or _shield_blockstun) and _allow_shield and signals.on_floor and not _attacking()
 		)
 	)
 
