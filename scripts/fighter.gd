@@ -510,6 +510,8 @@ func _cancel_attack(signals: VerticalForceSignals, states: MoveStates):
 			# Cancelar ataque saltarin si esta recibiendo daño. En el piso.
 			# El if no describe eso, pero es para eso que se menciona.
 			_current_attack = null
+		elif _grabbing():
+			_current_attack = null
 		elif (
 			_current_attack.air_attack and 
 			(_current_attack.jump_power > 0 and states.falling) and not _can_attack_jump()
@@ -832,6 +834,8 @@ func _physics_process(delta: float) -> void:
 		# Forzar soltarse de ledge. Y bloquiar agarrarse del ledge.
 		_release_hanging_ledge() 
 		_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
+		# Reiniciar contador de ataques saltarines
+		_attack_jump_count = 0
 	_ledge_grab(delta, gravity_signals, move_signals)
 	_set_x_not_zero_value(move_signals.direction)
 	

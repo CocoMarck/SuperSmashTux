@@ -23,6 +23,7 @@
 - `Apply knocked out` **LISTO**: Completamente noqueado, en "x" segundos se habilita el poder moverse. Con un golpe, se te quita el estado de noqueado. El knockout, solo se habilita con poderes, o castigos, por ejemplo, habilidad mágica para dormir o romper escudo. 
 - `_knocked_out_anim` **FALTA**: Puede ser placeholder.
 - `_grabbed_anim` **FALTA**: Puede ser placeholder.
+- Al recibir daño en el aire, ya no poder saltar en el aire **LISTO**.
 
 ### Fighter
 - `Shield` **LISTO**: 
@@ -47,5 +48,11 @@
     - Funciones publicas **LISTO**: `get_width, get_height`. Y ya esta.
     - Eliminar la func legacy `_get_body_half_height() ` **FALTA**: Simplemente seria un `get_height()*0.5`.
 
+### Fighter
+- Ataques con salto **LISTO**: 
+    - Ahora los movimientos de ataques pueden incluir un salto. Solo se puede hacer un salto en el aire y en el piso. No dos saltos. 
+    - Si se hace el ataque de salto, ya no se puede hacer saltar normal, hasta caer al piso. 
+    - Un golpe reinicia el conteo de saltos de ataque, por lo que si haces el salto con movimiento de ataque, y en el aire te dan un trancazo, ahora puedes hacer otro salto de ataque.
+
 ### PowerFighter
-- `Tercer salto` **LISTO**: Tendra anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso.
+- `Tercer salto` **LISTO**: Tendrá anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso. Esto lo hace fighter.
