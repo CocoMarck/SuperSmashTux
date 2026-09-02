@@ -88,10 +88,10 @@ Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las 
 
 
 #### PowerFighter
-- `power_neutral`: Proyectil, ráfaga de energía, o carga de ataque.
-- `power_side`: Poder hacia un lado.
-- `power_up`: Poder hacia arriba que da propulsión. Puede hacer daño o no.
-- `power_down`: Poder hacia abajo, puede ser ataque o no.
+- `neutral_power_attack`: Proyectil, ráfaga de energía, o carga de ataque.
+- `side_power_attack`: Poder hacia un lado.
+- `up_power_attack`: Poder hacia arriba que da propulsión. Puede hacer daño o no.
+- `down_power_attack`: Poder hacia abajo, puede ser ataque o no.
 
 ### En el aire
 #### Person
@@ -109,6 +109,6 @@ Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las 
 
 #### PowerFighter
 - `air_jump`: Salto en el aire.
-- `power_air_up`: Lo mismo que power up. Pero animación en el aire.
-- `power_air_down`: Lo mismo que power down. Pero animación en el aire.
-- `power_air_side`: Lo mismo que power side. Pero animación en el aire.
+- `air_up_power_attack`: Lo mismo que power up. Pero animación en el aire.
+- `air_down_power_attack`: Lo mismo que power down. Pero animación en el aire.
+- `air_side_power_attack`: Lo mismo que power side. Pero animación en el aire.

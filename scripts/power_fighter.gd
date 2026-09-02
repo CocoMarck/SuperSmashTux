@@ -7,8 +7,8 @@ var _power_attack: bool = false
 # Propiedades privadas | Power attacks
 var _power_attacks: PowerAttacks = PowerAttacks.new({
 	"up" : FightMove.new({
-		"name": &"up_attack", # Nombre de animación
-		"duration": 0.4583,
+		"name": &"up_power_attack", # Nombre de animación
+		"duration": 0.625,
 		"speed": Vector3(8,0,0),
 		"direction": Vector3(0,0,0),
 		"jump_power": 10.0,
@@ -30,8 +30,8 @@ var _power_attacks: PowerAttacks = PowerAttacks.new({
 		]
 	}),
 	"air_up" : FightMove.new({
-		"name": &"up_attack", # Nombre de animación
-		"duration": 0.4583,
+		"name": &"air_up_power_attack", # Nombre de animación
+		"duration": 0.625,
 		"speed": Vector3(8,0,0),
 		"direction": Vector3(0,0,0),
 		"jump_power": 10.0,

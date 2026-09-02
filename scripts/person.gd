@@ -40,6 +40,11 @@ var _animation_player: AnimationPlayer
 
 # `_target_velocity`, pertenece a `GravityBody3D`.
 
+# Propiedades privadas | Animacion air jump
+var _air_jump_time :float = 0
+var _air_jump_duration :float = 0.5833
+var _current_air_jump_anim :String = "air_jump"
+
 # Propiedades privadas | Aceleracion horizontal
 var _ground_acceleration: float = 40.0
 var _air_acceleration: float = 40.0
@@ -146,6 +151,7 @@ func _set_x_not_zero_value(p_direction: Vector3) -> void:
 			_x_not_zero_value = 1.0
 		else:
 			_x_not_zero_value = -1.0
+		_last_x_direction = _x_not_zero_value
 
 # Funciones | Apariencia
 func _set_material( p_meterial: Material ) -> void:
@@ -378,7 +384,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 		_x_not_zero_value = _last_x_direction # Forzar dirección. Para cuando cae del air de espaldas.
 	else:
 		if _max_jumps == 1.0:
-			_jump_count = _max_jumps
+			_set_jumps_to_max()
 
 	# Cambiador de velocidad segun sea el caso.
 	var speed : int
@@ -423,7 +429,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 		_target_velocity.y = jump_impulse
 		_heavy_hitstun_time = 0.0 # Cancelar stun move si es que hay.
 		if signals.air_count > 0:
-			_jump_count = _max_jumps
+			_set_jumps_to_max()
 		else:
 			_jump_count += 1
 	
@@ -497,6 +503,10 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 		air_forward,
 		air_back
 	)
+	
+func _set_jumps_to_max() -> void:
+	_air_jump_time = 0
+	_jump_count = _max_jumps
 
 func _move_anim(delta:float, states: MoveStates) -> void:
 	'''
@@ -516,12 +526,29 @@ func _move_anim(delta:float, states: MoveStates) -> void:
 	elif states.running:
 		_animation_player.play("run")
 	# En el aire
+	elif _jump_count > 1 and _air_jump_time > 0:
+		# Animacion de salto en el aire.
+		if _air_jump_time == _air_jump_duration:
+			# Actualizar anim de segundo satlo segun el caso.
+			_current_air_jump_anim = "air_jump"
+			if states.air_forward:
+				_current_air_jump_anim = "air_forward_jump"
+			elif states.air_back:
+				_current_air_jump_anim = "air_back_jump"
+		_animation_player.play(_current_air_jump_anim)
+		_air_jump_time -= delta
 	elif states.jumping:
 		_animation_player.play("jump")
+		_air_jump_time = _air_jump_duration
 	elif states.falling:
 		_animation_player.play("fall")
+		_air_jump_time = 0
 	else:
 		_animation_player.play("idle")
+
+func _looking_at_direction(direction: Vector3 ) -> void:
+	_pivot.basis = Basis.looking_at(direction)
+	_pivot.rotate_x( 0 )
 
 func _set_pivot_direction(signals: MoveSignals) -> void:
 	'''
@@ -530,11 +557,11 @@ func _set_pivot_direction(signals: MoveSignals) -> void:
 	- Cuando se agarre de un ledge.
 	'''
 	if (signals.on_floor and (_move_left or _move_right)) or _holding_onto_the_ledge():
-		_pivot.basis = Basis.looking_at(
+		_looking_at_direction(
 			Vector3(_x_not_zero_value, signals.direction.y, signals.direction.z)
 		)
-		_last_x_direction = _x_not_zero_value
 		_pivot.rotate_x( 0 )
+		_last_x_direction = _x_not_zero_value
 
 # Funciones | Damage recibido
 func set_damage(damage:int):
@@ -574,7 +601,7 @@ func set_damage_move(damage:int, direction:Vector3) -> void:
 			# Al recibir trancasos en el aire, ya no poder saltar.
 			# Si bien en realidad simplemente solo se puede poner el maximo de saltos sin este if, porque cuando estas en el piso se reinicia el conteo de saltos. 
 			# Lo que pasa que estando en el piso y recibes un golpe que te manda a volar, si deberias poder saltar.
-			_jump_count = _max_jumps # Ya no poder saltar
+			_set_jumps_to_max()
 			_target_velocity.y = 0 # Cancelar velocidad vertical
 
 func set_thrown_move(damage: int, direction: Vector3) -> void:

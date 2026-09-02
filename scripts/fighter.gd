@@ -453,8 +453,12 @@ func _clean_hitboxes_damages() -> void:
 func _first_attack_frame() -> bool:
 	return _attack_count == 0
 
+func _attack_jump_limit_reached() -> bool:
+	return _attack_jump_count > 1
+func _is_attack_jump() -> bool:
+	return _current_attack.jump_power > 0.0
 func _can_attack_jump() -> bool:
-	return _current_attack.jump_power > 0.0 and _attack_jump_count == 0 and _first_attack_frame()
+	return _is_attack_jump() and (not _attack_jump_limit_reached()) and _first_attack_frame()
 
 func _set_attack(states: MoveStates) -> void:
 	'''
@@ -512,12 +516,6 @@ func _cancel_attack(signals: VerticalForceSignals, states: MoveStates):
 			_current_attack = null
 		elif _grabbing():
 			_current_attack = null
-		elif (
-			_current_attack.air_attack and 
-			(_current_attack.jump_power > 0 and states.falling) and not _can_attack_jump()
-		):
-			# Cancelar ataque aerio si es de salto, y esta callendo
-			_current_attack = null
 		elif signals.on_floor and _current_attack.air_attack:
 			# Cancelar ataque aerio si no esta en aire.
 			_current_attack = null
@@ -547,25 +545,52 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		
 	# Hacer ataque, esperando lo que dure, y haciendo que no se mueva el player si es necesario.
 	if _current_attack != null:
-		if _first_attack_frame():
+		# Necesarios
+		var first_attack_frame :bool = _first_attack_frame()
+		var is_attack_jump :bool = _is_attack_jump()
+		
+		# Debug
+		if first_attack_frame:
 			print(_current_attack.name)
 		
-		# Movimiento a al atacar
-		if _current_attack.override_horizontal_move:
-			_target_velocity.x = _current_attack.speed.x * _last_x_direction
-			# Antes se usaba `_x_not_zero_value`, pero no era lo correcto.
-		if _current_attack.override_vertical_move:
-			_target_velocity.y = _current_attack.speed.y
-		elif _can_attack_jump():
-			# Saltar solo una vez. Y Poner los saltos al maximo.
-			_target_velocity.y = _current_attack.jump_power
-			_jump_count = _max_jumps
-			_attack_jump_count += 1
-			_last_x_direction = _x_not_zero_value # Forzar direccion de movimiento de salto.
-			if not signals.on_floor:
-				# Cancelar solo heavy stun si esta en el aire.
-				_heavy_hitstun_time = 0
-			
+		# Sobrescribir movimiento a al atacar. Modo normal
+		if not is_attack_jump:
+			if _current_attack.override_horizontal_move:
+				_target_velocity.x = _current_attack.speed.x * _last_x_direction
+				# Antes se usaba `_x_not_zero_value`, pero no era lo correcto.
+			if _current_attack.override_vertical_move:
+				_target_velocity.y = _current_attack.speed.y
+		
+		# Lo que pasa cuando el movimiento de ataque es de salto
+		if is_attack_jump:
+			# Contar saltos
+			if first_attack_frame:
+				_attack_jump_count += 1
+			# Determinar limite
+			if _attack_jump_limit_reached():
+				_attack_count = _current_attack.duration
+			else:
+				if _current_attack.override_horizontal_move:
+					_target_velocity.x = _current_attack.speed.x * _last_x_direction
+				if first_attack_frame:
+					# Saltar solo una vez. Y Poner los saltos al maximo.
+					print(_current_attack.jump_power)
+					_target_velocity.y = _current_attack.jump_power
+					_set_jumps_to_max()
+					# Forzar direccion de movimiento de salto.
+					if _move_left:
+						_direction.x = -1
+					elif _move_right:
+						_direction.x = 1
+					if _direction.x != 0:
+						# Esto forza la visual, y pone las direcciones de mane de edecuada.
+						_last_x_direction = _direction.x
+						_x_not_zero_value = _direction.x
+						_looking_at_direction( _direction ) 
+					# Cancelar solo heavy stun si esta en el aire.
+					if not signals.on_floor:
+						_heavy_hitstun_time = 0
+		
 		# Finalizar ataque.
 		if _attack_count >= _current_attack.duration:
 			_current_attack = null
@@ -605,7 +630,6 @@ func _attack_anim(delta:float) -> void:
 		_animation_player.play(_current_attack.name)
 	else:
 		_animation_player.stop()
-		#_mesh_instance.rotation_degrees.x = _current_attack.mesh_rotation_x
 
 func _attacking() -> bool:
 	return _current_attack != null
