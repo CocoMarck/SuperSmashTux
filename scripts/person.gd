@@ -44,6 +44,7 @@ var _animation_player: AnimationPlayer
 var _air_jump_time :float = 0
 var _air_jump_duration :float = 0.5833
 var _current_air_jump_anim :String = "air_jump"
+var _allow_jump_anim: bool = false
 
 # Propiedades privadas | Aceleracion horizontal
 var _ground_acceleration: float = 40.0
@@ -428,6 +429,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	if can_jump and _jump_count < _max_jumps:
 		_target_velocity.y = jump_impulse
 		_heavy_hitstun_time = 0.0 # Cancelar stun move si es que hay.
+		_allow_jump_anim = true
 		if signals.air_count > 0:
 			_set_jumps_to_max()
 		else:
@@ -448,8 +450,10 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 	'''
 	# Movimiento normal
 	var moving = signals.direction.x != 0.0
-	var jumping = velocity.y > 0
+	var jumping = signals.velocity.y > 0 and _allow_jump_anim
 	var falling = not jumping and not signals.on_floor
+	if signals.velocity.y < 0:
+		_allow_jump_anim = false
 
 	# En el piso o en el aire
 	var neutral := false
