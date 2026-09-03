@@ -35,7 +35,6 @@ var _init_shield_height : float
 var _shield_blockstun : bool = false
 var _shield_blockstun_time : float = 0.0
 
-
 # Propiedades privadas | Ataque
 var _attack_count: float = 0.0
 var _current_attack: FightMove = null
@@ -387,7 +386,13 @@ var _attacks: Attacks = Attacks.new(
 	),
 )
 
-# Grabbing
+# Propiedades privadas | Ataque neutral en el piso
+var _neutral_combo_count :int = 0
+var _neutral_combo_reset_time :float = 0.0
+var _neutral_combo_reset_duration :float = 1.5
+var _neutral_combo_attacks :Array[FightMove] # Este almacena limite de ataques neutrales en el piso.
+
+# Propiedades privadas | Grabbing
 var _grabbed_victim: Person = null
 var _grabbing_cooldown_time = 0.0
 
@@ -448,6 +453,24 @@ func _clean_hitboxes_damages() -> void:
 			clean_hitboxes_damages.append(hitbox_damage)
 	_spawned_hitboxes_damages = clean_hitboxes_damages
 	
+# Funciones | Ataques neutrales en el piso
+func _get_neutral_combo_limit() -> int:
+	return _neutral_combo_attacks.size()
+
+func _is_current_attack_in_neutral_combo():
+	return _current_attack in _neutral_combo_attacks
+	
+func _neutral_combo_limit_reached() -> bool:
+	return _neutral_combo_count > _get_neutral_combo_limit()-1
+
+func _get_current_neutral_combo_move() -> FightMove:
+	if _neutral_combo_limit_reached():
+		return _neutral_combo_attacks[_neutral_combo_attacks.size()-1]
+	else:
+		var index :float = 0
+		if _neutral_combo_count > 0:
+			index = _neutral_combo_count
+		return _neutral_combo_attacks[index]
 
 # Funciones | Pelear
 func _first_attack_frame() -> bool:
@@ -460,74 +483,111 @@ func _is_attack_jump() -> bool:
 func _can_attack_jump() -> bool:
 	return _is_attack_jump() and (not _attack_jump_limit_reached()) and _first_attack_frame()
 
+func _init_attack_by_move(direction_buffered: bool, states: MoveStates):
+	if not _attack:
+		return
+	if states.neutral:
+		_current_attack = _get_current_neutral_combo_move()
+	elif (states.moving and not states.crouch_move) and direction_buffered:
+		_current_attack = _attacks.heavy_side
+	elif states.walking:
+		_current_attack = _attacks.forward
+	elif states.running:
+		_current_attack = _attacks.dash
+	elif states.neutral_crouch and direction_buffered:
+		_current_attack = _attacks.heavy_down
+	elif states.neutral_crouch or states.crouch_move:
+		_current_attack = _attacks.down
+	elif states.neutral_up and direction_buffered:
+		_current_attack = _attacks.heavy_up
+	elif states.neutral_up:
+		_current_attack = _attacks.up
+
+	# Ataque en aire
+	elif states.neutral_air:
+		_current_attack = _attacks.air_neutral
+	elif states.air_down:
+		_current_attack = _attacks.air_down
+	elif states.air_up:
+		_current_attack = _attacks.air_up
+	elif states.air_forward:
+		_current_attack = _attacks.air_forward
+	elif states.air_back:
+		_current_attack = _attacks.air_back
+
+func _process_attack(direction_buffered: bool, states: MoveStates) -> void:
+	'''
+	Función remplazable. La remplazara power fighter
+	'''
+	_init_attack_by_move(direction_buffered, states)
+
+func _set_attack_direction() -> void:
+	_attack_count = 0
+	_attack_direction.x = _current_attack.direction.x * _x_not_zero_value
+	_attack_direction.y = _current_attack.direction.y * 0.1
+
 func _set_attack(states: MoveStates) -> void:
 	'''
-	Funcion remplazable. La remplazara power attack, para obtener sus ataques.
+	Establecer ataque
 	'''
+	if _current_attack != null:
+		return
+	
+	_attack_direction = Vector3.ZERO
+	
+	# Ataque en piso
+	var direction_buffered :bool = _is_direction_buffer() # Margen de error de presión de direccion.
+	_process_attack(direction_buffered, states)
+	
 	if _current_attack == null:
-		_attack_direction.x = 0.0
-		_attack_direction.y = 0.0
-		_attack_direction.z = 0.0
-		
-		# Ataque en piso
-		var direction_buffered = _is_direction_buffer() # Margen de error de presión de direccion.
-		if _attack:
-			if states.neutral:
-				_current_attack = _attacks.ground_neutral
-			elif (states.moving and not states.crouch_move) and direction_buffered:
-				_current_attack = _attacks.heavy_side
-			elif states.walking:
-				_current_attack = _attacks.forward
-			elif states.running:
-				_current_attack = _attacks.dash
-			elif states.neutral_crouch and direction_buffered:
-				_current_attack = _attacks.heavy_down
-			elif states.neutral_crouch or states.crouch_move:
-				_current_attack = _attacks.down
-			elif states.neutral_up and direction_buffered:
-				_current_attack = _attacks.heavy_up
-			elif states.neutral_up:
-				_current_attack = _attacks.up
-
-			# Ataque en aire
-			elif states.neutral_air:
-				_current_attack = _attacks.air_neutral
-			elif states.air_down:
-				_current_attack = _attacks.air_down
-			elif states.air_up:
-				_current_attack = _attacks.air_up
-			elif states.air_forward:
-				_current_attack = _attacks.air_forward
-			elif states.air_back:
-				_current_attack = _attacks.air_back
-		
-		# Inicializar ataque
-		if _current_attack != null:
-			_attack_count = 0
-			_attack_direction.x = _current_attack.direction.x * _x_not_zero_value
-			_attack_direction.y = _current_attack.direction.y * 0.1
-			#_attack_direction.z = _attack_direction.z * _current_attack.direction.y
+		return
+	
+	# Inicializar ataque
+	_set_attack_direction()
 
 func _cancel_attack(signals: VerticalForceSignals, states: MoveStates):
-	if _current_attack != null:
-		if taking_damage() and signals.on_floor:
-			# Cancelar ataque saltarin si esta recibiendo daño. En el piso.
-			# El if no describe eso, pero es para eso que se menciona.
+	# Verificar attack
+	if _current_attack == null:
+		return
+	
+	# Lo que pasa con ataques genericos
+	if taking_damage() and signals.on_floor:
+		# Cancelar ataque saltarin si esta recibiendo daño. En el piso.
+		# El if no describe eso, pero es para eso que se menciona.
+		_current_attack = null
+	elif _grabbing():
+		_current_attack = null
+	elif signals.on_floor and _current_attack.air_attack:
+		# Cancelar ataque aerio si no esta en aire.
+		_current_attack = null
+	elif not _current_attack.air_attack:
+		# Cancelar ataque en piso si esta en el aire
+		if _current_attack.jump_power == 0 and not signals.on_floor:
+			# Para poder hacer ataques saltarines.
 			_current_attack = null
-		elif _grabbing():
-			_current_attack = null
-		elif signals.on_floor and _current_attack.air_attack:
-			# Cancelar ataque aerio si no esta en aire.
-			_current_attack = null
-		elif not _current_attack.air_attack:
-			# Cancelar ataque en piso si esta en el aire
-			if _current_attack.jump_power == 0 and not signals.on_floor:
-				# Para poder hacer ataques saltarines.
-				_current_attack = null
-		else:
-			_direction.x = 0
-		if _current_attack == null:
-			_clear_hitboxes_damages()
+	else:
+		_direction.x = 0
+	if _current_attack == null:
+		_clear_hitboxes_damages()
+
+func _reset_neutral_combo_count(states: MoveStates) -> void:
+	if (not states.neutral) or (_neutral_combo_reset_time <= 0):
+		_neutral_combo_count = 0
+
+func _tick_neutral_combo_reset(delta:float):
+	if _neutral_combo_reset_time > 0:
+		_neutral_combo_reset_time -= delta
+
+func _process_neutral_combo(first_attack_frame:bool, states: MoveStates) -> void:
+	# Contar ataque neutral, solo en first frame.
+	if (_current_attack in _neutral_combo_attacks):
+		if _neutral_combo_limit_reached():
+			_neutral_combo_count = 0
+		if first_attack_frame:
+			_neutral_combo_count += 1
+			_neutral_combo_reset_time = _neutral_combo_reset_duration
+	else:
+		_reset_neutral_combo_count(states)
 
 func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates) -> void:
 	'''
@@ -542,88 +602,95 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 	# Reiniciar conteo de saltitos
 	if signals.on_floor:
 		_attack_jump_count = 0
+
+	# Paso la prueba
+	if _current_attack == null:
+		return
 		
-	# Hacer ataque, esperando lo que dure, y haciendo que no se mueva el player si es necesario.
-	if _current_attack != null:
-		# Necesarios
-		var first_attack_frame :bool = _first_attack_frame()
-		var is_attack_jump :bool = _is_attack_jump()
-		
-		# Debug
+	# Necesarios
+	var first_attack_frame :bool = _first_attack_frame()
+	var is_attack_jump :bool = _is_attack_jump()
+	
+	# Sobrescribir movimiento a al atacar. Modo normal
+	if not is_attack_jump:
+		if _current_attack.override_horizontal_move:
+			_target_velocity.x = _current_attack.speed.x * _last_x_direction
+			# Antes se usaba `_x_not_zero_value`, pero no era lo correcto.
+		if _current_attack.override_vertical_move:
+			_target_velocity.y = _current_attack.speed.y
+	
+	# Lo que pasa cuando el movimiento de ataque es de salto
+	if is_attack_jump:
+		# Contar saltos
 		if first_attack_frame:
-			print(_current_attack.name)
-		
-		# Sobrescribir movimiento a al atacar. Modo normal
-		if not is_attack_jump:
+			_attack_jump_count += 1
+		# Determinar limite
+		if _attack_jump_limit_reached():
+			_attack_count = _current_attack.duration
+		else:
 			if _current_attack.override_horizontal_move:
 				_target_velocity.x = _current_attack.speed.x * _last_x_direction
-				# Antes se usaba `_x_not_zero_value`, pero no era lo correcto.
-			if _current_attack.override_vertical_move:
-				_target_velocity.y = _current_attack.speed.y
-		
-		# Lo que pasa cuando el movimiento de ataque es de salto
-		if is_attack_jump:
-			# Contar saltos
 			if first_attack_frame:
-				_attack_jump_count += 1
-			# Determinar limite
-			if _attack_jump_limit_reached():
-				_attack_count = _current_attack.duration
-			else:
-				if _current_attack.override_horizontal_move:
-					_target_velocity.x = _current_attack.speed.x * _last_x_direction
-				if first_attack_frame:
-					# Saltar solo una vez. Y Poner los saltos al maximo.
-					print(_current_attack.jump_power)
-					_target_velocity.y = _current_attack.jump_power
-					_set_jumps_to_max()
-					# Forzar direccion de movimiento de salto.
-					if _move_left:
-						_direction.x = -1
-					elif _move_right:
-						_direction.x = 1
-					if _direction.x != 0:
-						# Esto forza la visual, y pone las direcciones de mane de edecuada.
-						_last_x_direction = _direction.x
-						_x_not_zero_value = _direction.x
-						_looking_at_direction( _direction ) 
-					# Cancelar solo heavy stun si esta en el aire.
-					if not signals.on_floor:
-						_heavy_hitstun_time = 0
-		
-		# Finalizar ataque.
-		if _attack_count >= _current_attack.duration:
-			_current_attack = null
-		else:
-			_attack_count += delta
+				# Saltar solo una vez. Y Poner los saltos al maximo.
+				print(_current_attack.jump_power)
+				_target_velocity.y = _current_attack.jump_power
+				_set_jumps_to_max()
+				# Forzar direccion de movimiento de salto.
+				if _move_left:
+					_direction.x = -1
+				elif _move_right:
+					_direction.x = 1
+				if _direction.x != 0:
+					# Esto forza la visual, y pone las direcciones de mane de edecuada.
+					_last_x_direction = _direction.x
+					_x_not_zero_value = _direction.x
+					_looking_at_direction( _direction ) 
+				# Cancelar solo heavy stun si esta en el aire.
+				if not signals.on_floor:
+					_heavy_hitstun_time = 0
+	
+	# Finalizar ataque.
+	if _attack_count >= _current_attack.duration:
+		_current_attack = null
+	else:
+		_attack_count += delta
+	
+	_process_neutral_combo(first_attack_frame, states)
+
+	# Verificar que no sea null
+	if _current_attack == null:
+		return
 	
 	# Hitbox. Asegurarsee de solo spawnear uno.
-	if _current_attack != null:
-		# Basado en la duracion del ataque, es lo que dura el hitbox de damage.
-		for hitbox_move in _current_attack.hitboxes_moves:
-			var time_ratio = _current_attack.get_time_ratio(hitbox_move.init_time_ratio)
-			var hitbox_time = _attack_count-delta
-			if hitbox_time >= time_ratio:
-				_clean_hitboxes_damages()
-				var direction = Vector3(0,0,0)
-				direction.x = hitbox_move.direction.x * _x_not_zero_value
-				direction.y = hitbox_move.direction.y * 0.1
-				if hitbox_time < time_ratio+hitbox_move.duration:
-					# Solo spawnear hitbox si no esta repetido. Se hace con id.
-					var repeated_hitbox = false
-					for hitbox_damage in _spawned_hitboxes_damages:
-						if hitbox_damage.id == hitbox_move.id:
-							repeated_hitbox = true
-							break
-					if not repeated_hitbox:
-						_spawn_hitboxes_damages(
-							hitbox_move.id,
-							hitbox_move.size, 
-							hitbox_move.position, 
-							hitbox_move.damage, 
-							direction, 
-							hitbox_move.duration
-						)
+	# Basado en la duracion del ataque, es lo que dura el hitbox de damage.
+	for hitbox_move in _current_attack.hitboxes_moves:
+		var time_ratio = _current_attack.get_time_ratio(hitbox_move.init_time_ratio)
+		var hitbox_time = _attack_count-delta
+		if hitbox_time >= time_ratio:
+			_clean_hitboxes_damages()
+			var direction = Vector3(0,0,0)
+			direction.x = hitbox_move.direction.x * _x_not_zero_value
+			direction.y = hitbox_move.direction.y * 0.1
+			if hitbox_time < time_ratio+hitbox_move.duration:
+				# Solo spawnear hitbox si no esta repetido. Se hace con id.
+				var repeated_hitbox = false
+				for hitbox_damage in _spawned_hitboxes_damages:
+					if hitbox_damage.id == hitbox_move.id:
+						repeated_hitbox = true
+						break
+				if not repeated_hitbox:
+					_spawn_hitboxes_damages(
+						hitbox_move.id,
+						hitbox_move.size, 
+						hitbox_move.position, 
+						hitbox_move.damage, 
+						direction, 
+						hitbox_move.duration
+					)
+
+	# Debug
+	if first_attack_frame:
+		print(_current_attack.name)
 
 func _attack_anim(delta:float) -> void:
 	if _current_attack.name != &"":
@@ -839,6 +906,7 @@ func _ready() -> void:
 	_init_shield_radius = _shield_sphere.radius
 	_init_shield_height = _shield_sphere.height
 	_shield_time = GameBalance.SHIELD_DURATION
+	_neutral_combo_attacks = [_attacks.ground_neutral, _attacks.forward, _attacks.heavy_side]
 
 # Funciones | Procesar
 func _physics_process(delta: float) -> void:
@@ -854,6 +922,8 @@ func _physics_process(delta: float) -> void:
 	)
 	var move_signals = _move(delta, gravity_signals)
 	var move_states = _get_move_states(move_signals)
+	_reset_neutral_combo_count(move_states)
+	_tick_neutral_combo_reset(delta)
 	if taking_damage():
 		# Forzar soltarse de ledge. Y bloquiar agarrarse del ledge.
 		_release_hanging_ledge() 

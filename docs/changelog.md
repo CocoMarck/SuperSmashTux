@@ -53,6 +53,7 @@
     - Ahora los movimientos de ataques pueden incluir un salto. Solo se puede hacer un salto en el aire y en el piso. No dos saltos. 
     - Si se hace el ataque de salto, ya no se puede hacer saltar normal, hasta caer al piso. 
     - Un golpe reinicia el conteo de saltos de ataque, por lo que si haces el salto con movimiento de ataque, y en el aire te dan un trancazo, ahora puedes hacer otro salto de ataque.
+- Tres ataques neutrales en el piso **LISTO**: Contador de ataques. Reiniciar contador si no se hace en el mismo combo.
 
 ### PowerFighter
 - `Tercer salto` **LISTO**: Tendrá anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso. Esto lo hace fighter.
