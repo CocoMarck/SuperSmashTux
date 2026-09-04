@@ -16,7 +16,7 @@
 - `Air jumping` **LISTO**: Posibilidad de saltar en el aire, por defecto no salta en el aire.
 - `Apply hitstun` **LISTO**: Movimiento al recibir daño. Tiene stun pero corto, no deja "secuelas". Lo causan golpes no heavys. Se considera heavy, por cantidad de porcentaje de daño.
 - `Apply heavy hitstun` **LISTO**: 
-    - **LISTO** Movimiento al recibir daño fuerte (15% o mas). Pero no permite moverse en piso, solo en el aire de forma horozontal; sin poder atacar, y salto en el aire anula stun.
+    - **LISTO** Movimiento al recibir daño fuerte (15% o mas). Pero no permite moverse en piso, solo en el aire de forma horizontal; sin poder atacar, y salto en el aire anula stun.
     - **LISTO** En el piso estas tumbado, pero cualquier input te levanta. Si no recibe input en el piso se quedara x segundos en el piso, y se levantara solo. Mientras te levantas, eres inmune al daño. 
     - **LISTO** Mientras te lavantas, pues no puedes hacer ningún input. Tienes que esperarte. 
     - **LISTO** El conteo del stun sucede en el piso, levantarse, y inmunidad al levantarse.
@@ -54,6 +54,10 @@
     - Si se hace el ataque de salto, ya no se puede hacer saltar normal, hasta caer al piso. 
     - Un golpe reinicia el conteo de saltos de ataque, por lo que si haces el salto con movimiento de ataque, y en el aire te dan un trancazo, ahora puedes hacer otro salto de ataque.
 - Tres ataques neutrales en el piso **LISTO**: Contador de ataques. Reiniciar contador si no se hace en el mismo combo.
+- El `heavy_hitstun` vuelve a permitir hacer ataques con salto. **LISTO**
 
 ### PowerFighter
 - `Tercer salto` **LISTO**: Tendrá anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso. Esto lo hace fighter.
+
+### Person
+- Optimizar, hacer mas modular, es `physics_process` de `Person` **FALTA**: El `Fighter`, remplaza el physics process, pero es muy parecido al de Person, por lo cual se puede optimizar Person para que sea modular, para que Fighter, no remplace todo, eso no es fácil de mantener.

@@ -605,7 +605,7 @@ func set_damage_move(damage:int, direction:Vector3) -> void:
 			# Al recibir trancasos en el aire, ya no poder saltar.
 			# Si bien en realidad simplemente solo se puede poner el maximo de saltos sin este if, porque cuando estas en el piso se reinicia el conteo de saltos. 
 			# Lo que pasa que estando en el piso y recibes un golpe que te manda a volar, si deberias poder saltar.
-			_set_jumps_to_max()
+			#_set_jumps_to_max() # Mejor no, demasiado castigo.
 			_target_velocity.y = 0 # Cancelar velocidad vertical
 
 func set_thrown_move(damage: int, direction: Vector3) -> void:
@@ -664,11 +664,16 @@ func _apply_heavy_hitstun(delta: float, signals: VerticalForceSignals) -> void:
 	if signals.on_floor:
 		_heavy_hitstun_time -= delta
 	else:
+		_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
 		if signals.air_count >= 0.5:
 			_horizontal_move = true
 	_heavy_hitstun_get_up_move(delta, signals)
 
 func _heavy_hitstun_get_up_move(delta: float, signals: VerticalForceSignals):
+	# Si no esta en el piso, no esta en espera de animacion de leventarse.
+	if not signals.on_floor:
+		_heavy_hitstun_wait_to_get_up = false
+	
 	# Animacion inmune de levantarse.
 	if _heavy_hitstun_time <= 0:
 		_immunity_to_damage = true

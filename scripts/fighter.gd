@@ -45,192 +45,150 @@ var _attacks: Attacks = Attacks.new(
 	# En el piso
 	FightMove.new(
 		{
-			"name": &"ground_neutral_attack",
-			"duration": 0.875,
-			"speed": Vector3(0,0,0),
-			"air_attack": false,
-			"grab_attack": false,
-			"override_horizontal_move": true,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"ground_neutral_attack1", "duration": 0.5, "speed": Vector3(0.25,0,0),
+			"air_attack": false, "grab_attack": false,  "override_horizontal_move": true, 
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 1,
-					"damage": 10,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(0.8,0,0),
-					"direction": Vector3(1,0.5,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 1, "damage": 10, "size": Vector3(0.5,0.5,0.5), 
+					"position": Vector3(0.8,0.3,0), "direction": Vector3(0.25,0.3,0),
+					"init_time_ratio": 0.6, "duration": 0.2
 				})
 			]
 		}
 	),
 	FightMove.new(
 		{
-			"name": &"down_attack",
-			"duration": 0.5,
-			"speed": Vector3(0,0,0),
-			"air_attack": false,
-			"grab_attack": false,
-			"override_horizontal_move": true,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"ground_neutral_attack2", "duration": 0.5, "speed": Vector3(0.25,0,0),
+			"air_attack": false, "grab_attack": false,  "override_horizontal_move": true, 
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 2,
-					"damage": 8,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(1.0,-1.0,0),
-					"direction": Vector3(0.25,0.75,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 1, "damage": 10, "size": Vector3(0.5,0.5,0.5), 
+					"position": Vector3(1.0,0.3,0), "direction": Vector3(0.25,0.3,0),
+					"init_time_ratio": 0.6, "duration": 0.2
 				})
 			]
 		}
 	),
 	FightMove.new(
 		{
-			"name": &"up_attack",
-			"duration": 0.4583,
-			"speed": Vector3(0,0,0),
-			"air_attack": false,
-			"grab_attack": false,
-			"override_horizontal_move": true,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"ground_neutral_attack3", "duration": 0.6667, "speed": Vector3(0.25,0,0),
+			"air_attack": false, "grab_attack": false,  "override_horizontal_move": true, 
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 3,
-					"damage": 7,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(0.3,0.9,0),
-					"direction": Vector3(0.25,1.0,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 1, "damage": 15, "size": Vector3(0.5,0.5,0.5), 
+					"position": Vector3(0.8,0.1,0), "direction": Vector3(0.4,0.5,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				})
 			]
 		}
 	),
 	FightMove.new(
 		{
-			"name": &"dash_attack",
-			"duration": 0.8333,
-			"speed": Vector3(7,0,0),
-			"air_attack": false,
-			"grab_attack": false,
-			"override_horizontal_move": true,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"down_attack", "duration": 0.5, "speed": Vector3(0,0,0),
+			"air_attack": false, "grab_attack": false, "override_horizontal_move": true, 
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 4,
-					"damage": 5,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(0.8,-1.0,0),
-					"direction": Vector3(0.5,0.8,0.0),
-					"init_time_ratio": 0.2,
-					"duration": 0.3
+					"id": 2, "damage": 8, "size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(1.0,-1.0,0), "direction": Vector3(0.25,0.75,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				})
 			]
 		}
 	),
 	FightMove.new(
 		{
-			"name": &"forward_attack",
-			"duration": 0.4583,
-			"speed": Vector3(0,0,0),
-			"air_attack": false,
-			"grab_attack": false,
-			"override_horizontal_move": true,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"up_attack", "duration": 0.4583, "speed": Vector3(0,0,0),
+			"air_attack": false, "grab_attack": false, "override_horizontal_move": true, 
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 5,
-					"damage": 6,
-					"size": Vector3(0.5,0.5,1.0),
-					"position": Vector3(1.0,-0.2,0),
-					"direction": Vector3(1.0,0.5,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.1
+					"id": 3, "damage": 7, "size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.3,0.9,0), "direction": Vector3(0.25,1.0,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				})
 			]
 		}
 	),
 	FightMove.new(
 		{
-			"name": &"heavy_side_attack",
-			"duration": 0.7083,
-			"speed": Vector3(0,0,0),
-			"air_attack": false,
-			"grab_attack": false,
-			"override_horizontal_move": true,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"dash_attack", "duration": 0.8333, "speed": Vector3(7,0,0),
+			"air_attack": false, "grab_attack": false, "override_horizontal_move": true,
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 6,
-					"damage": 20,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(0.8,0.1,0),
-					"direction": Vector3(1,1,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 4, "damage": 5, "size": Vector3(0.5,0.5,0.5), 
+					"position": Vector3(0.8,-1.0,0), "direction": Vector3(0.5,0.8,0.0),
+					"init_time_ratio": 0.2, "duration": 0.3
 				})
 			]
 		}
 	),
 	FightMove.new(
 		{
-			"name": &"heavy_up_attack",
-			"duration": 0.5833,
-			"speed": Vector3(0,0,0),
-			"air_attack": false,
-			"grab_attack": false,
-			"override_horizontal_move": true,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"forward_attack", "duration": 0.4583, "speed": Vector3(0,0,0),
+			"air_attack": false, "grab_attack": false, "override_horizontal_move": true,
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 7,
-					"damage": 20,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(0.1,0.8,0),
-					"direction": Vector3(0.25,1.0,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 5, "damage": 6, "size": Vector3(0.5,0.5,1.0), 
+					"position": Vector3(1.0,-0.2,0), "direction": Vector3(1.0,0.5,0),
+					"init_time_ratio": 0.5, "duration": 0.1
 				})
 			]
 		}
 	),
 	FightMove.new(
 		{
-			"name": &"heavy_down_attack",
-			"duration": 0.625,
-			"speed": Vector3(0,0,0),
-			"air_attack": false,
-			"grab_attack": false,
-			"override_horizontal_move": true,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"heavy_side_attack", "duration": 0.7083, "speed": Vector3(0,0,0),
+			"air_attack": false, "grab_attack": false, "override_horizontal_move": true,
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 8,
-					"damage": 10,
-					"size": Vector3(0.5,0.5,2.0),
-					"position": Vector3(0.0,-1.0,0),
-					"direction": Vector3(1,1,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 6, "damage": 20, "size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.8,0.1,0), "direction": Vector3(1,1,0),
+					"init_time_ratio": 0.5, "duration": 0.2
+				})
+			]
+		}
+	),
+	FightMove.new(
+		{
+			"name": &"heavy_up_attack", "duration": 0.5833, "speed": Vector3(0,0,0),
+			"air_attack": false, "grab_attack": false, "override_horizontal_move": true,
+			"override_vertical_move": false, "immortal": false,
+			
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 7, "damage": 20, "size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.1,0.8,0), "direction": Vector3(0.25,1.0,0),
+					"init_time_ratio": 0.5, "duration": 0.2
+				})
+			]
+		}
+	),
+	FightMove.new(
+		{
+			"name": &"heavy_down_attack", "duration": 0.625, "speed": Vector3(0,0,0),
+			"air_attack": false, "grab_attack": false, "override_horizontal_move": true,
+			"override_vertical_move": false, "immortal": false,
+			
+			"hitboxes_moves": [
+				HitboxMove.new({
+					"id": 8, "damage": 10, "size": Vector3(0.5,0.5,2.0),
+					"position": Vector3(0.0,-1.0,0), "direction": Vector3(1,1,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				})
 			]
 		}
@@ -239,147 +197,90 @@ var _attacks: Attacks = Attacks.new(
 	# En el aire
 	FightMove.new(
 		{
-			"name": &"air_neutral_attack",
-			"duration": 0.9167,
-			"speed": Vector3(0,0,0),
-			"air_attack": true,
-			"grab_attack": false,
-			"override_horizontal_move": false,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"air_neutral_attack", "duration": 0.9167, "speed": Vector3(0,0,0),
+			"air_attack": true, "grab_attack": false, "override_horizontal_move": false,
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 9,
-					"damage": 5,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(0.9, -0.9, 0),
-					"direction": Vector3(1,-1,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 9, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.9, -0.9, 0), "direction": Vector3(1,-1,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				}),
 				HitboxMove.new({
-					"id": 10,
-					"damage": 5,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(-0.9, -0.9, 0),
-					"direction": Vector3(-1,-1,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 10, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(-0.9, -0.9, 0), "direction": Vector3(-1,-1,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				}),
 				HitboxMove.new({
-					"id": 11,
-					"damage": 5,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(0.9, 0.5, 0),
-					"direction": Vector3(1,1,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 11, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.9, 0.5, 0), "direction": Vector3(1,1,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				}),
 				HitboxMove.new({
-					"id": 12,
-					"damage": 5,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(-0.9, 0.5, 0),
-					"direction": Vector3(-1,1,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 12, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(-0.9, 0.5, 0), "direction": Vector3(-1,1,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				}),
 			]
 		}
 	),
 	FightMove.new(
 		{
-			"name": &"air_down_attack",
-			"duration": 0.5,
-			"speed": Vector3(0,0,0),
-			"air_attack": true,
-			"grab_attack": false,
-			"override_horizontal_move": false,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"air_down_attack", "duration": 0.5, "speed": Vector3(0,0,0),
+			"air_attack": true, "grab_attack": false, "override_horizontal_move": false,
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 13,
-					"damage": 20,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(0.1, -1.1, 0),
-					"direction": Vector3(0.25,-1.0,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 13, "damage": 20, "size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(0.1, -1.1, 0), "direction": Vector3(0.25,-1.0,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				})
 			]
 		}
 	),
 	FightMove.new(
 		{
-			"name": &"air_up_attack",
-			"duration": 0.5833,
-			"speed": Vector3(0,0,0),
-			"air_attack": true,
-			"grab_attack": false,
-			"override_horizontal_move": false,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"air_up_attack", "duration": 0.5833, "speed": Vector3(0,0,0),
+			"air_attack": true, "grab_attack": false, "override_horizontal_move": false,
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 14,
-					"damage": 5,
-					"size": Vector3(0.5,0.5,0.8),
-					"position": Vector3(0.15, 0.8, 0),
-					"direction": Vector3(0.5,1.25,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 14, "damage": 5, "size": Vector3(0.5,0.5,0.8),
+					"position": Vector3(0.15, 0.8, 0), "direction": Vector3(0.5,1.25,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				})
 			]
 		}
 	),
 	FightMove.new(
 		{
-			"name": &"air_forward_attack",
-			"duration": 0.6667,
-			"speed": Vector3(0,0,0),
-			"air_attack": true,
-			"grab_attack": false,
-			"override_horizontal_move": false,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"air_forward_attack", "duration": 0.6667, "speed": Vector3(0,0,0),
+			"air_attack": true, "grab_attack": false, "override_horizontal_move": false,
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 15,
-					"damage": 10,
-					"size": Vector3(0.5,0.5,0.9),
-					"position": Vector3(0.75, 0.0, 0),
-					"direction": Vector3(1.2,1,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 15, "damage": 10, "size": Vector3(0.5,0.5,0.9),
+					"position": Vector3(0.75, 0.0, 0), "direction": Vector3(1.2,1,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				})
 			]
 		}
 	),
 	FightMove.new(
 		{
-			"name": &"air_back_attack",
-			"duration": 0.5833,
-			"speed": Vector3(0,0,0),
-			"air_attack": true,
-			"grab_attack": false,
-			"override_horizontal_move": false,
-			"override_vertical_move": false,
-			"immortal": false,
+			"name": &"air_back_attack", "duration": 0.5833, "speed": Vector3(0,0,0),
+			"air_attack": true, "grab_attack": false, "override_horizontal_move": false,
+			"override_vertical_move": false, "immortal": false,
 			
 			"hitboxes_moves": [
 				HitboxMove.new({
-					"id": 16,
-					"damage": 10,
-					"size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(-0.7, 0.0, 0),
-					"direction": Vector3(1.0,1,0),
-					"init_time_ratio": 0.5,
-					"duration": 0.2
+					"id": 16, "damage": 10, "size": Vector3(0.5,0.5,0.5),
+					"position": Vector3(-0.7, 0.0, 0), "direction": Vector3(1.0,1,0),
+					"init_time_ratio": 0.5, "duration": 0.2
 				})
 			]
 		}
@@ -906,7 +807,7 @@ func _ready() -> void:
 	_init_shield_radius = _shield_sphere.radius
 	_init_shield_height = _shield_sphere.height
 	_shield_time = GameBalance.SHIELD_DURATION
-	_neutral_combo_attacks = [_attacks.ground_neutral, _attacks.forward, _attacks.heavy_side]
+	_neutral_combo_attacks = [_attacks.ground_neutral1, _attacks.ground_neutral2, _attacks.ground_neutral3]
 
 # Funciones | Procesar
 func _physics_process(delta: float) -> void:
