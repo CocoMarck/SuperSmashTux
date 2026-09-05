@@ -809,53 +809,45 @@ func _ready() -> void:
 	_shield_time = GameBalance.SHIELD_DURATION
 	_neutral_combo_attacks = [_attacks.neutral1, _attacks.neutral2, _attacks.neutral3]
 
-# Funciones | Procesar
-func _physics_process(delta: float) -> void:
+
+# Funciones | Dependencias del physics process
+func _reset_counts_by_impact() -> void:
+	# Reiniciar contador de ataques saltarines
+	_attack_jump_count = 0
+
+func _reset_counts_by_move_state(delta: float, move_states: MoveStates) -> void:
 	'''
-	Funcion de procesamiento de fisicas.
-    Este puede ser remplazado segun se necesite.
+	Resetiar contadores por estado. Es para que fighter lo sobrescriba.
 	'''
-	_collect_input()
-	
-	# Move
-	var gravity_signals = _vertical_force(
-		delta, (_down_pressed and _heavy_hitstun_active() == false), _fall_acceleration_multiplier
-	)
-	var move_signals = _move(delta, gravity_signals)
-	var move_states = _get_move_states(move_signals)
 	_reset_neutral_combo_count(move_states)
 	_tick_neutral_combo_reset(delta)
-	if taking_damage():
-		# Forzar soltarse de ledge. Y bloquiar agarrarse del ledge.
-		_release_hanging_ledge() 
-		_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
-		# Reiniciar contador de ataques saltarines
-		_attack_jump_count = 0
-	_ledge_grab(delta, gravity_signals, move_signals)
-	_set_x_not_zero_value(move_signals.direction)
-	
+
+func _process_action(delta: float, frame: FrameMotionSignals) -> void:
+	'''
+	Movimientos de ataque, cancelacion de ataques etc.
+	'''
 	# Cancelar salto por ataque heavy arriba.
-	if _is_direction_buffer() and _attack and move_signals.on_floor:
+	if _is_direction_buffer() and _attack and frame.move_signals.on_floor:
 		_target_velocity.y = 0
-	
+
 	# Fight and Defence moves
 	## No permitir grab y shield.
 	if _grabbing_cooldown_time > 0:
 		_grabbing_cooldown_time -= delta
-	if _shield or _with_shield(gravity_signals) or _grabbing() or _grabbing_cooldown_time > 0:
+	if _shield or _with_shield(frame.vertical_force_signals) or _grabbing() or _grabbing_cooldown_time > 0:
 		_grab = false
 	if _grab or _waiting_grab_move():
 		_shield = false
 	## No permitir hacer agarre o escudo cuando se ataca.
 	if not _attacking():
-		_grab_move(delta, gravity_signals)
+		_grab_move(delta, frame.vertical_force_signals)
 		if (_shield or _shield_blockstun)  and _allow_shield:
-			_shield_move(delta, gravity_signals)
+			_shield_move(delta, frame.vertical_force_signals)
 		else:
 			if not _rolling():
-				_shield_regeneration(delta, gravity_signals)
+				_shield_regeneration(delta, frame.vertical_force_signals)
 	var waiting_grab_move = _waiting_grab_move()
-	var with_shield = _with_shield(gravity_signals)
+	var with_shield = _with_shield(frame.vertical_force_signals)
 	var grab_or_shield = waiting_grab_move or with_shield
 	if grab_or_shield or _rolling():
 		# Anular ataque si se hace grab, escudo, o rueda.
@@ -863,10 +855,10 @@ func _physics_process(delta: float) -> void:
 		_clear_hitboxes_damages()
 	else:
 		# Solo permitir atacar cuando no se hace grab o se pone escudo
-		_fight_move(delta, gravity_signals, move_states)
+		_fight_move(delta, frame.vertical_force_signals, frame.move_states)
 	
 	# Grabbing move
-	_grabbing_move(gravity_signals)
+	_grabbing_move(frame.vertical_force_signals)
 	
 	# Bloqueo de direccion por movimiento de inputs.
 	# Mejor bloquiar la direccion en un solo lado.
@@ -887,18 +879,9 @@ func _physics_process(delta: float) -> void:
 	else:
 		_shield_blockstun = false
 		_shield_blockstun_time = 0
-	_roll_move(delta, gravity_signals)
+	_roll_move(delta, frame.vertical_force_signals)
 
-	# Damage move
-	if _knockback_active():
-		_apply_hitstun(delta)
-	elif _heavy_hitstun_active():
-		_apply_heavy_hitstun(delta, gravity_signals)
-	elif _shield_blockstun:
-		_apply_shield_pushback(delta)
-	if _knocked_out():
-		_apply_knockout(delta, gravity_signals)
-	
+func _cancel_action() -> void:
 	# Anular ataque, grab, y shield
 	_allow_shield = true and not grabbed
 	if (
@@ -908,41 +891,45 @@ func _physics_process(delta: float) -> void:
 		_grab_move_time = 0.0
 		_allow_shield = false
 		_clear_hitboxes_damages()
-		
+
+func _visual_shield(frame: FrameMotionSignals) -> void:
 	# Visual | Escudo
-	## Esto hacerlo func tipo `_visual_shield`
-	with_shield = _with_shield(gravity_signals)
+	var with_shield = _with_shield(frame.vertical_force_signals)
 	_shield_mesh_instance.visible = with_shield
 	if with_shield:
 		var porcent :float = _get_shield_porcent()
 		_shield_sphere.radius = _init_shield_radius * porcent
 		_shield_sphere.height = _init_shield_height * porcent
-	
-	# Anim
-	_reset_visual_values()
+
+func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
 	if _knockback_active():
-		_hitstun_anim(delta, gravity_signals)
+		_apply_hitstun(delta)
 	elif _heavy_hitstun_active():
-		_heavy_hitstun_anim(delta, gravity_signals)
+		_apply_heavy_hitstun(delta, frame.vertical_force_signals)
+	elif _shield_blockstun:
+		_apply_shield_pushback(delta)
+
+func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
+	var not_normal = true
+	if _knockback_active():
+		_hitstun_anim(delta, frame.vertical_force_signals)
+	elif _heavy_hitstun_active():
+		_heavy_hitstun_anim(delta, frame.vertical_force_signals)
 	elif _holding_onto_the_ledge():
 		_ledge_grab_anim(delta)
 	elif _attacking():
 		_attack_anim(delta)
 	elif _rolling():
 		_roll_anim()
-	elif waiting_grab_move:
+	elif _waiting_grab_move():
 		_animation_player.play("grab")
-	elif with_shield: 
+	elif _with_shield(frame.vertical_force_signals): 
 		_animation_player.play("guard")
 	else:
-		_move_anim(delta, move_states)
-	if not (taking_damage()):
-		_set_pivot_direction(move_signals)
+		not_normal = false
+	return not_normal
 
-	# Effects
-	immunity_effect(delta)
+func _process_visual(frame: FrameMotionSignals) -> void:
+	_visual_shield(frame)
 
-	# Procesar todo
-	_push_bodies_apart(delta, move_states)
-	velocity = _target_velocity
-	move_and_slide()
+# _physics_process, vive en `Person`

@@ -60,4 +60,7 @@
 - `Tercer salto` **LISTO**: Tendrá anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso. Esto lo hace fighter.
 
 ### Person
-- Optimizar, hacer mas modular, es `physics_process` de `Person` **FALTA**: El `Fighter`, remplaza el physics process, pero es muy parecido al de Person, por lo cual se puede optimizar Person para que sea modular, para que Fighter, no remplace todo, eso no es fácil de mantener.
+- Optimizar, hacer mas modular, es `physics_process` de `Person` **LISTO**: 
+    - El `Fighter`, remplaza el physics process, pero es muy parecido al de Person, por lo cual se puede optimizar Person para que sea modular, para que Fighter, no remplace todo, eso no es fácil de mantener.
+
+    - Se realizo el `2026-09-04`: Asegurarse que jale bien. Primeras impresiones: De diez.

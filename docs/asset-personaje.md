@@ -93,8 +93,7 @@ Todo nombre que no tenga prefijo `air_`, sucede en el piso. Ejemplo `rising`, co
 
 
 #### PowerFighter
-- `neutral_power_attack`: Proyectil, ráfaga de energía, o carga de ataque.
-- `side_power_attack`: Poder hacia un lado.
+- `power_attack`: Proyectil, ráfaga de energía, o carga de ataque.
 - `up_power_attack`: Poder hacia arriba que da propulsión. Puede hacer daño o no.
 - `down_power_attack`: Poder hacia abajo, puede ser ataque o no.
 
@@ -117,4 +116,4 @@ Todo nombre que no tenga prefijo `air_`, sucede en el piso. Ejemplo `rising`, co
 #### PowerFighter
 - `air_up_power_attack`: Lo mismo que power up. Pero animación en el aire.
 - `air_down_power_attack`: Lo mismo que power down. Pero animación en el aire.
-- `air_side_power_attack`: Lo mismo que power side. Pero animación en el aire.
+- `air_power_attack`: Proyectil, ráfaga de energía, o carga de ataque.

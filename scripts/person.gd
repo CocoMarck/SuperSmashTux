@@ -796,6 +796,124 @@ func _ready() -> void:
 	# Direccion
 	_pivot.basis = Basis.looking_at(_get_initial_facing())
 
+
+# Funciones | dependencias del physics process
+func _build_frame(delta: float) -> FrameMotionSignals:
+	'''
+	Agrupa gravity move states.
+	'''
+	var vertical_force_signals = _vertical_force(
+		delta, (_down_pressed and _heavy_hitstun_active() == false), _fall_acceleration_multiplier
+	)
+	var move_signals = _move(delta, vertical_force_signals)
+	var move_states = _get_move_states(move_signals)
+	return FrameMotionSignals.new({
+		"vertical_force_signals": vertical_force_signals,
+		"move_signals": move_signals, "move_states": move_states
+	})
+
+func _reset_counts_by_impact() -> void:
+	'''
+	Resetear contadores por impacto. Es para que fighter lo sobrescriba.
+	'''
+	pass
+
+func _reset_counts_by_move_state(delta: float, move_states: MoveStates) -> void:
+	'''
+	Resetiar contadores por estado. Es para que fighter lo sobrescriba.
+	'''
+	pass
+
+func _tick_frame(delta: float, frame: FrameMotionSignals) -> void:
+	'''
+	Necestia Hook: Ledges, cooldowns, transiciones. Para jalar con fighter.
+	'''
+	_reset_counts_by_move_state(delta, frame.move_states)
+	if taking_damage():
+		# Forzar soltarse de ledge. Y bloquiar agarrarse del ledge.
+		_release_hanging_ledge()
+		_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
+		_reset_counts_by_impact()
+	_ledge_grab(delta, frame.vertical_force_signals, frame.move_signals)
+	_set_x_not_zero_value(frame.move_signals.direction)
+
+func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
+	'''
+	Se hace referencia a stuns normales
+	- NO los que no te dan efectos locos. Como invertirte los inputs o algo asi.
+	Funcion remplazable por fighter.
+	'''
+	if _knockback_active():
+		_apply_hitstun(delta)
+	elif _heavy_hitstun_active():
+		_apply_heavy_hitstun(delta, frame.vertical_force_signals)
+
+func _process_damage(delta: float, frame: FrameMotionSignals) -> void:
+	'''
+	Procesar movimientos de daño, stuneos, activar cooldowns, etc.
+	'''
+	_process_stun(delta, frame)
+	if _knocked_out():
+		_apply_knockout(delta, frame.vertical_force_signals)
+
+
+func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
+	'''
+	Estas tienen que ser animaciones, pero no las de movimiento normal.
+	Función sobreescribible, para fighter.
+	'''
+	var not_normal = true
+	if _knockback_active():
+		_hitstun_anim(delta, frame.vertical_force_signals)
+	elif _heavy_hitstun_active():
+		_heavy_hitstun_anim(delta, frame.vertical_force_signals)
+	elif _holding_onto_the_ledge():
+		_ledge_grab_anim(delta)
+	else:
+		not_normal = false
+	return not_normal
+
+func _animate(delta: float, frame: FrameMotionSignals) -> void:
+	'''
+	Animaciones.
+	Hook: Extender ramas de anim.
+	'''
+	_reset_visual_values()
+	if _not_normal_move_anim(delta, frame) == false:
+		_move_anim(delta, frame.move_states)
+	if not (taking_damage()):
+		_set_pivot_direction(frame.move_signals)
+
+func _process_effects(delta) -> void:
+	immunity_effect(delta)
+
+func _commit_frame(delta, frame) -> void:
+	'''
+	Procesar todo.
+	Push + Velocity + Move and slide
+	'''
+	_push_bodies_apart(delta, frame.move_states)
+	velocity = _target_velocity
+	move_and_slide()
+
+func _process_action(delta: float, frame: FrameMotionSignals) -> void:
+	'''
+	Acciones especiales. Esta func la sobrescribira fighter.
+	'''
+	pass
+
+func _cancel_action() -> void:
+	'''
+	Cancelar Acciones especiales. Esta func la sobrescribira fighter.
+	'''
+	pass
+
+func _process_visual(frame: FrameMotionSignals) -> void:
+	'''
+	Renderiza componentes visuales, dependiendo de inputs, contadores, si tiene agarrado un item, etc. Por defecto no hace nada. Lo remplazara fighter.
+	'''
+	pass
+
 # Funciones | Procesar
 func _physics_process(delta: float) -> void:
 	'''
@@ -804,44 +922,27 @@ func _physics_process(delta: float) -> void:
 	'''
 	_collect_input()
 	
-	# Move
-	var gravity_signals = _vertical_force(
-		delta, (_down_pressed and _heavy_hitstun_active() == false), _fall_acceleration_multiplier
-	)
-	var move_signals = _move(delta, gravity_signals)
-	var move_states = _get_move_states(move_signals)
-	if taking_damage():
-		# Forzar soltarse de ledge. Y bloqiuar agarrarse del ledge.
-		_release_hanging_ledge()
-		_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
-	_ledge_grab(delta, gravity_signals, move_signals)
-	_set_x_not_zero_value(move_signals.direction)
+	# Normal move
+	var frame = _build_frame(delta)
+	_tick_frame(delta, frame)
 
-	# Damage
-	if _knockback_active():
-		_apply_hitstun(delta)
-	elif _heavy_hitstun_active():
-		_apply_heavy_hitstun(delta, gravity_signals)
-	if _knocked_out():
-		_apply_knockout(delta, gravity_signals)
+	# Action move | Por defecto no hace nada
+	_process_action(delta, frame)
 
-	# Anim
-	_reset_visual_values()
-	if _knockback_active():
-		_hitstun_anim(delta, gravity_signals)
-	elif _heavy_hitstun_active():
-		_heavy_hitstun_anim(delta, gravity_signals)
-	elif _holding_onto_the_ledge():
-		_ledge_grab_anim(delta)
-	else:
-		_move_anim(delta, move_states)
-	if not (taking_damage()):
-		_set_pivot_direction(move_signals)
+	# Damage move
+	_process_damage(delta, frame)
+
+	# Cancel action | Por defecto no hace nada
+	_cancel_action()
+
+	# Visual | Por defecto no hace nada
+	_process_visual(frame)
+
+	# Animation
+	_animate(delta, frame)
 
 	# Effects
-	immunity_effect(delta)
+	_process_effects(delta)
 
-	# Procesar todo
-	_push_bodies_apart(delta, move_states)
-	velocity = _target_velocity
-	move_and_slide()
+	# Commeter cambios.
+	_commit_frame(delta, frame)
