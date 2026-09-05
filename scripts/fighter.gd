@@ -45,7 +45,7 @@ var _attacks: Attacks = Attacks.new(
 	# En el piso
 	FightMove.new(
 		{
-			"name": &"ground_neutral_attack1", "duration": 0.5, "speed": Vector3(0.25,0,0),
+			"name": &"neutral_attack1", "duration": 0.5, "speed": Vector3(0.25,0,0),
 			"air_attack": false, "grab_attack": false,  "override_horizontal_move": true, 
 			"override_vertical_move": false, "immortal": false,
 			
@@ -60,7 +60,7 @@ var _attacks: Attacks = Attacks.new(
 	),
 	FightMove.new(
 		{
-			"name": &"ground_neutral_attack2", "duration": 0.5, "speed": Vector3(0.25,0,0),
+			"name": &"neutral_attack2", "duration": 0.5, "speed": Vector3(0.25,0,0),
 			"air_attack": false, "grab_attack": false,  "override_horizontal_move": true, 
 			"override_vertical_move": false, "immortal": false,
 			
@@ -75,7 +75,7 @@ var _attacks: Attacks = Attacks.new(
 	),
 	FightMove.new(
 		{
-			"name": &"ground_neutral_attack3", "duration": 0.6667, "speed": Vector3(0.25,0,0),
+			"name": &"neutral_attack3", "duration": 0.6667, "speed": Vector3(0.25,0,0),
 			"air_attack": false, "grab_attack": false,  "override_horizontal_move": true, 
 			"override_vertical_move": false, "immortal": false,
 			
@@ -807,7 +807,7 @@ func _ready() -> void:
 	_init_shield_radius = _shield_sphere.radius
 	_init_shield_height = _shield_sphere.height
 	_shield_time = GameBalance.SHIELD_DURATION
-	_neutral_combo_attacks = [_attacks.ground_neutral1, _attacks.ground_neutral2, _attacks.ground_neutral3]
+	_neutral_combo_attacks = [_attacks.neutral1, _attacks.neutral2, _attacks.neutral3]
 
 # Funciones | Procesar
 func _physics_process(delta: float) -> void:

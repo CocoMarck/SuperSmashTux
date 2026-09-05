@@ -2,9 +2,9 @@ class_name Attacks
 extends RefCounted
 
 # Ataques en el piso.
-var ground_neutral1 : FightMove
-var ground_neutral2 : FightMove
-var ground_neutral3 : FightMove
+var neutral1 : FightMove
+var neutral2 : FightMove
+var neutral3 : FightMove
 var down : FightMove
 var dash : FightMove
 var forward : FightMove
@@ -22,9 +22,9 @@ var air_up : FightMove
 
 func _init(
 	# Ataques en el piso.
-	p_ground_neutral1 : FightMove,
-	p_ground_neutral2 : FightMove,
-	p_ground_neutral3 : FightMove,
+	p_neutral1 : FightMove,
+	p_neutral2 : FightMove,
+	p_neutral3 : FightMove,
 	p_down : FightMove,
 	p_up : FightMove,
 	p_dash : FightMove,
@@ -41,9 +41,9 @@ func _init(
 	p_air_back : FightMove
 ):
 	# Ataques en el piso.
-	ground_neutral1 = p_ground_neutral1
-	ground_neutral2 = p_ground_neutral2
-	ground_neutral3 = p_ground_neutral3
+	neutral1 = p_neutral1
+	neutral2 = p_neutral2
+	neutral3 = p_neutral3
 	down = p_down
 	up = p_up
 	dash = p_dash

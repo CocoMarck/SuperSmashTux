@@ -7,8 +7,8 @@ var _power_attack: bool = false
 # Propiedades privadas | Power attacks
 var _power_attacks: PowerAttacks = PowerAttacks.new({
 	"up" : FightMove.new({
-		"name": &"up_power_attack", "duration": 0.625, "speed": Vector3(8,0,0),
-		"direction": Vector3(0,0,0), "jump_power": 10.0, "air_attack": false,
+		"name": &"up_power_attack", "duration": 0.625, "speed": Vector3(5,0,0),
+		"direction": Vector3(0,0,0), "jump_power": 12.0, "air_attack": false,
 		"grab_attack": false, "override_horizontal_move": true,
 		"override_vertical_move": false, "immortal": false,
 		"hitboxes_moves": [
@@ -20,8 +20,8 @@ var _power_attacks: PowerAttacks = PowerAttacks.new({
 		]
 	}),
 	"air_up" : FightMove.new({
-		"name": &"air_up_power_attack", "duration": 0.625, "speed": Vector3(8,0,0),
-		"direction": Vector3(0,0,0), "jump_power": 10.0, "air_attack": true,
+		"name": &"air_up_power_attack", "duration": 0.625, "speed": Vector3(5,0,0),
+		"direction": Vector3(0,0,0), "jump_power": 12.0, "air_attack": true,
 		"grab_attack": false, "override_horizontal_move": true,
 		"override_vertical_move": false, "immortal": false,
 		"hitboxes_moves": [

@@ -52,6 +52,9 @@ CharacterBody3D      # script Person/Fighter
 ## Animaciones
 Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las anims, o no si, posiblemente sucederá crash.
 
+#### Lógica de prefix
+Todo nombre que no tenga prefijo `air_`, sucede en el piso. Ejemplo `rising`, conceptualmente se puede entender que sucede si o si en el aire, pero también puedes elevarte en el piso, por lo que poner `air_rising` y `air` tiene sentido.
+
 ### En el piso
 
 #### Person
@@ -61,16 +64,18 @@ Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las 
 - `look_up`: Mirar arriba.
 - `crouch`: Agacharse sin moverse.
 - `crouch_walk`: Movimiento agachado.
-- `hurt_ground`: Recibiendo daño en el piso.
+- `hurt`: Recibiendo daño en el piso.
 - `knockdown`: Tumbado en el piso. Lleva a estado al person.
 - `inpact_front`: Colisión de frente en cualquier lado.
 - `impact_back`: Colisión de espaldas en cualquier lado.
 - `turn`: Dar vuelta. (Saltando no puede dar vuelta).
 - `hold_platform`: Agarrarse de plataforma.
 - `knockout`: Noqueado.
+- `neutral_jump`: Sin moverse, solo saltar.
+- `moving_jump`: Moviendose, salto.
 
 #### Fighter
-- `ground_neutral_attack`: Cuando no se mueve y esta parado.
+- `neutral_attack`. 1, 2 y 3: Cuando no se mueve y esta parado.
 - `down_attack`: Cuando esta agachado y sin moverse.
 - `dash_attack`: Corriendo y atacar.
 - `forward_attack`: Caminando y attack.
@@ -95,10 +100,12 @@ Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las 
 
 ### En el aire
 #### Person
-- `jump`: Saltando.
-- `air_jump`: Salto en el aire.
-- `fall`: Cayendo.
-- `hurt_air`: Daño recibido en el aire.
+- `air_rising`: Elevándose en el aire sin saltar. Por ejemplo por golpe
+- `air_jump`: Salto en el aire neutral.
+- `air_back_jump`: Salto en el aire de espaldas
+- `air_forward_jump`: Salto en el aire de frente.
+- `air_hurt`: Daño recibido en el aire.
+- `air_fall`: Cayendo.
 
 #### Fighter
 - `air_neutral_attack`: En el aire, sin moverse y atacar.
@@ -108,7 +115,6 @@ Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las 
 - `air_up_attack`: En el aire y atacar presionando arriba. Ya sea moviéndose o no.
 
 #### PowerFighter
-- `air_jump`: Salto en el aire.
 - `air_up_power_attack`: Lo mismo que power up. Pero animación en el aire.
 - `air_down_power_attack`: Lo mismo que power down. Pero animación en el aire.
 - `air_side_power_attack`: Lo mismo que power side. Pero animación en el aire.

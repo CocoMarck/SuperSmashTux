@@ -450,10 +450,17 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 	'''
 	# Movimiento normal
 	var moving = signals.direction.x != 0.0
-	var jumping = signals.velocity.y > 0 and _allow_jump_anim
-	var falling = not jumping and not signals.on_floor
+	
+	var jumping = false
+	var rising = false
+	signals.velocity.y > 0 and _allow_jump_anim
+	if signals.velocity.y > 0:
+		jumping = _allow_jump_anim
+		rising = not _allow_jump_anim
 	if signals.velocity.y < 0:
 		_allow_jump_anim = false
+	
+	var falling = not (jumping or rising) and not signals.on_floor
 
 	# En el piso o en el aire
 	var neutral := false
@@ -488,25 +495,18 @@ func _get_move_states(signals: MoveSignals) -> MoveStates:
 		air_forward = moving and (signals.direction.x == _last_x_direction)
 		air_back = moving and (signals.direction.x != _last_x_direction)
 
-	return MoveStates.new(
-		walking,
-		moving,
-		jumping,
-		falling,
+	return MoveStates.new({
+		"walking": walking, "moving": moving,
+		"jumping": jumping, "rising": rising, "falling": falling,
 		
-		neutral,
-		running,
-		neutral_up,
-		neutral_crouch,
-		crouch_move,
+		"neutral": neutral, "neutral_up": neutral_up, 
+		"neutral_crouch": neutral_crouch,
+		"running": running, "crouch_move": crouch_move,
 
-		neutral_air,
-		air_move,
-		air_up,
-		air_down,
-		air_forward,
-		air_back
-	)
+		"neutral_air": neutral_air,
+		"air_move": air_move, "air_up": air_up, "air_down": air_down,
+		"air_forward": air_forward, "air_back": air_back
+	})
 	
 func _set_jumps_to_max() -> void:
 	_air_jump_time = 0
@@ -530,22 +530,29 @@ func _move_anim(delta:float, states: MoveStates) -> void:
 	elif states.running:
 		_animation_player.play("run")
 	# En el aire
-	elif _jump_count > 1 and _air_jump_time > 0:
+	elif _jump_count >= 1 and _air_jump_time > 0:
 		# Animacion de salto en el aire.
 		if _air_jump_time == _air_jump_duration:
 			# Actualizar anim de segundo satlo segun el caso.
-			_current_air_jump_anim = "air_jump"
-			if states.air_forward:
-				_current_air_jump_anim = "air_forward_jump"
-			elif states.air_back:
-				_current_air_jump_anim = "air_back_jump"
+			if _jump_count > 1:
+				_current_air_jump_anim = "air_jump"
+				if states.air_forward:
+					_current_air_jump_anim = "air_forward_jump"
+				elif states.air_back:
+					_current_air_jump_anim = "air_back_jump"
+			else:
+				_current_air_jump_anim = "neutral_jump"
+				if states.moving:
+					_current_air_jump_anim = "moving_jump"
 		_animation_player.play(_current_air_jump_anim)
 		_air_jump_time -= delta
 	elif states.jumping:
-		_animation_player.play("jump")
 		_air_jump_time = _air_jump_duration
+	elif states.rising:
+		_animation_player.play("air_rising")
+		_air_jump_time = 0
 	elif states.falling:
-		_animation_player.play("fall")
+		_animation_player.play("air_fall")
 		_air_jump_time = 0
 	else:
 		_animation_player.play("idle")
@@ -646,12 +653,12 @@ func _apply_hitstun(delta: float) -> void:
 func _hitstun_anim(delta: float, signals: VerticalForceSignals) -> void:
 	if signals.air_count < 0.2:
 		_damage_degrees = 0
-		_animation_player.play("hurt_ground")
+		_animation_player.play("hurt")
 	elif signals.on_floor:
 		_damage_degrees = 0
-		_animation_player.play("hurt_ground")
+		_animation_player.play("hurt")
 	else:
-		_animation_player.play("hurt_air")
+		_animation_player.play("air_hurt")
 		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
 	_pivot.rotation_degrees.x = _damage_degrees
 
@@ -703,7 +710,7 @@ func _heavy_hitstun_anim(delta: float, signals: VerticalForceSignals) -> void:
 		_pivot.position.y = -1.0
 		_animation_player.play("knockdown")
 	else:
-		_animation_player.play("hurt_air")
+		_animation_player.play("air_hurt")
 		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
 	_pivot.rotation_degrees.x = _damage_degrees
 
