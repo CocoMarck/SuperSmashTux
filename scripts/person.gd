@@ -671,20 +671,24 @@ func _apply_heavy_hitstun(delta: float, signals: VerticalForceSignals) -> void:
 	if signals.on_floor:
 		_heavy_hitstun_time -= delta
 	else:
-		_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
+		# Solo poder reiniciar tiempo de caida, si no esta levantandose.
+		if not _heavy_hitstun_wait_to_get_up:
+			_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
+		# Solo poder moverse si esta medio segundo en el aire.
 		if signals.air_count >= 0.5:
 			_horizontal_move = true
 	_heavy_hitstun_get_up_move(delta, signals)
 
 func _heavy_hitstun_get_up_move(delta: float, signals: VerticalForceSignals):
-	# Si no esta en el piso, no esta en espera de animacion de leventarse.
-	if not signals.on_floor:
-		_heavy_hitstun_wait_to_get_up = false
-	
 	# Animacion inmune de levantarse.
 	if _heavy_hitstun_time <= 0:
+		# Si no esta en el piso, no esta en espera de animacion de leventarse.
+		if signals.on_floor == false:
+			_heavy_hitstun_get_up_time = 0.0
+		
+		# Acrivar inmunidad
 		_immunity_to_damage = true
-		if (_heavy_hitstun_get_up_time <= 0.0) or (not signals.on_floor):
+		if (_heavy_hitstun_get_up_time <= 0.0):
 			_pivot.rotation_degrees.x = 0
 			_immunity_to_damage = false
 			_ledge_release_count = 0.0 # Para poder agarrarse
