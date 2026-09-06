@@ -70,7 +70,7 @@ Todo nombre que no tenga prefijo `air_`, sucede en el piso. Ejemplo `rising`, co
 - `impact_back`: Colisión de espaldas en cualquier lado.
 - `turn`: Dar vuelta. (Saltando no puede dar vuelta).
 - `hold_platform`: Agarrarse de plataforma.
-- `knockout`: Noqueado.
+- `knocked_out`: Noqueado.
 - `neutral_jump`: Sin moverse, solo saltar.
 - `moving_jump`: Moviéndose, y saltar.
 - `grabbed`: Siendo agarrado.

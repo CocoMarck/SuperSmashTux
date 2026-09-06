@@ -14,6 +14,7 @@ const ONE_WAY_COYOTE_TIME :float = 0.3   # tiempo de perdon al salirse de la ori
 
 # Person | Input
 const INPUT_BUFFER_WINDOW: float = 0.15
+const TIMES_PRESSING_DOWN: int = 2
 
 # Person | Agarre de orillas.
 const LEDGE_HANG_OFFSET := 0.3     # que tan separado de la orilla se queda colgado

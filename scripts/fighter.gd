@@ -456,6 +456,7 @@ func _set_attack(states: MoveStates) -> void:
 	# Inicializar ataque
 	_attack_count = 0 ## Contador de combo, si es que tiene.
 	_spawned_hitbox_ids.clear() ## Cada que se pone direccion de ataque, poner el clear de los hitbox id spawneados. Para poder spawnear varios si es que se requiere
+	_air_jump_time = 0 ## Quitar animacion de salto en el aire si es que existe.
 
 
 func _cancel_attack(signals: VerticalForceSignals, states: MoveStates):
@@ -582,7 +583,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		if hitbox_time >= time_ratio:
 			_clean_hitboxes_damages()
 			var direction = Vector3(0,0,0)
-			direction.x = hitbox_move.direction.x * _x_not_zero_value
+			direction.x = hitbox_move.direction.x * _last_x_direction
 			direction.y = hitbox_move.direction.y * 0.1
 			if hitbox_time < time_ratio+hitbox_move.duration:
 				# Solo spawnear hitbox si no esta repetido. Se hace con id.
@@ -916,6 +917,8 @@ func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 		_hitstun_anim(delta, frame.vertical_force_signals)
 	elif _heavy_hitstun_active():
 		_heavy_hitstun_anim(delta, frame.vertical_force_signals)
+	elif _knocked_out():
+		_animation_player.play("knocked_out")
 	elif _holding_onto_the_ledge():
 		_ledge_grab_anim(delta)
 	elif _attacking():

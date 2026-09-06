@@ -53,8 +53,13 @@ var _ground_friction: float = 100.0
 var _knockback_friction: float = 20.0
 
 # Propiedades privadas | Multiples saltos
-var _max_jumps = 1
-var _jump_count = 0
+var _max_jumps : int = 1
+var _jump_count : int = 0
+
+# Propiedades privadas | Bajar de plataforma, o bajar rápido.
+var _down_count : int = 0
+var _last_can_down_hard : bool = false
+var _last_on_floor : bool = false
 
 # Propiedadas privadas | Estados posición
 var _direction: Vector3 = Vector3.ZERO
@@ -327,6 +332,9 @@ func _false_inputs() -> void:
 func taking_damage() -> bool:
 	return _knockback_active() or _heavy_hitstun_active()
 
+func _can_down_hard():
+	return _down_count >= GameBalance.TIMES_PRESSING_DOWN
+
 func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	'''
 	Movimientos.
@@ -364,19 +372,37 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	else:
 		if (_down_pressed or _up_pressed or _left_pressed or _right_pressed):
 			_direction_buffer_timer = GameBalance.INPUT_BUFFER_WINDOW
+			
 
 	# Variables | Direccion de movimiento horizontal
 	# Solo actualizar direccion en el piso.
 	_direction = _get_move_direction()
 
-	# En caida | Descender o no mas rapido.
+	# En caida | Descender o no mas rapido. Traspasar one way platform o no.
+	if _down_pressed: # Contar veces precinando abajo.
+		_down_count += 1
+	
 	if signals.on_floor:
 		_fall_acceleration_multiplier = 1
+		# Resetear conteo por first frame on floor
+		if _last_on_floor == false:
+			_down_count = 0
+		_last_on_floor = true
 	else:
-		if _move_down:
+		if _can_down_hard():
 			_fall_acceleration_multiplier = 2
 		if can_jump:
 			_fall_acceleration_multiplier = 1
+		_last_on_floor = false
+		# Resetear conteo por first frame en el aire.
+		if _air_count == delta:
+			_down_count = 0
+	
+	# Reiniciar conteo `can_down_hard`. Establecer ultimo estado de bajada rapida.
+	_last_can_down_hard = false
+	if _can_down_hard():
+		_down_count = 0
+		_last_can_down_hard = true
 	
 	# En el piso
 	if signals.on_floor:
@@ -807,7 +833,7 @@ func _build_frame(delta: float) -> FrameMotionSignals:
 	Agrupa gravity move states.
 	'''
 	var vertical_force_signals = _vertical_force(
-		delta, (_down_pressed and _heavy_hitstun_active() == false), _fall_acceleration_multiplier
+		delta, (_last_can_down_hard and _heavy_hitstun_active() == false), _fall_acceleration_multiplier
 	)
 	var move_signals = _move(delta, vertical_force_signals)
 	var move_states = _get_move_states(move_signals)
@@ -871,6 +897,8 @@ func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 		_hitstun_anim(delta, frame.vertical_force_signals)
 	elif _heavy_hitstun_active():
 		_heavy_hitstun_anim(delta, frame.vertical_force_signals)
+	elif _knocked_out():
+		_animation_player.play("knocked_out")
 	elif _holding_onto_the_ledge():
 		_ledge_grab_anim(delta)
 	else:
