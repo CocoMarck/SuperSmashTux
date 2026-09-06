@@ -6,9 +6,21 @@ var _power_attack: bool = false
 
 # Propiedades privadas | Power attacks
 var _power_attacks: PowerAttacks = PowerAttacks.new({
+	"standard" : FightMove.new({
+		"name": &"neutral_attack1", "duration": 0.625, "speed": Vector3(0,0,0),
+		"air_attack": false,
+		"hitboxes_moves": [
+			HitboxMove.new({
+				"id": 1, "damage": 10, "size": Vector3(0.5,0.5,0.5), 
+				"position": Vector3(0.8,0.3,0), "direction": Vector3(0.25,0.3,0),
+				"init_time_ratio": 0.6, "duration": 2.0, 
+				"use_gravity": true, "speed": 20, "bounce": true, "bounce_impulse": 8.0, "fall_acceleration": 20, 
+			})
+		]
+	}),
 	"up" : FightMove.new({
 		"name": &"up_power_attack", "duration": 0.625, "speed": Vector3(5,0,0),
-		"direction": Vector3(0,0,0), "jump_power": 12.0, "air_attack": false,
+		"jump_power": 12.0, "air_attack": false,
 		"grab_attack": false, "override_horizontal_move": true,
 		"override_vertical_move": false, "immortal": false,
 		"hitboxes_moves": [
@@ -21,7 +33,7 @@ var _power_attacks: PowerAttacks = PowerAttacks.new({
 	}),
 	"air_up" : FightMove.new({
 		"name": &"air_up_power_attack", "duration": 0.625, "speed": Vector3(5,0,0),
-		"direction": Vector3(0,0,0), "jump_power": 12.0, "air_attack": true,
+		"jump_power": 12.0, "air_attack": true,
 		"grab_attack": false, "override_horizontal_move": true,
 		"override_vertical_move": false, "immortal": false,
 		"hitboxes_moves": [
@@ -40,6 +52,8 @@ func _init_power_attack_by_move(direction_buffered: bool, states: MoveStates):
 	# En el piso
 	if states.neutral_up:
 		_current_attack = _power_attacks.up
+	elif states.neutral or states.walking or states.running or states.crouch_move:
+		_current_attack = _power_attacks.standard
 	elif states.air_up:
 		_current_attack = _power_attacks.air_up
 

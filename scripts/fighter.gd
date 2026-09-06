@@ -38,7 +38,6 @@ var _shield_blockstun_time : float = 0.0
 # Propiedades privadas | Ataque
 var _attack_count: float = 0.0
 var _current_attack: FightMove = null
-var _attack_direction : Vector3 = Vector3(0.0, 0.0, 0.0)
 var _attack_jump_count :int = 0
 
 var _attacks: Attacks = Attacks.new(
@@ -300,6 +299,7 @@ var _grabbing_cooldown_time = 0.0
 # Propiedades privadas | Hitbox
 var _spawned_hitboxes_damages: Array = []
 var _spawned_hitbox_grab: HitboxGrab = null
+var _spawned_hitbox_ids: Dictionary = {}
 
 # Override funcs
 func _false_inputs() -> void:
@@ -317,25 +317,40 @@ func _false_inputs() -> void:
 	#_shield = false # Este no. Se necesita para poder absorver golpe mientras se pone escudo.
 
 # Funciones | hitbox de ataque.
-func _spawn_hitboxes_damages(p_id: int, p_size: Vector3, p_position: Vector3, p_damage: int, p_direction: Vector3, p_lifetime: float) -> void:
+func _spawn_hitboxes_damages(
+	hitbox_move: HitboxMove, p_direction: Vector3,
+) -> void:
 	'''
 	Spawn de hitbox por movimiento de ataque.
 	Swap de ejes: el "adelante" (x) del FightMove cae en z del Pivot, y z en x invertido.
 	Se indica posision y tamaño de hitbox.
 	'''
-	var fixed_position := Vector3(p_position.z, p_position.y, p_position.x)
+	var fixed_position := Vector3(hitbox_move.position.z, hitbox_move.position.y, hitbox_move.position.x)
 	var hitbox_damage : HitboxDamage = HitboxDamage.new({
-		"id": p_id,
+		"id": hitbox_move.id,
 		"position": fixed_position, 
-		"size": p_size, 
+		"size": hitbox_move.size, 
 		"parent": self, 
-		"damage": p_damage,
+		"damage": hitbox_move.damage,
 		"direction": p_direction,
-		"lifetime": p_lifetime,
-		"color": Color(1.0, 0.0, 1.0, 0.3)
+		"lifetime": hitbox_move.duration,
+		"color": Color(1.0, 0.0, 1.0, 0.3),
+		"use_gravity": hitbox_move.use_gravity,
+		"fall_acceleration": hitbox_move.fall_acceleration,
+		"bounce": hitbox_move.bounce,
+		"speed": hitbox_move.speed,
+		"bounce_impulse": hitbox_move.bounce_impulse,
 	})
 	_spawned_hitboxes_damages.append( hitbox_damage )
-	_pivot.add_child(hitbox_damage)
+	if hitbox_damage.use_gravity == false:
+		# Agregarlo como hijo.
+		_pivot.add_child(hitbox_damage)
+	else:
+		# Con gravedad: Pasa aser nodo libre de la escena, para su movimiento.
+		# No depende del pivot, se convierte la posición local del pivot al global.
+		get_tree().current_scene.add_child(hitbox_damage)
+		hitbox_damage.rotation_degrees.y = 90 # Alinearla lateral, no de frente.
+		hitbox_damage.global_position = _pivot.to_global(fixed_position)
 
 func _clear_hitboxes_damages() -> void:
 	'''
@@ -343,8 +358,9 @@ func _clear_hitboxes_damages() -> void:
 	'''
 	for hitbox_damage in _spawned_hitboxes_damages:
 		if hitbox_damage != null:
-			hitbox_damage.queue_free()
-			hitbox_damage = null
+			if hitbox_damage.use_gravity == false:
+				hitbox_damage.queue_free()
+				hitbox_damage = null
 	_spawned_hitboxes_damages.clear()
 
 func _clean_hitboxes_damages() -> void:
@@ -422,10 +438,6 @@ func _process_attack(direction_buffered: bool, states: MoveStates) -> void:
 	'''
 	_init_attack_by_move(direction_buffered, states)
 
-func _set_attack_direction() -> void:
-	_attack_count = 0
-	_attack_direction.x = _current_attack.direction.x * _x_not_zero_value
-	_attack_direction.y = _current_attack.direction.y * 0.1
 
 func _set_attack(states: MoveStates) -> void:
 	'''
@@ -433,8 +445,6 @@ func _set_attack(states: MoveStates) -> void:
 	'''
 	if _current_attack != null:
 		return
-	
-	_attack_direction = Vector3.ZERO
 	
 	# Ataque en piso
 	var direction_buffered :bool = _is_direction_buffer() # Margen de error de presión de direccion.
@@ -444,7 +454,9 @@ func _set_attack(states: MoveStates) -> void:
 		return
 	
 	# Inicializar ataque
-	_set_attack_direction()
+	_attack_count = 0 ## Contador de combo, si es que tiene.
+	_spawned_hitbox_ids.clear() ## Cada que se pone direccion de ataque, poner el clear de los hitbox id spawneados. Para poder spawnear varios si es que se requiere
+
 
 func _cancel_attack(signals: VerticalForceSignals, states: MoveStates):
 	# Verificar attack
@@ -574,20 +586,9 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 			direction.y = hitbox_move.direction.y * 0.1
 			if hitbox_time < time_ratio+hitbox_move.duration:
 				# Solo spawnear hitbox si no esta repetido. Se hace con id.
-				var repeated_hitbox = false
-				for hitbox_damage in _spawned_hitboxes_damages:
-					if hitbox_damage.id == hitbox_move.id:
-						repeated_hitbox = true
-						break
-				if not repeated_hitbox:
-					_spawn_hitboxes_damages(
-						hitbox_move.id,
-						hitbox_move.size, 
-						hitbox_move.position, 
-						hitbox_move.damage, 
-						direction, 
-						hitbox_move.duration
-					)
+				if not _spawned_hitbox_ids.has(hitbox_move.id):
+					_spawned_hitbox_ids[hitbox_move.id] = true
+					_spawn_hitboxes_damages( hitbox_move, direction )
 
 	# Debug
 	if first_attack_frame:

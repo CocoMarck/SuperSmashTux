@@ -1,5 +1,5 @@
 class_name Hitbox
-extends Area3D
+extends AreaGravity3D
 
 '''
 Hitbox. 
@@ -17,7 +17,7 @@ var _mesh := MeshInstance3D.new()
 var _box_mesh := BoxMesh.new()
 var _material := StandardMaterial3D.new()
 
-var _direction: Vector3 # <--- Direccion de spawneo
+#var _direction: Vector3 # <--- Direccion de spawneo
 
 var _lifetime :float = 0.0
 var _init_lifetime: float
@@ -30,6 +30,11 @@ var _defaults: Dictionary = {
 	"color": Color(1.0, 1.0, 1.0, 0.4),
 	"lifetime": 1.0,
 	"direction": Vector3.ZERO,
+	"use_gravity": false,
+	"fall_acceleration": 0.0,
+	"bounce": false,
+	"speed": 0.0,
+	"bounce_impulse": 0.0,
 }
 
 func _init(
@@ -39,6 +44,14 @@ func _init(
 	var config := _defaults.duplicate()
 	config.merge(p_config, true)  # true = p_config gana
 
+	# AreaGravity3D
+	_fall_acceleration = config["fall_acceleration"]
+	use_gravity = config["use_gravity"]
+	speed = config["speed"]
+	bounce = config["bounce"]
+	bounce_impulse = config["bounce_impulse"]
+
+	# Essentials
 	id = config["id"]
 	position = config["position"]
 	_parent = config["parent"]
@@ -75,10 +88,11 @@ func _good_lifetime() -> bool:
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass
+	super()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	# Lifetime
 	if _good_lifetime():
 		if _lifetime <= 0:
 			self.queue_free()

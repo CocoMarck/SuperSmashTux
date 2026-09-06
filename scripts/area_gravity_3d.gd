@@ -16,14 +16,14 @@ var _air_count: float = 0.0
 # Visibles en GUI
 @export var bounce : bool = false
 @export var bounce_impulse: float = 0.0
-@export var speed: float = 10 # Horizontal speed
+@export var speed: float = 0 # Horizontal speed
 
 # Direccion de spawneo. Para movimiento solo usa x.
 var _direction: Vector3 = Vector3.ZERO
 var _x_not_zero_value: float = 0.0
 
 # Flags
-var use_gravity: bool
+var use_gravity: bool = false
 
 func _allow_bounce() -> bool:
 	return bounce and bounce_impulse > 0
@@ -90,9 +90,13 @@ func _vertical_force(delta:float) -> VerticalForceSignals:
 	
 	return signals
 
+func _allow_speed():
+	return speed > 0
+
 func move(delta: float, signals: VerticalForceSignals) -> void:
 	# Movimiento horizontal
-	_target_velocity.x += (speed * _x_not_zero_value) * delta
+	if _allow_speed():
+		_target_velocity.x = (speed * _x_not_zero_value)
 	
 	if _allow_bounce():
 		if signals.on_floor:
@@ -110,7 +114,7 @@ func _ready() -> void:
 	_set_x_not_zero_value(_direction)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	var vertical_force_signals :VerticalForceSignals = _vertical_force(delta)
 	move(delta, vertical_force_signals)
 	_commit(delta)
