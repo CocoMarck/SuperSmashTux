@@ -75,3 +75,14 @@ func is_above_surface(global_point: Vector3, margin: float = 0.0) -> bool:
 	var half_height := (box.size.y * 0.5) * _collision_shape.global_basis.get_scale().y
 	var surface_point := _collision_shape.global_position + (normal * half_height)
 	return (global_point - surface_point).dot(normal) >= -margin
+
+func get_aabb_global() -> AABB:
+	'''
+	Caja global de la plataforma, respetando escala y posición del colision shape.
+	'''
+	var box := _get_box()
+	if box == null:
+		return AABB(global_position, Vector3.ONE)
+	var shape_pos: Vector3 = _collision_shape.global_position
+	var size_extends: Vector3 = box.size * _collision_shape.global_basis.get_scale()
+	return AABB(shape_pos -size_extends * 0.5, size_extends)

@@ -1,8 +1,5 @@
 # Hitbox — Diseño
-
-> Documento de diseño del sistema de hitboxes. Sustituye a la vieja `nota-hitbox.md`.
-> Estado: el `Hitbox` actual (`scripts/hitbox.gd`) ya existe como script puro con debug visual.
-> Planeado: convertirlo en **papa** y derivar hijos por tipo de efecto (`HitboxDamage`, `HitboxGrab`).
+(`Area3D` `AreaGravity3D`, `Hitbox`, `HitboxDamage`, `HitboxGrab`).
 
 ## Misión
 
@@ -19,9 +16,10 @@ El hitbox **no decide qué movimiento lo lanzó**: eso lo sabe el `Fighter`. El 
 
 ```
 Area3D
-  └── Hitbox          (papa: física + debug + lifetime, comportamiento genérico)
-        ├── HitboxDamage   (daño + knockback, el comportamiento actual)
-        └── HitboxGrab     (detecta y avisa al padre que agarre; no daña)
+  └── AreaGravity3D       (un area3d con físicas simples, rebote y esas cosas)
+      └── Hitbox          (papa: física + debug + lifetime, comportamiento genérico)
+          ├── HitboxDamage   (daño + knockback, el comportamiento actual)
+          └── HitboxGrab     (detecta y avisa al padre que agarre; no daña)
 ```
 
 ### `Hitbox` (papa) — `scripts/hitbox.gd`

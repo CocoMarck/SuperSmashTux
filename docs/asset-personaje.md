@@ -72,7 +72,8 @@ Todo nombre que no tenga prefijo `air_`, sucede en el piso. Ejemplo `rising`, co
 - `hold_platform`: Agarrarse de plataforma.
 - `knockout`: Noqueado.
 - `neutral_jump`: Sin moverse, solo saltar.
-- `moving_jump`: Moviendose, salto.
+- `moving_jump`: Moviéndose, y saltar.
+- `grabbed`: Siendo agarrado.
 
 #### Fighter
 - `neutral_attack`. 1, 2 y 3: Cuando no se mueve y esta parado.
@@ -84,7 +85,8 @@ Todo nombre que no tenga prefijo `air_`, sucede en el piso. Ejemplo `rising`, co
 - `heavy_up_attack`: Sin moverse, y presionar al mismo tiempo ataque y arriba.
 - `heavy_down_attack`: Sin moverse, y presionar al mismo tiempo ataque y abajo.
 - `pickup`: Agarrar item.
-- `grab`: Agarrar a la gente.
+- `grab`: Intentar agarrar a alguien.
+- `grabbing`: Agarrando a alguien.
 - `guard`: Animación de defensa. Protección.
 - `roll_forward`: Vuelta estilo parkur.
 - `roll_backward`: Vuelta estilo parkur.

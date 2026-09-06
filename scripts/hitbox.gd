@@ -70,12 +70,12 @@ func set_color( p_color: Color ) -> void:
 func set_alpha(p_alpha: float) -> void:
 	_material.albedo_color.a = clampf(p_alpha, 0.0, 1.0)
 
+func _good_lifetime() -> bool:
+	return _init_lifetime > 0.0
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass
-
-func _good_lifetime() -> bool:
-	return _init_lifetime > 0.0
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
