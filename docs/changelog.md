@@ -4,7 +4,7 @@
 > Apenas me di cuenta, pero gdscirpt no tiene para variables privadas. Pero weno, igual es bueno marcarlas como `_var_private`, ya que indica que eso no se toco fuera de la clase dueña. Es una forma de documentar.
 
 ### Hitobox refactor **LISTO**
-- `AreaGravity3D` **FALTA**: Area3D con física simple.
+- `AreaGravity3D` **LISTO**: Area3D con física simple.
 - `Hitbox` **LISTO**: (Hijo de Area3D. Papa: física + debug + lifetime, comportamiento genérico). Contiene `id`, para identificarlo.
 - `HitboxDamage` **LISTO**: (daño + knockback, el comportamiento actual)
 - `HitboxGrab` **LISTO**: (detecta y avisa al padre que agarre; no daña)
