@@ -44,7 +44,7 @@ var _attacks: Attacks = Attacks.new(
 	# En el piso
 	FightMove.new(
 		{
-			"name": &"neutral_attack1", "duration": 0.5, "speed": Vector3(0.25,0,0),
+			"name": &"neutral_attack1", "duration": 0.5, "speed": Vector3(0,0,0),
 			"air_attack": false, "grab_attack": false,  "override_horizontal_move": true, 
 			"override_vertical_move": false, "immortal": false,
 			

@@ -65,3 +65,9 @@
     - El `Fighter`, remplaza el physics process, pero es muy parecido al de Person, por lo cual se puede optimizar Person para que sea modular, para que Fighter, no remplace todo, eso no es fácil de mantener.
 
     - Se realizo el `2026-09-04`: Asegurarse que jale bien. Primeras impresiones: De diez.
+
+- `process_sound` **FALTA**: modulo que obtiene señales, para reproducir sonidos, sonido de pasos, de daño recibido, y etc.
+    - Contar tiempo al moverse en el piso o en el aire.
+    - Obtener señal frame uno al recibir daño.
+    - Obtener señal frame uno al caer en el piso.
+    - Obtener señal frame uno al saltar en el piso o en el aire.

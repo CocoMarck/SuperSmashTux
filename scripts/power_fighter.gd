@@ -44,12 +44,12 @@ var _power_attacks: PowerAttacks = PowerAttacks.new({
 			}),
 			HitboxMove.new({
 				"id": 5, "damage": 5, "size": Vector3(0.5,0.5,0.5), 
-				"position": Vector3(0.8,0.3,0), "direction": Vector3(-1,1,0),
+				"position": Vector3(0.8,0.3,0), "direction": Vector3(0,1,0),
 				"init_time_ratio": 0.4, "duration": 0.1
 			}),
 			HitboxMove.new({
 				"id": 6, "damage": 5, "size": Vector3(0.5,0.5,0.5), 
-				"position": Vector3(-0.8,0.3,0), "direction": Vector3(1,1,0),
+				"position": Vector3(-0.8,0.3,0), "direction": Vector3(0,1,0),
 				"init_time_ratio": 0.4, "duration": 0.1
 			}),
 		]
@@ -105,12 +105,12 @@ var _power_attacks: PowerAttacks = PowerAttacks.new({
 			}),
 			HitboxMove.new({
 				"id": 5, "damage": 5, "size": Vector3(0.5,0.5,0.5), 
-				"position": Vector3(0.8,0.3,0), "direction": Vector3(-1,1,0),
+				"position": Vector3(0.8,0.3,0), "direction": Vector3(0,1,0),
 				"init_time_ratio": 0.4, "duration": 0.1
 			}),
 			HitboxMove.new({
 				"id": 6, "damage": 5, "size": Vector3(0.5,0.5,0.5), 
-				"position": Vector3(-0.8,0.3,0), "direction": Vector3(1,1,0),
+				"position": Vector3(-0.8,0.3,0), "direction": Vector3(0,1,0),
 				"init_time_ratio": 0.4, "duration": 0.1
 			}),
 		]
