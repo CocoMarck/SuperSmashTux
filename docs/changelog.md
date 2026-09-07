@@ -22,9 +22,8 @@
     - **LISTO** Mientras te lavantas, pues no puedes hacer ningún input. Tienes que esperarte. 
     - **LISTO** El conteo del stun sucede en el piso, levantarse, y inmunidad al levantarse.
 - `Apply knocked out` **LISTO**: Completamente noqueado, en "x" segundos se habilita el poder moverse. Con un golpe, se te quita el estado de noqueado. El knockout, solo se habilita con poderes, o castigos, por ejemplo, habilidad mágica para dormir o romper escudo. 
-- `_knocked_out_anim` **FALTA**: Puede ser placeholder.
+- `knocked_out_anim` **LISTO**: Puede ser placeholder. Solo es una anim no se creo func, no se necesitaba.
 - `_grabbed_anim` **FALTA**: Puede ser placeholder.
-- Al recibir daño en el aire, ya no poder saltar en el aire **LISTO**.
 
 ### Fighter
 - `Shield` **LISTO**: 
@@ -56,6 +55,8 @@
     - Un golpe reinicia el conteo de saltos de ataque, por lo que si haces el salto con movimiento de ataque, y en el aire te dan un trancazo, ahora puedes hacer otro salto de ataque.
 - Tres ataques neutrales en el piso **LISTO**: Contador de ataques. Reiniciar contador si no se hace en el mismo combo.
 - El `heavy_hitstun` vuelve a permitir hacer ataques con salto. **LISTO**
+- Reiniciar contador de ataques con salto, cuando se agarre a ledge de orilla. **LISTO**
+- Arreglar Bug: hacer ataque con salto mientras `_holding_onto_the_ledge()`, sucede bug visual, porque se eleva first frame del ataque con salto y luego cancela. **FALTA**
 
 ### PowerFighter
 - `Tercer salto` **LISTO**: Tendrá anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso. Esto lo hace fighter.

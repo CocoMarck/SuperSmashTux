@@ -883,6 +883,10 @@ func _process_action(delta: float, frame: FrameMotionSignals) -> void:
 		_shield_blockstun_time = 0
 	_roll_move(delta, frame.vertical_force_signals)
 
+	# Reiniciar contador de saltos hechos con ataque
+	if _holding_onto_the_ledge():
+		_attack_jump_count = 0
+
 func _cancel_action() -> void:
 	# Anular ataque, grab, y shield
 	_allow_shield = true and not grabbed
