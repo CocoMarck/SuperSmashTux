@@ -278,7 +278,7 @@ var _attacks: Attacks = Attacks.new(
 			"hitboxes_moves": [
 				HitboxMove.new({
 					"id": 16, "damage": 10, "size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(-0.7, 0.0, 0), "direction": Vector3(1.0,1,0),
+					"position": Vector3(-0.7, 0.0, 0), "direction": Vector3(-1.0,1,0),
 					"init_time_ratio": 0.5, "duration": 0.2
 				})
 			]
