@@ -66,9 +66,15 @@
     - El `Fighter`, remplaza el physics process, pero es muy parecido al de Person, por lo cual se puede optimizar Person para que sea modular, para que Fighter, no remplace todo, eso no es fácil de mantener.
 
     - Se realizo el `2026-09-04`: Asegurarse que jale bien. Primeras impresiones: De diez.
+- Animación de caída en el piso, pequeño cooldown **FALTA**: 
+    - Cuando se cae first frame en el piso, y dependiendo del `velocity.y` anterior, hacer la anim mas lenta, mas rápida, o a velocidad normal. Solo cuando no se esta recibiendo daño.
+    - Si esta recibiendo daño se cancela la animación. 
+    - Se sobrepone sobre move states. Los pone en false todos, para que no se pueda hacer nada mientras se hace la anim de caída en el piso.
+    - Es una anim muy corta, poner constante en game balance, duración de anim como de 0.2 segundos.
 
 - `process_sound` **FALTA**: modulo que obtiene señales, para reproducir sonidos, sonido de pasos, de daño recibido, y etc.
-    - Contar tiempo al moverse en el piso o en el aire.
+    - Contar tiempo al moverse en el piso o en el aire. (Solo cuando no se recibe daño)
     - Obtener señal frame uno al recibir daño.
     - Obtener señal frame uno al caer en el piso.
     - Obtener señal frame uno al saltar en el piso o en el aire.
+    - Obtener señal frame uno al caer en cealing/techo o en wall.
