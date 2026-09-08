@@ -32,8 +32,8 @@
 - `Mientras se rueda no regenerar escudo` **LISTO**.
 - `Fight move margen de error` **LISTO**: Input buffer temporal. Los flancos (`_left_pressed`, `_right_pressed`, etc.) duran 1 frame, lo que hace heavy attacks dificiles. Solución: timer `_direction_input_timer` (0.1s, en `GameBalance.INPUT_BUFFER_WINDOW`) en `person.gd`. Cada dirección presionada reinicia el timer. `_fight_move` usa el timer en vez de flancos puros. ~10 frames de ventana como Smash Bros. Si bien esto es para `Fighter` y hijos, esto se hara en `Person`.
 - `Grab` como movimiento de ataque **LISTO**: Requiere de refactor hitbox system. No puede hacer grab cuando el personaje esta en el suelo (Esto no fue planeado asi, por por como esta hecho el aventar a `Person`, sucedió asi, y creo que esta bien.). 
+- `spawn hitboxes damages` **LISTO**: Varios hitbox damage por move. Jala bien.
 - `grabbing_anim` **FALTA**: Puede ser placeholder.
-- `spawn hitboxes damages` **LISTO***: Varios hitbox damage por move. Aun no jala tan bien pero jala.
 
 ### Constantes
 - Poner contestes de juego en `GameBalance` **LISTO**: Duración de stun, duración de efectos, duración de movimientos compartidos, margenes de perdon/error. Eso si, recordar usar namespace completo; `GameBalence.CONST_NAME`.
@@ -46,7 +46,7 @@
 ### GravityBody
 - **LISTO**: Normalizar a obtener width y hegiht valor completo, con shape, y serán funciones publicas. Escalar si se requiere, pero con multiplicador. Ejemplo `get_width()*0.5`.
     - Funciones publicas **LISTO**: `get_width, get_height`. Y ya esta.
-    - Eliminar la func legacy `_get_body_half_height() ` **FALTA**: Simplemente seria un `get_height()*0.5`.
+    - Eliminar la func legacy `_get_body_half_height() ` **LISTO**: Simplemente seria un `get_height()*0.5`.
 
 ### Fighter
 - Ataques con salto **LISTO**: 
