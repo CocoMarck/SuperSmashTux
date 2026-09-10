@@ -23,7 +23,7 @@
     - **LISTO** El conteo del stun sucede en el piso, levantarse, y inmunidad al levantarse.
 - `Apply knocked out` **LISTO**: Completamente noqueado, en "x" segundos se habilita el poder moverse. Con un golpe, se te quita el estado de noqueado. El knockout, solo se habilita con poderes, o castigos, por ejemplo, habilidad mágica para dormir o romper escudo. 
 - `knocked_out_anim` **LISTO**: Puede ser placeholder. Solo es una anim no se creo func, no se necesitaba.
-- `_grabbed_anim` **FALTA**: Puede ser placeholder.
+- `grabbed anim` **LISTO**: Puede ser placeholder.
 
 ### Fighter
 - `Shield` **LISTO**: 
@@ -33,7 +33,7 @@
 - `Fight move margen de error` **LISTO**: Input buffer temporal. Los flancos (`_left_pressed`, `_right_pressed`, etc.) duran 1 frame, lo que hace heavy attacks dificiles. Solución: timer `_direction_input_timer` (0.1s, en `GameBalance.INPUT_BUFFER_WINDOW`) en `person.gd`. Cada dirección presionada reinicia el timer. `_fight_move` usa el timer en vez de flancos puros. ~10 frames de ventana como Smash Bros. Si bien esto es para `Fighter` y hijos, esto se hara en `Person`.
 - `Grab` como movimiento de ataque **LISTO**: Requiere de refactor hitbox system. No puede hacer grab cuando el personaje esta en el suelo (Esto no fue planeado asi, por por como esta hecho el aventar a `Person`, sucedió asi, y creo que esta bien.). 
 - `spawn hitboxes damages` **LISTO**: Varios hitbox damage por move. Jala bien.
-- `grabbing_anim` **FALTA**: Puede ser placeholder.
+- `grabbing_anim` **LISTO**: Puede ser placeholder.
 
 ### Constantes
 - Poner contestes de juego en `GameBalance` **LISTO**: Duración de stun, duración de efectos, duración de movimientos compartidos, margenes de perdon/error. Eso si, recordar usar namespace completo; `GameBalence.CONST_NAME`.
@@ -57,6 +57,7 @@
 - El `heavy_hitstun` vuelve a permitir hacer ataques con salto. **LISTO**
 - Reiniciar contador de ataques con salto, cuando se agarre a ledge de orilla. **LISTO**
 - Arreglar Bug: hacer ataque con salto mientras `_holding_onto_the_ledge()`, sucede bug visual, porque se eleva first frame del ataque con salto y luego cancela. **FALTA**
+- Mecánica: **LISTO**: Cuando se hace ataque en el aire, cancelar heavy hitsun
 
 ### PowerFighter
 - `Tercer salto` **LISTO**: Tendrá anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso. Esto lo hace fighter.
@@ -78,3 +79,5 @@
     - Obtener señal frame uno al caer en el piso.
     - Obtener señal frame uno al saltar en el piso o en el aire.
     - Obtener señal frame uno al caer en cealing/techo o en wall.
+
+- Bug **TESTEAR**: Por alguna extraña razón el `heavy_hitstun`, queda fijado de forma rara. Aun no identifico que lo deja siempre activo. hasta parece random. (Ya lo cambie, parese jalar. El pedo era el flag de wait heavy hitstun get up )

@@ -206,7 +206,7 @@ func respawn(at_position: Vector3) -> void:
 	# podria dañar a quien este parado en el spawn apenas reaparece.
 	_release_hanging_ledge()
 	_drop_through_count = 0.0
-	_heavy_hitstun_time = 0
+	_clean_heavy_hitstun_state()
 	grabbed = false
 	_knockout_time = 0
 	_set_x_not_zero_value( _get_initial_facing() )
@@ -454,7 +454,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	# Salto | Aplicar salto normal o doble salto segun sea el caso.
 	if can_jump and _jump_count < _max_jumps:
 		_target_velocity.y = jump_impulse
-		_heavy_hitstun_time = 0.0 # Cancelar stun move si es que hay.
+		_clean_heavy_hitstun_state() # Cancelar heavy hitstun si es que hay.
 		_allow_jump_anim = true
 		if signals.air_count > 0:
 			_set_jumps_to_max()
@@ -618,6 +618,11 @@ func _ignore_last_damage() -> void:
 	if hp < 100:
 		hp += _last_damage
 
+func _clean_heavy_hitstun_state():
+	# Para asegurar no meter tener sin usar el heavy hitstun.
+	_heavy_hitstun_time = 0
+	_heavy_hitstun_wait_to_get_up = false
+
 func set_damage_move(damage:int, direction:Vector3) -> void:
 	'''
 	Recibir un trancazo
@@ -628,7 +633,9 @@ func set_damage_move(damage:int, direction:Vector3) -> void:
 	if not _immunity_to_damage:
 		_knockback_direction = direction
 		_knockback_time = GameBalance.KNOCKBACK_DURATION
-		_heavy_hitstun_time = 0
+
+		# Heavy hitstun. Cuando entra.
+		_clean_heavy_hitstun_state()
 		if damage >= hp*GameBalance.STUN_DAMAGE_THRESHOLD:
 			# Movimiento stun solo si se hace el porcentaje de daño indicado.
 			_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
@@ -641,11 +648,13 @@ func set_damage_move(damage:int, direction:Vector3) -> void:
 			#_set_jumps_to_max() # Mejor no, demasiado castigo.
 			_target_velocity.y = 0 # Cancelar velocidad vertical
 
+
 func set_thrown_move(damage: int, direction: Vector3) -> void:
 	'''
 	Movimiento estando arrojado
 	'''
 	if not _immunity_to_damage:
+		_clean_heavy_hitstun_state()
 		grabbed = false
 		set_damage(damage)
 		set_damage_percentage(damage)
@@ -899,6 +908,8 @@ func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 		_heavy_hitstun_anim(delta, frame.vertical_force_signals)
 	elif _knocked_out():
 		_animation_player.play("knocked_out")
+	elif grabbed:
+		_animation_player.play("hurt")
 	elif _holding_onto_the_ledge():
 		_ledge_grab_anim(delta)
 	else:
@@ -934,7 +945,7 @@ func _process_action(delta: float, frame: FrameMotionSignals) -> void:
 	'''
 	pass
 
-func _cancel_action() -> void:
+func _cancel_action(frame: FrameMotionSignals) -> void:
 	'''
 	Cancelar Acciones especiales. Esta func la sobrescribira fighter.
 	'''
@@ -965,7 +976,7 @@ func _physics_process(delta: float) -> void:
 	_process_damage(delta, frame)
 
 	# Cancel action | Por defecto no hace nada
-	_cancel_action()
+	_cancel_action(frame)
 
 	# Visual | Por defecto no hace nada
 	_process_visual(frame)

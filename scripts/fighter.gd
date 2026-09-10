@@ -11,6 +11,7 @@ var _shield: bool = false
 # Propiedades privadas | Grab
 var _grab_move_time: float = 0.0
 var _grab_move_duration: float = 0.375#GameBalance.GRAB_MOVE_NORMAL_DURATION
+var _wait_hitbox_grab: bool = false
 
 # Propiedades privadas | Shield
 var _shield_time: float = 0.0
@@ -561,7 +562,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 					_looking_at_direction( _direction ) 
 				# Cancelar solo heavy stun si esta en el aire.
 				if not signals.on_floor:
-					_heavy_hitstun_time = 0
+					_clean_heavy_hitstun_state()
 	
 	# Finalizar ataque.
 	if _attack_count >= _current_attack.duration:
@@ -613,13 +614,15 @@ func _grab_move(delta: float, signals: VerticalForceSignals) -> void:
 		if _grab:
 			if _grab_move_time <= 0.0:
 				_grab_move_time = _grab_move_duration
+				_wait_hitbox_grab = true
 	else:
 		_grab_move_time = 0.0
 	
 	if _grab_move_time > 0.0:
 		_grab_move_time -= delta
 		
-		if _grab_move_time <= 0:
+		if _grab_move_time <= _grab_move_duration*0.5 and _wait_hitbox_grab:
+			_wait_hitbox_grab = false
 			var hitbox = HitboxGrab.new({
 				"parent": self, 
 				"position": Vector3(0,0,1.0),
@@ -668,7 +671,7 @@ func _shield_defence() -> void:
 	'''
 	if taking_damage():
 		_knockback_time = 0.0
-		_heavy_hitstun_time = 0.0
+		_clean_heavy_hitstun_state()
 		_ignore_last_damage()
 		_shield_time -= (GameBalance.SHIELD_DURATION*_last_damage_percentage)
 		_shield_blockstun = true
@@ -887,16 +890,26 @@ func _process_action(delta: float, frame: FrameMotionSignals) -> void:
 	if _holding_onto_the_ledge():
 		_attack_jump_count = 0
 
-func _cancel_action() -> void:
+func _cancel_action(frame: FrameMotionSignals) -> void:
 	# Anular ataque, grab, y shield
 	_allow_shield = true and not grabbed
 	if (
 		taking_damage() or _holding_onto_the_ledge() or _rolling() or _grabbing() or _knocked_out()
 	):
-		_current_attack = null
 		_grab_move_time = 0.0
 		_allow_shield = false
-		_clear_hitboxes_damages()
+		
+		# Cancelar ataque
+		# Solo cancelar heavy hitsun, cuando esta en el aire.
+		if (
+			_heavy_hitstun_active() and _attacking() and not frame.vertical_force_signals.on_floor
+		):
+			if _current_attack.air_attack:
+				_clean_heavy_hitstun_state()
+		else:
+			_current_attack = null
+			_clear_hitboxes_damages()
+			
 
 func _visual_shield(frame: FrameMotionSignals) -> void:
 	# Visual | Escudo
@@ -923,6 +936,8 @@ func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 		_heavy_hitstun_anim(delta, frame.vertical_force_signals)
 	elif _knocked_out():
 		_animation_player.play("knocked_out")
+	elif grabbed:
+		_animation_player.play("hurt")
 	elif _holding_onto_the_ledge():
 		_ledge_grab_anim(delta)
 	elif _attacking():
@@ -933,6 +948,10 @@ func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 		_animation_player.play("grab")
 	elif _with_shield(frame.vertical_force_signals): 
 		_animation_player.play("guard")
+	elif _grabbing():
+		_animation_player.play("grab")
+		_animation_player.pause()
+		_animation_player.seek(_animation_player.current_animation_length*0.5, true)
 	else:
 		not_normal = false
 	return not_normal
