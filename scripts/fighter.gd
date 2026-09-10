@@ -904,7 +904,7 @@ func _cancel_action(frame: FrameMotionSignals) -> void:
 		if (
 			_heavy_hitstun_active() and _attacking() and not frame.vertical_force_signals.on_floor
 		):
-			if _current_attack.air_attack:
+			if _current_attack.air_attack and frame.vertical_force_signals.air_count >= GameBalance.ABLE_TO_ATTACK_WITH_HITSTUN_DURATION:
 				_clean_heavy_hitstun_state()
 		else:
 			_current_attack = null

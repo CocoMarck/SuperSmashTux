@@ -44,7 +44,7 @@
 > Aveces ando en modo automático, y pongo cosas redundantes
 
 ### GravityBody
-- **LISTO**: Normalizar a obtener width y hegiht valor completo, con shape, y serán funciones publicas. Escalar si se requiere, pero con multiplicador. Ejemplo `get_width()*0.5`.
+- **LISTO**: Normalizar a obtener width y height valor completo, con shape, y serán funciones publicas. Escalar si se requiere, pero con multiplicador. Ejemplo `get_width()*0.5`.
     - Funciones publicas **LISTO**: `get_width, get_height`. Y ya esta.
     - Eliminar la func legacy `_get_body_half_height() ` **LISTO**: Simplemente seria un `get_height()*0.5`.
 
@@ -55,9 +55,10 @@
     - Un golpe reinicia el conteo de saltos de ataque, por lo que si haces el salto con movimiento de ataque, y en el aire te dan un trancazo, ahora puedes hacer otro salto de ataque.
 - Tres ataques neutrales en el piso **LISTO**: Contador de ataques. Reiniciar contador si no se hace en el mismo combo.
 - El `heavy_hitstun` vuelve a permitir hacer ataques con salto. **LISTO**
-- Reiniciar contador de ataques con salto, cuando se agarre a ledge de orilla. **LISTO**
-- Arreglar Bug: hacer ataque con salto mientras `_holding_onto_the_ledge()`, sucede bug visual, porque se eleva first frame del ataque con salto y luego cancela. **FALTA**
-- Mecánica: **LISTO**: Cuando se hace ataque en el aire, cancelar heavy hitsun
+- **LISTO**: Reiniciar contador de ataques con salto, cuando se agarre a ledge de orilla. 
+- Arreglar Bug **FALTA**: hacer ataque con salto mientras `_holding_onto_the_ledge()`, sucede bug visual, porque se eleva first frame del ataque con salto y luego cancela. 
+- Mecánica: **LISTO**: Cuando se hace ataque en el aire, cancelar heavy hitsun.
+    - **LISTO** Solo poder atacar cuando pase "x" tiempo en el aire. 
 
 ### PowerFighter
 - `Tercer salto` **LISTO**: Tendrá anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso. Esto lo hace fighter.
@@ -80,4 +81,4 @@
     - Obtener señal frame uno al saltar en el piso o en el aire.
     - Obtener señal frame uno al caer en cealing/techo o en wall.
 
-- Bug **TESTEAR**: Por alguna extraña razón el `heavy_hitstun`, queda fijado de forma rara. Aun no identifico que lo deja siempre activo. hasta parece random. (Ya lo cambie, parese jalar. El pedo era el flag de wait heavy hitstun get up )
+- Bug **TESTEAR**: Por alguna extraña razón el `heavy_hitstun`, queda fijado de forma rara. Aun no identifico que lo deja siempre activo. hasta parece random. Ya lo cambie, párese jalar. El pedo era el flag/bool de wait heavy hitstun get up.
