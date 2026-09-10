@@ -619,8 +619,10 @@ func _ignore_last_damage() -> void:
 		hp += _last_damage
 
 func _clean_heavy_hitstun_state():
-	# Para asegurar no meter tener sin usar el heavy hitstun.
+	# Limpiar estado de hitstun time. Dejarlo todo en cero.
+	# Para asegurar no estar en heavy hitsun state eterno.
 	_heavy_hitstun_time = 0
+	_heavy_hitstun_get_up_time = 0
 	_heavy_hitstun_wait_to_get_up = false
 
 func set_damage_move(damage:int, direction:Vector3) -> void:
