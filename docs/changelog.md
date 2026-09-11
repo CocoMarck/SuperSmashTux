@@ -59,6 +59,7 @@
 - Arreglar Bug **FALTA**: hacer ataque con salto mientras `_holding_onto_the_ledge()`, sucede bug visual, porque se eleva first frame del ataque con salto y luego cancela. 
 - Mecánica: **LISTO**: Cuando se hace ataque en el aire, cancelar heavy hitsun.
     - **LISTO** Solo poder atacar cuando pase "x" tiempo en el aire. 
+- Animación de shield, para poder usarlo **FALTA**: Es necesario, que evita hacer que el jugador se salga de combo, por spamear escudo..
 
 ### PowerFighter
 - `Tercer salto` **LISTO**: Tendrá anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso. Esto lo hace fighter.
@@ -80,5 +81,11 @@
     - Obtener señal frame uno al caer en el piso.
     - Obtener señal frame uno al saltar en el piso o en el aire.
     - Obtener señal frame uno al caer en cealing/techo o en wall.
+
+- Mejoras en `knockback/hitstun` **LISTO**:
+    - Ahora el no poder moverse, dura mas que el knockback. El duración de; knockback se queda fija. La duración de hitstun varia según el porcentaje de daño, y el daño recibido, y tiene un limite máximo.
+    - `BASE_HITSTUN_DURATION` 0.3. Duración base del hitstun.
+    - `MAX_HITSTUN_DURATION` 0.7. Duración máxima de hitstun.
+    - `KNOCKBACK_DECAY_TIME` 0.3. Duración de movimiento de knockback. Fija.
 
 - Bug **TESTEAR**: Por alguna extraña razón el `heavy_hitstun`, queda fijado de forma rara. Aun no identifico que lo deja siempre activo. hasta parece random. Ya lo cambie, párese jalar. El pedo era el flag/bool de wait heavy hitstun get up.

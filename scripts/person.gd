@@ -76,7 +76,8 @@ var _allow_jump: bool = true
 # Propiedades privadas | Daño
 var _normal_damage_power :float = 35 # Este valor se cambiara segun el personaje. 50 Para 0.35 seconds de knockback, 35 para 0.5 seconds de knockback
 var _knockback_direction :Vector3 = Vector3.ZERO
-var _knockback_time :float = 0.0
+var _hitstun_time :float = 0.0
+var _knockback_decay_time :float = 0.0
 var _damage_degrees :float = 0.0
 var _last_damage :float = 0.0
 var _last_damage_percentage :float = 0.0
@@ -209,7 +210,7 @@ func respawn(at_position: Vector3) -> void:
 	_clean_heavy_hitstun_state()
 	grabbed = false
 	_knockout_time = 0
-	_knockback_time = 0
+	_hitstun_time = 0
 	_set_x_not_zero_value( _get_initial_facing() )
 	
 # Funciones | Agarre de orillas
@@ -606,7 +607,6 @@ func set_damage(damage:int):
 	if not _immunity_to_damage:
 		hp -= damage
 		_last_damage = damage
-		
 
 func set_damage_percentage(damage:int) -> void:
 	if not _immunity_to_damage:
@@ -626,9 +626,15 @@ func _clean_heavy_hitstun_state():
 	_heavy_hitstun_get_up_time = 0
 	_heavy_hitstun_wait_to_get_up = false
 
-func _get_knockback_time_by_damage_porcentage(damage: float) -> float:
+func _get_hitstun_time_by_damage_porcentage(damage: int) -> float:
 	# Tiempo adicional basado en porcentaje de daño.
-	return (damage * damage_percentage)*0.01
+	return (damage * damage_percentage)*0.02
+
+func _get_hitstun_time(damage:int) ->float:
+	var time :float = GameBalance.BASE_HITSTUN_DURATION + _get_hitstun_time_by_damage_porcentage(damage)
+	if time >= GameBalance.MAX_HITSTUN_DURATION:
+		time = GameBalance.MAX_HITSTUN_DURATION
+	return time
 
 func set_damage_move(damage:int, direction:Vector3) -> void:
 	'''
@@ -639,7 +645,9 @@ func set_damage_move(damage:int, direction:Vector3) -> void:
 	'''
 	if not _immunity_to_damage:
 		_knockback_direction = direction
-		_knockback_time = GameBalance.KNOCKBACK_DURATION + _get_knockback_time_by_damage_porcentage(damage)
+		_hitstun_time = _get_hitstun_time(damage)
+		_knockback_decay_time = 0.0
+		print(_hitstun_time)
 
 		# Heavy hitstun. Cuando entra.
 		_clean_heavy_hitstun_state()
@@ -666,7 +674,7 @@ func set_thrown_move(damage: int, direction: Vector3) -> void:
 		set_damage(damage)
 		set_damage_percentage(damage)
 		_knockback_direction = direction
-		_knockback_time = GameBalance.KNOCKBACK_DURATION
+		_hitstun_time = GameBalance.BASE_HITSTUN_DURATION
 		_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
 
 func is_immune_to_damage() -> bool:
@@ -677,20 +685,25 @@ func is_immune_to_damage() -> bool:
 
 # Funciones | Hitstun
 func _knockback_active() -> bool:
-	return _knockback_time > 0
+	return _hitstun_time > 0
 
 func _apply_hitstun(delta: float) -> void:
-	_knockback_time -= delta
-	var accel := _normal_damage_power * damage_percentage
-	_target_velocity.x += (
-		_knockback_direction.x * accel * delta
-	)
-	_target_velocity.y += (
-		_knockback_direction.y * (accel*10) * delta
-	)
-	if _knockback_time <= 0.0:
+	_hitstun_time -= delta
+	# Tiempo de movimiento de knockback
+	if _knockback_decay_time < GameBalance.KNOCKBACK_DECAY_TIME:
+		var accel := _normal_damage_power * damage_percentage
+		_target_velocity.x += (
+			_knockback_direction.x * accel * delta
+		)
+		_target_velocity.y += (
+			_knockback_direction.y * (accel*10) * delta
+		)
+	_knockback_decay_time += delta
+	# Restablecer
+	if _hitstun_time <= 0.0:
 		_ledge_release_count = 0.0 # Para poder agarrarse
 		_pivot.rotation_degrees.x = 0
+		_knockback_decay_time = 0.0 # Para reiniciar tiempo de movimiento de knockback
 	
 func _hitstun_anim(delta: float, signals: VerticalForceSignals) -> void:
 	if signals.air_count < 0.2:

@@ -157,7 +157,7 @@ var _attacks: Attacks = Attacks.new(
 			"hitboxes_moves": [
 				HitboxMove.new({
 					"id": 6, "damage": 20, "size": Vector3(0.5,0.5,0.5),
-					"position": Vector3(0.8,0.1,0), "direction": Vector3(1,1,0),
+					"position": Vector3(0.8,0.1,0), "direction": Vector3(1,0.75,0),
 					"init_time_ratio": 0.5, "duration": 0.2
 				})
 			]
@@ -670,7 +670,7 @@ func _shield_defence() -> void:
 	Defensa de ataques locos. Anular daño.
 	'''
 	if taking_damage():
-		_knockback_time = 0.0
+		_hitstun_time = 0.0
 		_clean_heavy_hitstun_state()
 		_ignore_last_damage()
 		_shield_time -= (GameBalance.SHIELD_DURATION*_last_damage_percentage)

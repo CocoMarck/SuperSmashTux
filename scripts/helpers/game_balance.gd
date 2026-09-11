@@ -21,7 +21,10 @@ const LEDGE_HANG_OFFSET := 0.3     # que tan separado de la orilla se queda colg
 const LEDGE_RELEASE_TIME := 0.3    # cooldown tras soltarse, pa no re-agarrarse solo
 
 # Person | Damage move
-const KNOCKBACK_DURATION :float = 0.3 # 0.3 (Aceptable) 0.5 (Largo).
+# Duración de base y máxima knockback, del no poder hacer nada, y del movimiento por el knockback.
+const BASE_HITSTUN_DURATION :float = 0.3 # 0.3 (aceptable).
+const MAX_HITSTUN_DURATION :float = 0.7 # 0.5 (aceptable) 1.0 (largo).
+const KNOCKBACK_DECAY_TIME :float = 0.3 # 0.3 (aceptable) 0.5 (largo)
 
 # Person | Stun move
 const STUN_DURATION_ON_FLOOR: float = 1.0
