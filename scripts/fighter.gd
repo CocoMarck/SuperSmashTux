@@ -470,7 +470,7 @@ func _cancel_attack(signals: VerticalForceSignals, states: MoveStates):
 		# Cancelar ataque saltarin si esta recibiendo daño. En el piso.
 		# El if no describe eso, pero es para eso que se menciona.
 		_current_attack = null
-	elif _grabbing():
+	elif _grabbing() or grabbed:
 		_current_attack = null
 	elif signals.on_floor and _current_attack.air_attack:
 		# Cancelar ataque aerio si no esta en aire.
@@ -806,12 +806,16 @@ func _grabbing_move(signals: VerticalForceSignals) -> void:
 # Funciones | Init
 func _ready() -> void:
 	super()
-	_shield_mesh_instance = $Visual/ShieldMeshInstance3D
+	# Duplicar mesh instance, para evitar bugs visuales.
+	# Tamaño de shield de inicio
+	_shield_mesh_instance = _visual.get_node("ShieldMeshInstance3D")
 	_shield_mesh_instance.visible = false
-	_shield_sphere = _shield_mesh_instance.mesh
+	_shield_sphere = _shield_mesh_instance.mesh.duplicate()
+	_shield_mesh_instance.mesh = _shield_sphere
 	_init_shield_radius = _shield_sphere.radius
 	_init_shield_height = _shield_sphere.height
 	_shield_time = GameBalance.SHIELD_DURATION
+	# Ataques
 	_neutral_combo_attacks = [_attacks.neutral1, _attacks.neutral2, _attacks.neutral3]
 
 

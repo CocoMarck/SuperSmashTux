@@ -21,7 +21,7 @@ const LEDGE_HANG_OFFSET := 0.3     # que tan separado de la orilla se queda colg
 const LEDGE_RELEASE_TIME := 0.3    # cooldown tras soltarse, pa no re-agarrarse solo
 
 # Person | Damage move
-const KNOCKBACK_DURATION :float = 0.35
+const KNOCKBACK_DURATION :float = 0.5 # 0.35 (Corto para combó) 0.5 (un poco largo, pero pasable, bueno para combó).
 
 # Person | Stun move
 const STUN_DURATION_ON_FLOOR: float = 1.0
@@ -36,7 +36,7 @@ const STUN_GETUP_DOWN_DURATION: float = 0.4
 const KNOCKOUT_DURATION: float = 2.0
 
 # Fighter | Shield
-const SHIELD_STUN_DURATION :float = 0.8
+const SHIELD_STUN_DURATION :float = 0.5
 const ROLL_SHIELD_COST_RATIO : float = 0.1
 const SHIELD_DURATION: float = 5.0
 const SHIELD_REGENERATION_DURATION: float = 0.5

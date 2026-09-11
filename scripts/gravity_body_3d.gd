@@ -196,7 +196,7 @@ func _get_head_y() -> float:
 # Ready y physics process
 func _ready() -> void:
 	# El shape que se necesita si o si.
-	_collision_shape = $CollisionShape3D
+	_collision_shape = get_node("CollisionShape3D")
 	add_to_group("gravity_bodies")
 
 func _physics_process(delta: float) -> void:

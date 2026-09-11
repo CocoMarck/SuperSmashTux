@@ -822,7 +822,7 @@ func _ready() -> void:
 	# El hijo de Visual es la raiz del .glb importado; su nombre depende del
 	# archivo fuente (ej. "standard_character_a_pose"), asi que se toma
 	# dinamico en vez de hardcodearlo, y se navega desde ahi.
-	_visual = $Visual
+	_visual = get_node("Visual")
 	var model_root: Node3D = _visual.get_child(0)
 	_pivot = model_root.get_node("Pivot")
 	_mesh_instance = model_root.get_node("Pivot/Skeleton3D/MeshInstance3D")
