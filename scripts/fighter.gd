@@ -767,7 +767,10 @@ func grabbing_person(p_person: Person, p_hitbox_grab: HitboxGrab) -> void:
 			)
 		)
 	else:
-		_clear_grabbing()
+		#_clear_grabbing()
+		_spawned_hitbox_grab.queue_free()
+		_spawned_hitbox_grab = null
+		_grabbed_victim = null
 
 func _grabbing() -> bool:
 	return _spawned_hitbox_grab != null

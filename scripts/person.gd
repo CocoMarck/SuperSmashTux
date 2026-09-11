@@ -74,7 +74,7 @@ var _horizontal_move: bool = true
 var _allow_jump: bool = true
 
 # Propiedades privadas | Daño
-var _normal_damage_power :float = 50 # Este valor se cambiara segun el personaje.
+var _normal_damage_power :float = 35 # Este valor se cambiara segun el personaje. 50 Para 0.35 seconds de knockback, 35 para 0.5 seconds de knockback
 var _knockback_direction :Vector3 = Vector3.ZERO
 var _knockback_time :float = 0.0
 var _damage_degrees :float = 0.0
@@ -209,6 +209,7 @@ func respawn(at_position: Vector3) -> void:
 	_clean_heavy_hitstun_state()
 	grabbed = false
 	_knockout_time = 0
+	_knockback_time = 0
 	_set_x_not_zero_value( _get_initial_facing() )
 	
 # Funciones | Agarre de orillas
@@ -625,6 +626,10 @@ func _clean_heavy_hitstun_state():
 	_heavy_hitstun_get_up_time = 0
 	_heavy_hitstun_wait_to_get_up = false
 
+func _get_knockback_time_by_damage_porcentage(damage: float) -> float:
+	# Tiempo adicional basado en porcentaje de daño.
+	return (damage * damage_percentage)*0.01
+
 func set_damage_move(damage:int, direction:Vector3) -> void:
 	'''
 	Recibir un trancazo
@@ -634,7 +639,7 @@ func set_damage_move(damage:int, direction:Vector3) -> void:
 	'''
 	if not _immunity_to_damage:
 		_knockback_direction = direction
-		_knockback_time = GameBalance.KNOCKBACK_DURATION
+		_knockback_time = GameBalance.KNOCKBACK_DURATION + _get_knockback_time_by_damage_porcentage(damage)
 
 		# Heavy hitstun. Cuando entra.
 		_clean_heavy_hitstun_state()
