@@ -640,13 +640,13 @@ func _grab_move(delta: float, signals: VerticalForceSignals) -> void:
 
 # Funciones | Shield
 func _waiting_shield_move(signals: VerticalForceSignals) -> bool:
-	return _shield_move_time > 0 and signals.on_floor
+	return _shield_move_time > 0 and signals.on_floor and _shield
 
 func _shield_regeneration(delta: float, signals: VerticalForceSignals) -> void:
 	'''
-	Regenera el escudo, solo si no esta haciendo ataque, o anda rodando.
+	Regenera el escudo, solo si no esta usando escudo, haciendo ataque, o anda rodando.
 	'''
-	if _with_shield(signals) or _rolling():
+	if _with_shield(signals) or _rolling() or _attacking():
 		return
 
 	# Regenerar solo en el piso, y cuando no ruede, y cuando no se use escudo.
@@ -663,24 +663,27 @@ func _shield_regeneration(delta: float, signals: VerticalForceSignals) -> void:
 
 func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 	'''
-	Cuenta la anim de hacer el shield. Pone el shield, y le resta capacidad de uso, hasta cero.
+	- Cuenta la anim de hacer el shield. 
+	- Pone el shield, y le resta capacidad de uso, hasta cero.
+	- Resetera espera de shield dependiendo de si recibio daño, esta atacando, o no esta en el aire.
 	'''
 	if _shield_pressed:
 		_shield_move_time = GameBalance.SHIELD_MOVE_DURATION
 	
-	# Esperar animacion de shield
+	# Esperar animacion de shield. Reniciar tiempo si es que se necesita.
 	if _waiting_shield_move(signals):
-		if not signals.on_floor or taking_damage():
+		if not signals.on_floor or taking_damage() or _attacking() or grabbed:
 			_shield_move_time = GameBalance.SHIELD_MOVE_DURATION
 		else:
 			_shield_move_time -= delta
 
-	# Asegurar que este activado el escudo. Que este en el piso o si no cancelar.
+	# Cancelar escudo: 
+	# Que este activado el escudo. Que este en el piso. Que no este atacando.
 	if (
 		(
 			_waiting_shield_move(signals) or
 			( not ( (_shield or _shield_blockstun) and _allow_shield ) )
-		) or not signals.on_floor
+		) or not signals.on_floor or _attacking()
 	):
 		return 
 	
@@ -755,7 +758,7 @@ func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
 				_roll_backward = false
 				_roll_forward = true
 			_roll_time = _roll_duration
-			_shield_time -= GameBalance.SHIELD_DURATION * GameBalance.ROLL_SHIELD_COST_RATIO # Consto de usar rodada
+			_shield_time -= GameBalance.SHIELD_DURATION * GameBalance.ROLL_SHIELD_COST_RATIO # Costo de usar rodada.
 	if signals.on_floor == false:
 		_roll_time = 0
 	if _rolling():
@@ -892,12 +895,11 @@ func _process_action(delta: float, frame: FrameMotionSignals) -> void:
 	## No permitir hacer agarre o escudo cuando se ataca.
 	if not _attacking():
 		_grab_move(delta, frame.vertical_force_signals)
-		_shield_move(delta, frame.vertical_force_signals)
-		_shield_regeneration(delta, frame.vertical_force_signals)
+	_shield_move(delta, frame.vertical_force_signals)
+	_shield_regeneration(delta, frame.vertical_force_signals)
 	var with_shield = _with_shield(frame.vertical_force_signals)
 	var grab_or_shield = (
-		_waiting_grab_move() or 
-		_waiting_shield_move(frame.vertical_force_signals) or with_shield
+		_waiting_grab_move() or with_shield
 	)
 	if grab_or_shield or _rolling():
 		# Anular ataque si se hace grab, escudo, o rueda.
