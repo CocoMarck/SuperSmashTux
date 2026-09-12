@@ -318,7 +318,7 @@ func _is_direction_buffer() -> bool:
 	return _direction_buffer_timer > 0
 
 func _block_inputs() -> bool:
-	return grabbed or _knockback_active() or _knocked_out()
+	return grabbed or _hitstun_active() or _knocked_out()
 
 func _false_inputs() -> void:
 	_move_left = false
@@ -332,7 +332,7 @@ func _false_inputs() -> void:
 	_right_pressed = false
 
 func taking_damage() -> bool:
-	return _knockback_active() or _heavy_hitstun_active()
+	return _hitstun_active() or _heavy_hitstun_active()
 
 func _can_down_hard():
 	return _down_count >= GameBalance.TIMES_PRESSING_DOWN
@@ -431,7 +431,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	# Velocidad horizontal
 	var target_speed := _direction.x * (speed*speed_multiplier)
 	var accel := _air_acceleration
-	if _knockback_active():
+	if _hitstun_active():
 		accel = _knockback_friction
 	elif signals.on_floor:
 		if _direction.x == 0.0:
@@ -681,7 +681,7 @@ func is_immune_to_damage() -> bool:
 	return _immunity_to_damage
 
 # Funciones | Hitstun
-func _knockback_active() -> bool:
+func _hitstun_active() -> bool:
 	return _hitstun_time > 0
 
 func _apply_hitstun(delta: float) -> void:
@@ -899,7 +899,7 @@ func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
 	- NO los que no te dan efectos locos. Como invertirte los inputs o algo asi.
 	Funcion remplazable por fighter.
 	'''
-	if _knockback_active():
+	if _hitstun_active():
 		_apply_hitstun(delta)
 	elif _heavy_hitstun_active():
 		_apply_heavy_hitstun(delta, frame.vertical_force_signals)
@@ -919,7 +919,7 @@ func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 	Función sobreescribible, para fighter.
 	'''
 	var not_normal = true
-	if _knockback_active():
+	if _hitstun_active():
 		_hitstun_anim(delta, frame.vertical_force_signals)
 	elif _heavy_hitstun_active():
 		_heavy_hitstun_anim(delta, frame.vertical_force_signals)

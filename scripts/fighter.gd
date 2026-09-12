@@ -966,7 +966,7 @@ func _visual_shield(frame: FrameMotionSignals) -> void:
 		_shield_sphere.height = _init_shield_height * porcent
 
 func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
-	if _knockback_active():
+	if _hitstun_active():
 		_apply_hitstun(delta)
 	elif _heavy_hitstun_active():
 		_apply_heavy_hitstun(delta, frame.vertical_force_signals)
@@ -975,7 +975,7 @@ func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
 
 func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 	var not_normal = true
-	if _knockback_active():
+	if _hitstun_active():
 		_hitstun_anim(delta, frame.vertical_force_signals)
 	elif _heavy_hitstun_active():
 		_heavy_hitstun_anim(delta, frame.vertical_force_signals)
