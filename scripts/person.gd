@@ -416,12 +416,10 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 			_set_jumps_to_max()
 
 	# Cambiador de velocidad segun sea el caso.
-	var speed : int
+	var speed : int = running_speed
 	var speed_multiplier := 1.0
 	if _walk:
 		speed = walking_speed
-	else:
-		speed = running_speed
 	if signals.on_floor:
 		if _move_down:
 			speed = walking_speed
@@ -647,7 +645,6 @@ func set_damage_move(damage:int, direction:Vector3) -> void:
 		_knockback_direction = direction
 		_hitstun_time = _get_hitstun_time(damage)
 		_knockback_decay_time = 0.0
-		print(_hitstun_time)
 
 		# Heavy hitstun. Cuando entra.
 		_clean_heavy_hitstun_state()

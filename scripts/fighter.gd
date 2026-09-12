@@ -8,6 +8,10 @@ var _attack: bool = false
 var _grab: bool = false
 var _shield: bool = false
 
+# Propiedades privadas | Flancos
+var _was_shield: bool = false
+var _shield_pressed: bool = false
+
 # Propiedades privadas | Grab
 var _grab_move_time: float = 0.0
 var _grab_move_duration: float = 0.375#GameBalance.GRAB_MOVE_NORMAL_DURATION
@@ -17,6 +21,7 @@ var _wait_hitbox_grab: bool = false
 var _shield_time: float = 0.0
 var _shield_regeneration_time :float = 0.0
 var _shield_regeneration_value :float = 0.5
+var _shield_move_time: float = 0.0
 var _allow_shield: bool = true
 
 # Propiedades privadas | Shield rodar
@@ -634,7 +639,17 @@ func _grab_move(delta: float, signals: VerticalForceSignals) -> void:
 			_pivot.add_child(hitbox)
 
 # Funciones | Shield
+func _waiting_shield_move(signals: VerticalForceSignals) -> bool:
+	return _shield_move_time > 0 and signals.on_floor
+
 func _shield_regeneration(delta: float, signals: VerticalForceSignals) -> void:
+	'''
+	Regenera el escudo, solo si no esta haciendo ataque, o anda rodando.
+	'''
+	if _with_shield(signals) or _rolling():
+		return
+
+	# Regenerar solo en el piso, y cuando no ruede, y cuando no se use escudo.
 	if signals.on_floor:
 		if _shield_regeneration_time <= 0.0:
 			_shield_time += _shield_regeneration_value
@@ -647,23 +662,44 @@ func _shield_regeneration(delta: float, signals: VerticalForceSignals) -> void:
 		_shield_time = GameBalance.SHIELD_DURATION
 
 func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
-	# Tiene que estar en el piso
-	if signals.on_floor:
-		if _shield_time > 0.0:
-			_shield_time -= delta
-			# Blockstun time
-			if _shield_blockstun_time <= 0:
-				_shield_blockstun = false
-			if _shield_blockstun:
-				_shield_blockstun_time -= delta
-		if _shield_time <= 0.0:
-			# Daño por exceso de uso de escudo
-			_shield_blockstun = false
-			_shield_time = 0.0
-			_knockout_time = GameBalance.KNOCKOUT_DURATION
+	'''
+	Cuenta la anim de hacer el shield. Pone el shield, y le resta capacidad de uso, hasta cero.
+	'''
+	if _shield_pressed:
+		_shield_move_time = GameBalance.SHIELD_MOVE_DURATION
+	
+	# Esperar animacion de shield
+	if _waiting_shield_move(signals):
+		if not signals.on_floor or taking_damage():
+			_shield_move_time = GameBalance.SHIELD_MOVE_DURATION
 		else:
-			# Rodar
-			_roll = _left_pressed or _right_pressed
+			_shield_move_time -= delta
+
+	# Asegurar que este activado el escudo. Que este en el piso o si no cancelar.
+	if (
+		(
+			_waiting_shield_move(signals) or
+			( not ( (_shield or _shield_blockstun) and _allow_shield ) )
+		) or not signals.on_floor
+	):
+		return 
+	
+	# Tiene que estar en el piso
+	if _shield_time > 0.0:
+		_shield_time -= delta
+		# Blockstun time
+		if _shield_blockstun_time <= 0:
+			_shield_blockstun = false
+		if _shield_blockstun:
+			_shield_blockstun_time -= delta
+	if _shield_time <= 0.0:
+		# Daño por exceso de uso de escudo
+		_shield_blockstun = false
+		_shield_time = 0.0
+		_knockout_time = GameBalance.KNOCKOUT_DURATION
+	else:
+		# Rodar
+		_roll = _left_pressed or _right_pressed
 
 func _shield_defence() -> void:
 	'''
@@ -699,7 +735,7 @@ func _with_shield(signals: VerticalForceSignals) -> bool:
 		(_shield_time > 0) and 
 		(
 			(_shield or _shield_blockstun) and _allow_shield and signals.on_floor and not _attacking()
-		)
+		) and (not _waiting_shield_move(signals))
 	)
 
 # Funciones | Shield rodar
@@ -848,19 +884,21 @@ func _process_action(delta: float, frame: FrameMotionSignals) -> void:
 		_grabbing_cooldown_time -= delta
 	if _shield or _with_shield(frame.vertical_force_signals) or _grabbing() or _grabbing_cooldown_time > 0:
 		_grab = false
-	if _grab or _waiting_grab_move():
+	if _grab or _waiting_grab_move() or _grabbing():
 		_shield = false
+	# Flanco de input shield
+	_shield_pressed = _shield and not _was_shield
+	_was_shield = _shield
 	## No permitir hacer agarre o escudo cuando se ataca.
 	if not _attacking():
 		_grab_move(delta, frame.vertical_force_signals)
-		if (_shield or _shield_blockstun)  and _allow_shield:
-			_shield_move(delta, frame.vertical_force_signals)
-		else:
-			if not _rolling():
-				_shield_regeneration(delta, frame.vertical_force_signals)
-	var waiting_grab_move = _waiting_grab_move()
+		_shield_move(delta, frame.vertical_force_signals)
+		_shield_regeneration(delta, frame.vertical_force_signals)
 	var with_shield = _with_shield(frame.vertical_force_signals)
-	var grab_or_shield = waiting_grab_move or with_shield
+	var grab_or_shield = (
+		_waiting_grab_move() or 
+		_waiting_shield_move(frame.vertical_force_signals) or with_shield
+	)
 	if grab_or_shield or _rolling():
 		# Anular ataque si se hace grab, escudo, o rueda.
 		_current_attack = null
@@ -881,7 +919,7 @@ func _process_action(delta: float, frame: FrameMotionSignals) -> void:
 		# Si este en el piso y da trancazos, no permitir inputs de movimiento horizontal.
 		if _current_attack.air_attack == false:
 			_horizontal_move = false
-	elif _waiting_grab_move() or with_shield or _rolling() or _grabbing():
+	elif _waiting_grab_move() or with_shield or _rolling() or _grabbing() or _waiting_shield_move(frame.vertical_force_signals):
 		_horizontal_move = false
 		_allow_jump = false
 		
@@ -952,6 +990,8 @@ func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 	elif _rolling():
 		_roll_anim()
 	elif _waiting_grab_move():
+		_animation_player.play("grab")
+	elif _waiting_shield_move(frame.vertical_force_signals):
 		_animation_player.play("grab")
 	elif _with_shield(frame.vertical_force_signals): 
 		_animation_player.play("guard")
