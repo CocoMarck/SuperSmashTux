@@ -670,7 +670,7 @@ func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 	if _shield_pressed:
 		_shield_move_time = GameBalance.SHIELD_MOVE_DURATION
 	
-	# Esperar animacion de shield. Reniciar tiempo si es que se necesita.
+	# Esperar animacion de shield. Reniciar tiempo si es que se necesita. Por arquietectura no puede hacer "grabbing" mientras usa quiere usar el escudo.
 	if _waiting_shield_move(signals):
 		if not signals.on_floor or taking_damage() or _attacking() or grabbed:
 			_shield_move_time = GameBalance.SHIELD_MOVE_DURATION
