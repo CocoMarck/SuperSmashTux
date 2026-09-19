@@ -38,7 +38,6 @@ var _init_shield_radius : float
 var _init_shield_height : float
 
 # Propiedades privadas | shields stun
-var _shield_blockstun : bool = false
 var _shield_blockstun_time : float = 0.0
 
 # Propiedades privadas | Ataque
@@ -642,6 +641,9 @@ func _grab_move(delta: float, signals: VerticalForceSignals) -> void:
 func _waiting_shield_move(signals: VerticalForceSignals) -> bool:
 	return _shield_move_time > 0 and signals.on_floor and _shield
 
+func _shield_blockstun_active() -> bool:
+	return _shield_blockstun_time > 0
+
 func _shield_regeneration(delta: float, signals: VerticalForceSignals) -> void:
 	'''
 	Regenera el escudo, solo si no esta usando escudo, haciendo ataque, o anda rodando.
@@ -670,7 +672,7 @@ func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 	if _shield_pressed:
 		_shield_move_time = GameBalance.SHIELD_MOVE_DURATION
 	
-	# Esperar animacion de shield. Reniciar tiempo si es que se necesita. Por arquietectura no puede hacer "grabbing" mientras usa quiere usar el escudo.
+	# Esperar animacion de shield. Reniciar tiempo si es que se necesita. Por arquitectura no puede hacer "grabbing" mientras se quiere usar el escudo.
 	if _waiting_shield_move(signals):
 		if not signals.on_floor or taking_damage() or _attacking() or grabbed:
 			_shield_move_time = GameBalance.SHIELD_MOVE_DURATION
@@ -682,22 +684,22 @@ func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 	if (
 		(
 			_waiting_shield_move(signals) or
-			( not ( (_shield or _shield_blockstun) and _allow_shield ) )
+			( not ( (_shield or _shield_blockstun_active()) and _allow_shield ) )
 		) or not signals.on_floor or _attacking()
 	):
 		return 
 	
 	# Tiene que estar en el piso
 	if _shield_time > 0.0:
-		_shield_time -= delta
 		# Blockstun time
-		if _shield_blockstun_time <= 0:
-			_shield_blockstun = false
-		if _shield_blockstun:
+		if _shield_blockstun_active():
 			_shield_blockstun_time -= delta
+		else:
+			# Solo restar tiempo si no esta bloqueado por stun.
+			_shield_time -= delta
 	if _shield_time <= 0.0:
 		# Daño por exceso de uso de escudo
-		_shield_blockstun = false
+		_shield_blockstun_time = 0.0
 		_shield_time = 0.0
 		_knockout_time = GameBalance.KNOCKOUT_DURATION
 	else:
@@ -713,7 +715,6 @@ func _shield_defence() -> void:
 		_clean_heavy_hitstun_state()
 		_ignore_last_damage()
 		_shield_time -= (GameBalance.SHIELD_DURATION*_last_damage_percentage)
-		_shield_blockstun = true
 		_shield_blockstun_time = GameBalance.SHIELD_STUN_DURATION
 
 func _apply_shield_pushback(delta):
@@ -737,7 +738,7 @@ func _with_shield(signals: VerticalForceSignals) -> bool:
 	return (
 		(_shield_time > 0) and 
 		(
-			(_shield or _shield_blockstun) and _allow_shield and signals.on_floor and not _attacking()
+			(_shield or _shield_blockstun_active()) and _allow_shield and signals.on_floor and not _attacking()
 		) and (not _waiting_shield_move(signals))
 	)
 
@@ -746,7 +747,7 @@ func _rolling() -> bool:
 	return _roll_backward or _roll_forward
 
 func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
-	if _roll and (_allow_shield) and (not _shield_blockstun):
+	if _roll and (_allow_shield) and (not _shield_blockstun_active()):
 		if _roll_time <= 0:
 			if _left_pressed and _last_x_direction == 1:
 				_roll_backward = true
@@ -929,7 +930,6 @@ func _process_action(delta: float, frame: FrameMotionSignals) -> void:
 	if with_shield:
 		_shield_defence()
 	else:
-		_shield_blockstun = false
 		_shield_blockstun_time = 0
 	_roll_move(delta, frame.vertical_force_signals)
 
@@ -972,7 +972,7 @@ func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
 		_apply_hitstun(delta)
 	elif _heavy_hitstun_active():
 		_apply_heavy_hitstun(delta, frame.vertical_force_signals)
-	elif _shield_blockstun:
+	elif _shield_blockstun_active():
 		_apply_shield_pushback(delta)
 
 func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:

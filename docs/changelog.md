@@ -60,6 +60,7 @@
 - Mecánica: **LISTO**: Cuando se hace ataque en el aire, cancelar heavy hitsun.
     - **LISTO** Solo poder atacar cuando pase "x" tiempo en el aire. 
 - Animación de shield, para poder usarlo **LISTO**: Es necesario, que evita hacer que el jugador se salga de combo, por spamear escudo.. Es placeholder la anim, testear, puede que se me escapase algo. 
+- No restar capacidad de escudo cuando se en el shield hitstun. **LISTO**
 
 ### PowerFighter
 - `Tercer salto` **LISTO**: Tendrá anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso. Esto lo hace fighter.
@@ -74,6 +75,7 @@
     - Si esta recibiendo daño se cancela la animación. 
     - Se sobrepone sobre move states. Los pone en false todos, para que no se pueda hacer nada mientras se hace la anim de caída en el piso.
     - Es una anim muy corta, poner constante en game balance, duración de anim como de 0.2 segundos.
+- Efecto visual al hacer movimientos especiales: Ejemplo: Moverse hacia abajo mas rápido. Bajarse de plataforma. **FALTA**
 
 - `process_sound` **FALTA**: modulo que obtiene señales, para reproducir sonidos, sonido de pasos, de daño recibido, y etc.
     - Contar tiempo al moverse en el piso o en el aire. (Solo cuando no se recibe daño)
