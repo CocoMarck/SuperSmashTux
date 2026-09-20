@@ -81,6 +81,7 @@ var _knockback_decay_time :float = 0.0
 var _damage_degrees :float = 0.0
 var _last_damage :float = 0.0
 var _last_damage_percentage :float = 0.0
+var _taking_damage_count : float = 0.0
 
 # Propiedades privadas | Stun
 var _heavy_hitstun_time: float = 0.0
@@ -642,6 +643,7 @@ func set_damage_move(damage:int, direction:Vector3) -> void:
 	Y establecer si el golpe te quito saltos o no.
 	'''
 	if not _immunity_to_damage:
+		_taking_damage_count = 0
 		_knockback_direction = direction
 		_hitstun_time = _get_hitstun_time(damage)
 		_knockback_decay_time = 0.0
@@ -703,12 +705,12 @@ func _apply_hitstun(delta: float) -> void:
 		_knockback_decay_time = 0.0 # Para reiniciar tiempo de movimiento de knockback
 	
 func _hitstun_anim(delta: float, signals: VerticalForceSignals) -> void:
-	if signals.air_count < 0.2:
+	if signals.air_count < 0.2 or signals.on_floor:
 		_damage_degrees = 0
-		_animation_player.play("hurt")
-	elif signals.on_floor:
-		_damage_degrees = 0
-		_animation_player.play("hurt")
+		if _taking_damage_count >= 0.4: # Mucho tiempo en el piso.
+			_animation_player.play("knocked_out")
+		else:
+			_animation_player.play("hurt")
 	else:
 		_animation_player.play("air_hurt")
 		_damage_degrees += ((_normal_damage_power*damage_percentage)*8 )*delta
@@ -911,6 +913,10 @@ func _process_damage(delta: float, frame: FrameMotionSignals) -> void:
 	_process_stun(delta, frame)
 	if _knocked_out():
 		_apply_knockout(delta, frame.vertical_force_signals)
+	
+	# Contar recibimiento de daño.
+	if taking_damage():
+		_taking_damage_count += delta
 
 
 func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
