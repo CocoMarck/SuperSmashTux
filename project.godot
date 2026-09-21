@@ -8,10 +8,6 @@
 
 config_version=5
 
-[autoload]
-; Para tener cargado siempre el settings.
-InputSettings="*res://scripts/helpers/input_settings.gd"
-
 [animation]
 
 compatibility/default_parent_skeleton_in_mesh_instance_3d=true
@@ -22,6 +18,10 @@ config/name="SuperSmashTux"
 run/main_scene="uid://c80ojhhjrd0un"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.png"
+
+[autoload]
+
+InputSettings="*res://scripts/helpers/input_settings.gd"
 
 [dotnet]
 
