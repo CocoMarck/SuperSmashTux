@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://bylaowuf7ncy7"]
+
+[ext_resource type="Script" uid="uid://cgps5wruilxk" path="res://scripts/menu/controls_menu.gd" id="1_i2gav"]
+[ext_resource type="Script" uid="uid://cno74wf4nvv0l" path="res://scripts/menu/button_menu.gd" id="2_5tddo"]
+
+[node name="Controls" type="Node2D" unique_id=406256504]
+script = ExtResource("1_i2gav")
+
+[node name="TabContainer" type="TabContainer" parent="." unique_id=749770512]
+offset_right = 1151.0
+offset_bottom = 646.0
+current_tab = 0
+
+[node name="Player1" type="VBoxContainer" parent="TabContainer" unique_id=1036642587]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="Player2" type="VBoxContainer" parent="TabContainer" unique_id=1293396354]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="ButtonMenu" type="Button" parent="." unique_id=497547379]
+offset_left = 994.0
+offset_top = 602.0
+offset_right = 1123.0
+offset_bottom = 634.0
+text = "Back to menu"
+script = ExtResource("2_5tddo")

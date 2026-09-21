@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://c5rhlecdtr3fm"]
+
+[ext_resource type="Script" uid="uid://dixe7xp7tg4fo" path="res://scripts/menu/button_start.gd" id="1_yqeox"]
+[ext_resource type="Script" uid="uid://caufbm20j0drj" path="res://scripts/menu/button_controls.gd" id="2_vjb58"]
+
+[node name="Menu" type="Node2D" unique_id=2015966259]
+
+[node name="ButtonStart" type="Button" parent="." unique_id=360843869]
+offset_left = 513.0
+offset_top = 162.0
+offset_right = 656.0
+offset_bottom = 206.0
+text = "Start"
+script = ExtResource("1_yqeox")
+
+[node name="ButtonControls" type="Button" parent="." unique_id=401747103]
+offset_left = 519.0
+offset_top = 257.0
+offset_right = 648.0
+offset_bottom = 301.0
+text = "Controls"
+script = ExtResource("2_vjb58")
