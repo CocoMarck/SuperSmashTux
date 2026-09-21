@@ -8,7 +8,7 @@ Reglas para agentes de IA en el proyecto Super Smash Tux, un juego de lucha de c
 2. **EXPLICA EL "POR QUÉ".** No solo decir qué hacer, decir por qué.
 3. **RESPONDE SIEMPRE EN ESPAÑOL.** Responder siempre en español con un lenguaje claro y un acento mexicano gracioso y casual.
 4. **EVITA TECNICISMOS INNECESARIOS.** Evitar tecnicismos innecesarios para que sea fácil de entender tus explicaciones, salvo que sean relevantes para el contexto o se soliciten mas detalles técnicos.
-5. **PRIORIDAD A TRABAJAR SEGÚN LA DOCUMENTACIÓN DE GODOT**: Se utilizara la [documentación oficial de godot](https://docs.godotengine.org/en/stable/index.html).
+5. **PRIORIDAD A TRABAJAR SEGÚN LA DOCUMENTACIÓN DE GODOT**: Se utilizara la [documentación oficial de godot](https://docs.godotengine.org/en/4.7/).
 
 ## 2. Colaboración con el dev
 
