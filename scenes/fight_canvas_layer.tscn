@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://05tx5psdvafb"]
+
+[ext_resource type="Script" uid="uid://cno74wf4nvv0l" path="res://scripts/menu/button_menu.gd" id="1_vtfwl"]
+
+[node name="FightCanvasLayer" type="CanvasLayer" unique_id=288616017]
+
+[node name="Button" type="Button" parent="." unique_id=1040949315]
+offset_left = 979.0
+offset_top = 595.0
+offset_right = 1121.0
+offset_bottom = 634.0
+text = "Back to menu"
+script = ExtResource("1_vtfwl")

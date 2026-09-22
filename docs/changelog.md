@@ -93,3 +93,14 @@
 - Bug **TESTEAR**: Por alguna extraña razón el `heavy_hitstun`, queda fijado de forma rara. Aun no identifico que lo deja siempre activo. hasta parece random. Ya lo cambie, párese jalar. El pedo era el flag/bool de wait heavy hitstun get up.
 
 - Aceleración horizontal **TESTEAR**: al tener poca, si se mueve rapido, pero queda raro cuando se mueve en el aire aveces, ya que al ser poca, aveces se mueve muy rapido en el aire.
+
+---
+## `2026-09-22`
+- **LISTO** Menu como scene princial.
+- **LISTO** Meno de configuración de controles.
+- **LISTO** Poder regresar al menu en el juego. Con que se puede mover al menu, no importa si limpia la ecena de juego.
+
+### Bug: como se maneja la partida
+- **FALTA** `GameManager` y `SpawnPoint` dependen de `get_tree().current_scene` para colgar los personajes (`spawn_point.gd`, y el respawn en `game_manager.gd`). Eso estaba bien con `change_scene_to_file`, pero con el cambio de escena manual del botón Start (`button_start.gd`), el spawn corre en `_ready()` cuando `current_scene` todavía apunta al menú viejo, así que los fighters se enganchan a una escena que se va a liberar y quedan referencias `freed`.
+- **FALTA** Con eso, `_physics_process` de `GameManager` encuentra chars freed dentro de `_lives_of_character` y llama `_forget_character` con el parámetro tipado `PowerFighter`, que Godot rechaza por type-check: `Invalid type ... previously freed is not a subclass of the expected argument class`.
+- **LISTO (solución propuesta)** Quitar la dependencia de `current_scene`: `SpawnPoint.spawn()` recibe un `host_node`, y el `GameManager` usa `_level_root = get_parent()` para spawn y respawn.
