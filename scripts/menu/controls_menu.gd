@@ -12,13 +12,11 @@ const ACTION_LEBELS :Dictionary = {
 	"attack": "Attack", "grab": "Grabbing",
 	"shield": "Use defence", "power_attack": "Powerful attack",}
 
-# Slots de entrada disponibles por arquitectura: dos mapas de input por acción.
-enum Slot { INPUT_MAP_1, INPUT_MAP_2 }
-
 var _capturing_player: GlobalUtils.PlayerId
 var _capturing_action: StringName
-var _capturing_slot: Slot
+var _capturing_slot: InputSettings.Slot
 var _capturing_button: Button
+var _capturing_original_text: String
 
 func _ready() -> void:
 	# Construir contenido de pestañas.
@@ -65,48 +63,58 @@ func _make_row(player_id: GlobalUtils.PlayerId, label_text: String, action: Stri
 	row.add_child(label)
 
 	var button_1 := Button.new()
-	button_1.text = _get_bind_text(action, Slot.INPUT_MAP_1)
+	button_1.text = InputSettings.get_bind_text(
+		action, InputSettings.Slot.INPUT_MAP_1)
 	button_1.pressed.connect(
-		_start_capture.bind(player_id, action, Slot.INPUT_MAP_1, button_1))
+		_start_capture.bind(
+			player_id, action, InputSettings.Slot.INPUT_MAP_1, button_1))
 	row.add_child(button_1)
 
 	var button_2 := Button.new()
-	button_2.text = _get_bind_text(action, Slot.INPUT_MAP_2)
+	button_2.text = InputSettings.get_bind_text(
+		action, InputSettings.Slot.INPUT_MAP_2)
 	button_2.pressed.connect(
-		_start_capture.bind(player_id, action, Slot.INPUT_MAP_2, button_2))
+		_start_capture.bind(
+			player_id, action, InputSettings.Slot.INPUT_MAP_2, button_2))
 	row.add_child(button_2)
 
 	return row
 
-## Texto a mostrar del bind actual de una acción para un slot dado.
-func _get_bind_text(action: StringName, slot: Slot) -> String:
-	for event in InputMap.action_get_events(action):
-		if _matches_slot(event, slot):
-			return event.as_text()
-	return "None"
-
-## Indica si un evento corresponde al slot (input_map_1 o input_map_2):
-func _matches_slot(event: InputEvent, slot: Slot) -> bool:
-	match slot:
-		Slot.INPUT_MAP_1:
-			return event is InputEventKey or event is InputEventMouseButton
-		Slot.INPUT_MAP_2:
-			return event is InputEventJoypadButton or event is InputEventJoypadMotion
-	return false
-
 ## Guarda en que acción/slot se hizo click para capturar en el siguiente paso.
 func _start_capture(
-	player_id: GlobalUtils.PlayerId, action: StringName, slot: Slot, button: Button
+	player_id: GlobalUtils.PlayerId, action: StringName, slot: InputSettings.Slot, button: Button
 ) -> void:
 	_capturing_player = player_id
 	_capturing_action = action
 	_capturing_slot = slot
 	_capturing_button = button
+	_capturing_original_text = button.text
 
+# Captura
+func _clear_capture() -> void:
+	_capturing_action = &""
+	_capturing_button = null
+
+func _cancel_capture() -> void:
+	if _capturing_button != null:
+		_capturing_button.text = _capturing_original_text
+	_clear_capture()
 
 ## Señal de captura
-#func _input(event: InputEvent) -> void:
-#    if _capturing_action.is_empty():
-#        return
-#    if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-#        return
+func _input(event: InputEvent) -> void:
+	if _capturing_action.is_empty():
+		return
+	# Si el evento es de salida, cancelar.
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		_cancel_capture()
+		return
+	# Capturar evento
+	var new_event: InputEvent = InputSettings.normalize_captured_event(event, _capturing_slot)
+	if new_event == null:
+		return
+	# Guardado de datos. Remplazar con `InputMap`. Función interna de godot.
+	InputSettings.apply_binding(_capturing_action, _capturing_slot, new_event)
+	InputSettings.save_settings()
+	# Poner texto en boton
+	_capturing_button.text = InputSettings.get_bind_text(_capturing_action, _capturing_slot)
+	_clear_capture()
