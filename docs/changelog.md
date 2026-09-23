@@ -97,8 +97,9 @@
 ---
 ## `2026-09-22`
 - **LISTO** Menu como scene princial.
-- **LISTO** Meno de configuración de controles.
+- **LISTO** Menu de configuración de controles.
 - **LISTO** Poder regresar al menu en el juego. Con que se puede mover al menu, no importa si limpia la ecena de juego.
+- **LISTO**: Hacer interfaz menu, controls, y en el jeugo, responsiva.
 
 ### Bug: como se maneja la partida
 - **FALTA** `GameManager` y `SpawnPoint` dependen de `get_tree().current_scene` para colgar los personajes (`spawn_point.gd`, y el respawn en `game_manager.gd`). Eso estaba bien con `change_scene_to_file`, pero con el cambio de escena manual del botón Start (`button_start.gd`), el spawn corre en `_ready()` cuando `current_scene` todavía apunta al menú viejo, así que los fighters se enganchan a una escena que se va a liberar y quedan referencias `freed`.

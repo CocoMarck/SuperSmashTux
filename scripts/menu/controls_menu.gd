@@ -18,12 +18,21 @@ var _capturing_slot: InputSettings.Slot
 var _capturing_button: Button
 var _capturing_original_text: String
 
+# Controles
+var _tab_container: TabContainer
+var _vbox_player1: VBoxContainer
+var _vbox_player2: VBoxContainer
+
 func _ready() -> void:
+	_tab_container = $CanvasLayer/Control/TabContainer
+	_vbox_player1 = _tab_container.get_child(0)
+	_vbox_player2 = _tab_container.get_child(1)
+	
 	# Construir contenido de pestañas.
 	var tabs :Dictionary = {
 		# TabContainer/VBoxContainer
-		GlobalUtils.PlayerId.PLAYER_1: $TabContainer/Player1,
-		GlobalUtils.PlayerId.PLAYER_2: $TabContainer/Player2,}
+		GlobalUtils.PlayerId.PLAYER_1: _vbox_player1,
+		GlobalUtils.PlayerId.PLAYER_2: _vbox_player2,}
 	for player_id in tabs:
 		_build_player_tab(player_id, tabs[player_id])
 	# Asegurar archivo de configuracion

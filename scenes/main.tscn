@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c80ojhhjrd0un"]
 
-[ext_resource type="PackedScene" uid="uid://c5rhlecdtr3fm" path="res://scenes/main_menu.tscn" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://c5rhlecdtr3fm" path="res://scenes/main_menu_canvas_layer.tscn" id="1_o5qli"]
 
 [node name="Node2D" type="Node2D" unique_id=1113155528]
 
-[node name="Menu" parent="." unique_id=2015966259 instance=ExtResource("1_o5qli")]
+[node name="MainMenuCanvasLayer" parent="." unique_id=2015966259 instance=ExtResource("1_o5qli")]
