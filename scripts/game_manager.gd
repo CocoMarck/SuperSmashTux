@@ -2,13 +2,13 @@ class_name GameManager
 extends Node
 
 # Encargado de armar la partida: cuantos personajes salen, de que tipo, cuantas vidas trae cada quien,
-# y de vigilar que nadie se salga del area jugable pa respawnearlo o eliminarlo.
+# y de vigilar que nadie se salga del área jugable pa respawnearlo o eliminarlo.
 
 # Constantes | Materiales fijos pa los numeros 3 y 4 de la partida.
 const SLOT_3_MATERIAL: Material = preload("res://materials/mat_yellow.tres")
 const SLOT_4_MATERIAL: Material = preload("res://materials/mat_green.tres")
 
-# Propiedades publicas | Configuracion de partida.
+# Propiedades publicas | Configuración de partida.
 @export_group("Match Settings")
 @export var character_types: Array[GlobalUtils.CharacterType] = [
 	GlobalUtils.CharacterType.PLAYER, GlobalUtils.CharacterType.PLAYER,

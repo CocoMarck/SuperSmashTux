@@ -105,3 +105,6 @@
 - **FALTA** `GameManager` y `SpawnPoint` dependen de `get_tree().current_scene` para colgar los personajes (`spawn_point.gd`, y el respawn en `game_manager.gd`). Eso estaba bien con `change_scene_to_file`, pero con el cambio de escena manual del botón Start (`button_start.gd`), el spawn corre en `_ready()` cuando `current_scene` todavía apunta al menú viejo, así que los fighters se enganchan a una escena que se va a liberar y quedan referencias `freed`.
 - **FALTA** Con eso, `_physics_process` de `GameManager` encuentra chars freed dentro de `_lives_of_character` y llama `_forget_character` con el parámetro tipado `PowerFighter`, que Godot rechaza por type-check: `Invalid type ... previously freed is not a subclass of the expected argument class`.
 - **LISTO (solución propuesta)** Quitar la dependencia de `current_scene`: `SpawnPoint.spawn()` recibe un `host_node`, y el `GameManager` usa `_level_root = get_parent()` para spawn y respawn.
+
+## `2026-09-28`
+- **FALTA** `Person` `GravityBody3D` **BUG**: Cuando se colisiona en position perfecta, mismo `x, y, z`, salen volando. Cuando saltan, hago que su colision desaparesca `_toggle_body_collisions`, si sucede que cuando caen, y tienen ambos bodys el mismo `x y z`, salen volando hacia arriba.

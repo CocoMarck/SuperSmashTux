@@ -1,5 +1,6 @@
 extends Button
 
+#const LEVEL_SCENE := "res://scenes/map1_new.tscn"
 const LEVEL_SCENE := "res://scenes/map1.tscn"
 const FIGHT_CANVAS_LAYER_SCENE := "res://scenes/fight_canvas_layer.tscn"
 

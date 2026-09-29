@@ -823,8 +823,11 @@ func _push_bodies_apart(delta: float, states: MoveStates) -> void:
 			var current_speed := walking_speed
 			if states.running:
 				current_speed = running_speed
-			var normal := collision.get_normal()
-			collider.position.x -= normal.x * current_speed * delta
+			
+			# Dirección de empje desde los centros
+			var push_dir_x := signf(collider.global_position.x -global_position.x)
+			if not is_zero_approx(push_dir_x):
+				collider.position.x += push_dir_x * current_speed * delta
 
 # Funciones | Inicializar
 func _ready() -> void:
