@@ -24,12 +24,6 @@ const SLOT_2_MATERIAL: Material = preload("res://materials/mat_blue.tres")
 const SLOT_3_MATERIAL: Material = preload("res://materials/mat_yellow.tres")
 const SLOT_4_MATERIAL: Material = preload("res://materials/mat_green.tres")
 
-# Constantes | Para spawnear
-const POWER_FIGHTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn")
-const POWER_FIGHTER_SCRIPT = preload("res://scripts/power_fighter.gd")
-const PLAYER_SCRIPT = preload("res://scripts/player.gd")
-const NPC_SCRIPT = preload("res://scripts/npc.gd")
-
 # Propiedades publicas | Configuración de partida.
 @export_group("Match Settings")
 @export_range(1, 99, 1) var lives_per_character: int = 3
