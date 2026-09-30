@@ -1,4 +1,4 @@
-class_name SpawnPoint
+class_name OldSpawnPoint
 extends Marker3D
 
 # Constantes del script.

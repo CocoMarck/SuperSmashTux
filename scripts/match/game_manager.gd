@@ -1,9 +1,10 @@
-class_name NewGameManager
+class_name GameManager
 extends Node
 
 '''
 No valida nada, esta bien que de crash si el mapa no esta bien construido.
 
+- Agrega la camara de juego. CameraFollow.
 - Detecta cuando se mueren los peleadores.
 - Tiene las coordenadas de spawneo.
 - Determina y gestiona las vidas de los peleadores.
@@ -52,7 +53,6 @@ var _spawn_point4: SpawnPoint
 
 # Propiedades privadas, relacionadas con la camera.
 var _camera_follow: CameraFollow
-var _shake_end_time_msec: int = 0
 
 # Funciones
 func _get_spawn_points() -> Array[SpawnPoint]:
@@ -69,20 +69,15 @@ func _spawn_all_power_fighters() -> void:
 	for i in range(0, spawn_points.size()):
 		# Instanciar, establecer posición, y meter script. (Esto lo debe hacer spawn point)
 		var spawn_point = spawn_points[i]
-		var power_fighter = POWER_FIGHTER_PREFAB.instantiate()
+		var power_fighter : PowerFighter
 		if i == 0 or i == 1:
-			# Forzar poner players en primeros dos spawn points.
-			power_fighter.set_script(PLAYER_SCRIPT)
-			power_fighter.player_id = i
+			power_fighter = spawn_point.spawn( GlobalUtils.CharacterType.PLAYER, i )
 		else:
-			#power_fighter.set_script(POWER_FIGHTER_SCRIPT)
-			power_fighter.set_script(NPC_SCRIPT)
+			power_fighter = spawn_point.spawn( GlobalUtils.CharacterType.NPC, i )
 		power_fighter.material = _get_all_materials()[i]
-		power_fighter.position = spawn_point.global_position
-		power_fighter.init_looking_at_right = spawn_point.init_looking_at_right
-		# Establecer spawn fijo. El `as PowerFighter`, porque una vez instanciado el scene, es solo un `Node` comun y corriente.
-		_spawn_point_of_power_fighter[power_fighter as PowerFighter] = spawn_point
-		_lives_of_power_fighter[power_fighter as PowerFighter] = lives_per_character
+		# Establecer spawn fijo.
+		_spawn_point_of_power_fighter[power_fighter] = spawn_point
+		_lives_of_power_fighter[power_fighter] = lives_per_character
 		# Agregar al mapa
 		add_child(power_fighter)
 
@@ -105,6 +100,7 @@ func _handle_power_fighter_death(power_fighter: PowerFighter) -> void:
 	'''
 	Un personaje se salio del area jugable. Si le quedan vidas, se sace del arbol de inmediato. See quita de la scene. Se queda la instncia. Delay al morir, despes respawn. Si no le quedan vidas, se purga de la scene.
 	'''
+	_camera_follow.shake( 500 )
 	_lives_of_power_fighter[power_fighter] -= 1
 	# Debug
 	print("%s: morido por la patria vidas; %d" % [_get_power_fighter_label(power_fighter), _lives_of_power_fighter[power_fighter]])
@@ -145,9 +141,10 @@ func _ready() -> void:
 	_spawn_point2 = $SpawnPoint2
 	_spawn_point3 = $SpawnPoint3
 	_spawn_point4 = $SpawnPoint4
-	_camera_follow = $CameraPivot
-	_camera_follow.camera_area = $CameraArea
-	#_camera_follow.play_area = _play_area # Para el nuevo camera.
+	# Camera
+	_camera_follow = CameraFollow.new(_play_area, null)
+	_camera_follow.camera_area = _play_area
+	add_child(_camera_follow)
 	# Debug
 	if _play_area_bounds.size == Vector3.ZERO:
 		# Play_area sin configurar; no se detectaran muertes

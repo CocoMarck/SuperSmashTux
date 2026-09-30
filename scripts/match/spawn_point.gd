@@ -1,0 +1,35 @@
+class_name SpawnPoint
+extends Marker3D
+
+# Constantes del script.
+const POWER_FIGHTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn")
+const PLAYER_SCRIPT = preload("res://scripts/player.gd")
+const NPC_SCRIPT = preload("res://scripts/npc.gd")
+
+# Propiedades publicas del script.
+@export var init_looking_at_right: bool = false
+
+func spawn(character_type: GlobalUtils.CharacterType, player_id: int) -> PowerFighter:
+	'''
+	Instanciar un personaje en este punto, con el tipo e ID que indique quien llama
+	(normalmente el GameManager). El add_child es diferido, pero la referencia que se
+	devuelve ya es valida de inmediato, se puede guardar aunque el nodo todavia no
+	ande metido en el arbol.
+	'''
+	var power_fighter = POWER_FIGHTER_PREFAB.instantiate()
+	match character_type:
+		# Jugador: Establecer script correspondiente y asignar ID. El Player resuelve sus inputs y material segun su ID.
+		GlobalUtils.CharacterType.PLAYER:
+			power_fighter.set_script(PLAYER_SCRIPT)
+			power_fighter.player_id = player_id
+
+		# NPC: Establecer script correspondiente. El NPC resuelve su propio material.
+		GlobalUtils.CharacterType.NPC:
+			power_fighter.set_script(NPC_SCRIPT)
+
+	# Configurar direccion de vista del personaje.
+	power_fighter.init_looking_at_right = init_looking_at_right
+
+	# Posicionar al personaje en este punto de spawn, como hijo directo de la escena.
+	power_fighter.position = global_position
+	return power_fighter as PowerFighter

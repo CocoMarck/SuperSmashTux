@@ -1,4 +1,4 @@
-class_name CameraFollow
+class_name OldCameraFollow
 extends Marker3D
 
 # Camara dinamica: encuadra a todos los peleadores, se aleja cuando se separan y se acerca cuando se juntan. 
@@ -6,7 +6,7 @@ extends Marker3D
 
 # Propiedades publicas | Game Manager.
 @export_group("Game Manager")
-@export var game_manager: GameManager   # obligatorio: fuente de verdad del area jugable y de quien anda esperando su respawn
+@export var game_manager: OldGameManager   # obligatorio: fuente de verdad del area jugable y de quien anda esperando su respawn
 
 # Propiedades publicas | Area de juego.
 @export_group("Areas")
@@ -73,7 +73,7 @@ func _physics_process(delta: float) -> void:
 	if not fighter_positions.is_empty() or not pending_positions.is_empty():
 		_update_target(fighter_positions, pending_positions)
 
-	# La ventana la controla GameManager.is_shake_active(), dura respawn_delay y se dispara en
+	# La ventana la controla OldGameManager.is_shake_active(), dura respawn_delay y se dispara en
 	# cualquier muerte, no solo si el personaje va a volver.
 	_shake_offset = Vector2(randf_range(-shake_strength, shake_strength), randf_range(-shake_strength, shake_strength)) if game_manager.is_shake_active() else Vector2.ZERO
 

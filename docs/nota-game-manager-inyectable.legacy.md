@@ -1,5 +1,15 @@
 # Idea: GameManager inyectable a los mapas
 
+> **LEGACY — documento archivado. Esta idea ya se implementó y cambió de forma.**
+>
+> Describe el `GameManager` anterior (`scripts/legacy/old_game_manager.gd`) y la idea de inyectarlo
+> a los mapas. La inyección quedó obsoleta: el `GameManager` nuevo (`scripts/match/game_manager.gd`)
+> ya no usa `@export var play_area` ni depende de `get_tree().current_scene`; toma su nivel de
+> `get_parent()` y se arma a sí mismo con su `PlayArea` y sus spawn points.
+>
+> La idea que **sí** sigue viva es la de la modularidad, pero con otro nombre y otro alcance:
+> `docs/nota-game-manager-modular.md`.
+
 > **Estado: SOLO IDEA.** No es tarea activa. Se anota para no perder la arquitectura que se quiere
 > alcanzar cuando se mueva el sistema de mapas.
 

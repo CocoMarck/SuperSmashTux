@@ -1,7 +1,7 @@
 extends Button
 
-#const LEVEL_SCENE := "res://scenes/map1_new.tscn"
 const LEVEL_SCENE := "res://scenes/map1.tscn"
+#const LEVEL_SCENE := "res://scenes/map1_old.tscn" # <-- Legacy, solo existe por debug.
 const FIGHT_CANVAS_LAYER_SCENE := "res://scenes/fight_canvas_layer.tscn"
 
 # Called when the node enters the scene tree for the first time.

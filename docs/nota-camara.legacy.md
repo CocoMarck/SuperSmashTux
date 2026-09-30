@@ -1,6 +1,20 @@
 # Nota: Cámara dinámica
 
-> Cómo funciona la cámara estilo Smash Bros del juego. Script: `scripts/camera_follow.gd`.
+> **LEGACY — documento archivado. Nodescribe el sistema vigente.**
+>
+> Describe la cámara anterior: `scripts/legacy/old_camera_follow.gd`, que colgaba de un
+> `CameraPivot` cableado a mano en el mapa y **dependía del `GameManager`** (le pedía los bounds
+> del área y las posiciones de muerte por getters).
+>
+> Hoy la cámara es `scripts/match/camera_follow.gd` (`class_name CameraFollow`), la crea el
+> `GameManager` por código, no depende del manager, y el mapa ya no tiene nodos de cámara. Se
+> conserva la idea del encuadre porque sigue siendo válida, pero las dos cajas y el cableado
+> manual que se describen aquí **ya no aplican**.
+>
+> Arquitectura vigente: `docs/nota-game-manager-modular.md`.
+
+> Cómo funciona la cámara estilo Smash Bros del juego. Script: `camera_follow.gd`, que en su día
+> vivía en `scripts/camera_follow.gd` y hoy está archivado en `scripts/legacy/old_camera_follow.gd`.
 
 ## La idea de fondo
 

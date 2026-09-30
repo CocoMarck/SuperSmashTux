@@ -422,7 +422,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	if _walk:
 		speed = walking_speed
 	if signals.on_floor:
-		if _move_down:
+		if _move_down and not _move_up:
 			speed = walking_speed
 			speed_multiplier = 0.8
 	else:

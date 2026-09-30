@@ -1,4 +1,4 @@
-class_name GameManager
+class_name OldGameManager
 extends Node
 
 # Encargado de armar la partida: cuantos personajes salen, de que tipo, cuantas vidas trae cada quien,
@@ -18,11 +18,11 @@ const SLOT_4_MATERIAL: Material = preload("res://materials/mat_green.tres")
 
 # Propiedades publicas | Referencias de escena.
 @export_group("Scene References")
-@export var spawn_points: Array[SpawnPoint] = []
+@export var spawn_points: Array[OldSpawnPoint] = []
 @export var play_area: Area3D
 
 # Propiedades privadas | Estado por personaje.
-var _spawn_point_of_character: Dictionary[PowerFighter, SpawnPoint] = {}
+var _spawn_point_of_character: Dictionary[PowerFighter, OldSpawnPoint] = {}
 var _lives_of_character: Dictionary[PowerFighter, int] = {}
 var _death_count_of_character: Dictionary[PowerFighter, int] = {}
 var _npc_id_of_character: Dictionary[PowerFighter, GlobalUtils.NPCId] = {}
@@ -81,8 +81,8 @@ func _get_used_player_numbers(requested_player_slots: int) -> Array[int]:
 func _spawn_all_characters() -> void:
 	'''
 	Spawnear a todos los personajes de la partida, sacando el numero de character_types.size()
-	(sin limite forzado; si faltan SpawnPoint pa cubrirlos, esos slots se saltan), repartiendo
-	los SpawnPoint en orden y asignando PlayerId consecutivos a los jugadores.
+	(sin limite forzado; si faltan OldSpawnPoint pa cubrirlos, esos slots se saltan), repartiendo
+	los OldSpawnPoint en orden y asignando PlayerId consecutivos a los jugadores.
 	'''
 	var requested_player_slots := character_types.count(GlobalUtils.CharacterType.PLAYER)
 	var forbidden_npc_numbers := _get_used_player_numbers(requested_player_slots)
@@ -91,7 +91,7 @@ func _spawn_all_characters() -> void:
 	var count := character_types.size()
 	for i in range(count):
 		if i >= spawn_points.size():
-			push_warning("GameManager: falta SpawnPoint para el slot %d" % i)
+			push_warning("GameManager: falta OldSpawnPoint para el slot %d" % i)
 			continue
 		var spawn_point := spawn_points[i]
 		var resolved_type := character_types[i]

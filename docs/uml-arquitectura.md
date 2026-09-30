@@ -35,6 +35,8 @@ classDiagram
 	SpawnPoint ..> PowerFighter : instancia
 	GameManager ..> SpawnPoint : usa
 	GameManager ..> PowerFighter : respawnea
+	GameManager ..> CameraFollow : crea y configura
+	GameManager o-- CameraFollow
 ```
 
 ## Notas
@@ -44,4 +46,6 @@ classDiagram
 - `Fighter`: ataques (13 `FightMove`), grab y shield (temporizadores).
 - `PowerFighter`: doble salto; poderes pendientes.
 - `Character` y `OldFightMove` son legacy, fuera de la cadena.
+- `GameManager` es **modular**: un concern por módulo en `scripts/match/`, sin que un módulo le pregunte a otro. Ver `docs/nota-game-manager-modular.md`.
+- `OldGameManager`, `OldCameraFollow` y `OldSpawnPoint` son la implementación anterior, archivada en `scripts/legacy/`. Fuera de toda la cadena activa.
 - Señales-objeto: `VerticalForceSignals`, `MoveSignals`, `MoveStates` (RefCounted en `scripts/helpers`).
