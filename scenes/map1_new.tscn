@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://xtlh1m2ntt5n"]
 
-[ext_resource type="Script" uid="uid://6osx0hme4168" path="res://scripts/new_game_manager.gd" id="1_vjlk8"]
+[ext_resource type="Script" uid="uid://6osx0hme4168" path="res://scripts/game_flow/new_game_manager.gd" id="1_vjlk8"]
 [ext_resource type="Environment" uid="uid://lit05fb87j4a" path="res://environments/env_game.tres" id="2_1ql3t"]
 [ext_resource type="Script" uid="uid://bcu7gm8en7srf" path="res://scripts/camera_follow.gd" id="3_3qthp"]
 [ext_resource type="Script" uid="uid://bqr8o7d3ctyo2" path="res://scripts/ground_platform.gd" id="4_e1cm0"]
@@ -44,9 +44,8 @@ camera_attributes = SubResource("CameraAttributesPractical_gl6un")
 transform = Transform3D(0.6961406, -0.6440442, 0.31716764, 0.15394281, 0.56543684, 0.8102981, -0.7012058, -0.51525575, 0.49276972, 0, 11.2912, 0)
 shadow_enabled = true
 
-[node name="CameraPivot" type="Marker3D" parent="." unique_id=137112446 node_paths=PackedStringArray("game_manager", "camera_area")]
+[node name="CameraPivot" type="Marker3D" parent="." unique_id=137112446 node_paths=PackedStringArray("camera_area")]
 script = ExtResource("3_3qthp")
-game_manager = NodePath("")
 camera_area = NodePath("../CameraArea")
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=1986782906]

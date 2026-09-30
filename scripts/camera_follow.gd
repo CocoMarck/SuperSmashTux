@@ -1,3 +1,4 @@
+class_name CameraFollow
 extends Marker3D
 
 # Camara dinamica: encuadra a todos los peleadores, se aleja cuando se separan y se acerca cuando se juntan. 

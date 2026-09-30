@@ -32,11 +32,13 @@ const NPC_SCRIPT = preload("res://scripts/npc.gd")
 # Propiedades publicas | Configuración de partida.
 @export_group("Match Settings")
 @export_range(1, 99, 1) var lives_per_character: int = 3
-@export_range(0.0, 5.0, 0.05) var respawn_delay: float = 0.3   # segundos de espera antes de reaparecer
+@export_range(0.0, 5.0, 0.05) var respawn_delay: float = 1.0   # segundos de espera antes de reaparecer
 
 # Propiedades privadas | Estado por personaje.
-var _spawn_point_of_character: Dictionary[PowerFighter, SpawnPoint] = {}
-var _lifes_of_power_fighter: Dictionary[PowerFighter, int] = {}
+# Aca probablemente mejor usar una clase, en vez de varios diccionarios.
+var _spawn_point_of_power_fighter: Dictionary[PowerFighter, SpawnPoint] = {}
+var _lives_of_power_fighter: Dictionary[PowerFighter, int] = {}
+var _death_position_of_power_fighter: Dictionary[PowerFighter, Vector3] = {} # El death position, se usara para hacer efectos gráficos. Por ahora esta sin uso.
 
 # Propiedades privadas | Dependencias, lo que tiene que tener el mapa.
 var _play_area: Area3D
@@ -48,6 +50,10 @@ var _spawn_point2: SpawnPoint
 var _spawn_point3: SpawnPoint
 var _spawn_point4: SpawnPoint
 
+# Propiedades privadas, relacionadas con la camera.
+var _camera_follow: CameraFollow
+var _shake_end_time_msec: int = 0
+
 # Funciones
 func _get_spawn_points() -> Array[SpawnPoint]:
 	return [_spawn_point1, _spawn_point2, _spawn_point3, _spawn_point4]
@@ -55,7 +61,7 @@ func _get_spawn_points() -> Array[SpawnPoint]:
 func _get_all_materials() -> Array[Material]:
 	return [SLOT_1_MATERIAL, SLOT_2_MATERIAL, SLOT_3_MATERIAL, SLOT_4_MATERIAL]
 
-func _spawn_all_characters() -> void:
+func _spawn_all_power_fighters() -> void:
 	'''
 	Spawnear a todos los personajes de la partida, sacando el numero de.
 	'''
@@ -74,9 +80,9 @@ func _spawn_all_characters() -> void:
 		power_fighter.material = _get_all_materials()[i]
 		power_fighter.position = spawn_point.global_position
 		power_fighter.init_looking_at_right = spawn_point.init_looking_at_right
-		# Establecer spawn fijo.
-		_spawn_point_of_character.assign({power_fighter: spawn_point})
-		_spawn_point_of_character.assign({power_fighter: lives_per_character})
+		# Establecer spawn fijo. El `as PowerFighter`, porque una vez instanciado el scene, es solo un `Node` comun y corriente.
+		_spawn_point_of_power_fighter[power_fighter as PowerFighter] = spawn_point
+		_lives_of_power_fighter[power_fighter as PowerFighter] = lives_per_character
 		# Agregar al mapa
 		add_child(power_fighter)
 
@@ -87,6 +93,48 @@ func _get_area_bounds() -> AABB:
 	var half := _play_area_box.size * 0.5 * _play_area_collision_shape.global_basis.get_scale()
 	return AABB(_play_area_collision_shape.global_position - half, half * 2.0)
 
+func _forget_power_fighter(power_fighter: PowerFighter) -> void:
+	'''
+	Olvidar por completo los datos relacionados con un power fighter que ya no existe.
+	'''
+	_spawn_point_of_power_fighter.erase(power_fighter)
+	_lives_of_power_fighter.erase(power_fighter)
+	_death_position_of_power_fighter.erase(power_fighter)
+
+func _handle_power_fighter_death(power_fighter: PowerFighter) -> void:
+	'''
+	Un personaje se salio del area jugable. Si le quedan vidas, se sace del arbol de inmediato. See quita de la scene. Se queda la instncia. Delay al morir, despes respawn. Si no le quedan vidas, se purga de la scene.
+	'''
+	_lives_of_power_fighter[power_fighter] -= 1
+	# Debug
+	print("%s: morido por la patria vidas; %d" % [_get_power_fighter_label(power_fighter), _lives_of_power_fighter[power_fighter]])
+	# Si se ya no tiene vidas, adios.
+	if _lives_of_power_fighter[power_fighter] == 0:
+		power_fighter.queue_free()
+		_forget_power_fighter(power_fighter)
+		return
+	# Obtener posición de muerte, y quetarlo de la vista del scene.
+	var parent := power_fighter.get_parent()
+	if parent != null:
+		_death_position_of_power_fighter[power_fighter] = power_fighter.global_position
+		parent.remove_child(power_fighter)
+	# Inicalizar spawn con delay
+	if respawn_delay > 0.0:
+		await get_tree().create_timer(respawn_delay).timeout
+	# Respawn a la scene, solo si existe la instancia del power fighter
+	if not is_instance_valid(power_fighter):
+		return
+	add_child(power_fighter)
+	power_fighter.respawn( _spawn_point_of_power_fighter[power_fighter].global_position )
+	_death_position_of_power_fighter.erase(power_fighter)
+
+func _get_power_fighter_label(power_fighter: PowerFighter) -> String:
+	if power_fighter is Player:
+		var player_id: int = (power_fighter as Player).player_id
+		return power_fighter.name + str(GlobalUtils.PlayerId.keys()[player_id])
+	return power_fighter.name
+
+# Funciones | Gestionar vidas
 func _ready() -> void:
 	# Establecer propiedades dependencia
 	_play_area = $PlayArea
@@ -97,17 +145,29 @@ func _ready() -> void:
 	_spawn_point2 = $SpawnPoint2
 	_spawn_point3 = $SpawnPoint3
 	_spawn_point4 = $SpawnPoint4
+	_camera_follow = $CameraPivot
+	_camera_follow.camera_area = $CameraArea
+	#_camera_follow.play_area = _play_area # Para el nuevo camera.
 	# Debug
 	if _play_area_bounds.size == Vector3.ZERO:
 		# Play_area sin configurar; no se detectaran muertes
 		push_warning("GameManager: fail open no fail-closed. No detect play area bounds")
 	# Spawneo
-	_spawn_all_characters()
+	_spawn_all_power_fighters()
 
-# Funciones | Gestionar vidas
 func _physics_process(delta: float) -> void:
 	'''
 	Es un physics process, para no perder data de físicas. Como salir de una área 3d. Pero también funcionaria con un simple process.
 	'''
-	for power_fighter in _lifes_of_power_fighter.keys():
-		continue
+	for power_fighter in _lives_of_power_fighter.keys():
+		# Si no es instancia valida, forzar olvidar todos sus datos. El handle death, ya lo olvida. Este es verificador.
+		if not is_instance_valid(power_fighter):
+			_forget_power_fighter(power_fighter)
+			continue
+		# Si esta recien spawneado, o recien muerto (esperando su respawn_delay, fuera del arbol. Se salte este frame nomas, sigue registrando y se revisa en cuanto vuelva al arbol
+		if not power_fighter.is_inside_tree():
+			continue
+		# Detactar que este fuera del area de juego.
+		if not _play_area_bounds.has_point(power_fighter.global_position):
+			_handle_power_fighter_death(power_fighter)
+		
