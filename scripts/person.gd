@@ -129,6 +129,10 @@ var _hanging_right_side: bool = false
 var _hang_position: Vector3 = Vector3.ZERO
 var _ledge_release_count: float = 0.0
 
+# NPC Things
+var _last_frame : FrameMotionSignals = null
+
+
 # Fuciones | Direccion
 func _get_initial_facing() -> Vector3:
 	'''
@@ -983,6 +987,12 @@ func _process_visual(frame: FrameMotionSignals) -> void:
 	'''
 	pass
 
+func _process_ai(delta: float, frame: FrameMotionSignals) -> void:
+	'''
+	Procesar AI
+	'''
+	pass
+
 # Funciones | Procesar
 func _physics_process(delta: float) -> void:
 	'''
@@ -990,6 +1000,9 @@ func _physics_process(delta: float) -> void:
     Este puede ser remplazado segun se necesite.
 	'''
 	_collect_input()
+	
+	# Para la AI, por defecto no hace nada.
+	_process_ai(delta, _last_frame)
 	
 	# Normal move
 	var frame = _build_frame(delta)
@@ -1013,5 +1026,8 @@ func _physics_process(delta: float) -> void:
 	# Effects
 	_process_effects(delta)
 
-	# Commeter cambios.
+	# Cometer cambios.
 	_commit_frame(delta, frame)
+
+	# Para la AI
+	_last_frame = frame
