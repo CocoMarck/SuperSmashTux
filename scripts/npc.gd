@@ -27,13 +27,13 @@ func _process_ai(delta, frame: FrameMotionSignals):
 	_move_down = false
 	_attack = false
 	_jump = false
+	_move_down = true
 
 	# Validar que existan datos para el NPC
 	if frame == null:
 		return
 	
 	# Mover NPC
-	_attack = true # Atacar a lo loco por motivos debug.
 	_invert_pin = false
 	if not frame.vertical_force_signals.on_floor and not _try_recovery:
 		_invert_pin = true
@@ -41,6 +41,8 @@ func _process_ai(delta, frame: FrameMotionSignals):
 		_jump = true
 	if _try_recovery and frame.vertical_force_signals.on_floor:
 		_try_recovery = false
+		_attack = true
+		
 
 	if _npc_horizontal_move:
 		# Invertir dirección
