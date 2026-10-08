@@ -132,7 +132,7 @@ func directional_orientation_relative_to_oneself(target_position: Vector3) -> Ve
 	if global_position.y > target_position.y:
 		direction.y = -1.0
 	elif global_position.y < target_position.y:
-		direction.y = -1.0
+		direction.y = 1.0
 	return direction
 
 # Funciones | Cambios aleatoreos, para que no sea predecible
@@ -221,7 +221,7 @@ func _process_ai(delta: float, frame: FrameMotionSignals):
 		elif direction.x == -1.0:
 			_pin_left = true
 			_pin_right = false
-		if direction.y == -1.0:
+		if direction.y == 1.0:
 			_jump = true
 
 		print("Posición de plataforma mas cercana: ", nearest_platform_position)
