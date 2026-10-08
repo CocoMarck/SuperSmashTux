@@ -19,6 +19,7 @@ var _npc_horizontal_move = true
 var _pin_left = true
 var _pin_right = false
 var _pin_down = false
+var _pin_walk = false
 
 # Rango de vista del NPC.
 var _detection_area : Area3D
@@ -167,26 +168,27 @@ func _random_speed_move(delta: float):
 		var state :NPCState = _get_random_speed_state()
 		_npc_horizontal_move = true
 		_pin_down = false
+		_pin_walk = false
 		match state:
 			NPCState.IDLE:
 				_npc_horizontal_move = false
 			NPCState.RUN:
-				_walk = false
+				_pin_walk = false
 			NPCState.WALK:
-				_walk = true
+				_pin_walk = true
 			NPCState.CROUCH:
 				_pin_down = true
 	_count_change_speed += delta
 
 func _collect_input() -> void:
-	# Todavia no tiene movimiento horizontal, solo salta en su lugar.
+	# Esto sucede primero que el `_process_ai()` en person.
 	_move_left = false
 	_move_right = false
 	_move_up = false
 	_move_down = false
 	_jump = false
 	_walk = false
-	#_power_attack = false
+	_power_attack = false
 	_attack = false
 
 # Funciones | Procesar AI
@@ -229,15 +231,20 @@ func _process_ai(delta: float, frame: FrameMotionSignals):
 		_random_horizontal_move(delta)
 		_random_speed_move(delta)
 	
-	# Commit de Mover
+	# Commit movimiento horizonal
 	if _npc_horizontal_move or _try_recovery:
 		# Mover, ya sea izq o der. No ambos.
 		if not (_pin_left and _pin_right):
 			_move_left = _pin_left
 			_move_right = _pin_right
+
+	# Commit movimiento vertical
 	if _pin_down:
 		_move_down = true
 
+	# Commit velocidad
+	if _pin_walk:
+		_walk = true
 		
 # Inicializar area de detección/vista de NPC
 func _ready():
