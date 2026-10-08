@@ -243,8 +243,9 @@ func _process_ai(delta: float, frame: FrameMotionSignals):
 		_move_down = true
 
 	# Commit velocidad
-	if _pin_walk:
-		_walk = true
+	if not _try_recovery:
+		if _pin_walk:
+			_walk = true
 		
 # Inicializar area de detección/vista de NPC
 func _ready():
