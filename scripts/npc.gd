@@ -39,6 +39,10 @@ var _count_change_speed : float = 0.0
 var _speeds : Array[NPCState] = [
 	NPCState.IDLE, NPCState.RUN, NPCState.WALK, NPCState.CROUCH]
 
+# Saltos interminables
+var _turbo_jump: bool = false
+var _count_jump_frames: int = 0
+
 # Funciones | Apariencia.
 func _get_default_material() -> Material:
 	'''
@@ -191,6 +195,29 @@ func _collect_input() -> void:
 	_power_attack = false
 	_attack = false
 
+func _calcule_max_jump_height_frames(fall_acceleration: float, impulse: float) -> int:
+	'''
+	> Basado en funcionamiento de GravityBody3D
+
+	Cada que esta en el aire, se acumula el fall aceleración, imitando la gravedad. Si no esta en el aire no se acumula. 
+
+	Por lo que se debe determinar hasta cuando se alcanza la altura maxima de un salto dependiendo de la fuerza de gravedad, y el impulso.
+
+	Es un aproximado de, porque no recive delta, ya que delta depende de que el calculo, se haga en tiempo de juego, y así no sirve.
+	
+	Se espera que el fall acceleration, no sea mayor que impulse, o si no no jala. Se espera algo asi de paremetros: 0.4, 10.
+
+	De hecho es hasta realista, porque ni el jugador sabe el tiempo exacto para saltar.
+	'''
+	var frames :int = 0
+	var vertical_force: float = -impulse
+	var is_zero :bool = vertical_force < fall_acceleration
+	while is_zero:
+		vertical_force += fall_acceleration
+		is_zero = vertical_force < fall_acceleration
+		frames += 1
+	return frames
+
 # Funciones | Procesar AI
 func _process_ai(delta: float, frame: FrameMotionSignals):
 	'''
@@ -215,6 +242,7 @@ func _process_ai(delta: float, frame: FrameMotionSignals):
 		var nearest_platform_position :Vector3 = get_nearest_platform_position()
 		var direction :Vector3 = directional_orientation_relative_to_oneself(
 			nearest_platform_position)
+		_turbo_jump = false
 		if direction.x == 1.0:
 			_pin_left = false
 			_pin_right = true
@@ -222,9 +250,8 @@ func _process_ai(delta: float, frame: FrameMotionSignals):
 			_pin_left = true
 			_pin_right = false
 		if direction.y == 1.0:
-			_jump = true
-
-		print("Posición de plataforma mas cercana: ", nearest_platform_position)
+			_turbo_jump = true
+		#print("Posición de plataforma mas cercana: ", nearest_platform_position)
 	
 	# Cambio de direccion y velocidad aleatorio.
 	if not _try_recovery:
@@ -239,6 +266,27 @@ func _process_ai(delta: float, frame: FrameMotionSignals):
 			_move_right = _pin_right
 
 	# Commit movimiento vertical
+	if _turbo_jump and _try_recovery:
+		# Salto en el piso.
+		if frame.vertical_force_signals.on_floor:#and _jump_count == 0:
+			_jump = true
+			_count_jump_frames = 0
+		# Los demas saltos
+		var reached_max_jumps :bool = _jump_count >= _max_jumps
+		if _jump == false or reached_max_jumps:
+			var frames :int = _calcule_max_jump_height_frames(fall_acceleration*delta, jump_impulse)
+			#var short_time_in_the_air :bool = frame.vertical_force_signals.air_count <= delta
+			#print(frames)
+			if (_count_jump_frames >= frames):
+				if reached_max_jumps:
+					_move_up = true
+					_power_attack = true
+					_count_jump_frames = 0
+				else:
+					_jump = true
+					_count_jump_frames = 0
+		# Contar frames de salto.
+		_count_jump_frames += 1
 	if _pin_down:
 		_move_down = true
 
