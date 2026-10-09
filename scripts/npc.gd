@@ -6,11 +6,13 @@ No player controller
 
 # Recovery
 - Cuando el NPC detecta esta en el aire y detecta una plataforma cercana, intentara llegar a ella.
+
+- Objetos. Detectar posiciones, primeramente el x y z base, Pero tambien el de la otra punta, el x y z, mas las dimensiones del objeto. Así se contempla de mejor manera la realidad de las posiciones disponibles.
 '''
 
 # NPC Enums
-enum NPCState {
-	IDLE, RUN, WALK, CROUCH
+enum NPCIntention { # Intención de NPC
+	IDLE, RUN, WALK, CROUCH, TURBO_JUMP, SINGLE_JUMP, DOUBLE_JUMP
 }
 
 # NPC
@@ -29,15 +31,18 @@ var _detection_interval: float = 0.1
 # Detección de objetos
 var _detected_platforms : Array[Platform] = []
 
-# Timer cambio de dirección aleatorio.
+# Timer cambio de dirección horizontal aleatoria.
 var _invert_horizontal_direction_intervals : Array[float] = [5.0, 3.0, 1.0]
 var _count_invert_horizontal_direction : float = 0.0
 
 # Timer cambio de velocidad aleatoria.
 var _change_speed_intervals: Array[float] = [5.0, 4.0, 3.0]
 var _count_change_speed : float = 0.0
-var _speeds : Array[NPCState] = [
-	NPCState.IDLE, NPCState.RUN, NPCState.WALK, NPCState.CROUCH]
+var _speeds : Array[NPCIntention] = [
+	NPCIntention.IDLE, NPCIntention.RUN, NPCIntention.WALK, NPCIntention.CROUCH]
+
+# Timer saltos aleatoreos
+var _jump_intervals : Array[float] = [8.0, 5.5, 4.2]
 
 # Saltos interminables
 var _turbo_jump: bool = false
@@ -147,7 +152,7 @@ func _get_random_directional_interval() -> float:
 func _get_random_speed_interval() -> float:
 	return _change_speed_intervals[ randi() %_change_speed_intervals.size() ]
 
-func _get_random_speed_state() -> NPCState:
+func _get_random_speed_state() -> NPCIntention:
 	return _speeds[ randi() %_speeds.size() ]
 
 # Funciones movimiento AI
@@ -169,18 +174,18 @@ func _random_horizontal_move(delta: float):
 func _random_speed_move(delta: float):
 	if _count_change_speed >= _get_random_speed_interval():
 		_count_change_speed = 0.0
-		var state :NPCState = _get_random_speed_state()
+		var state :NPCIntention = _get_random_speed_state()
 		_npc_horizontal_move = true
 		_pin_down = false
 		_pin_walk = false
 		match state:
-			NPCState.IDLE:
+			NPCIntention.IDLE:
 				_npc_horizontal_move = false
-			NPCState.RUN:
+			NPCIntention.RUN:
 				_pin_walk = false
-			NPCState.WALK:
+			NPCIntention.WALK:
 				_pin_walk = true
-			NPCState.CROUCH:
+			NPCIntention.CROUCH:
 				_pin_down = true
 	_count_change_speed += delta
 
@@ -287,7 +292,7 @@ func _process_ai(delta: float, frame: FrameMotionSignals):
 					_count_jump_frames = 0
 		# Contar frames de salto.
 		_count_jump_frames += 1
-	if _pin_down:
+	if _pin_down and not _turbo_jump: # Pioridad a salto
 		_move_down = true
 
 	# Commit velocidad

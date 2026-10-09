@@ -32,6 +32,9 @@ Objeto de persona. Tiene lo necesario para tener fisicas 2D en un mundo 3D.
 
 var block_move :bool = false
 
+# Coordenada Z segura. Para poder seguir jugando.
+var _safe_z_coord : float = 0.0
+
 # Essential character nodes
 var _visual: Node3D
 var _pivot: Node3D
@@ -807,6 +810,11 @@ func immunity_effect(delta: float) -> void:
 	_mesh_instance.visible = fmod(_immunity_blink_time, 0.1) < 0.05 # Pa que parpede
 
 # Funciones mover bodys
+func _ensure_safe_z_coord():
+	# Asegurar pos Z segura.	
+	if global_position.z != _safe_z_coord:
+		global_position.z = _safe_z_coord
+
 func _push_bodies_apart(delta: float, states: MoveStates) -> void:
 	'''
 	Empujar. 
@@ -833,12 +841,15 @@ func _push_bodies_apart(delta: float, states: MoveStates) -> void:
 			if not is_zero_approx(push_dir_x):
 				collider.position.x += push_dir_x * current_speed * delta
 
+
 # Funciones | Inicializar
 func _ready() -> void:
 	'''
 	Inicializar el character, con sus colorines, materiales etc.
 	'''
 	super()
+	_safe_z_coord = global_position.z
+
 	# Fall
 	fall_acceleration = 25
 	
@@ -968,6 +979,7 @@ func _commit_frame(delta, frame) -> void:
 	_push_bodies_apart(delta, frame.move_states)
 	velocity = _target_velocity
 	move_and_slide()
+	_ensure_safe_z_coord()
 
 func _process_action(delta: float, frame: FrameMotionSignals) -> void:
 	'''
