@@ -14,13 +14,14 @@ supersmashtux/
 ├── materials/        # Materiales (.tres)
 ├── environments/     # Entornos de mundo (.tres)
 ├── assets/           # Assets raw (texturas, modelos, audios fuente) — aún no creada
+├── addons/           # Plugins de Godot (godot_ai: MCP de Godot para agentes de IA)
 ├── docs/             # Documentación, notas, ideas
 ├── .claude/          # Config local de Claude Code (agentes, skills, settings)
 ├── AGENTS.md         # Archivo principal de instrucciones para agentes de IA
 ├── README.md         # Documento de presentación del proyecto
 ├── LICENSE           # Licencia Open Source GPL-3.0
-├── .mcp.json         # Servidor MCP de Godot para agentes de IA
-├── mcp-setup.bat     # Script de configuración del servidor MCP
+├── .mcp.json         # Servidor MCP de Blender para agentes de IA (lo genera mcp-setup)
+├── mcp-setup.bat     # Script de configuración del MCP de Blender (mcp-setup.sh en Linux)
 ├── .gitignore        # Archivo para ignorar archivos y carpetas irrelevantes en Git
 ├── .gitattributes    # Archivo para definir atributos de archivos en Git
 ├── icon.png          # Icono del Juego

@@ -12,8 +12,8 @@ Videojuego de peleas inspirado en Super Smash Bros, con los personajes más famo
 
 ## Requisitos
 
-- [Godot Engine 4+](https://godotengine.org/download)
-- [Node.js 18+](https://nodejs.org) (opcional si se quiere usar MCP para agentes de IA)
+- [Godot Engine 4+](https://godotengine.org/download) (4.7+ si se quiere usar MCP para agentes de IA)
+- [uv](https://docs.astral.sh/uv/) (opcional si se quiere usar MCP para agentes de IA)
 - [Python 3.12+](https://www.python.org/downloads/) (opcional si se quiere usar MCP para agentes de IA)
 - [Blender 5.1+](https://www.blender.org/download/) (opcional si se quiere editar los modelos 3D)
 
@@ -23,30 +23,41 @@ Videojuego de peleas inspirado en Super Smash Bros, con los personajes más famo
 2. Abre Godot 4+ y selecciona "Importar", apuntando al directorio raíz del proyecto.
 3. Corre la escena principal (`scenes/main.tscn`) desde el editor.
 
-Si vas a trabajar con un agente de IA, ejecuta además `mcp-setup.bat` antes de arrancarlo (ver [Desarrollo con IA](#desarrollo-con-ia)).
+Si vas a trabajar con un agente de IA, conéctalo antes de arrancarlo: el MCP de Godot desde el panel **Godot AI** del editor y el de Blender con `mcp-setup.bat` (ver [Desarrollo con IA](#desarrollo-con-ia)).
 
 Para más detalles sobre la estructura de carpetas y convenciones del proyecto, revisa [docs/estructura.md](./docs/estructura.md).
 
 ## Desarrollo con IA
 
-El proyecto incluye un archivo `.mcp.json` que conecta agentes de IA (Claude Code, OpenCode y Codex) con dos programas, para que puedan trabajar por su cuenta:
+El proyecto se conecta con agentes de IA (Claude Code, OpenCode y Codex) mediante dos servidores MCP, para que puedan trabajar por su cuenta:
 
-| Servidor | Qué permite | Requisitos |
-|---|---|---|
-| `godot` | Modificar escenas y correr el juego, vía [godot-mcp](https://github.com/Coding-Solo/godot-mcp) | [Node.js 18+](https://nodejs.org) |
-| `blender` | Inspeccionar y editar la escena abierta en Blender, vía [MCP oficial de Blender Lab](https://www.blender.org/lab/mcp-server/) | [Blender 5.1+](https://www.blender.org/download/) y [uv](https://docs.astral.sh/uv/) |
+| Servidor | Qué permite | Cómo se configura | Requisitos |
+|---|---|---|---|
+| `godot-ai` | Controlar el editor de Godot abierto (escenas, nodos, scripts, señales, UI, animación), correr el juego y leer sus errores, vía [Godot AI](https://github.com/hi-godot/godot-ai) | Botón **Configure** en el panel **Godot AI** del editor | [Godot 4.7+](https://godotengine.org/download) y [uv](https://docs.astral.sh/uv/) |
+| `blender` | Inspeccionar y editar la escena abierta en Blender, vía [MCP oficial de Blender Lab](https://www.blender.org/lab/mcp-server/) | `mcp-setup.bat` (o `mcp-setup.sh` en Linux) | [Blender 5.1+](https://www.blender.org/download/) y [uv](https://docs.astral.sh/uv/) |
 
-Ambos se configuran con **mcp-setup.bat**, que hay que ejecutar antes de usar el MCP por primera vez. Al abrirlo aparece un menú para elegir qué configurar. El script detecta los ejecutables por su cuenta y escribe `GODOT_PATH` y `BLENDER_PATH` en el `.mcp.json`.
+Después de configurar cualquiera de los dos hay que reiniciar el agente de código para que tome la configuración nueva.
 
-Después de ejecutarlo hay que reiniciar el agente de código para que tome la configuración nueva.
+### Sobre el MCP de Godot (Godot AI)
 
-### Sobre el MCP de Godot
+Son **dos piezas** que se comunican por conexiones locales autenticadas (puertos `8000` y `9500`):
 
-Es una sola pieza: el servidor **godot-mcp**, que el agente de código lanza con `npx`. `npx` descarga el paquete la primera vez que se usa, solo se necesita tener Node.js y que `GODOT_PATH` apunte al ejecutable de Godot, (lo resuelve `mcp-setup.bat`).
+- el **plugin** en `addons/godot_ai/`, que viene incluido en el repositorio y ya está activado en `project.godot`;
+- el servidor **`godot-ai`** (Python), que se descarga y se lanza con `uvx` la primera vez que se usa.
 
-Permite crear escenas y nodos, leer la información del proyecto, y correr el juego para después leer su salida de depuración, que es la forma más directa de que el agente diagnostique errores en tiempo de ejecución.
+Para conectarlo:
 
-A diferencia de Blender, **no hace falta tener el editor abierto**: el servidor invoca a Godot por línea de comandos cuando lo necesita.
+1. Abre el proyecto en Godot 4.7+. Aparece el panel **Godot AI**.
+2. En ese panel, pulsa **Configure** junto a tu agente (Claude Code, Codex, OpenCode, etc.). La configuración se guarda en tu usuario, no en el repositorio.
+3. Reinicia el agente.
+
+A tener en cuenta:
+
+- **El editor tiene que estar abierto:** el agente trabaja sobre el editor en vivo, así que sin Godot abierto no puede conectarse.
+- **Telemetría:** Godot AI envía estadísticas de uso anónimas por defecto. Para apagarla, en el panel **Godot AI** abre **Clients & Settings → Settings**, desmarca **Telemetry**, pulsa **Apply & Restart Server** y vuelve a pulsar **Configure** en cada agente. También se puede con la variable de entorno `GODOT_AI_DISABLE_TELEMETRY=true`. Es una preferencia de cada persona: se guarda en la configuración del editor, no en el proyecto.
+- **Autoload `_mcp_game_helper`:** el plugin lo agrega a `project.godot` para inspeccionar el juego mientras corre. En los builds exportados queda inactivo. Si algún día se quita el plugin, hay que quitar también este autoload.
+- **Actualizaciones:** cuando hay una versión nueva, el panel muestra el botón **Update**. No copies una versión nueva encima de la carpeta a mano.
+- **Un agente a la vez:** si dos agentes controlan el mismo editor al mismo tiempo, se pisan los cambios.
 
 ### Sobre el MCP de Blender
 
@@ -55,7 +66,9 @@ El MCP oficial de Blender son **dos piezas** que se comunican por un socket TCP 
 - un **add-on** que corre dentro de Blender y ejecuta los pedidos;
 - el servidor **`blender-mcp`**, que lanza el agente de código.
 
-`mcp-setup.bat` se encarga de las dos: instala `uv` con winget, agrega el repositorio de extensiones `https://lab.blender.org/` y desde ahí instala y habilita el add-on. Instalarlo desde el repositorio permite recibir actualizaciones.
+Se configura con **mcp-setup.bat**, que hay que ejecutar antes de usar el MCP por primera vez. Al abrirlo aparece un menú para elegir qué agentes configurar. El script detecta Blender por su cuenta y escribe `BLENDER_PATH` en el archivo de cada agente (`.mcp.json`, `opencode.json` o `.codex/config.toml`).
+
+`mcp-setup.bat` se encarga de las dos piezas: instala `uv` con winget, agrega el repositorio de extensiones `https://lab.blender.org/` y desde ahí instala y habilita el add-on. Instalarlo desde el repositorio permite recibir actualizaciones.
 
 A tener en cuenta:
 

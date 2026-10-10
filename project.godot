@@ -22,10 +22,15 @@ config/icon="res://icon.png"
 [autoload]
 
 InputSettings="*res://scripts/helpers/input_settings.gd"
+_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [dotnet]
 
 project/assembly_name="SuperSmashTux"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg")
 
 [input]
 
