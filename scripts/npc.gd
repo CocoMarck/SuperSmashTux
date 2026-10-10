@@ -30,9 +30,10 @@ var _detection_interval: float = 0.1
 
 # Detección de objetos
 var _detected_platforms : Array[Platform] = []
+var _detected_persons : Array[Person] = []
 
 # Timer cambio de dirección horizontal aleatoria.
-var _invert_horizontal_direction_intervals : Array[float] = [5.0, 3.0, 1.0]
+var _invert_horizontal_direction_intervals : Array[float] = [8.0, 4.0, 5.0]
 var _count_invert_horizontal_direction : float = 0.0
 
 # Timer cambio de velocidad aleatoria.
@@ -56,7 +57,7 @@ func _get_default_material() -> Material:
 	return GlobalUtils.NPC_MATERIAL
 
 # Funciones | Detección de objetos
-func check_nearby_objects(delta: float) -> void:
+func _check_nearby_objects(delta: float) -> void:
 	# Solo checar si esta en el intervalo
 	_detection_counter += delta
 	if _detection_counter < _detection_interval:
@@ -68,20 +69,29 @@ func check_nearby_objects(delta: float) -> void:
 
 	# Agregar lo que se detecte
 	_detected_platforms.clear()
+	_detected_persons.clear()
 	for body in bodies:
 		#print("Detectado: ", body.name)
 		if (
 			is_instance_valid(body) and (body is Platform) ):
 			_detected_platforms.append(body)
+		if (
+			is_instance_valid(body) and (body is Person) ):
+			_detected_persons.append(body)
 
 # Funciones | Normalizar datos
-func get_nodes_positions(nodes: Array[Node3D]) -> Array[Vector3]:
+func _get_nodes_positions(nodes: Array[Node3D]) -> Array[Vector3]:
+	'''
+	Obtener posiciones de nodos. Solo si no son el propio nodo del NPC.
+	'''
 	var positions :Array[Vector3] = []
 	for obj in nodes:
+		if obj == self:
+			continue
 		positions.append(obj.global_position)
 	return positions
 
-func get_position_average_difference(position1: Vector3, position2: Vector3) -> float:
+func _get_position_average_difference(position1: Vector3, position2: Vector3) -> float:
 	'''Obtener diferencia entre dos posiciones'''
 	# Saber cual es la pos max, y cual es la min
 	var max_position :Vector3 = Vector3(
@@ -98,14 +108,14 @@ func get_position_average_difference(position1: Vector3, position2: Vector3) -> 
 		return 0.0
 	return (addition) / 3
 
-func get_nearest_position(positions: Array[Vector3]) -> Vector3:
+func _get_nearest_position(positions: Array[Vector3]) -> Vector3:
 	'''
 	Determina con el global position, la diferencia promedio entre varias posiciones. Y retorna la posición mas cercana.
 	'''
 	# Obtener diferencias
 	var average_differences :Array[float] = []
 	for position in positions:
-		var difference :float = get_position_average_difference(global_position, position)
+		var difference :float = _get_position_average_difference(global_position, position)
 		average_differences.append(difference)
 	
 	var index_nearest_position: int = 0
@@ -115,24 +125,77 @@ func get_nearest_position(positions: Array[Vector3]) -> Vector3:
 			index_nearest_position = index
 			break
 	
-	# Retornar la plataforma mas cercana
+	# Retornar la posición mas cercana
 	return positions[index_nearest_position]
 
-# Funciones | Detección por tipo de objeto
-func get_nearest_platform_position() -> Vector3:
+func _get_very_close_position(positions: Array[Vector3], close_difference: float=0.5) -> Vector3:
 	'''
-	Obtener la posición de la plataforma mas cercana con respecto al NPC.
+	Obtiene una posición si esta muy cercana, y la retorna, de lo contrario un Vector3.ZERO.
+	'''
+	# Obtener diferencias
+	var average_differences :Array[float] = []
+	for position in positions:
+		var difference :float = _get_position_average_difference(global_position, position)
+		average_differences.append(difference)
+	
+	var index_nearest_position: int = 0
+	var min_difference :float = 0.0
+	if average_differences.size() != 0:
+		min_difference = average_differences.min()
+	for index in range(0, average_differences.size()):
+		if average_differences[index] == min_difference:
+			index_nearest_position = index
+			break
+	
+	# Posición mas cercana
+	if (min_difference <= close_difference) and (min_difference > 0.0):
+		return positions[index_nearest_position]
+	else:
+		return Vector3.ZERO
+
+
+# Funciones | Detección por tipo de objeto
+func _get_nearest_platform_position() -> Vector3:
+	'''
+	Obtener la posición de la plataforma con la diferencia positiva mas baja, con respecto al NPC.
 	'''
 	# Obtrener posiciones de plataformas
 	var nodes : Array[Node3D] = []
 	for node in _detected_platforms:
 		nodes.append( node as Node3D )
-	var positions :Array[Vector3] = get_nodes_positions(nodes)
+	var positions :Array[Vector3] = _get_nodes_positions(nodes)
 	
-	# Obtener diferencias
-	return get_nearest_position(positions)
+	# Obtener la diferencia positiva mas baja
+	return _get_nearest_position(positions)
 
-func directional_orientation_relative_to_oneself(target_position: Vector3) -> Vector3:
+func _get_nearest_person_position() -> Vector3:
+	'''
+	Obtener la posición del Person/Fighter/PowerFighter con la diferencia positiva mas baja, con respecto al NPC.
+	'''
+	var nodes : Array[Node3D] = []
+	for node in _detected_persons:
+		nodes.append( node as Node3D )
+	var positions :Array[Vector3] = _get_nodes_positions(nodes)
+
+	# Obtener la diferencia positiva mas baja
+	return _get_nearest_position(positions)
+
+func _get_very_close_person_position() -> Vector3:
+	'''
+	Obtiene la pos de un person muy cercano, de lo contrario nada.
+	'''
+	var nodes : Array[Node3D] = []
+	for node in _detected_persons:
+		nodes.append( node as Node3D )
+	var positions :Array[Vector3] = _get_nodes_positions(nodes)
+
+	return _get_very_close_position(positions, 0.4)
+
+# Otros, sin categoria por ahora.
+func _directional_orientation_relative_to_oneself(target_position: Vector3) -> Vector3:
+	'''
+	Dirección de posición, relativa a la posición del NPC.
+	'''
 	var direction :Vector3 = Vector3.ZERO
 	if global_position.x > target_position.x:
 		direction.x = -1.0
@@ -166,9 +229,17 @@ func _invert_horizontal_move():
 
 func _random_horizontal_move(delta: float):
 	# Movimiento horizontal aleatoreo
+	if not _pin_right and not _pin_left:	
+		# Para evitar que se deje de mover jajaj.
+		var true_false :Array[bool] = [true, false]
+		if true_false[ randi() %true_false.size() ]:
+			_pin_left = true
+		else:
+			_pin_right = true
 	if _count_invert_horizontal_direction >= _get_random_directional_interval():
 		_count_invert_horizontal_direction = 0.0
 		_invert_horizontal_move()
+				
 	_count_invert_horizontal_direction += delta
 
 func _random_speed_move(delta: float):
@@ -231,21 +302,27 @@ func _process_ai(delta: float, frame: FrameMotionSignals):
 	# En person sucede primero el `_collect_input()`
 
 	# Detectar objetos mas que entraron al area y trabajar con ello.
-	check_nearby_objects(delta)
+	_check_nearby_objects(delta)
 
 	# Validar que existan datos para el NPC
 	if frame == null:
 		return
 	
 	# Mover NPC
-	if not frame.vertical_force_signals.on_floor and not _try_recovery:
+	if (
+		(not frame.vertical_force_signals.on_floor or _holding_onto_the_ledge()) and
+		not _try_recovery):
 		_try_recovery = true
-	if _try_recovery and frame.vertical_force_signals.on_floor:
+	if (
+		_try_recovery and frame.vertical_force_signals.on_floor and
+		not _holding_onto_the_ledge()):
 		_try_recovery = false
 	
-	if _try_recovery and _detected_platforms.size() > 0:
-		var nearest_platform_position :Vector3 = get_nearest_platform_position()
-		var direction :Vector3 = directional_orientation_relative_to_oneself(
+	if (
+		(_try_recovery and _detected_platforms.size() > 0) or 
+		_holding_onto_the_ledge()):
+		var nearest_platform_position :Vector3 = _get_nearest_platform_position()
+		var direction :Vector3 = _directional_orientation_relative_to_oneself(
 			nearest_platform_position)
 		_turbo_jump = false
 		if direction.x == 1.0:
@@ -254,7 +331,7 @@ func _process_ai(delta: float, frame: FrameMotionSignals):
 		elif direction.x == -1.0:
 			_pin_left = true
 			_pin_right = false
-		if direction.y == 1.0:
+		if direction.y == 1.0 or _holding_onto_the_ledge():
 			_turbo_jump = true
 		#print("Posición de plataforma mas cercana: ", nearest_platform_position)
 	
@@ -262,6 +339,15 @@ func _process_ai(delta: float, frame: FrameMotionSignals):
 	if not _try_recovery:
 		_random_horizontal_move(delta)
 		_random_speed_move(delta)
+	
+	# Ataque si esta muy cerca algun Person.
+	if _detected_persons.size() != 0 and not _try_recovery:
+		if _get_very_close_person_position() != Vector3.ZERO:
+			# Forzar estar paradito
+			_pin_left = false
+			_pin_right = false
+			# Atacar
+			_attack = true
 	
 	# Commit movimiento horizonal
 	if _npc_horizontal_move or _try_recovery:

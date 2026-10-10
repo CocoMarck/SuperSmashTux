@@ -258,7 +258,7 @@ func _ledge_grab(
 		# Determinar a donde se debe mirar mientras uno se cuelga pa irse a conocer a diosito.
 		var inward := -1.0 if _hanging_right_side else 1.0
 
-		if _up_pressed:
+		if _up_pressed or _jump:
 			# Subirse de vuelta a la plataforma, puro impulso hacia arriba; si se mete o no ya es bronca del jugador.
 			_target_velocity.y = jump_impulse
 			_release_hanging_ledge()
