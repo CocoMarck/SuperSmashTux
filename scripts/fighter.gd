@@ -698,9 +698,10 @@ func _shield_move(delta: float, signals: VerticalForceSignals) -> void:
 			# Solo restar tiempo si no esta bloqueado por stun.
 			_shield_time -= delta
 	if _shield_time <= 0.0:
-		# Daño por exceso de uso de escudo
+		# Daño por exceso de uso de escudo.
+		# Aca se puede regenerar por completo el escudo, ya que igual no se puede usar por tener KO. Una vez te quiten el KO, podras usar escudito.
 		_shield_blockstun_time = 0.0
-		_shield_time = 0.0
+		_shield_time = GameBalance.SHIELD_DURATION*0.5 #0.0
 		_knockout_time = GameBalance.KNOCKOUT_DURATION
 	else:
 		# Rodar
