@@ -4,11 +4,11 @@
 > vive en su propio módulo, dentro de `scripts/match/`. Este documento define qué módulos existen,
 > cuáles faltan, y cómo se hablan entre ellos.
 
-Reemplaza la idea vieja de "un manager que hace todo": ver `nota-game-manager-inyectable.legacy.md`.
+Reemplaza la idea vieja de "un manager que hace todo" (su nota se eliminó; queda en el historial de git).
 
 ## El problema que resuelve
 
-El `GameManager` original (`scripts/legacy/old_game_manager.gd`) mezclaba en un solo archivo:
+El `GameManager` original (`OldGameManager`, ya eliminado del repo; se puede recuperar del historial de git) mezclaba en un solo archivo:
 
 - las **reglas** de la partida (vidas, muertes, respawn, lineup)
 - la **geometría del mapa** (dónde está el play area, dónde los spawn points)
@@ -40,6 +40,8 @@ cambian**. Nada de reglas depende de que la cámara exista.
 | Encuadre | `CameraFollow` | sigue a los peleadores, zoom, temblor (el temblor debería salir de aquí) | **LISTO** |
 | Colocación | `SpawnPoint` | instancia peleadores configurados | **LISTO** |
 
+`GameManager` también spawnea a los 4 peleadores: los slots 1 y 2 como `PLAYER`, el 3 y 4 como `NPC`.
+
 `GameManager` crea la `CameraFollow` por código (`CameraFollow.new()`), le inyecta el `PlayArea`
 como `camera_area`, y la cuelga de sí mismo. La cámara **ya no tiene** referencia al manager, y el
 mapa quedó sin nodos de cámara: sus únicas dependencias son `PlayArea` y 4 spawn points.
@@ -52,7 +54,7 @@ Hoy el `CameraFollow` mezcla dos cosas que deberían estar separadas:
 
 - **Encuadre** (seguir peleadores, calcular rect y distancia). Esto ya es un módulo aparte.
 - **Efectos de cámara** (el temblor). Hoy es un método público que el manager **llama directo**
-  (`_camera_follow.shake(500)`), no una señal. Es la costura que queda por cortar.
+  (`_camera_follow.shake(500)` en `_handle_power_fighter_death`), no una señal. Es la costura que queda por cortar.
 
 Lo que debería pasar: el `GameManager` emite una señal cuando alguien muere, y un
 `CameraManager` la escucha y decide el temblor, el tiempo, y la intensidad. Así el manager
@@ -60,14 +62,14 @@ deja de saber qué es un temblor, y agregar un efecto nuevo (flash, zoom dramati
 no toca el manager.
 
 También falta recuperar lo que se perdió al simplificar: **encuadrar el punto de muerte** mientras
-el peleador espera su respawn (`get_pending_respawn_positions()` del manager viejo).
+el peleador espera su respawn (`get_pending_respawn_positions()` del manager viejo, eliminado). El manager actual ya guarda `_death_position_of_power_fighter`, pero hoy no lo usa nadie.
 
 ### `TalkerManager` — pendiente (el comentarista)
 
 El comentarista es el consumidor más claro del principio, porque **no toca las reglas**: solo
 observa y comenta. Debería ser un módulo que escucha eventos de la partida y decide qué decir.
 
-Eventos que le sirven, y que la partida ya puede emitir:
+Eventos que le sirven (hoy el `GameManager` **no emite ninguna señal**, esto es lo que habría que agregar):
 
 - muerte de alguien (y a quién le quedan cuántas vidas)
 - último KO de la partida
@@ -76,7 +78,7 @@ Eventos que le sirven, y que la partida ya puede emitir:
 - inicio y fin de partida
 
 Nada de esto debe requerir que el `GameManager` sepa que existe un comentarista. El manager
-emite `death_occurred(...)`; el `TalkerManager` decide si habla.
+emitiría una señal de muerte (por ejemplo `death_occurred(...)`, nombre ilustrativo, no existe aún); el `TalkerManager` decide si habla.
 
 ### `EffectsManager` — pendiente
 
@@ -103,11 +105,10 @@ muerte por `hp == 0` (que es la que dispararía el ragdoll) sigue pendiente.
 ## Cómo se documenta la modularidad
 
 - Un módulo por concern, un archivo, un `class_name` sin prefijo.
-- Las carpetas de módulos van en `scripts/match/`. Lo que ya no se usa, a `scripts/legacy/`
-  con prefijo `Old*` en el `class_name` (`OldGameManager`, `OldCameraFollow`, `OldSpawnPoint`),
-  para que los nombres sigan documentando de qué implementación son.
-- Cuando un módulo se vuelve legacy, su nota en `docs/` se renombra a `.legacy.md` y se le
-  pone un banner al inicio. Así el doc sigue legible pero nadie lo toma por vigente.
+- Las carpetas de módulos van en `scripts/match/`. Lo que ya no se usa se **elimina del repo**
+  (queda en el historial de git). Antes se archivaba en `scripts/legacy/` con prefijo `Old*`
+  (`OldGameManager`, `OldCameraFollow`, `OldSpawnPoint`), pero esa carpeta ya no existe.
+- Cuando un módulo se elimina, su nota en `docs/` se elimina también (queda en el historial de git).
 - El diagrama de clases de `docs/uml-arquitectura.md` es la fuente de verdad de qué módulos
   existen hoy. La lista de "módulos que faltan" de esta nota es el backlog, no el estado.
 

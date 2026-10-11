@@ -8,9 +8,8 @@ supersmashtux/
 ├── scenes/           # Escenas principales (main, niveles, menús, UI)
 ├── scripts/          # GDScripts para nodos y lógica del juego
 │   ├── match/        # Módulos de la partida, uno por concern (GameManager, CameraFollow, SpawnPoint)
-│   ├── legacy/       # Implementaciones retiradas, con prefijo Old* en el class_name
+│   ├── menu/         # Scripts de los menús (botones, controles)
 │   └── helpers/      # Clases de apoyo que NO son nodos: RefCounted y contenedores de datos/constantes
-├── animations/       # Recursos de animación (.res)
 ├── materials/        # Materiales (.tres)
 ├── environments/     # Entornos de mundo (.tres)
 ├── assets/           # Assets raw (texturas, modelos, audios fuente) — aún no creada
@@ -37,7 +36,6 @@ supersmashtux/
 | Assets | `snake_case.ext` | `ground_texture.png`, `jump_sfx.wav` |
 | Recursos | `prefijo_nombre.tres` | `mat_red.tres`, `env_game.tres` |
 | Docs | `lower-kebab-case.md` | `estructura.md`, `titulo-descriptivo.md` |
-| Docs legacy | `lower-kebab-case.legacy.md` | `nota-camara.legacy.md` |
 
 ## Godot namespace
 - Nodos en escenas: **PascalCase** (estándar de Godot: `Player`, `CameraPivot`)

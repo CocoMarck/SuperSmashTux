@@ -5,7 +5,7 @@
 ## Personajes
 
 ```
-CharacterBody3D → GravityBody3D → Person → Fighter → PowerFighter → Player / TestPlayer / NPC
+CharacterBody3D → GravityBody3D → Person → Fighter → PowerFighter → Player / NPC
 ```
 
 ## Diagrama
@@ -19,7 +19,6 @@ classDiagram
 	Person <|-- Fighter
 	Fighter <|-- PowerFighter
 	PowerFighter <|-- Player
-	PowerFighter <|-- TestPlayer
 	PowerFighter <|-- NPC
 
 	Platform <|-- GroundPlatform
@@ -29,6 +28,10 @@ classDiagram
 	Fighter ..> Attacks : usa
 	Attacks *-- FightMove
 	Fighter ..> Hitbox : crea
+	PowerFighter ..> PowerAttacks : usa
+	PowerAttacks *-- FightMove
+	NPC ..> Platform : detecta
+	NPC ..> Person : detecta
 	Person ..> Hitbox : recibe daño
 	Player ..> PlayerInputMap : usa
 	GlobalUtils o-- PlayerInputMap
@@ -43,9 +46,8 @@ classDiagram
 
 - `GravityBody3D`: gravedad 2D + colisiones (normales y one-way).
 - `Person`: moverse, saltar, ledge grab, daño, `respawn()`.
-- `Fighter`: ataques (13 `FightMove`), grab y shield (temporizadores).
-- `PowerFighter`: doble salto; poderes pendientes.
-- `Character` y `OldFightMove` son legacy, fuera de la cadena.
+- `Fighter`: ataques (15 `FightMove`), grab (con `HitboxGrab` y lanzamiento), shield (con defensa y roll).
+- `PowerFighter`: doble salto y ataques de poder (`PowerAttacks`); el "tercer salto" es el ataque de poder hacia arriba (`jump_power`).
+- `NPC`: IA propia vía `_process_ai(delta, frame)` (hook definido en `Person`).
 - `GameManager` es **modular**: un concern por módulo en `scripts/match/`, sin que un módulo le pregunte a otro. Ver `docs/nota-game-manager-modular.md`.
-- `OldGameManager`, `OldCameraFollow` y `OldSpawnPoint` son la implementación anterior, archivada en `scripts/legacy/`. Fuera de toda la cadena activa.
 - Señales-objeto: `VerticalForceSignals`, `MoveSignals`, `MoveStates` (RefCounted en `scripts/helpers`).

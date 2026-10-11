@@ -1,34 +1,46 @@
-# Nota: `_ai_process` — entrada de IA para NPCs
+# Nota: `_process_ai` — entrada de IA para NPCs
 
-> Propuesta de diseño para que los futuros NPCs (probablemente `NPCPerson`, `NPCFighter`, `NPCPowerFighter`) puedan "jugar" con la misma maquinaria de gameplay de los humanos sin tocar nada. **Aún no aplicado; es anotación de diseño.**
+> **Aplicado.** Nació como propuesta (`_ai_process(signals)` llamado al final del frame); quedó implementado distinto: el hook se llama `_process_ai(delta, frame)`, vive en `Person` y lo sobreescribe `NPC` (`scripts/npc.gd`). Esta nota explica el diseño real y por qué.
 
 ## Idea central
 
 Separar las dos fuentes de entrada:
 
-- **`_collect_input()`** → entrada humana. Vive en el nodo jugador (`TestPlayer`), lee el `Input Map` y llena los bools.
-- **`_ai_process(signals: VerticalForceSignals)`** → entrada de IA. **Existe desde `Person`** y, por defecto, es un `pass`. Todos los hijos de `Person` (`Fighter`, `PowerFighter`, `TestPlayer`, y los futuros `NPC*`) lo heredan.
+- **`_collect_input()`** → entrada humana. `Player` lee el `Input Map` y llenan los bools.
+- **`_process_ai(delta, frame: FrameMotionSignals)`** → entrada de IA. Existe en `Person` como `pass`; todos sus hijos lo heredan y solo `NPC` lo sobreescribe.
 
-Los NPCs **no sobreescriben `_collect_input`** (lo dejan en `pass`, ya es `pass` en `Person`) y sí sobreescriben `_ai_process`. La IA no toca el gameplay: solo setea los mismos bools que usa el humano (`_move_left`, `_move_right`, `_move_up`, `_move_down`, `_jump`, `_attack`, `_grab`, `_shield`). Todo el pipeline (movimiento, ataques, grab, shield, salto) ya trabaja con esos bools, así que el NPC hereda el gameplay completo sin cambios.
+La IA **no toca el gameplay**: solo setea los mismos bools que usa el humano (`_move_left`, `_move_right`, `_move_up`, `_move_down`, `_jump`, `_walk`, `_attack`, `_power_attack`). Todo el pipeline (movimiento, ataques, escudo, saltos) ya trabaja con esos bools, así que el NPC hereda el gameplay completo sin cambios.
+
+`NPC._collect_input()` baja todos los bools a `false` al inicio de cada frame; luego `_process_ai` sube los que necesite. Así nada se queda "pegado" de un frame a otro.
 
 ## Dónde va en `_physics_process` y por qué
 
-Se llama **al final del `_physics_process`**, después de `move_and_slide()` (lo último del pipeline actual, `fighter.gd:512` / `person.gd:403`). Razones:
+```
+_collect_input()
+_process_ai(delta, _last_frame)   # <- aquí
+frame = _build_frame(delta)
+... (acción, daño, animación) ...
+_commit_frame(delta, frame)       # move_and_slide()
+_last_frame = frame
+```
 
-1. **Lee el `on_floor` real, no el del gameplay.** El `signals.on_floor` que circula por el juego sale de `_vertical_force()`, que corre al inicio del frame y usa `is_on_floor()` del `move_and_slide()` anterior — o sea, todo el gameplay vive con 1 frame de retraso (el `is_on_floor()` real solo se actualiza dentro de `move_and_slide()`). Si `_ai_process` corre al final, la IA puede leer `is_on_floor()` recién actualizado por la física del frame actual.
-2. **Lee los estados que ya se calcularon este frame.** `_current_attack`, `_grabbing()`, `_with_shield()`, `_knockback_active`, `velocity`, `_x_not_zero_value`, etc., ya tienen valor fresco para que la IA decida mejor.
-3. **No hay riesgo de leer el "futuro".** Los bools que setee la IA al final se consumen hasta el `_physics_process` del frame siguiente — 1 frame de latencia entre decisión y acción, que es la misma latencia con la que ya vive todo el gameplay (nada reacciona a la física del frame actual en el mismo frame).
+Se llama **justo después de `_collect_input()` y antes de construir el frame**, no al final como se propuso al inicio. Razones:
 
-### Ojo con el parámetro `signals`
+1. **Los bools se consumen en el mismo frame.** Al ir antes de `_build_frame`, lo que decide la IA se aplica ya en este `_physics_process`, igual que una tecla del humano. Cero frames de latencia extra.
+2. **Contexto sin tocar el pipeline.** `Person` guarda el `FrameMotionSignals` del frame anterior en `_last_frame` y se lo pasa a la IA (`vertical_force_signals`, `move_signals`, `move_states`). Es lo más fresco que existe antes de calcular el frame nuevo.
+3. **`_last_frame` es `null` en el primer frame**, por eso `NPC._process_ai` revisa `frame == null` y sale.
 
-El `VerticalForceSignals` que recibe es el que ya computó `_vertical_force()` **al inicio** del frame: su `on_floor` es el "viejo" (el del gameplay). Si la IA necesita el `on_floor` recién horneado, usa `is_on_floor()` dentro del propio `_ai_process` en vez de `signals.on_floor`. El parámetro sigue siendo útil para datos como `air_count` o `force` que no requieren frescura frame-perfect.
+## Qué hace `NPC` hoy
 
-## Responsabilidades de la IA
+- **Detección**: `DetectionArea` (`Area3D` creada en `_ready`), revisada cada `_detection_interval` (0.1 s). Separa `Platform` y `Person`.
+- **Recovery**: en el aire o colgado de una orilla, camina hacia la plataforma más cercana y, si está arriba de él, activa `_turbo_jump`: salto en el piso, saltos en el aire al llegar a la altura máxima estimada (`_calcule_max_jump_height_frames`) y, con los saltos agotados, `_move_up` + `_power_attack` (ataque de poder hacia arriba con `jump_power`, el "tercer salto").
+- **Vagabundeo**: fuera del recovery, cambia dirección y velocidad (idle, run, walk, crouch) con temporizadores aleatorios.
+- **Ataque por cercanía**: si hay un `Person` a diferencia promedio XYZ <= 0.4 (`_get_very_close_person_position`), se queda quieto y pone `_attack = true`.
 
-- **Flancos:** `_attack`, `_grab` y `_shield` en el humano viajan como `is_action_just_pressed` (flanco puro). La IA debe emular el flanco: setearlos `true` un solo frame y bajarlos al siguiente.
-- **Salto:** `_jump` sostenido se lo traga el flanco de `_was_jumping` (`person.gd:151`), así que la IA también lo togglea en el frame justo.
-- **Búsqueda de contexto:** el target del NPC se resuelve con `@export` o un grupo (`"fighters"`); la IA lee `global_position`, `velocity`, `is_on_floor()`, `_x_not_zero_value` por sí misma. `_ai_process` no recibe contexto extra por firma — el NPC va a buscarlo.
+El `_attack` ya viaja como bool de un frame porque `_collect_input` lo baja cada frame; la IA lo vuelve a subir solo mientras haya alguien cerca.
 
-## Estado
+## Pendiente
 
-- **No aplicado.** Decisión pendiente: confirmar la firma exacta (`_ai_process(signals: VerticalForceSignals)`) y en qué nivel del pipeline llamarla cuando se implementen los NPCs.
+- **Escudo y agarre**: el NPC aún no usa `_shield` ni `_grab`.
+- **Detección con bordes reales** (AABB en vez de solo el centro): ver `docs/nota-npc-aabb-deteccion.md`.
+- **Modularizar** `_process_ai`: hoy es un solo método largo (así lo marca el propio comentario en `npc.gd`).

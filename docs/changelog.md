@@ -106,3 +106,16 @@
 
 ## `2026-09-30`
 - **LISTO** `Person` Arreglar **BUG**: Al precionar arriba y abajo (Mirar arriba, y agacharse), y moverse horizontalmente, sucede un error; Se puede mover, pero con el estado en corriendo, y con velocidad de ir agachado. Jajaj bug loco.
+
+## `2026-10-11`
+- **LISTO** Limpieza de archivos en desuso. Se borraron del repo (siguen en el historial de git):
+    - `scripts/legacy/` completa: `old_game_manager.gd`, `old_camera_follow.gd`, `old_spawn_point.gd`.
+    - `scripts/helpers/old_fight_move.gd`.
+    - `scenes/map1_old.tscn`.
+    - `prefabs/character.tscn` y `prefabs/power_fighter.tscn`.
+    - `animations/run.res`.
+    - `scripts/test_player.gd` (`TestPlayer`), sin uso en ninguna escena.
+    - Docs `nota-camara.legacy.md` y `nota-game-manager-inyectable.legacy.md`, de código ya eliminado.
+    - Notas históricas de refactors ya aplicados: `nota-herencia-de-fisicas.md`, `nota-plataformas-character.md` y `uml-refactor-person-fighter-powerfighter.md`.
+    - Lo vigente vive en `scripts/match/` (`game_manager.gd`, `camera_follow.gd`, `spawn_point.gd`) y `prefabs/standard_power_fighter.tscn`.
+- **LISTO** Docs ajustados: `nota-game-manager-modular.md`, `nota-camara.legacy.md` y `nota-game-manager-inyectable.legacy.md` (estas dos se eliminaron después) ya no apuntan a `scripts/legacy/` como si existiera.
