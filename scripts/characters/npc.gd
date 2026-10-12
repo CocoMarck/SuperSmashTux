@@ -24,6 +24,13 @@ var _pin_down = false
 var _pin_walk = false
 
 # Rango de vista del NPC.
+# Debug: muestra/oculta la caja verde del área de detección.
+@export var show_detection_area : bool = false:
+	set(value):
+		show_detection_area = value
+		if _detection_mesh:
+			_detection_mesh.visible = value
+var _detection_mesh : MeshInstance3D
 var _detection_area : Area3D
 var _detection_counter : float = 0
 var _detection_interval: float = 0.1
@@ -410,6 +417,8 @@ func _ready():
 	mesh.size = box.size
 
 	mesh_instance.mesh = mesh
+	mesh_instance.visible = show_detection_area
+	_detection_mesh = mesh_instance
 	_detection_area.add_child(mesh_instance)
 
 	# Detection area | Material

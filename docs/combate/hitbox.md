@@ -22,7 +22,7 @@ Area3D
           └── HitboxGrab     (detecta y avisa al padre que agarre; no daña)
 ```
 
-### `AreaGravity3D` (abuelo, con mucha fortuna) — `scripts/physics/area_gravity_3d.gd`
+### `AreaGravity3D` (abuelo, con mucha fortuna) — `scripts/combat/area_gravity_3d.gd`
 Un area 3d con físicas listas, puede moverse en `x`, y saltar. `y` es la fuerza vertical. Puede rebotar, en `x`, y en `y`. `z` no se usa, por lo que es funciona tipo 2d, pero sigue siendo 3d, solo no se usa z.
 
 ### `Hitbox` (papa) — `scripts/combat/hitbox.gd`

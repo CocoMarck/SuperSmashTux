@@ -124,3 +124,4 @@
 - **LISTO** Docs ordenados por dominio: `docs/` ahora tiene `arquitectura/`, `combate/`, `ia/`, `controles/`, `ui/` y `arte/` (`estructura.md` y `changelog.md` quedan en la raíz). `configurar-controles.md` y `nota-input-settings.md` se fusionaron en `docs/controles/configurar-controles.md`.
 - **LISTO** Lógica one-way movida de GravityBody3D a Person
 - **LISTO** `gravity_body_3d.gd` movido de `scripts/physics/` a `scripts/characters/`, porque es la base de la cadena de personajes. `physics/` queda con `area_gravity_3d.gd`.
+- **LISTO** `area_gravity_3d.gd` movido de `scripts/physics/` a `scripts/combat/`, porque `Hitbox` es su único uso. La carpeta `physics/` se eliminó.

@@ -127,4 +127,3 @@ script = ExtResource("5_eryo2")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, 0)
 gizmo_extents = 0.5
 script = ExtResource("5_eryo2")
-init_looking_at_right = true

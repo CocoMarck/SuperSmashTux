@@ -10,8 +10,7 @@ supersmashtux/
 ├── ui/               # Pantallas de interfaz (no son niveles): main_menu, fight_hud, controls_menu
 ├── scripts/          # GDScripts para nodos y lógica del juego
 │   ├── characters/   # Cadena de personajes: GravityBody3D -> Person -> Fighter -> PowerFighter -> Player / NPC
-│   ├── combat/       # Hitboxes (nodos): Hitbox, HitboxDamage, HitboxGrab
-│   ├── physics/      # Gravedad para áreas (no cuerpos): AreaGravity3D, base de Hitbox
+│   ├── combat/       # Hitboxes (nodos): AreaGravity3D -> Hitbox -> HitboxDamage / HitboxGrab
 │   ├── platforms/    # Plataformas: Platform, GroundPlatform, OneWayPlatform
 │   ├── match/        # Módulos de la partida, uno por concern (GameManager, CameraFollow, SpawnPoint)
 │   ├── ui/           # Scripts de las pantallas de UI en ui/ (botones, menú de controles)
