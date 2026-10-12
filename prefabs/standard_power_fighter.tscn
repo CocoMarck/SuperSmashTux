@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b4cy7pey5xxe"]
 
-[ext_resource type="PackedScene" uid="uid://c0l1vjua7a3ib" path="res://assets/standard_character_a_pose.glb" id="1_glb0"]
+[ext_resource type="PackedScene" uid="uid://dhfu76dvlacbw" path="res://assets/standard_character_a_pose.glb" id="1_glb0"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nwdyk"]
 transparency = 1

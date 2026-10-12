@@ -7,11 +7,12 @@ Objeto de persona. Tiene lo necesario para tener fisicas 2D en un mundo 3D.
 - Puede correr, caminar, ir agachado, y saltar. 
 - Tiene compatibilidad con mas de un salto.
 - Puede agarrarse de plataformas.
+- Atraviesa plataformas de un solo sentido, y se puede dejar caer de ellas.
 - Recibe daño y tiene hp.
 - Tiene flancos de input de movimiento para poder hacer acciones especiales. O limitar acciones.
 '''
 
-# Constantes de agarre de orillas en `GameBalance`.
+# Constantes de agarre de orillas y plataformas de un solo sentido en `GameBalance`.
 
 # Propiedades publicas
 @export_group("Horizontal Movement")
@@ -132,6 +133,12 @@ var _hanging_right_side: bool = false
 var _hang_position: Vector3 = Vector3.ZERO
 var _ledge_release_count: float = 0.0
 
+# Propiedades privadas | Plataformas de un solo sentido.
+var _drop_through_count: float = 0.0
+var _one_way_ignored: Dictionary = {}
+var _last_floor_one_way: OneWayPlatform = null
+var _one_way_coyote_count: float = 0.0
+
 # NPC Things
 var _last_frame : FrameMotionSignals = null
 
@@ -215,6 +222,7 @@ func respawn(at_position: Vector3) -> void:
 	# podria dañar a quien este parado en el spawn apenas reaparece.
 	_release_hanging_ledge()
 	_drop_through_count = 0.0
+	_one_way_coyote_count = 0.0
 	_clean_heavy_hitstun_state()
 	grabbed = false
 	_knockout_time = 0
@@ -320,6 +328,80 @@ func _holding_onto_the_ledge() -> bool:
 func _ledge_grab_anim(delta) -> void:
 	_pivot.position.y = -0.3
 	_animation_player.play("hold_platform")
+
+# Funciones | Plataformas de un solo sentido
+func _get_floor_one_way() -> OneWayPlatform:
+	'''
+	Buscar en las colisiones del ultimo move_and_slide si topamos con alguna OneWayPlatform.
+	Devuelve la primera que encuentre, o null si no hubo ninguna.
+	'''
+	for i in range(get_slide_collision_count()):
+		var collision := get_slide_collision(i)
+		var collider := collision.get_collider()
+		if collider is OneWayPlatform:
+			return collider as OneWayPlatform
+	return null
+
+func _one_way_platforms(delta: float, ignore: bool, on_floor: bool) -> void:
+	'''
+	Maneja las plataformas de un solo sentido, estilo Smash Bros: se atraviesan de abajo pa arriba,
+	pero solidas al caer encima. Con tap de abajo estando parado en una, te dejas caer a proposito.
+	'''
+	# Plataforma de un solo sentido en la que estamos parados ahorita, si hay.
+	var floor_one_way := _get_floor_one_way() if on_floor else null
+
+	# Arrancar caida voluntaria si se hace tap de abajo estando parado sobre una plataforma de un solo sentido.
+	if ignore and floor_one_way != null:
+		_drop_through_count = GameBalance.DROP_THROUGH_TIME
+		# Empujoncito hacia abajo pa despegarse y que no se re-enganche por el snap del piso.
+		_target_velocity.y = min(_target_velocity.y, -1.0)
+
+	# Temporizador de la caida voluntaria.
+	if _drop_through_count > 0.0:
+		_drop_through_count = max(_drop_through_count - delta, 0.0)
+
+	# Coyote time: si nos salimos de la orilla caminando, la plataforma sigue solida un ratito,
+	# pa que si regresamos de volada no nos caigamos como si nada.
+	if _drop_through_count > 0.0:
+		# Si se esta cayendo a proposito, cancelar el coyote, si no la plataforma se queda solida y el tap no sirve.
+		_one_way_coyote_count = 0.0
+	elif floor_one_way != null:
+		_last_floor_one_way = floor_one_way
+		_one_way_coyote_count = GameBalance.ONE_WAY_COYOTE_TIME
+	else:
+		_one_way_coyote_count = max(_one_way_coyote_count - delta, 0.0)
+
+	var feet_position := _get_feet_position()
+
+	# Recorrer todas las plataformas de un solo sentido y decidir si atravesarlas o no.
+	for platform in get_tree().get_nodes_in_group(Platform.GROUP_NAME):
+		var one_way := platform as OneWayPlatform
+		if one_way == null or not is_instance_valid(one_way):
+			continue
+
+		# En coyote time nomas pa la plataforma en la que estabamos parados, no pa todas.
+		var in_coyote := one_way == _last_floor_one_way and _one_way_coyote_count > 0.0
+		var should_ignore := _drop_through_count > 0.0 \
+			or _target_velocity.y > 0.0 \
+			or (not one_way.is_above_surface(feet_position, GameBalance.ONE_WAY_MARGIN) and not in_coyote)
+
+		# Solo llamar add/remove cuando el estado cambia de verdad, pa no hacerlo de a gratis cada frame.
+		if _one_way_ignored.get(one_way, false) != should_ignore:
+			if should_ignore:
+				add_collision_exception_with(one_way)
+			else:
+				remove_collision_exception_with(one_way)
+			_one_way_ignored[one_way] = should_ignore
+
+	# Limpiar del cache las plataformas que ya no sean validas.
+	for cached_platform in _one_way_ignored.keys():
+		if not is_instance_valid(cached_platform):
+			_one_way_ignored.erase(cached_platform)
+
+	# Limpiar tambien la referencia de la ultima plataforma pisada, si ya no es valida.
+	if _last_floor_one_way != null and not is_instance_valid(_last_floor_one_way):
+		_last_floor_one_way = null
+		_one_way_coyote_count = 0.0
 
 # Funciones | Mover
 func _is_direction_buffer() -> bool:
@@ -878,9 +960,11 @@ func _build_frame(delta: float) -> FrameMotionSignals:
 	'''
 	Agrupa gravity move states.
 	'''
-	var vertical_force_signals = _vertical_force(
-		delta, (_last_can_down_hard and _heavy_hitstun_active() == false), _fall_acceleration_multiplier
+	# Las plataformas de un solo sentido se resuelven antes de la gravedad y las colisiones entre bodies.
+	_one_way_platforms(
+		delta, (_last_can_down_hard and _heavy_hitstun_active() == false), is_on_floor()
 	)
+	var vertical_force_signals = _vertical_force(delta, _fall_acceleration_multiplier)
 	var move_signals = _move(delta, vertical_force_signals)
 	var move_states = _get_move_states(move_signals)
 	return FrameMotionSignals.new({

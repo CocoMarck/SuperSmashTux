@@ -6,7 +6,7 @@
 
 ```
 CharacterBody3D
-└─ GravityBody3D        → física: gravedad 2D + colisiones (normales y OneWayPlatform)
+└─ GravityBody3D        → física: gravedad 2D + colisiones normales y entre cuerpos
    └─ Person            → moverse, saltar, agarrarse de orillas, recibir daño, respawn
 	  └─ Fighter        → trancazos (FightMove), protegerse, agarres
 		 └─ PowerFighter → doble salto + ataques de poder (`PowerAttacks`)
@@ -22,10 +22,11 @@ CharacterBody3D
 
 Hijo de `CharacterBody3D`. No sabe pelear ni moverse: solo sabe de **gravedad 2D y colisiones**.
 
-- **Gravedad 2D** (`_vertical_force(delta, ignore_one_way_platforms, multiplier)`): imita gravedad en el eje Y, dentro de un mundo 3D. Devuelve `VerticalForceSignals` (`on_floor`, `on_ceiling`, `on_wall`, `air_count`, `force`).
+- **Gravedad 2D** (`_vertical_force(delta, multiplier = 1)`): imita gravedad en el eje Y, dentro de un mundo 3D. Devuelve `VerticalForceSignals` (`on_floor`, `on_ceiling`, `on_wall`, `air_count`, `force`).
 - **Colisión con plataformas normales**: las de siempre, vía `move_and_slide()`.
-- **Colisión con `OneWayPlatform`**: se atraviesan de abajo hacia arriba pero sólidas al caer encima, con drop-through voluntario y coyote time.
-- **Medidas del cuerpo** (`_get_feet_position`, `_get_body_half_height`): derivadas del `$CollisionShape3D`.
+- **Colisión entre cuerpos** (`_toggle_body_collisions`).
+- **Medidas del cuerpo** (`get_width`, `get_height`, `_get_feet_position`, `_get_head_y`): derivadas del `$CollisionShape3D`.
+- **No sabe de `OneWayPlatform`**: esa lógica vive en `Person` (ver abajo). Así la base queda limpia para cuerpos sin gameplay.
 - Tiene un `_physics_process` default (gravedad + `move_and_slide()`) que sirve de ejemplo y de base para cuerpos sin gameplay (futuro ragdoll, por ejemplo).
 
 ## `Person` — el papá de todos
@@ -40,6 +41,7 @@ Hijo de `GravityBody3D`. Tiene los métodos y propiedades para **moverse y recib
 - **Entrada por capas**:
   - `_collect_input()` → **para players**. Por defecto es `pass`; lo llenan los hijos que leen teclado.
   - `_process_ai(delta, frame)` → **para NPCs**. Hook virtual (por defecto `pass`) que `NPC` sobreescribe; recibe el `FrameMotionSignals` del frame anterior (`_last_frame`). Ver `docs/ia/nota-ai-npc.md`.
+- **Plataformas one-way** (`_one_way_platforms()`, `_get_floor_one_way()`, estado `_drop_through_count`, `_one_way_ignored`, `_last_floor_one_way`, `_one_way_coyote_count`): se atraviesan de abajo hacia arriba pero son sólidas al caer encima, con drop-through voluntario (tap abajo) y coyote time. Vive aquí y no en `GravityBody3D` porque depende del input (`_down_pressed`) y de Person; `Person` llama `_one_way_platforms(...)` justo antes de `_vertical_force(...)`.
 - **Flancos de input**: `_up_pressed` / `_down_pressed` (con su memoria `_was_move_up` / `_was_move_down`) y `_was_jumping` para el salto. Sirven para drop-through y para acciones especiales simultáneas con dos teclas.
 - **Disabled**: Estado en el cual esta incapacitado para moverse adecuadante el person (Solo puede moverse horizontalmente en el aire). Se desbloquea movimiento adecuado en el piso, por x tiempo, o porque se recibio input de moverse.
 - **Knocked out**: Estado en cual esta inmobil el jugador por x cantidad de tiempo.

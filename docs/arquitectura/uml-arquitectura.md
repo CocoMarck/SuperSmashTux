@@ -44,8 +44,8 @@ classDiagram
 
 ## Notas
 
-- `GravityBody3D`: gravedad 2D + colisiones (normales y one-way).
-- `Person`: moverse, saltar, ledge grab, daño, `respawn()`.
+- `GravityBody3D`: gravedad 2D + colisiones (normales y entre cuerpos) + medidas del cuerpo.
+- `Person`: moverse, saltar, ledge grab, plataformas one-way (drop-through y coyote time), daño, `respawn()`.
 - `Fighter`: ataques (15 `FightMove`), grab (con `HitboxGrab` y lanzamiento), shield (con defensa y roll).
 - `PowerFighter`: doble salto y ataques de poder (`PowerAttacks`); el "tercer salto" es el ataque de poder hacia arriba (`jump_power`).
 - `NPC`: IA propia vía `_process_ai(delta, frame)` (hook definido en `Person`).
