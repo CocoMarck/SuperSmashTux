@@ -22,10 +22,10 @@ Area3D
           └── HitboxGrab     (detecta y avisa al padre que agarre; no daña)
 ```
 
-### `AreaGravity3D` (abuelo, con mucha fortuna) — `scripts/area_gravity_3d.gd`
+### `AreaGravity3D` (abuelo, con mucha fortuna) — `scripts/physics/area_gravity_3d.gd`
 Un area 3d con físicas listas, puede moverse en `x`, y saltar. `y` es la fuerza vertical. Puede rebotar, en `x`, y en `y`. `z` no se usa, por lo que es funciona tipo 2d, pero sigue siendo 3d, solo no se usa z.
 
-### `Hitbox` (papa) — `scripts/hitbox.gd`
+### `Hitbox` (papa) — `scripts/combat/hitbox.gd`
 
 Clase base que **todo** hitbox comparte. Extiende `Area3D`.
 
@@ -65,12 +65,12 @@ Detecta al oponente para iniciar un agarre. **No hace daño.**
 - En `_on_hitbox_body_entered` no aplica daño: avisa a `_parent` (el `Fighter`)
   para que arranque el estado de grab, o emite una señal `grabbed(body)`.
 - Se lanzará desde un `FightMove` con `grab_attack = true` (ya existe esa bandera en
-  `scripts/helpers/fight_move.gd:32`), pero con su propio tamaño/duración.
+  `scripts/helpers/combat/fight_move.gd:32`), pero con su propio tamaño/duración.
 
 ## Lifetime: el hitbox se sabe morir
 
 Hoy el `Fighter` controla todo el ciclo de vida con `_hitbox_time` y `_clear_hitbox()`
-(`scripts/fighter.gd`). El diseño planeado reparte el trabajo:
+(`scripts/characters/fighter.gd`). El diseño planeado reparte el trabajo:
 
 | Quién | Qué hace |
 |---|---|
@@ -79,11 +79,11 @@ Hoy el `Fighter` controla todo el ciclo de vida con `_hitbox_time` y `_clear_hit
 
 - `lifetime = 0.0` significa "no me destruyo solo": el `Fighter` decide cuándo.
 - El `Fighter` ya calcula la duración exacta con `get_hitbox_time_ratio()`
-  (`scripts/helpers/fight_move.gd:91`), así que basta pasarla como `lifetime`.
+  (`scripts/helpers/combat/fight_move.gd:91`), así que basta pasarla como `lifetime`.
 
 Ganancia: robustez (auto-cleanup) sin perder el control fino del `Fighter`.
 
-## Uso desde `scripts/fighter.gd`
+## Uso desde `scripts/characters/fighter.gd`
 
 - `_spawn_hitbox(...)`: hace el **swap de ejes** (`Vector3(p.z, p.y, p.x)`), crea el hitbox
   hijo del `_pivot` y pasa el `lifetime` calculado desde el `FightMove`.

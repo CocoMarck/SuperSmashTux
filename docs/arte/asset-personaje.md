@@ -35,7 +35,7 @@ CharacterBody3D      # script Person/Fighter
 
 ## Cómo agregar un personaje nuevo
 
-1. **En Blender**: modelar y armar el rig con el nodo raíz llamado `Pivot`, con la malla/esqueleto colgando de ahí (ver reglas de escala y orientación en `docs/nota-modelos-animaciones.md`). Animar con los nombres exactos que usa el código — ver la sección [Animaciones](#animaciones) más abajo para la lista completa por contexto (piso/aire, Person/Fighter/PowerFighter).
+1. **En Blender**: modelar y armar el rig con el nodo raíz llamado `Pivot`, con la malla/esqueleto colgando de ahí (ver reglas de escala y orientación en `docs/arte/nota-modelos-animaciones.md`). Animar con los nombres exactos que usa el código — ver la sección [Animaciones](#animaciones) más abajo para la lista completa por contexto (piso/aire, Person/Fighter/PowerFighter).
 2. **Exportar a `.glb`** y copiarlo a `assets/`.
 3. **Crear el prefab** (`.tscn` nuevo en `prefabs/`) con esta estructura:
    ```

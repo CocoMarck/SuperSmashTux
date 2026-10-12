@@ -1,33 +1,33 @@
 # Nota: Sistema de ataques
 
 > Cómo se elige, ejecuta y termina un ataque (`FightMove`). Para el hitbox en sí (construcción, ciclo
-> de vida) ver `docs/hitbox.md`. Para dónde encaja esto en la jerarquía de clases ver
-> `docs/arquitectura-personajes.md`.
+> de vida) ver `docs/combate/hitbox.md`. Para dónde encaja esto en la jerarquía de clases ver
+> `docs/arquitectura/arquitectura-personajes.md`.
 
-El sistema de ataques vive en **`scripts/fighter.gd`** (clase `Fighter`, hija de `Person`). Lo
+El sistema de ataques vive en **`scripts/characters/fighter.gd`** (clase `Fighter`, hija de `Person`). Lo
 extienden `PowerFighter` → `Player` / `NPC`. Todo lo de este doc sale de `Fighter`
 salvo que se diga otra cosa.
 
 ## Piezas
 
-- **`FightMove`** (`scripts/helpers/fight_move.gd`): describe UN movimiento. Se construye con un
+- **`FightMove`** (`scripts/helpers/combat/fight_move.gd`): describe UN movimiento. Se construye con un
   `Dictionary` que se mergea sobre `_defaults` (lo no especificado cae al default). Propiedades:
   `name`, `duration`, `speed`, `direction`, `jump_power`, `air_attack`, `grab_attack`,
   `override_horizontal_move` (default `true`), `override_vertical_move` (default `false`), `immortal`
   y `hitboxes_moves`.
-- **`HitboxMove`** (`scripts/helpers/hitbox_move.gd`): describe UN hitbox dentro de un `FightMove`.
+- **`HitboxMove`** (`scripts/helpers/combat/hitbox_move.gd`): describe UN hitbox dentro de un `FightMove`.
   Propiedades: `id`, `damage`, `position`, `size`, `direction`, `rotation`, `init_time_ratio`,
   `duration`, y las de `AreaGravity3D` (`use_gravity`, `fall_acceleration`, `bounce`,
   `bounce_impulse`, `speed`). **El hitbox ya no vive en el `FightMove`**: cada ataque trae un arreglo
   `hitboxes_moves`, así que un ataque puede lanzar varios hitboxes (ej. `air_neutral` lanza 4).
-- **`Attacks`** (`scripts/helpers/attacks.gd`): catálogo fijo de **15 `FightMove`** — 10 en piso
+- **`Attacks`** (`scripts/helpers/combat/attacks.gd`): catálogo fijo de **15 `FightMove`** — 10 en piso
   (`neutral1`, `neutral2`, `neutral3`, `down`, `up`, `dash`, `forward`, `heavy_side`, `heavy_up`,
   `heavy_down`) y 5 en aire (`air_neutral`, `air_down`, `air_up`, `air_forward`, `air_back`). `Fighter`
   lo declara como `var _attacks: Attacks = Attacks.new(...)`, propiedad de instancia.
   Los 3 neutrales son el combo de piso; los otros 12 son "un ataque = un estado".
 - **`Fighter._fight_move(delta, signals, states)`**: la máquina que decide cuándo arranca un ataque, lo
   sostiene mientras dura, y lanza/cierra los hitboxes. Se llama desde `_process_action()`.
-- **`PowerAttacks`** (`scripts/helpers/power_attacks.gd`): catálogo aparte de `PowerFighter` (ver
+- **`PowerAttacks`** (`scripts/helpers/combat/power_attacks.gd`): catálogo aparte de `PowerFighter` (ver
   sección al final). No son parte de los 15.
 
 ## Cómo se elige el ataque
@@ -123,7 +123,7 @@ distintos: si no, el segundo nunca saldría.
 Detalles de `_spawn_hitboxes_damages()`:
 
 - Crea un `HitboxDamage` con `damage`, `size`, `lifetime = duration` y `parent = self` (para no
-  pegarse a sí mismo). Ver `docs/hitbox.md`.
+  pegarse a sí mismo). Ver `docs/combate/hitbox.md`.
 - **Swap de ejes**: el "adelante" (x) del `FightMove` cae en `z` del `Pivot`, así que
   `fixed_position = Vector3(pos.z, pos.y, pos.x)`. Se agrega como hijo de `_pivot`, por lo que gira
   con el personaje.
@@ -174,12 +174,12 @@ de colgado siempre gana.
 ## Animación de ataque
 
 `_attack_anim()` reproduce `_current_attack.name` en el `AnimationPlayer` (si el nombre estuviera
-vacío, lo detiene). Los nombres de animación son los de `docs/asset-personaje.md` (fuente de verdad);
+vacío, lo detiene). Los nombres de animación son los de `docs/arte/asset-personaje.md` (fuente de verdad);
 el `name` del `FightMove` **es** el nombre de la animación, por eso son `snake_case`.
 
 ## Daño recibido
 
-`HitboxDamage._on_hitbox_body_entered` (`scripts/hitbox_damage.gd`), si el cuerpo es `Person` y no es
+`HitboxDamage._on_hitbox_body_entered` (`scripts/combat/hitbox_damage.gd`), si el cuerpo es `Person` y no es
 su propio `_parent`, llama:
 
 ```gdscript
@@ -244,7 +244,7 @@ Sus ataques viven en `_power_attacks` (`PowerAttacks`): `standard`, `down`, `up`
 
 ## Ver también
 
-- `docs/hitbox.md` — construcción y ciclo de vida del `Hitbox` en sí.
-- `docs/arquitectura-personajes.md` — jerarquía `Person` → `Fighter` → `PowerFighter`.
-- `docs/asset-personaje.md` — lista de nombres de animación de ataque (fuente de verdad para nombres).
-- `docs/normal-and-power-attacks-moves.md` — ataques normales y power.
+- `docs/combate/hitbox.md` — construcción y ciclo de vida del `Hitbox` en sí.
+- `docs/arquitectura/arquitectura-personajes.md` — jerarquía `Person` → `Fighter` → `PowerFighter`.
+- `docs/arte/asset-personaje.md` — lista de nombres de animación de ataque (fuente de verdad para nombres).
+- `docs/combate/normal-and-power-attacks-moves.md` — ataques normales y power.

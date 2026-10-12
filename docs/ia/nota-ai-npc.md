@@ -1,6 +1,6 @@
 # Nota: `_process_ai` — entrada de IA para NPCs
 
-> **Aplicado.** Nació como propuesta (`_ai_process(signals)` llamado al final del frame); quedó implementado distinto: el hook se llama `_process_ai(delta, frame)`, vive en `Person` y lo sobreescribe `NPC` (`scripts/npc.gd`). Esta nota explica el diseño real y por qué.
+> **Aplicado.** Nació como propuesta (`_ai_process(signals)` llamado al final del frame); quedó implementado distinto: el hook se llama `_process_ai(delta, frame)`, vive en `Person` y lo sobreescribe `NPC` (`scripts/characters/npc.gd`). Esta nota explica el diseño real y por qué.
 
 ## Idea central
 
@@ -42,5 +42,5 @@ El `_attack` ya viaja como bool de un frame porque `_collect_input` lo baja cada
 ## Pendiente
 
 - **Escudo y agarre**: el NPC aún no usa `_shield` ni `_grab`.
-- **Detección con bordes reales** (AABB en vez de solo el centro): ver `docs/nota-npc-aabb-deteccion.md`.
+- **Detección con bordes reales** (AABB en vez de solo el centro): ver `docs/ia/nota-npc-aabb-deteccion.md`.
 - **Modularizar** `_process_ai`: hoy es un solo método largo (así lo marca el propio comentario en `npc.gd`).

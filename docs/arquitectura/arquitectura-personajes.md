@@ -1,6 +1,6 @@
 # Arquitectura de personajes — `Person`, `Fighter` y `PowerFighter`
 
-> Jerarquía real (aplicada) de los personajes. Reemplazó al viejo `Character` (ya borrado) con tres capas: `Person` (moverse y recibir daño), `Fighter` (dar trancazos) y `PowerFighter` (golpes con poder + doble salto). El mapa de clases completo vive en `docs/uml-arquitectura.md`.
+> Jerarquía real (aplicada) de los personajes. Reemplazó al viejo `Character` (ya borrado) con tres capas: `Person` (moverse y recibir daño), `Fighter` (dar trancazos) y `PowerFighter` (golpes con poder + doble salto). El mapa de clases completo vive en `docs/arquitectura/uml-arquitectura.md`.
 
 ## Jerarquía
 
@@ -8,10 +8,10 @@
 CharacterBody3D
 └─ GravityBody3D        → física: gravedad 2D + colisiones (normales y OneWayPlatform)
    └─ Person            → moverse, saltar, agarrarse de orillas, recibir daño, respawn
-      └─ Fighter        → trancazos (FightMove), protegerse, agarres
-         └─ PowerFighter → doble salto + ataques de poder (`PowerAttacks`)
-            ├─ Player       → jugador real, con `player_id` e `input_map`
-            └─ NPC          → con IA propia (`_process_ai`)
+	  └─ Fighter        → trancazos (FightMove), protegerse, agarres
+		 └─ PowerFighter → doble salto + ataques de poder (`PowerAttacks`)
+			├─ Player       → jugador real, con `player_id` e `input_map`
+			└─ NPC          → con IA propia (`_process_ai`)
 ```
 
 > `Character` (la clase vieja) y `OldFightMove` ya se borraron del proyecto (quedan en el historial de git).
@@ -39,7 +39,7 @@ Hijo de `GravityBody3D`. Tiene los métodos y propiedades para **moverse y recib
 - **Respawn** (`respawn(at_position)`): limpia posición, velocidad, daño, saltos, orilla agarrada y orientación, para reaparecer como nuevo.
 - **Entrada por capas**:
   - `_collect_input()` → **para players**. Por defecto es `pass`; lo llenan los hijos que leen teclado.
-  - `_process_ai(delta, frame)` → **para NPCs**. Hook virtual (por defecto `pass`) que `NPC` sobreescribe; recibe el `FrameMotionSignals` del frame anterior (`_last_frame`). Ver `docs/nota-ai-npc.md`.
+  - `_process_ai(delta, frame)` → **para NPCs**. Hook virtual (por defecto `pass`) que `NPC` sobreescribe; recibe el `FrameMotionSignals` del frame anterior (`_last_frame`). Ver `docs/ia/nota-ai-npc.md`.
 - **Flancos de input**: `_up_pressed` / `_down_pressed` (con su memoria `_was_move_up` / `_was_move_down`) y `_was_jumping` para el salto. Sirven para drop-through y para acciones especiales simultáneas con dos teclas.
 - **Disabled**: Estado en el cual esta incapacitado para moverse adecuadante el person (Solo puede moverse horizontalmente en el aire). Se desbloquea movimiento adecuado en el piso, por x tiempo, o porque se recibio input de moverse.
 - **Knocked out**: Estado en cual esta inmobil el jugador por x cantidad de tiempo.
@@ -92,14 +92,14 @@ Hijo de `Fighter`. Tiene **doble salto** (`_max_jumps = 2`, aplicado en `_init()
 
 ## `NPC` — la IA
 
-Hijo de `PowerFighter` (`scripts/npc.gd`). No toca el gameplay: sobreescribe `_collect_input()` (limpia bools) y `_process_ai()` (los setea), así hereda ataques, escudo y saltos sin cambios.
+Hijo de `PowerFighter` (`scripts/characters/npc.gd`). No toca el gameplay: sobreescribe `_collect_input()` (limpia bools) y `_process_ai()` (los setea), así hereda ataques, escudo y saltos sin cambios.
 
 - **Detección**: un `Area3D` hijo (`DetectionArea`, caja 16x9x0.5) revisado cada 0.1 s. Guarda `Platform` y `Person` cercanos (`_detected_platforms`, `_detected_persons`).
 - **Recovery**: si está en el aire o colgado de una orilla, apunta a la plataforma más cercana (`_get_nearest_platform_position`), se mueve hacia ella y, si está por encima, activa `_turbo_jump`: salta en el piso, vuelve a saltar al llegar a la altura máxima estimada (`_calcule_max_jump_height_frames`) y, agotados los saltos, usa el ataque de poder hacia arriba (el "tercer salto").
 - **Vagabundeo**: fuera del recovery, cambia dirección y velocidad (idle/run/walk/crouch) por temporizadores aleatorios.
 - **Ataque**: si hay un `Person` muy cerca (`_get_very_close_person_position`, diferencia promedio XYZ <= 0.4), se queda quieto y ataca.
 
-Detalle y por qué del hook en `docs/nota-ai-npc.md`; plan de mejora de detección en `docs/nota-npc-aabb-deteccion.md`.
+Detalle y por qué del hook en `docs/ia/nota-ai-npc.md`; plan de mejora de detección en `docs/ia/nota-npc-aabb-deteccion.md`.
 
 ## Estado
 

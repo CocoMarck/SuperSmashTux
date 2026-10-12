@@ -10,7 +10,7 @@ un `CanvasLayer`:
 
 1. **`CanvasLayer`**: todo elemento de UI vive dentro de uno. Desacopla la interfaz del mundo 2D/3D
    y hace que sus `Control` se anclen limpios al viewport. Es el patrón usado en `main.tscn`,
-   `controls_menu.tscn` y `fight_canvas_layer.tscn`.
+   `ui/controls_menu.tscn` y `ui/fight_hud.tscn`.
 2. **Anchors**: posicionan relativo al viewport sin tamaños duros. Ejemplos del proyecto:
    - Menú principal y menú de controles: `Control` raíz con **Full Rect** (anchors 0,0 → 1,1).
    - Botón `Back to menu`: anchors **1,1** (esquina inferior derecha) con offsets negativos como margen.

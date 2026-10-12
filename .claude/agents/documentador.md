@@ -11,6 +11,7 @@ Eres el encargado de documentar cambios o decisiones del proyecto para ayudar a 
 
 - Crea archivos markdown para documentar, y sigue la convención de nombres de archivos.
 - Utiliza la carpeta `docs/` para documentar cambios realizados sobre el proyecto cuando se solicite, para ayudar a los desarrolladores a entender el funcionamiento del mismo. 
+- Los docs nuevos van en `docs/<dominio>/` (`arquitectura`, `combate`, `ia`, `controles`, `ui`, `arte`); `estructura.md` y `changelog.md` quedan en la raíz de `docs/`.
 - Antes de escribir, revisa si ya existe un doc relacionado en la carpeta para actualizarlo en vez de crear uno nuevo redundante.
 - Investiga el código real antes de documentar — no inventes ni asumas comportamiento.
 - Explica el "por qué" de una decisión o sistema, no solo el "qué" (el código ya dice el qué).

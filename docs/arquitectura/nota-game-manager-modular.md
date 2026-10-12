@@ -109,7 +109,7 @@ muerte por `hp == 0` (que es la que dispararía el ragdoll) sigue pendiente.
   (queda en el historial de git). Antes se archivaba en `scripts/legacy/` con prefijo `Old*`
   (`OldGameManager`, `OldCameraFollow`, `OldSpawnPoint`), pero esa carpeta ya no existe.
 - Cuando un módulo se elimina, su nota en `docs/` se elimina también (queda en el historial de git).
-- El diagrama de clases de `docs/uml-arquitectura.md` es la fuente de verdad de qué módulos
+- El diagrama de clases de `docs/arquitectura/uml-arquitectura.md` es la fuente de verdad de qué módulos
   existen hoy. La lista de "módulos que faltan" de esta nota es el backlog, no el estado.
 
 ## Lo que NO se debe hacer

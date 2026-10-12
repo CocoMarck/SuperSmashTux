@@ -3,8 +3,8 @@ extends Marker3D
 
 # Constantes del script.
 const POWER_FIGHTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn")
-const PLAYER_SCRIPT = preload("res://scripts/player.gd")
-const NPC_SCRIPT = preload("res://scripts/npc.gd")
+const PLAYER_SCRIPT = preload("res://scripts/characters/player.gd")
+const NPC_SCRIPT = preload("res://scripts/characters/npc.gd")
 
 # Propiedades publicas del script.
 @export var init_looking_at_right: bool = false

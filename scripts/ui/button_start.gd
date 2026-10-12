@@ -1,7 +1,7 @@
 extends Button
 
-const LEVEL_SCENE := "res://scenes/map1.tscn"
-const FIGHT_CANVAS_LAYER_SCENE := "res://scenes/fight_canvas_layer.tscn"
+const LEVEL_SCENE := "res://scenes/levels/map1.tscn"
+const FIGHT_HUD_SCENE := "res://ui/fight_hud.tscn"
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -10,7 +10,7 @@ func _ready() -> void:
 func _go_to_battle() -> void:
 	# Agregarle interface a la instancia de nivel.
 	var level: Node = load(LEVEL_SCENE).instantiate()
-	var canvas_layer: CanvasLayer = load(FIGHT_CANVAS_LAYER_SCENE).instantiate()
+	var canvas_layer: CanvasLayer = load(FIGHT_HUD_SCENE).instantiate()
 	level.add_child(canvas_layer)
 	# Meter como hijo la scene del level
 	get_tree().change_scene_to_node(level)

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c5rhlecdtr3fm"]
 
-[ext_resource type="Script" uid="uid://dixe7xp7tg4fo" path="res://scripts/menu/button_start.gd" id="1_yqeox"]
-[ext_resource type="Script" uid="uid://caufbm20j0drj" path="res://scripts/menu/button_controls.gd" id="2_vjb58"]
+[ext_resource type="Script" uid="uid://dixe7xp7tg4fo" path="res://scripts/ui/button_start.gd" id="1_yqeox"]
+[ext_resource type="Script" uid="uid://caufbm20j0drj" path="res://scripts/ui/button_controls.gd" id="2_vjb58"]
 
 [node name="MainMenuCanvasLayer" type="CanvasLayer" unique_id=683410342]
 

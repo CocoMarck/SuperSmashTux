@@ -1,6 +1,6 @@
 extends Button
 
-const CONTROL_MENU_SCENE := "res://scenes/controls_menu.tscn"
+const CONTROL_MENU_SCENE := "res://ui/controls_menu.tscn"
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
