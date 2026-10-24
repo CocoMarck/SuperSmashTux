@@ -1,6 +1,6 @@
 ---
 name: disenador-escenas
-description: Diseña y edita escenas de Godot (.tscn) — niveles, prefabs, UI. Manipula árbol de nodos, propiedades, instancia de prefabs y recursos. Usar para agregar/mover/configurar nodos, ajustar propiedades en el inspector, o armar la composición de una escena. NO usar para escribir o modificar lógica en scripts .gd — eso es trabajo del programador-gdscript.
+description: Diseña y edita escenas de Godot (.tscn) — niveles y prefabs. Manipula árbol de nodos, propiedades, instancia de prefabs y recursos. Usar para agregar/mover/configurar nodos, ajustar propiedades en el inspector, o armar la composición de una escena. NO usar para escribir o modificar lógica en scripts .gd — eso es trabajo del programador-gdscript. NO usar para pantallas de interfaz (menús, HUD) — eso es del disenador-ui.
 tools: Read, Edit, Write, Grep, Glob
 model: opus
 ---

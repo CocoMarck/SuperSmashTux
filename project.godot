@@ -21,8 +21,8 @@ config/icon="res://icon.png"
 
 [autoload]
 
-_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 InputSettings="*res://scripts/helpers/input/input_settings.gd"
+_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [dotnet]
 
