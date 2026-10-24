@@ -735,6 +735,12 @@ func _get_shield_porcent() -> float:
 		return _shield_time / GameBalance.SHIELD_DURATION
 	return 0.0
 
+func get_shield_ratio() -> float:
+	'''
+	Capacidad restante del escudo, de 0.0 (vacio) a 1.0 (lleno). Para mostrarla en el HUD.
+	'''
+	return clampf(_shield_time / GameBalance.SHIELD_DURATION, 0.0, 1.0)
+
 func _with_shield(signals: VerticalForceSignals) -> bool:
 	return (
 		(_shield_time > 0) and 

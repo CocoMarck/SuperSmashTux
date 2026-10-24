@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://ch8cm4ofsc1v"]
+
+[ext_resource type="Theme" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/hud/offscreen_cam.gd" id="2_script"]
+
+[node name="OffscreenCam" type="PanelContainer" unique_id=1867205134]
+visible = false
+custom_minimum_size = Vector2(104, 0)
+mouse_filter = 2
+theme = ExtResource("1_theme")
+theme_type_variation = &"KnWindow"
+script = ExtResource("2_script")
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=730116482]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Titlebar" type="PanelContainer" parent="VBox" unique_id=1325871090]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnTitlebarCam"
+
+[node name="TagLabel" type="Label" parent="VBox/Titlebar" unique_id=1704392268]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnChip"
+text = "P2"
+vertical_alignment = 1
+
+[node name="FeedMargin" type="MarginContainer" parent="VBox" unique_id=1188420517]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Feed" type="SubViewportContainer" parent="VBox/FeedMargin" unique_id=289574631]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(92, 92)
+layout_mode = 2
+mouse_filter = 2
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="VBox/FeedMargin/Feed" unique_id=1592640087]
+unique_name_in_owner = true
+handle_input_locally = false
+size = Vector2i(92, 92)
+render_target_update_mode = 0
+
+[node name="Camera" type="Camera3D" parent="VBox/FeedMargin/Feed/Viewport" unique_id=1036498215]
+unique_name_in_owner = true
+current = true
+fov = 40.0

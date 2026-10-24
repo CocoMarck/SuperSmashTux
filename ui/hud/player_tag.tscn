@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://d2tgk6pxr3ma"]
+
+[ext_resource type="Theme" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/hud/player_tag.gd" id="2_script"]
+
+[node name="PlayerTag" type="VBoxContainer" unique_id=1416239075]
+mouse_filter = 2
+theme = ExtResource("1_theme")
+theme_override_constants/separation = 3
+alignment = 1
+script = ExtResource("2_script")
+
+[node name="TagPanel" type="PanelContainer" parent="." unique_id=627014892]
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_type_variation = &"KnTag"
+
+[node name="TagLabel" type="Label" parent="TagPanel" unique_id=1958340127]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnTag"
+text = "P1"
+
+[node name="Pointer" type="Control" parent="." unique_id=1190853366]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(14, 8)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+
+[node name="PointerShape" type="Polygon2D" parent="Pointer" unique_id=405528819]
+unique_name_in_owner = true
+antialiased = true
+polygon = PackedVector2Array(0, 0, 14, 0, 7, 8)

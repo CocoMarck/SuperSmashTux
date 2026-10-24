@@ -9,7 +9,7 @@
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_gl6un"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_playa"]
-size = Vector3(24, 21, 4)
+size = Vector3(29.540283, 21, 4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bkxvp"]
 size = Vector3(41.528, 2, 4)
@@ -127,3 +127,4 @@ script = ExtResource("5_eryo2")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.5, 0)
 gizmo_extents = 0.5
 script = ExtResource("5_eryo2")
+init_looking_at_right = true

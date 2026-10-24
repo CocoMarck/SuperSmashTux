@@ -1,0 +1,150 @@
+[gd_scene format=3 uid="uid://cew1nd0wk3rx"]
+
+[ext_resource type="Theme" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/hud/end_window.gd" id="2_script"]
+
+[node name="EndWindow" type="PanelContainer" unique_id=1093857261]
+visible = false
+mouse_filter = 2
+theme = ExtResource("1_theme")
+theme_type_variation = &"KnWindowSystem"
+script = ExtResource("2_script")
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=1862039517]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Titlebar" type="PanelContainer" parent="VBox" unique_id=418576290]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnTitlebarCam"
+
+[node name="TitleText" type="Label" parent="VBox/Titlebar" unique_id=812345097]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnPlateName"
+text = "Ganador"
+vertical_alignment = 1
+
+[node name="Body" type="MarginContainer" parent="VBox" unique_id=1286513072]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="Stack" type="VBoxContainer" parent="VBox/Body" unique_id=1739204856]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 18
+
+[node name="Content" type="HBoxContainer" parent="VBox/Body/Stack" unique_id=1473920586]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 28
+alignment = 1
+
+[node name="Winner" type="VBoxContainer" parent="VBox/Body/Stack/Content" unique_id=965283714]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="TagPanel" type="PanelContainer" parent="VBox/Body/Stack/Content/Winner" unique_id=571839042]
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_type_variation = &"KnChip"
+
+[node name="WinnerTag" type="Label" parent="VBox/Body/Stack/Content/Winner/TagPanel" unique_id=2039471658]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnChip"
+text = "P1"
+horizontal_alignment = 1
+
+[node name="Portrait" type="PanelContainer" parent="VBox/Body/Stack/Content/Winner" unique_id=1720498351]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_type_variation = &"KnPortrait"
+
+[node name="PortraitTexture" type="TextureRect" parent="VBox/Body/Stack/Content/Winner/Portrait" unique_id=284716903]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Initial" type="Label" parent="VBox/Body/Stack/Content/Winner/Portrait" unique_id=1398025764]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnEndInitial"
+text = "B"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleRow" type="HBoxContainer" parent="VBox/Body/Stack/Content" unique_id=1584930276]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 15
+
+[node name="Title" type="Label" parent="VBox/Body/Stack/Content/TitleRow" unique_id=339172058]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnAnnounceEnd"
+text = "> ¡SE ACABÓ!"
+vertical_alignment = 1
+
+[node name="Cursor" type="ColorRect" parent="VBox/Body/Stack/Content/TitleRow" unique_id=905172634]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(38, 65)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.9019608, 0.92941177, 0.9529412, 1)
+
+[node name="ContinueRow" type="HBoxContainer" parent="VBox/Body/Stack" unique_id=602938471]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Press" type="Label" parent="VBox/Body/Stack/ContinueRow" unique_id=1147382956]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnMuted"
+text = "Pulsa"
+vertical_alignment = 1
+
+[node name="KeyChip" type="PanelContainer" parent="VBox/Body/Stack/ContinueRow" unique_id=829104637]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"KnHintKey"
+
+[node name="Key" type="Label" parent="VBox/Body/Stack/ContinueRow/KeyChip" unique_id=1958374620]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnMuted"
+text = "Enter"
+
+[node name="ContinueText" type="Label" parent="VBox/Body/Stack/ContinueRow" unique_id=473829165]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnMuted"
+text = "para continuar"
+vertical_alignment = 1

@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://dan5wc4mt7xg"]
+
+[ext_resource type="Theme" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/hud/announcement.gd" id="2_script"]
+
+[node name="Announcement" type="PanelContainer" unique_id=1749302815]
+visible = false
+mouse_filter = 2
+theme = ExtResource("1_theme")
+theme_type_variation = &"KnGo"
+script = ExtResource("2_script")
+
+[node name="Row" type="HBoxContainer" parent="." unique_id=962847301]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 15
+
+[node name="Text" type="Label" parent="Row" unique_id=1430658872]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnAnnounce"
+text = "> ¡PELEA!"
+vertical_alignment = 1
+
+[node name="Cursor" type="ColorRect" parent="Row" unique_id=274915630]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(38, 65)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.9019608, 0.92941177, 0.9529412, 1)

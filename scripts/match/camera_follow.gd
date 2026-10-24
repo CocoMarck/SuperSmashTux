@@ -14,7 +14,7 @@ Es un Marker3D, con hijo Camera3D.
 # Propiedades publicas | Zoom.
 @export_group("Zoom")
 @export var zoom_min_distance: float = 12.0    # que tan cerca puede llegar la camara
-@export var zoom_max_distance: float = 20.0    # que tan lejos puede alejarse la camara
+@export var zoom_max_distance: float = 30.0   # que tan lejos puede alejarse la camara
 
 # Propiedades publicas | Suavizado.
 @export_group("Smoothing")

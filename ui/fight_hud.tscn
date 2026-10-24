@@ -1,27 +1,128 @@
 [gd_scene format=3 uid="uid://05tx5psdvafb"]
 
-[ext_resource type="Script" uid="uid://cno74wf4nvv0l" path="res://scripts/ui/button_menu.gd" id="1_vtfwl"]
+[ext_resource type="Script" path="res://scripts/ui/fight_hud.gd" id="1_hud"]
+[ext_resource type="Theme" path="res://ui/themes/theme_kernel.tres" id="2_theme"]
+[ext_resource type="PackedScene" uid="uid://bc6dn3tw0ckr" path="res://ui/hud/countdown.tscn" id="3_countdown"]
+[ext_resource type="PackedScene" uid="uid://dan5wc4mt7xg" path="res://ui/hud/announcement.tscn" id="4_announcement"]
+[ext_resource type="PackedScene" uid="uid://cew1nd0wk3rx" path="res://ui/hud/end_window.tscn" id="5_end_window"]
 
-[node name="FightCanvasLayer" type="CanvasLayer" unique_id=288616017]
+[node name="FightHud" type="CanvasLayer" unique_id=288616017]
+script = ExtResource("1_hud")
 
-[node name="Control" type="Control" parent="." unique_id=1169761072]
+[node name="Root" type="Control" parent="." unique_id=1169761072]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
 
-[node name="Button" type="Button" parent="Control" unique_id=1040949315]
+[node name="TagLayer" type="Control" parent="Root" unique_id=1735092418]
+unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CamLayer" type="Control" parent="Root" unique_id=604827153]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Plates" type="HBoxContainer" parent="Root" unique_id=831475290]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -142.0
-offset_top = -39.0
-grow_horizontal = 0
+offset_top = -120.0
+offset_bottom = -32.0
+grow_horizontal = 2
 grow_vertical = 0
-text = "Back to menu"
-script = ExtResource("1_vtfwl")
+mouse_filter = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Center" type="CenterContainer" parent="Root" unique_id=1402968315]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Countdown" parent="Root/Center" unique_id=297465180 instance=ExtResource("3_countdown")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Announcement" parent="Root/Center" unique_id=1823057694 instance=ExtResource("4_announcement")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="EndWindow" parent="Root/Center" unique_id=1146930528 instance=ExtResource("5_end_window")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BackHint" type="PanelContainer" parent="Root" unique_id=742918356]
+unique_name_in_owner = true
+offset_left = 16.0
+offset_top = 18.0
+mouse_filter = 2
+theme_type_variation = &"KnHint"
+
+[node name="Row" type="HBoxContainer" parent="Root/BackHint" unique_id=1503887214]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="KeyChip" type="PanelContainer" parent="Root/BackHint/Row" unique_id=918273645]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"KnHintKey"
+
+[node name="Key" type="Label" parent="Root/BackHint/Row/KeyChip" unique_id=1276540389]
+layout_mode = 2
+theme_type_variation = &"KnHintText"
+text = "Esc"
+
+[node name="Text" type="Label" parent="Root/BackHint/Row" unique_id=384756102]
+layout_mode = 2
+theme_type_variation = &"KnHintText"
+text = "Regresar"
+vertical_alignment = 1
+
+[node name="TimerBox" type="PanelContainer" parent="Root" unique_id=1630948217]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 16.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_type_variation = &"KnHint"
+
+[node name="MatchTimer" type="Label" parent="Root/TimerBox" unique_id=527391846]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnTimer"
+text = "00:00"
+horizontal_alignment = 1
