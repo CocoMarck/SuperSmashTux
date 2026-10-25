@@ -84,9 +84,6 @@ func _spawn_all_power_fighters() -> void:
 		var spawn_point = spawn_points[i]
 		var power_fighter : PowerFighter
 		var is_player := i == 0 or i == 1
-		# TEMPORAL: CPUs desactivados para pruebas. Quitar este if para que vuelvan.
-		if not is_player:
-			continue
 		if is_player:
 			power_fighter = spawn_point.spawn( GlobalUtils.CharacterType.PLAYER, i )
 		else:

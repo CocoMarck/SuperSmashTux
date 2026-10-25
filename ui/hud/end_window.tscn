@@ -3,6 +3,11 @@
 [ext_resource type="Theme" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
 [ext_resource type="Script" path="res://scripts/ui/hud/end_window.gd" id="2_script"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_winner_portrait"]
+bg_color = Color(0.08627451, 0.105882354, 0.13333334, 1)
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
 [node name="EndWindow" type="PanelContainer" unique_id=1093857261]
 mouse_filter = 2
 theme = ExtResource("1_theme")
@@ -47,37 +52,41 @@ mouse_filter = 2
 theme_override_constants/separation = 28
 alignment = 1
 
-[node name="Winner" type="VBoxContainer" parent="VBox/Body/Stack/Content" unique_id=965283714]
+[node name="Winner" type="PanelContainer" parent="VBox/Body/Stack/Content" unique_id=965283714]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
-theme_override_constants/separation = 6
-alignment = 1
+theme_type_variation = &"KnWindow"
 
-[node name="TagPanel" type="PanelContainer" parent="VBox/Body/Stack/Content/Winner" unique_id=571839042]
+[node name="CardVBox" type="VBoxContainer" parent="VBox/Body/Stack/Content/Winner" unique_id=1847263950]
 layout_mode = 2
-size_flags_horizontal = 4
 mouse_filter = 2
-theme_type_variation = &"KnChip"
+theme_override_constants/separation = 0
 
-[node name="WinnerTag" type="Label" parent="VBox/Body/Stack/Content/Winner/TagPanel" unique_id=2039471658]
+[node name="Titlebar" type="PanelContainer" parent="VBox/Body/Stack/Content/Winner/CardVBox" unique_id=571839042]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnTitlebarCam"
+
+[node name="WinnerTag" type="Label" parent="VBox/Body/Stack/Content/Winner/CardVBox/Titlebar" unique_id=2039471658]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"KnChip"
 text = "P1"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Portrait" type="PanelContainer" parent="VBox/Body/Stack/Content/Winner" unique_id=1720498351]
+[node name="Portrait" type="PanelContainer" parent="VBox/Body/Stack/Content/Winner/CardVBox" unique_id=1720498351]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
-size_flags_horizontal = 4
 mouse_filter = 2
-theme_type_variation = &"KnPortrait"
+theme_override_styles/panel = SubResource("StyleBoxFlat_winner_portrait")
 
-[node name="PortraitTexture" type="TextureRect" parent="VBox/Body/Stack/Content/Winner/Portrait" unique_id=284716903]
+[node name="PortraitTexture" type="TextureRect" parent="VBox/Body/Stack/Content/Winner/CardVBox/Portrait" unique_id=284716903]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -85,7 +94,7 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Initial" type="Label" parent="VBox/Body/Stack/Content/Winner/Portrait" unique_id=1398025764]
+[node name="Initial" type="Label" parent="VBox/Body/Stack/Content/Winner/CardVBox/Portrait" unique_id=1398025764]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2

@@ -17,9 +17,6 @@ const DEFAULT_FIGHTER_NAME := "B.O.B" # Si el PowerFighter no trae display_name.
 const MAIN_MENU_SCENE := "res://ui/main_menu.tscn" # A donde regresa Esc (aviso "Esc Regresar").
 const BODY_OFFSET := Vector3.ZERO # El origen del PowerFighter ya es el centro de su cápsula.
 const OFFSCREEN_MARGIN := 16.0 # Distancia de la mini cámara a los bordes de pantalla y a las placas.
-const WIDE_SCREEN_WIDTH := 1600.0
-const PLATES_SEPARATION_WIDE := 96
-const PLATES_SEPARATION_NARROW := 48 # 4 placas de 220 + 3 × 48 = 1024 px: caben en 1152 con 64 px por lado.
 # Primer slot que se asigna a los NPC cuando el GameManager aún no avisa el slot.
 const FIRST_NPC_SLOT := 2
 
@@ -60,8 +57,6 @@ var _discover_fighters: bool = false # Respaldo cuando el GameManager no emite p
 
 # Funciones | Callbacks
 func _ready() -> void:
-	_update_plates_separation()
-	get_viewport().size_changed.connect(_update_plates_separation)
 	_game_manager = get_parent() as GameManager
 	if _game_manager == null:
 		push_warning("FightHud: el padre no es un GameManager, el HUD no mostrará nada.")
@@ -265,14 +260,6 @@ func _hide_world_widgets(entry: FighterEntry) -> void:
 		entry.tag.visible = false
 	if entry.cam != null and entry.cam.visible:
 		entry.cam.set_active(false)
-
-func _update_plates_separation() -> void:
-	'''
-	Más separación entre placas en pantallas anchas.
-	'''
-	var width := get_viewport().get_visible_rect().size.x
-	var separation := PLATES_SEPARATION_WIDE if width >= WIDE_SCREEN_WIDTH else PLATES_SEPARATION_NARROW
-	_plates.add_theme_constant_override("separation", separation)
 
 # Funciones | Señales del GameManager
 func _on_power_fighter_spawned(power_fighter: PowerFighter, slot: int, is_player: bool, max_lives: int) -> void:

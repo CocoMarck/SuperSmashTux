@@ -19,7 +19,7 @@ theme_override_constants/separation = 0
 custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 mouse_filter = 2
-theme_type_variation = &"KnTitlebarCam"
+theme_type_variation = &"KnTitlebarGlass"
 
 [node name="TagLabel" type="Label" parent="VBox/Titlebar" unique_id=1704392268]
 unique_name_in_owner = true
