@@ -11,6 +11,13 @@ var _tween: Tween = null
 # Propiedades privadas | Nodos
 @onready var _number: Label = %Number
 
+# Funciones | Callbacks
+func _ready() -> void:
+	'''
+	Arranca oculto en el juego; el editor sí lo muestra para poder diseñarlo. Lo prende show_number().
+	'''
+	visible = false
+
 # Funciones
 func show_number(n: int) -> void:
 	'''

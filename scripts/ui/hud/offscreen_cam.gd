@@ -21,6 +21,12 @@ var _active: bool = false
 @onready var _camera: Camera3D = %Camera
 
 # Funciones | Callbacks
+func _ready() -> void:
+	'''
+	Arranca oculta en el juego; el editor sí la muestra para poder diseñarla. La prende set_active().
+	'''
+	visible = false
+
 func _process(_delta: float) -> void:
 	if not _active or _target == null or not is_instance_valid(_target) or not _target.is_inside_tree():
 		return

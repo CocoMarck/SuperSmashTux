@@ -26,6 +26,13 @@ var _pop_tween: Tween = null
 @onready var _initial: Label = %Initial
 @onready var _winner_tag: Label = %WinnerTag
 
+# Funciones | Callbacks
+func _ready() -> void:
+	'''
+	Arranca oculto en el juego; el editor sí lo muestra para poder diseñarlo. Lo prende show_winner() o show_draw().
+	'''
+	visible = false
+
 # Funciones
 func show_winner(label: String, color: Color, display_name: String, portrait: Texture2D = null) -> void:
 	'''

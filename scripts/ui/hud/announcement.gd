@@ -20,6 +20,13 @@ var _pop_tween: Tween = null
 @onready var _text: Label = %Text
 @onready var _cursor: CanvasItem = %Cursor
 
+# Funciones | Callbacks
+func _ready() -> void:
+	'''
+	Arranca oculto en el juego; el editor sí lo muestra para poder diseñarlo. Lo prende show_text().
+	'''
+	visible = false
+
 # Funciones
 func show_text(text: String = "> ¡PELEA!", duration: float = 1.2) -> void:
 	'''

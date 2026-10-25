@@ -4,7 +4,6 @@
 [ext_resource type="Script" path="res://scripts/ui/hud/offscreen_cam.gd" id="2_script"]
 
 [node name="OffscreenCam" type="PanelContainer" unique_id=1867205134]
-visible = false
 custom_minimum_size = Vector2(104, 0)
 mouse_filter = 2
 theme = ExtResource("1_theme")
