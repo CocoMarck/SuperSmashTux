@@ -10,7 +10,7 @@ extends StaticBody3D
 const GROUP_NAME := &"platforms"
 
 # Propiedades privadas | Forma de la plataforma.
-@onready var _collision_shape: CollisionShape3D = _get_first_collision_shape()
+@onready var _collision_shape: CollisionShape3D = GlobalUtils.get_first_collision_shape(self)
 
 # Funciones | Inicializar.
 func _ready() -> void:
@@ -22,27 +22,15 @@ func _ready() -> void:
 	add_to_group(GROUP_NAME)
 
 # Funciones propias.
-func _get_first_collision_shape() -> CollisionShape3D:
-	'''
-	Buscar el primer CollisionShape3D hijo directo de la plataforma.
-	'''
-	for child in get_children():
-		if child is CollisionShape3D:
-			return child
-	return null
-
 func get_top_y() -> float:
 	'''
 	Altura (Y global) de la cara superior de la plataforma, segun su caja.
 	Ojo que esto ignora la rotacion; pa saber si algo anda encima de una plataforma inclinada,
 	usa is_above_surface() en vez de esta.
 	'''
-	var box := _get_box()
-	if box == null:
+	if _get_box() == null:
 		return global_position.y
-	var half_height := box.size.y * 0.5
-	var scale_y := _collision_shape.global_basis.get_scale().y
-	return _collision_shape.global_position.y + (half_height * scale_y)
+	return get_aabb_global().end.y
 
 func _get_box() -> BoxShape3D:
 	'''
@@ -80,9 +68,7 @@ func get_aabb_global() -> AABB:
 	'''
 	Caja global de la plataforma, respetando escala y posición del colision shape.
 	'''
-	var box := _get_box()
-	if box == null:
+	var bounds := GlobalUtils.get_box_bounds(_collision_shape)
+	if bounds.size == Vector3.ZERO:
 		return AABB(global_position, Vector3.ONE)
-	var shape_pos: Vector3 = _collision_shape.global_position
-	var size_extends: Vector3 = box.size * _collision_shape.global_basis.get_scale()
-	return AABB(shape_pos -size_extends * 0.5, size_extends)
+	return bounds

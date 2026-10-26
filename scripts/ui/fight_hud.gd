@@ -153,7 +153,7 @@ func _register_fighter(power_fighter: PowerFighter, slot: int, is_player: bool, 
 	entry.max_lives = max_lives
 	entry.lives = max_lives
 	entry.label = KernelPalette.slot_label(slot, is_player)
-	entry.color = KernelPalette.player_color(slot, is_player)
+	entry.color = KernelPalette.player_color(slot)
 	entry.display_name = str(power_fighter.get("display_name")) if "display_name" in power_fighter else DEFAULT_FIGHTER_NAME
 
 	if is_new:

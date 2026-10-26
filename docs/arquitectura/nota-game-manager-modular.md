@@ -37,29 +37,31 @@ cambian**. Nada de reglas depende de que la cámara exista.
 | Módulo | `class_name` | Concern | Estado |
 |---|---|---|---|
 | Reglas de partida | `GameManager` | vidas, detección de muerte, respawn, lineup | **LISTO** |
-| Encuadre | `CameraFollow` | sigue a los peleadores, zoom, temblor (el temblor debería salir de aquí) | **LISTO** |
+| Encuadre | `CameraFollow` | sigue a los peleadores, zoom, temblor al morir alguien (escucha `lives_changed`) | **LISTO** |
 | Colocación | `SpawnPoint` | instancia peleadores configurados | **LISTO** |
 
 `GameManager` también spawnea a los 4 peleadores: los slots 1 y 2 como `PLAYER`, el 3 y 4 como `NPC`.
 
-`GameManager` crea la `CameraFollow` por código (`CameraFollow.new()`), le inyecta el `PlayArea`
-como `camera_area`, y la cuelga de sí mismo. La cámara **ya no tiene** referencia al manager, y el
+`GameManager` instancia la `CameraFollow` desde el prefab `prefabs/camera_follow.tscn` (igual que
+`SpawnPoint` hace con los peleadores), le asigna el `PlayArea` como `camera_area` antes del `add_child`,
+y la cuelga de sí mismo. El fov y la distancia inicial se ajustan en la `Camera3D` hija del prefab. La cámara **ya no tiene** referencia al manager, y el
 mapa quedó sin nodos de cámara: sus únicas dependencias son `PlayArea` y 4 spawn points.
 
 ## Módulos que faltan
 
 ### `CameraManager` — pendiente
 
-Hoy el `CameraFollow` mezcla dos cosas que deberían estar separadas:
+La costura del temblor ya se cortó: el `GameManager` ya no llama `shake()`. Al crear la cámara
+conecta su señal `lives_changed` a `CameraFollow.on_power_fighter_died`, y la cámara decide el
+efecto (hoy tiembla `shake_duration_ms`, export del prefab). El manager no sabe qué es un temblor.
 
-- **Encuadre** (seguir peleadores, calcular rect y distancia). Esto ya es un módulo aparte.
-- **Efectos de cámara** (el temblor). Hoy es un método público que el manager **llama directo**
-  (`_camera_follow.shake(500)` en `_handle_power_fighter_death`), no una señal. Es la costura que queda por cortar.
+Lo que queda: el `CameraFollow` todavía mezcla **encuadre** (seguir peleadores, rect, distancia) y
+**efectos** (el temblor). Si los efectos crecen (flash, zoom dramático al último KO), conviene
+sacarlos a un `CameraManager` que escuche las mismas señales, sin tocar el manager.
 
-Lo que debería pasar: el `GameManager` emite una señal cuando alguien muere, y un
-`CameraManager` la escucha y decide el temblor, el tiempo, y la intensidad. Así el manager
-deja de saber qué es un temblor, y agregar un efecto nuevo (flash, zoom dramatico al último KO)
-no toca el manager.
+Otra dependencia implícita: la cámara encuentra a los peleadores porque es hija del `GameManager`
+(busca entre los hijos de su padre). Cortarla implicaría pasarle los peleadores con
+`power_fighter_spawned` / `power_fighter_eliminated`.
 
 También falta recuperar lo que se perdió al simplificar: **encuadrar el punto de muerte** mientras
 el peleador espera su respawn (`get_pending_respawn_positions()` del manager viejo, eliminado). El manager actual ya guarda `_death_position_of_power_fighter`, pero hoy no lo usa nadie.

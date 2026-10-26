@@ -1,4 +1,4 @@
-# Archivo de constantes y enumeraciones globales del proyecto.
+# Archivo de constantes, enumeraciones y utilidades estaticas globales del proyecto.
 class_name GlobalUtils
 
 # Enumeracion de tipos de personaje que un SpawnPoint puede generar.
@@ -32,3 +32,24 @@ const PLAYER_MATERIALS: Dictionary[PlayerId, Material] = {
 
 # Material de los NPC, usado por NPC (cuando no hay material puesto a mano en el editor).
 const NPC_MATERIAL: Material = preload("res://materials/mat_yellow.tres")
+
+# Funciones | Cajas de colision
+static func get_first_collision_shape(node: Node) -> CollisionShape3D:
+	'''Primer CollisionShape3D hijo directo del nodo, o null si no tiene.'''
+	for child in node.get_children():
+		if child is CollisionShape3D:
+			return child
+	return null
+
+static func get_box_bounds(collision_shape: CollisionShape3D) -> AABB:
+	'''
+	AABB global de un CollisionShape3D con BoxShape3D: respeta posicion y escala, ignora la rotacion.
+	Si no hay shape o no es caja devuelve AABB() (tamaño cero) y cada quien decide que hacer.
+	'''
+	if collision_shape == null:
+		return AABB()
+	var box := collision_shape.shape as BoxShape3D
+	if box == null:
+		return AABB()
+	var size := box.size * collision_shape.global_basis.get_scale()
+	return AABB(collision_shape.global_position - size * 0.5, size)

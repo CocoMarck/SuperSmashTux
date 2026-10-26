@@ -251,17 +251,6 @@ border_color = Color(0.16470589, 0.19215687, 0.23529412, 1)
 corner_radius_top_left = 5
 corner_radius_top_right = 5
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_titlebar_glass"]
-content_margin_left = 8.0
-content_margin_top = 0.0
-content_margin_right = 8.0
-content_margin_bottom = 1.0
-bg_color = Color(0.9019608, 0.92941177, 0.9529412, 0.04)
-border_width_bottom = 1
-border_color = Color(0.16470589, 0.19215687, 0.23529412, 1)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_titlebar_chip"]
 content_margin_left = 7.0
 content_margin_top = 0.0
@@ -279,6 +268,17 @@ content_margin_right = 10.0
 content_margin_bottom = 0.0
 bg_color = Color(0.9019608, 0.92941177, 0.9529412, 1)
 corner_radius_top_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_titlebar_glass"]
+content_margin_left = 8.0
+content_margin_top = 0.0
+content_margin_right = 8.0
+content_margin_bottom = 1.0
+bg_color = Color(0.9019608, 0.92941177, 0.9529412, 0.04)
+border_width_bottom = 1
+border_color = Color(0.16470589, 0.19215687, 0.23529412, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
 content_margin_left = 1.0
@@ -332,6 +332,15 @@ Button/styles/hover = SubResource("StyleBoxFlat_button_hover")
 Button/styles/hover_pressed = SubResource("StyleBoxFlat_button_pressed")
 Button/styles/normal = SubResource("StyleBoxFlat_button_normal")
 Button/styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+KernelPalette/colors/damage_1 = Color(0.92156863, 0.8509804, 0.65882355, 1)
+KernelPalette/colors/damage_2 = Color(0.9411765, 0.65882355, 0.40784314, 1)
+KernelPalette/colors/damage_3 = Color(0.9490196, 0.39215687, 0.37254903, 1)
+KernelPalette/colors/ink = Color(0.9019608, 0.92941177, 0.9529412, 1)
+KernelPalette/colors/ink_muted = Color(0.54509807, 0.58431375, 0.6392157, 1)
+KernelPalette/colors/player_1 = Color(0.9411765, 0.44313726, 0.47058824, 1)
+KernelPalette/colors/player_2 = Color(0.42352942, 0.7137255, 1, 1)
+KernelPalette/colors/player_3 = Color(0.9019608, 0.76862746, 0.41568628, 1)
+KernelPalette/colors/player_4 = Color(0.43529412, 0.8117647, 0.5921569, 1)
 KnAnnounce/base_type = &"Label"
 KnAnnounce/colors/font_color = Color(0.9019608, 0.92941177, 0.9529412, 1)
 KnAnnounce/font_sizes/font_size = 72
@@ -425,10 +434,10 @@ KnTitlebarCam/base_type = &"PanelContainer"
 KnTitlebarCam/styles/panel = SubResource("StyleBoxFlat_titlebar_cam")
 KnTitlebarChip/base_type = &"PanelContainer"
 KnTitlebarChip/styles/panel = SubResource("StyleBoxFlat_titlebar_chip")
-KnTitlebarGlass/base_type = &"PanelContainer"
-KnTitlebarGlass/styles/panel = SubResource("StyleBoxFlat_titlebar_glass")
 KnTitlebarChipInverse/base_type = &"PanelContainer"
 KnTitlebarChipInverse/styles/panel = SubResource("StyleBoxFlat_titlebar_chip_inverse")
+KnTitlebarGlass/base_type = &"PanelContainer"
+KnTitlebarGlass/styles/panel = SubResource("StyleBoxFlat_titlebar_glass")
 KnWindow/base_type = &"PanelContainer"
 KnWindow/styles/panel = SubResource("StyleBoxFlat_window")
 KnWindowSystem/base_type = &"PanelContainer"

@@ -1,15 +1,13 @@
 class_name OffscreenCam
 extends PanelContainer
 
-'''
-Mini cámara que muestra a un peleador que salió del encuadre. Comparte el World3D del juego,
-y solo renderiza mientras está activa.
-'''
+# Mini cámara que muestra a un peleador que salió del encuadre.
+# Comparte el World3D del juego y solo renderiza mientras está activa.
 
 # Propiedades publicas | Configuración de la mini cámara.
 @export_group("Camera")
 @export var camera_offset := Vector3(0.0, 0.3, 3.2) # Origen del peleador = centro de su cápsula de 1.8.
-@export var look_height: float = 0.1
+@export var look_height: float = 0.1 # Altura sobre el origen del peleador a la que apunta la cámara.
 
 # Propiedades privadas
 var _target: Node3D = null
@@ -28,6 +26,9 @@ func _ready() -> void:
 	visible = false
 
 func _process(_delta: float) -> void:
+	'''
+	Sigue al peleador solo si está activa; salta el frame si el peleador ya no es válido o salió del árbol (p. ej. esperando respawn).
+	'''
 	if not _active or _target == null or not is_instance_valid(_target) or not _target.is_inside_tree():
 		return
 	var target_pos := _target.global_position

@@ -15,7 +15,7 @@ const OUT_ALPHA := 0.55
 
 # Propiedades privadas | Estado, para no reconstruir nodos si nada cambió.
 var _max_lives: int = 0
-var _chip_color: Color = KernelPalette.INK
+var _chip_color: Color = KernelPalette.get_color(&"ink")
 var _last_damage: int = -1
 var _last_lives: int = -1
 var _last_hp_segments: int = -1
@@ -131,7 +131,7 @@ func set_out(out: bool) -> void:
 	_damage.visible = not out
 	_out_label.visible = out
 	modulate.a = OUT_ALPHA if out else 1.0
-	_slot_label.add_theme_color_override("font_color", KernelPalette.INK_MUTED if out else _chip_color)
+	_slot_label.add_theme_color_override("font_color", KernelPalette.get_color(&"ink_muted") if out else _chip_color)
 
 # Funciones | Utilidades privadas
 func _clear_children(container: Node) -> void:

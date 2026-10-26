@@ -23,11 +23,10 @@ func get_ledge_x(right_side: bool) -> float:
 	Posicion X global de la orilla derecha o izquierda segun right_side.
 	Si la plataforma no tiene orillas, cae a global_position.x sin tronar.
 	'''
-	var box := _get_box()
-	if box == null:
+	if not has_ledges():
 		return global_position.x
-	var half_width := box.size.x * 0.5 * _collision_shape.global_basis.get_scale().x
-	return _collision_shape.global_position.x + (half_width if right_side else -half_width)
+	var bounds := get_aabb_global()
+	return bounds.end.x if right_side else bounds.position.x
 
 func is_ledge_free(right_side: bool, who: Node = null) -> bool:
 	'''

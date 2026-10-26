@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bq4pl8te2kxa"]
 
-[ext_resource type="Theme" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
-[ext_resource type="Script" path="res://scripts/ui/hud/player_plate.gd" id="2_script"]
+[ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
+[ext_resource type="Script" uid="uid://djeiqpgmakqyx" path="res://scripts/ui/hud/player_plate.gd" id="2_script"]
 
 [node name="PlayerPlate" type="PanelContainer" unique_id=1530774912]
 custom_minimum_size = Vector2(198, 78)
@@ -129,7 +129,6 @@ vertical_alignment = 2
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-size_flags_vertical = 4
 theme_type_variation = &"KnOut"
 text = "[ FUERA ]"
 
@@ -147,9 +146,8 @@ theme_override_constants/separation = 6
 [node name="HpLabel" type="Label" parent="VBox/Body/BodyRow/Main/HpRow" unique_id=427093615]
 custom_minimum_size = Vector2(19, 0)
 layout_mode = 2
-mouse_filter = 2
 theme_type_variation = &"KnLabel"
-text = "HP"
+text = "LVS"
 vertical_alignment = 1
 
 [node name="HpMeter" type="HBoxContainer" parent="VBox/Body/BodyRow/Main/HpRow" unique_id=1792640358]
