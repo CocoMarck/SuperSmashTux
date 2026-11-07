@@ -39,24 +39,25 @@ var _safe_z_coord : float = 0.0
 # Essential character nodes
 var _visual: Node3D
 var _pivot: Node3D
+var _skeleton3d: Skeleton3D
 var _mesh_instance: MeshInstance3D
 var _animation_player: AnimationPlayer
 
 # `_target_velocity`, pertenece a `GravityBody3D`.
 
-# Propiedades privadas | Animacion air jump
+# Propiedades privadas | Animación air jump
 var _air_jump_time :float = 0
 var _air_jump_duration :float = 0.5833
 var _current_air_jump_anim :String = "air_jump"
 var _allow_jump_anim: bool = false
 
-# Propiedades privadas | Aceleracion horizontal
+# Propiedades privadas | Aceleración horizontal
 var _ground_acceleration: float = 40.0
 var _air_acceleration: float = 40.0
 var _ground_friction: float = 100.0
 var _knockback_friction: float = 20.0
 
-# Propiedades privadas | Multiples saltos
+# Propiedades privadas | Múltiples saltos
 var _max_jumps : int = 1
 var _jump_count : int = 0
 
@@ -183,7 +184,7 @@ func _set_material( p_meterial: Material ) -> void:
 	Pero por ahora, asi está bien.
 	'''
 	if p_meterial != null:
-		_mesh_instance.material_override = p_meterial
+		pass #_mesh_instance.material_override = p_meterial
 
 func _set_mesh( p_mesh: Mesh ) -> void:
 	'''
@@ -941,8 +942,9 @@ func _ready() -> void:
 	# dinamico en vez de hardcodearlo, y se navega desde ahi.
 	_visual = get_node("Visual")
 	var model_root: Node3D = _visual.get_child(0)
-	_pivot = model_root.get_node("Pivot")
-	_mesh_instance = model_root.get_node("Pivot/Skeleton3D/MeshInstance3D")
+	_pivot = model_root.get_child(0) # Pivot
+	_skeleton3d = _pivot.get_child(0) # Pivot/Skeleton3D
+	_mesh_instance = _skeleton3d.get_child(0) # Pivot/Skeleton3D/MeshInstance3D
 	_animation_player = model_root.get_node("AnimationPlayer")
 	
 	# Apariencia
@@ -1127,3 +1129,17 @@ func _physics_process(delta: float) -> void:
 
 	# Para la AI
 	_last_frame = frame
+
+
+# Configuración publica
+func set_horizontal_momentum(
+	ground_acceleration: float, air_acceleration: float, ground_friction: float,
+	knockback_friction: float):
+	_ground_acceleration = ground_acceleration
+	_air_acceleration = air_acceleration
+	_ground_friction = ground_friction
+	_knockback_friction = knockback_friction
+
+func set_time_of_anims(air_jump_time: float, air_jump_duration: float):
+	_air_jump_time = air_jump_time
+	_air_jump_duration = air_jump_duration

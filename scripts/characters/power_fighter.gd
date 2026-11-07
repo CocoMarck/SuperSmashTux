@@ -155,3 +155,7 @@ func _process_attack(direction_buffered: bool, states: MoveStates) -> void:
 # Init
 func _init() -> void:
 	_max_jumps = 2
+
+# Configuración publica
+func set_power_attacks(power_attacks: PowerAttacks):
+	_power_attacks = power_attacks

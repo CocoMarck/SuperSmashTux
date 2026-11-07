@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d2tgk6pxr3ma"]
 
-[ext_resource type="Theme" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
-[ext_resource type="Script" path="res://scripts/ui/hud/player_tag.gd" id="2_script"]
+[ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
+[ext_resource type="Script" uid="uid://b3yriewxersy3" path="res://scripts/ui/hud/player_tag.gd" id="2_script"]
 
 [node name="PlayerTag" type="VBoxContainer" unique_id=1416239075]
 mouse_filter = 2

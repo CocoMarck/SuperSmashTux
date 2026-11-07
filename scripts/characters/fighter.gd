@@ -1016,3 +1016,7 @@ func _process_visual(frame: FrameMotionSignals) -> void:
 	_visual_shield(frame)
 
 # _physics_process, vive en `Person`
+
+# Configuración pública
+func set_attacks(attacks: Attacks):
+	_attacks = attacks

@@ -1,14 +1,17 @@
 # Archivo de constantes, enumeraciones y utilidades estaticas globales del proyecto.
 class_name GlobalUtils
 
-# Enumeracion de tipos de personaje que un SpawnPoint puede generar.
-enum CharacterType { PLAYER, NPC }
+# Enumeración de tipos de personaje que un SpawnPoint puede generar.
+enum ControlType { PLAYER, NPC }
 
-# Enumeracion de IDs posibles de jugadores.
+# Enumeración de IDs posibles de jugadores.
 enum PlayerId { PLAYER_1, PLAYER_2 }
 
-# Enumeracion de IDs posibles de NPCs.
+# Enumeración de IDs posibles de NPCs.
 enum NPCId { NPC_1, NPC_2, NPC_3, NPC_4 }
+
+# Enumeración de configuraciones disponibles para `power fighter`
+enum PowerFighterConfig { STANDARD, TUX }
 
 # Mapa de input de cada jugador, usado por Player para resolver sus controles segun su ID. Se construye una sola vez al cargar el script.
 static var PLAYER_INPUT_MAPS: Dictionary[PlayerId, PlayerInputMap] = {

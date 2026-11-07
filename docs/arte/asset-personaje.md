@@ -12,6 +12,20 @@ Node3D               # Raíz del asset = el "contrato" del modelo
     AnimationPlayer
 ```
 
+Tiene que estar en este orden. Da igual el nombre.
+
+1. Primero el pivot/contenedor del esqueleto, despues el esqueleto, adentro del esqueleto su malla.
+2. La animación.
+
+Ejemplo en blender:
+```
+metarig <-- Pivot
+    Animación <-- AnimationPlayer
+    Pose
+    metarig <-- Esqueleto
+    tux_fighter <-- Malla
+```
+
 ## Uso dentro de un personaje
 
 ```
@@ -25,7 +39,7 @@ CharacterBody3D      # script Person/Fighter
 
 ## Reglas
 
-- **Nombres fijos, pero solo dentro del modelo.** `Pivot`, `Skeleton3D`/`MeshInstance3D` y `AnimationPlayer` deben llamarse igual en todos los assets — eso es lo que exportas de Blender y no cambia. El nodo que Godot pone automáticamente al instanciar el `.glb` (el hijo directo de `Visual`, con el nombre del archivo del modelo, ej. `standard_character_a_pose`) **no** se puede renombrar ni reparentar (ni arrastrando en el editor con "Editable Children", ni por script — Godot no lo permite). Por eso `person.gd` no asume ese nombre: en `_ready()` toma `_visual.get_child(0)` (lo que sea que haya ahí) y desde ese nodo navega por ruta fija hacia `Pivot`, `Pivot/Skeleton3D/MeshInstance3D` y `AnimationPlayer`. Así cualquier modelo nuevo funciona sin tocar código, sin importar cómo se llame su archivo `.glb`.
+- **OPCIONAL nombres fijos, pero solo dentro del modelo.** `Pivot`, `Skeleton3D`/`MeshInstance3D` y `AnimationPlayer` deben llamarse igual en todos los assets — eso es lo que exportas de Blender y no cambia. El nodo que Godot pone automáticamente al instanciar el `.glb` (el hijo directo de `Visual`, con el nombre del archivo del modelo, ej. `standard_character_a_pose`) **no** se puede renombrar ni reparentar (ni arrastrando en el editor con "Editable Children", ni por script — Godot no lo permite). Por eso `person.gd` no asume ese nombre: en `_ready()` toma `_visual.get_child(0)` (lo que sea que haya ahí) y desde ese nodo navega por ruta fija hacia `Pivot`, `Pivot/Skeleton3D/MeshInstance3D` y `AnimationPlayer`. Así cualquier modelo nuevo funciona sin tocar código, sin importar cómo se llame su archivo `.glb`.
 - **`MeshInstance3D` siempre con material.** La malla debe traer material asignado (por defecto o propio). Sin material se ve invisible/blanco de más.
 - **`Skeleton3D` sí va en el asset, pero solo lo tocan las animaciones.** Las animaciones animan los huesos; **no se usa desde código** (ningún script accede a `Skeleton3D`).
 - **El `Pivot` vive dentro del asset** para que volteos, rotación de daño (spin) y animaciones viajen juntos con el modelo.
@@ -113,13 +127,13 @@ Todo nombre que no tenga prefijo `air_`, sucede en el piso. Ejemplo `rising`, co
 43. `air_fall`: Cayendo normal, sin stun ni nada. Animación cíclica.
 
 #### Fighter
-43. `air_neutral_attack`: En el aire, sin moverse y atacar.
-44. `air_back_attack`: En el aire moviéndose de espaldas y atacar.
-45. `air_forward_attack`: En el aire moviéndose de frente y atacar.
-46. `air_down_attack`: En el aire y atacar presionando abajo. Ya sea moviéndose o no.
-47. `air_up_attack`: En el aire y atacar presionando arriba. Ya sea moviéndose o no.
+44. `air_neutral_attack`: En el aire, sin moverse y atacar.
+45. `air_back_attack`: En el aire moviéndose de espaldas y atacar.
+46. `air_forward_attack`: En el aire moviéndose de frente y atacar.
+47. `air_down_attack`: En el aire y atacar presionando abajo. Ya sea moviéndose o no.
+48. `air_up_attack`: En el aire y atacar presionando arriba. Ya sea moviéndose o no.
 
 #### PowerFighter
-48. `air_up_power_attack`: Lo mismo que power up. Pero animación en el aire.
-49. `air_down_power_attack`: Lo mismo que power down. Pero animación en el aire.
-50. `air_power_attack`: Proyectil, ráfaga de energía, o carga de ataque.
+49. `air_up_power_attack`: Lo mismo que power up. Pero animación en el aire.
+50. `air_down_power_attack`: Lo mismo que power down. Pero animación en el aire.
+51. `air_power_attack`: Proyectil, ráfaga de energía, o carga de ataque.

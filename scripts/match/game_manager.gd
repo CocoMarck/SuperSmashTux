@@ -75,10 +75,12 @@ func _spawn_all_power_fighters() -> void:
 		var spawn_point = spawn_points[i]
 		var power_fighter : PowerFighter
 		var is_player := i == 0 or i == 1
+		var config_options = [GlobalUtils.PowerFighterConfig.STANDARD, GlobalUtils.PowerFighterConfig.TUX]
+		var config = config_options.pick_random()
 		if is_player:
-			power_fighter = spawn_point.spawn( GlobalUtils.CharacterType.PLAYER, i )
+			power_fighter = spawn_point.spawn( config, GlobalUtils.ControlType.PLAYER, i )
 		else:
-			power_fighter = spawn_point.spawn( GlobalUtils.CharacterType.NPC, i )
+			power_fighter = spawn_point.spawn( config, GlobalUtils.ControlType.NPC, i )
 		power_fighter.material = _get_all_materials()[i]
 		# Establecer spawn fijo.
 		_spawn_point_of_power_fighter[power_fighter] = spawn_point
