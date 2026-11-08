@@ -1,10 +1,9 @@
 class_name SlotCard
 extends PanelContainer
 
-'''
-Tarjeta de un slot de jugador en la selección de personaje: tag, nombre, preview 3D y estado.
-Solo pinta lo que le piden; la lógica de selección vive en CharacterSelect.
-'''
+# Tarjeta de un slot de jugador en la selección de personaje: tag, nombre, preview 3D y estado.
+# Solo pinta lo que le piden; la lógica de selección vive en CharacterMenu.
+# El preview es un mundo 3D propio (Feed) donde el personaje gira; solo renderiza mientras hay modelo.
 
 # Señales
 signal pressed
@@ -20,6 +19,22 @@ const CORNER_RADIUS := 6.0
 const ACTIVE_BORDER_WIDTH := 2
 const DASH_LENGTH := 6.0
 const DASH_GAP := 4.0
+const SECONDS_PER_TURN := 6.0
+const IDLE_ANIMATION := &"idle"
+const TUX_MESH_OFFSET_Y := -1.2 # Mismo ajuste que PowerFighterConfigurer._build_tux_instance.
+const FILL_RATIO := 0.7 # Parte del alto del preview que ocupa el personaje.
+const FEET_RATIO := 0.12 # Espacio bajo los pies, como fracción del alto visible.
+const SLOT_MATERIALS: Array[Material] = [
+	preload("res://materials/mat_red.tres"),
+	preload("res://materials/mat_blue.tres"),
+	preload("res://materials/mat_yellow.tres"),
+	preload("res://materials/mat_green.tres"),
+]
+
+# Propiedades publicas | Encuadre de la cámara del preview.
+@export_group("Camera")
+@export var camera_distance: float = 0.0 # Con 0 se calcula con el tamaño del modelo.
+@export var camera_height: float = 0.0 # Con 0 se calcula con el tamaño del modelo.
 
 # Propiedades privadas
 var _slot: int = 0
@@ -31,13 +46,17 @@ var _controller_slot: int = -1
 var _blink_tween: Tween = null
 var _shown_preview_key: String = ""
 var _card_style: StyleBoxFlat = null # Copia propia del tema, para no mutar el recurso compartido.
+var _model: Node3D = null # Modelo que gira en el preview; null con Aleatorio o tarjeta vacía.
 
 # Propiedades privadas | Nodos
 @onready var _tag_label: Label = %TagLabel
 @onready var _name_label: Label = %NameLabel
 @onready var _empty_body: Control = %EmptyBody
 @onready var _art: Control = %Art
-@onready var _preview: CharacterPreview = %Preview
+@onready var _feed: Control = %Feed
+@onready var _viewport: SubViewport = %Viewport
+@onready var _camera: Camera3D = %Camera
+@onready var _turntable: Node3D = %Turntable
 @onready var _art_glyph: Label = %ArtGlyph
 @onready var _shadow: Control = %Shadow
 @onready var _footer: Control = %Footer
@@ -51,7 +70,18 @@ func _ready() -> void:
 	var base := get_theme_stylebox(&"panel") as StyleBoxFlat
 	_card_style = base.duplicate() as StyleBoxFlat
 	add_theme_stylebox_override(&"panel", _card_style)
+	# La escena trae un modelo de muestra para que el preview se vea en el editor; en juego lo pone _show_model().
+	for child: Node in _turntable.get_children():
+		_turntable.remove_child(child)
+		child.queue_free()
+	set_process(false)
 	_refresh()
+
+func _process(delta: float) -> void:
+	'''
+	Gira el modelo del preview; solo corre mientras hay uno.
+	'''
+	_turntable.rotation.y = wrapf(_turntable.rotation.y + TAU / SECONDS_PER_TURN * delta, 0.0, TAU)
 
 func _gui_input(event: InputEvent) -> void:
 	var mouse := event as InputEventMouseButton
@@ -158,10 +188,71 @@ func _refresh_preview() -> void:
 	if key == _shown_preview_key:
 		return
 	_shown_preview_key = key
+	_clear_model()
 	if wants_model:
-		_preview.show_character(_fighter, _slot)
-	else:
-		_preview.clear()
+		_show_model(_fighter, _slot)
+
+func _show_model(entry: CharacterCatalog.Entry, slot: int) -> void:
+	'''
+	Pone el modelo del personaje en el preview (B.O.B con el color del slot) y prende el render y el giro.
+	'''
+	if entry.model == null:
+		return
+	_model = entry.model.instantiate() as Node3D
+	_turntable.add_child(_model)
+	_turntable.rotation.y = 0.0
+
+	# La estructura del glb es Raíz/Pivot/Skeleton3D/Mesh y Raíz/AnimationPlayer.
+	var mesh := _find_mesh(_model)
+	if mesh != null:
+		if entry.config == GlobalUtils.PowerFighterConfig.TUX:
+			mesh.position.y = TUX_MESH_OFFSET_Y
+		else:
+			mesh.material_override = SLOT_MATERIALS[clampi(slot, 0, 3)]
+		_frame_camera(mesh)
+
+	var animation_player := _model.get_node_or_null("AnimationPlayer") as AnimationPlayer
+	if animation_player != null and animation_player.has_animation(IDLE_ANIMATION):
+		animation_player.get_animation(IDLE_ANIMATION).loop_mode = Animation.LOOP_LINEAR
+		animation_player.play(IDLE_ANIMATION)
+	_set_preview_running(true)
+
+func _clear_model() -> void:
+	'''
+	Quita el modelo del preview y apaga el render y el giro.
+	'''
+	_set_preview_running(false)
+	if _model != null:
+		_turntable.remove_child(_model)
+		_model.queue_free()
+		_model = null
+
+func _set_preview_running(running: bool) -> void:
+	'''
+	El SubViewport solo dibuja mientras hay un modelo que mostrar, igual que la OffscreenCam.
+	Apagado se oculta, para que no se quede viendo el último cuadro del modelo anterior.
+	'''
+	set_process(running)
+	_feed.visible = running
+	_viewport.render_target_update_mode = (
+		SubViewport.UPDATE_ALWAYS if running else SubViewport.UPDATE_DISABLED
+	)
+
+func _find_mesh(root: Node) -> MeshInstance3D:
+	var meshes := root.find_children("*", "MeshInstance3D", true, false)
+	return meshes[0] as MeshInstance3D if not meshes.is_empty() else null
+
+func _frame_camera(mesh: MeshInstance3D) -> void:
+	'''
+	Pone la cámara de frente al modelo: ocupa FILL_RATIO del alto y los pies quedan cerca del fondo.
+	'''
+	var aabb: AABB = mesh.transform * mesh.get_aabb()
+	var visible_height: float = aabb.size.y / FILL_RATIO
+	var half_fov: float = deg_to_rad(_camera.fov) / 2.0
+	var distance: float = camera_distance if camera_distance > 0.0 else visible_height / (2.0 * tan(half_fov))
+	var height: float = camera_height if camera_height > 0.0 else aabb.position.y + visible_height * (0.5 - FEET_RATIO)
+	_camera.position = Vector3(0.0, height, distance)
+	_camera.rotation = Vector3.ZERO
 
 func _refresh_border() -> void:
 	'''

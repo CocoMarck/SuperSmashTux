@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b6rs1lq4vte8k"]
 
 [ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
-[ext_resource type="Script" path="res://scripts/ui/character_select/rule_selector.gd" id="2_script"]
+[ext_resource type="Script" path="res://scripts/ui/components/character_menu/rule_selector.gd" id="2_script"]
 
 [node name="RuleSelector" type="PanelContainer" unique_id=1846203917]
 custom_minimum_size = Vector2(0, 31)

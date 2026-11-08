@@ -7,13 +7,18 @@ supersmashtux/
 ├── prefabs/          # Escenas reutilizables (personajes, enemigos, items)
 ├── scenes/           # Escenas del juego (main.tscn, la escena principal, vive en la raíz)
 │   └── levels/       # Niveles / mapas jugables (map1.tscn)
-├── ui/               # Pantallas de interfaz (no son niveles): main_menu, fight_hud, controls_menu
+├── ui/               # Pantallas de interfaz (no son niveles): main_menu, character_menu, fight_hud, controls_menu
+│   ├── components/   # Piezas de UI que se instancian dentro de las pantallas
+│   │   ├── common/   # Componentes reutilizados entre pantallas (key_hint: aviso de tecla con variantes pie, semitransparente y sólido)
+│   │   ├── hud/      # Componentes del fight_hud (player_plate, countdown, end_window...)
+│   │   └── character_menu/ # Componentes de la selección de personaje (slot_card, roster_tile...)
+│   └── themes/       # Theme Kernel (theme_kernel.tres)
 ├── scripts/          # GDScripts para nodos y lógica del juego
 │   ├── characters/   # Cadena de personajes: GravityBody3D -> Person -> Fighter -> PowerFighter -> Player / NPC
 │   ├── combat/       # Hitboxes (nodos): AreaGravity3D -> Hitbox -> HitboxDamage / HitboxGrab
 │   ├── platforms/    # Plataformas: Platform, GroundPlatform, OneWayPlatform
 │   ├── match/        # Módulos de la partida, uno por concern (GameManager, CameraFollow, SpawnPoint)
-│   ├── ui/           # Scripts de las pantallas de UI en ui/ (botones, menú de controles)
+│   ├── ui/           # Scripts de las pantallas de UI en ui/; components/ refleja ui/components/ (common, hud, character_menu)
 │   └── helpers/      # Clases de apoyo que NO son nodos: RefCounted y contenedores de datos/constantes
 │       ├── combat/   # Datos de ataques: Attacks, PowerAttacks, FightMove, HitboxMove
 │       ├── frame/    # Señales-objeto y estados por frame: MoveSignals, MoveStates, FrameMotionSignals, VerticalForceSignals

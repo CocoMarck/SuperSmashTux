@@ -9,9 +9,9 @@ Solo escucha al GameManager, no le manda nada. Su _ready corre ANTES que el del 
 '''
 
 # Constantes
-const PLAYER_PLATE_SCENE: PackedScene = preload("res://ui/hud/player_plate.tscn")
-const PLAYER_TAG_SCENE: PackedScene = preload("res://ui/hud/player_tag.tscn")
-const OFFSCREEN_CAM_SCENE: PackedScene = preload("res://ui/hud/offscreen_cam.tscn")
+const PLAYER_PLATE_SCENE: PackedScene = preload("res://ui/components/hud/player_plate.tscn")
+const PLAYER_TAG_SCENE: PackedScene = preload("res://ui/components/hud/player_tag.tscn")
+const OFFSCREEN_CAM_SCENE: PackedScene = preload("res://ui/components/hud/offscreen_cam.tscn")
 
 const DEFAULT_FIGHTER_NAME := "B.O.B" # Si el PowerFighter no trae display_name.
 const MAIN_MENU_SCENE := "res://ui/main_menu.tscn" # A donde regresa Esc (aviso "Esc Regresar").

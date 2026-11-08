@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://d2kc7fpw5ys1n"]
 
 [ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
-[ext_resource type="Script" path="res://scripts/ui/character_select/slot_card.gd" id="2_script"]
-[ext_resource type="PackedScene" uid="uid://dq7pv3cx6rn2m" path="res://ui/character_select/character_preview.tscn" id="3_preview"]
+[ext_resource type="Script" path="res://scripts/ui/components/character_menu/slot_card.gd" id="2_script"]
+[ext_resource type="PackedScene" uid="uid://dhfu76dvlacbw" path="res://assets/standard_character_a_pose.glb" id="3_sample_model"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_chip"]
 content_margin_left = 8.0
@@ -22,10 +22,15 @@ corner_radius_bottom_right = 11
 corner_radius_bottom_left = 11
 corner_detail = 12
 
+[sub_resource type="Environment" id="Environment_preview"]
+ambient_light_source = 2
+ambient_light_color = Color(0.7882353, 0.81960785, 0.85882354, 1)
+ambient_light_energy = 0.5
+
 [node name="SlotCard" type="PanelContainer" unique_id=1938475620]
-custom_minimum_size = Vector2(264, 272)
-offset_right = 264.0
-offset_bottom = 272.0
+custom_minimum_size = Vector2(254, 254)
+offset_right = 254.0
+offset_bottom = 254.0
 theme = ExtResource("1_theme")
 theme_type_variation = &"KnCard"
 script = ExtResource("2_script")
@@ -175,19 +180,51 @@ grow_vertical = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_floor_shadow")
 
-[node name="Preview" parent="VBox/Art/Stack" unique_id=1102938475 instance=ExtResource("3_preview")]
+[node name="Feed" type="SubViewportContainer" parent="VBox/Art/Stack" unique_id=1102938475]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 0.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="VBox/Art/Stack/Feed" unique_id=650283917]
+unique_name_in_owner = true
+own_world_3d = true
+transparent_bg = true
+handle_input_locally = false
+msaa_3d = 1
+size = Vector2i(252, 190)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="VBox/Art/Stack/Feed/Viewport" unique_id=1820463759]
+environment = SubResource("Environment_preview")
+
+[node name="Camera" type="Camera3D" parent="VBox/Art/Stack/Feed/Viewport" unique_id=372950184]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 5.345)
+current = true
+fov = 30.0
+
+[node name="Key" type="DirectionalLight3D" parent="VBox/Art/Stack/Feed/Viewport" unique_id=1572093846]
+transform = Transform3D(0.8660254, -0.3213938, 0.3830222, 0, 0.7660444, 0.6427876, -0.5, -0.5566704, 0.6634139, 2, 3, 3)
+light_energy = 1.1
+
+[node name="Fill" type="DirectionalLight3D" parent="VBox/Art/Stack/Feed/Viewport" unique_id=941728305]
+transform = Transform3D(0.5, 0.2961981, -0.8137977, 0, 0.9396926, 0.3420201, 0.8660254, -0.1710101, 0.4698463, -3, 1, 2)
+light_energy = 0.35
+
+[node name="Turntable" type="Node3D" parent="VBox/Art/Stack/Feed/Viewport" unique_id=1203948576]
+unique_name_in_owner = true
+
+[node name="SampleModel" parent="VBox/Art/Stack/Feed/Viewport/Turntable" unique_id=1749302861 instance=ExtResource("3_sample_model")]
 
 [node name="ArtGlyph" type="Label" parent="VBox/Art/Stack" unique_id=573920184]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

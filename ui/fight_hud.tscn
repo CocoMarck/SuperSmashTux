@@ -2,9 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/ui/fight_hud.gd" id="1_hud"]
 [ext_resource type="Theme" path="res://ui/themes/theme_kernel.tres" id="2_theme"]
-[ext_resource type="PackedScene" uid="uid://bc6dn3tw0ckr" path="res://ui/hud/countdown.tscn" id="3_countdown"]
-[ext_resource type="PackedScene" uid="uid://dan5wc4mt7xg" path="res://ui/hud/announcement.tscn" id="4_announcement"]
-[ext_resource type="PackedScene" uid="uid://cew1nd0wk3rx" path="res://ui/hud/end_window.tscn" id="5_end_window"]
+[ext_resource type="PackedScene" uid="uid://bc6dn3tw0ckr" path="res://ui/components/hud/countdown.tscn" id="3_countdown"]
+[ext_resource type="PackedScene" uid="uid://dan5wc4mt7xg" path="res://ui/components/hud/announcement.tscn" id="4_announcement"]
+[ext_resource type="PackedScene" uid="uid://cew1nd0wk3rx" path="res://ui/components/hud/end_window.tscn" id="5_end_window"]
+[ext_resource type="PackedScene" uid="uid://cn4kh8wt2jd5x" path="res://ui/components/common/key_hint.tscn" id="kh_key_hint"]
 
 [node name="FightHud" type="CanvasLayer" unique_id=288616017]
 script = ExtResource("1_hud")
@@ -76,34 +77,12 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="BackHint" type="PanelContainer" parent="Root" unique_id=742918356]
+[node name="BackHint" parent="Root" unique_id=742918356 instance=ExtResource("kh_key_hint")]
 unique_name_in_owner = true
 offset_left = 16.0
 offset_top = 18.0
-mouse_filter = 2
-theme_type_variation = &"KnHint"
-
-[node name="Row" type="HBoxContainer" parent="Root/BackHint" unique_id=1503887214]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 6
-
-[node name="KeyChip" type="PanelContainer" parent="Root/BackHint/Row" unique_id=918273645]
-layout_mode = 2
-size_flags_vertical = 4
-mouse_filter = 2
-theme_type_variation = &"KnHintKey"
-
-[node name="Key" type="Label" parent="Root/BackHint/Row/KeyChip" unique_id=1276540389]
-layout_mode = 2
-theme_type_variation = &"KnHintText"
-text = "Esc"
-
-[node name="Text" type="Label" parent="Root/BackHint/Row" unique_id=384756102]
-layout_mode = 2
-theme_type_variation = &"KnHintText"
-text = "Regresar"
-vertical_alignment = 1
+variant = 1
+action_text = "Pausar"
 
 [node name="TimerBox" type="PanelContainer" parent="Root" unique_id=1630948217]
 unique_name_in_owner = true

@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://cn4kh8wt2jd5x"]
+
+[ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/components/common/key_hint.gd" id="2_script"]
+
+[node name="KeyHint" type="PanelContainer" unique_id=1284730561]
+mouse_filter = 2
+theme = ExtResource("1_theme")
+theme_type_variation = &"KnHintBare"
+script = ExtResource("2_script")
+
+[node name="Row" type="HBoxContainer" parent="." unique_id=1503887214]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="KeyChip" type="PanelContainer" parent="Row" unique_id=503918274]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"KnKeySmall"
+
+[node name="KeyLabel" type="Label" parent="Row/KeyChip" unique_id=1739265048]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnTileName"
+text = "Esc"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ActionLabel" type="Label" parent="Row" unique_id=926481735]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnFooterText"
+text = "Regresar"
+vertical_alignment = 1

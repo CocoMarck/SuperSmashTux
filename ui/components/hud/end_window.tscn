@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cew1nd0wk3rx"]
 
 [ext_resource type="Theme" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
-[ext_resource type="Script" path="res://scripts/ui/hud/end_window.gd" id="2_script"]
+[ext_resource type="Script" path="res://scripts/ui/components/hud/end_window.gd" id="2_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_winner_portrait"]
 bg_color = Color(0.08627451, 0.105882354, 0.13333334, 1)

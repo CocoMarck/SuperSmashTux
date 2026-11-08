@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://c5rk2wqn7hs4a"]
 
-[ext_resource type="Script" path="res://scripts/ui/character_select.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://dbg870oeacj07" path="res://scripts/ui/character_menu.gd" id="1_script"]
 [ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="2_theme"]
-[ext_resource type="PackedScene" uid="uid://b6rs1lq4vte8k" path="res://ui/character_select/rule_selector.tscn" id="3_rule"]
-[ext_resource type="PackedScene" uid="uid://d2kc7fpw5ys1n" path="res://ui/character_select/slot_card.tscn" id="4_card"]
-[ext_resource type="PackedScene" uid="uid://cn4kh8wt2jd5x" path="res://ui/character_select/key_hint.tscn" id="5_key_hint"]
+[ext_resource type="PackedScene" uid="uid://b6rs1lq4vte8k" path="res://ui/components/character_menu/rule_selector.tscn" id="3_rule"]
+[ext_resource type="PackedScene" uid="uid://d2kc7fpw5ys1n" path="res://ui/components/character_menu/slot_card.tscn" id="4_card"]
+[ext_resource type="PackedScene" uid="uid://cn4kh8wt2jd5x" path="res://ui/components/common/key_hint.tscn" id="5_key_hint"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_banner"]
 content_margin_left = 28.0
@@ -22,7 +22,7 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
-[node name="CharacterSelect" type="CanvasLayer" unique_id=1726394058]
+[node name="CharacterMenu" type="CanvasLayer" unique_id=1726394058]
 script = ExtResource("1_script")
 
 [node name="Root" type="Control" parent="." unique_id=483920175]
@@ -73,33 +73,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="BackHint" type="PanelContainer" parent="Root/Margin/Layout/Header/Left" unique_id=1748302956]
+[node name="BackHint" parent="Root/Margin/Layout/Header/Left" unique_id=1748302956 instance=ExtResource("5_key_hint")]
 custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
-mouse_filter = 2
 theme_type_variation = &"KnPanelSolid"
-
-[node name="Row" type="HBoxContainer" parent="Root/Margin/Layout/Header/Left/BackHint" unique_id=918374026]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 6
-
-[node name="KeyChip" type="PanelContainer" parent="Root/Margin/Layout/Header/Left/BackHint/Row" unique_id=1203948576]
-layout_mode = 2
-size_flags_vertical = 4
-mouse_filter = 2
-theme_type_variation = &"KnHintKey"
-
-[node name="Key" type="Label" parent="Root/Margin/Layout/Header/Left/BackHint/Row/KeyChip" unique_id=574839201]
-layout_mode = 2
-theme_type_variation = &"KnHintText"
-text = "Esc"
-
-[node name="Text" type="Label" parent="Root/Margin/Layout/Header/Left/BackHint/Row" unique_id=1639204857]
-layout_mode = 2
-theme_type_variation = &"KnHintText"
-text = "Regresar"
-vertical_alignment = 1
+variant = 2
 
 [node name="Title" type="Label" parent="Root/Margin/Layout/Header" unique_id=847392015]
 layout_mode = 2
@@ -118,8 +96,6 @@ alignment = 2
 [node name="LivesRule" parent="Root/Margin/Layout/Header/Right" unique_id=402857193 instance=ExtResource("3_rule")]
 unique_name_in_owner = true
 layout_mode = 2
-label_text = "Vidas"
-value_text = "3"
 
 [node name="TimeRule" parent="Root/Margin/Layout/Header/Right" unique_id=1573920486 instance=ExtResource("3_rule")]
 unique_name_in_owner = true
@@ -151,7 +127,7 @@ theme_override_constants/margin_left = 10
 [node name="TitleText" type="Label" parent="Root/Margin/Layout/RosterWindow/VBox/Titlebar/TitleMargin" unique_id=820394761]
 layout_mode = 2
 theme_type_variation = &"KnTileName"
-text = "personajes"
+text = "Personajes"
 vertical_alignment = 1
 
 [node name="TilesMargin" type="MarginContainer" parent="Root/Margin/Layout/RosterWindow/VBox" unique_id=1274039586]
@@ -171,33 +147,71 @@ theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
 
 [node name="CardsSpacer" type="Control" parent="Root/Margin/Layout" unique_id=1938402756]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="Cards" type="HBoxContainer" parent="Root/Margin/Layout" unique_id=471029385]
+[node name="PlayersWindow" type="PanelContainer" parent="Root/Margin/Layout" unique_id=1360482957]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnWindow"
+
+[node name="VBox" type="VBoxContainer" parent="Root/Margin/Layout/PlayersWindow" unique_id=847201936]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Titlebar" type="PanelContainer" parent="Root/Margin/Layout/PlayersWindow/VBox" unique_id=1592830471]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnTitlebar"
+
+[node name="TitleMargin" type="MarginContainer" parent="Root/Margin/Layout/PlayersWindow/VBox/Titlebar" unique_id=692018374]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+
+[node name="TitleText" type="Label" parent="Root/Margin/Layout/PlayersWindow/VBox/Titlebar/TitleMargin" unique_id=1038294756]
+layout_mode = 2
+theme_type_variation = &"KnTileName"
+text = "Jugadores"
+vertical_alignment = 1
+
+[node name="CardsMargin" type="MarginContainer" parent="Root/Margin/Layout/PlayersWindow/VBox" unique_id=284019375]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="Cards" type="HBoxContainer" parent="Root/Margin/Layout/PlayersWindow/VBox/CardsMargin" unique_id=471029385]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 16
-alignment = 1
 
-[node name="Card1" parent="Root/Margin/Layout/Cards" unique_id=1602938475 instance=ExtResource("4_card")]
+[node name="Card1" parent="Root/Margin/Layout/PlayersWindow/VBox/CardsMargin/Cards" unique_id=1602938475 instance=ExtResource("4_card")]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 
-[node name="Card2" parent="Root/Margin/Layout/Cards" unique_id=284759301 instance=ExtResource("4_card")]
+[node name="Card2" parent="Root/Margin/Layout/PlayersWindow/VBox/CardsMargin/Cards" unique_id=284759301 instance=ExtResource("4_card")]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 
-[node name="Card3" parent="Root/Margin/Layout/Cards" unique_id=1857203946 instance=ExtResource("4_card")]
+[node name="Card3" parent="Root/Margin/Layout/PlayersWindow/VBox/CardsMargin/Cards" unique_id=1857203946 instance=ExtResource("4_card")]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 
-[node name="Card4" parent="Root/Margin/Layout/Cards" unique_id=930485712 instance=ExtResource("4_card")]
+[node name="Card4" parent="Root/Margin/Layout/PlayersWindow/VBox/CardsMargin/Cards" unique_id=930485712 instance=ExtResource("4_card")]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="Footer" type="HBoxContainer" parent="Root/Margin/Layout" unique_id=1748392016]
 unique_name_in_owner = true
@@ -208,7 +222,7 @@ theme_override_constants/separation = 18
 
 [node name="HintTakeControl" parent="Root/Margin/Layout/Footer" unique_id=519384702 instance=ExtResource("5_key_hint")]
 layout_mode = 2
-key_text = "Clic en tarjeta"
+key_text = "Clic en jugador"
 action_text = "Tomar control"
 
 [node name="HintPick" parent="Root/Margin/Layout/Footer" unique_id=1392048576 instance=ExtResource("5_key_hint")]

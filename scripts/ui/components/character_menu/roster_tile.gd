@@ -3,7 +3,7 @@ extends Control
 
 '''
 Casilla del roster: glifo, nombre y las pestañas de los jugadores que la tienen marcada.
-Solo pinta lo que le piden; la lógica de selección vive en CharacterSelect.
+Solo pinta lo que le piden; la lógica de selección vive en CharacterMenu.
 '''
 
 # Señales

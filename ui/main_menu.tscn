@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://c5rhlecdtr3fm"]
 
-[ext_resource type="Script" uid="uid://dixe7xp7tg4fo" path="res://scripts/ui/button_start.gd" id="1_yqeox"]
-[ext_resource type="Script" uid="uid://caufbm20j0drj" path="res://scripts/ui/button_controls.gd" id="2_vjb58"]
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_main_menu"]
 
 [node name="MainMenuCanvasLayer" type="CanvasLayer" unique_id=683410342]
+script = ExtResource("1_main_menu")
 
 [node name="Control" type="Control" parent="." unique_id=8405504]
 layout_mode = 3
@@ -23,11 +23,11 @@ grow_vertical = 2
 alignment = 1
 
 [node name="ButtonStart" type="Button" parent="Control/VBoxContainer" unique_id=360843869]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Start"
-script = ExtResource("1_yqeox")
 
 [node name="ButtonControls" type="Button" parent="Control/VBoxContainer" unique_id=401747103]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Controls"
-script = ExtResource("2_vjb58")

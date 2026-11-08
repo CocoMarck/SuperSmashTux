@@ -1,4 +1,4 @@
-class_name CharacterSelect
+class_name CharacterMenu
 extends CanvasLayer
 
 '''
@@ -7,7 +7,7 @@ apply_state() para pintar cualquier estado. La lógica de elegir (mover marcador
 '''
 
 # Constantes
-const ROSTER_TILE_SCENE := "res://ui/character_select/roster_tile.tscn"
+const ROSTER_TILE_SCENE := "res://ui/components/character_menu/roster_tile.tscn"
 const MAIN_MENU_SCENE := "res://ui/main_menu.tscn"
 const LEVEL_SCENE := "res://scenes/levels/map1.tscn"
 const FIGHT_HUD_SCENE := "res://ui/fight_hud.tscn"
