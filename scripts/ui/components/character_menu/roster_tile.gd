@@ -8,11 +8,15 @@ Solo pinta lo que le piden; la lógica de selección vive en CharacterMenu.
 
 # Señales
 signal pressed
+signal hovered # El puntero entró a la casilla.
 
 # Constantes
 const TAB_FONT_SIZE := 10
 const TAB_PADDING := Vector4(5, 2, 4, 3) # Izquierda, arriba, derecha, abajo.
 const TAB_BORDER := 1
+const MARCH_DASH := 3.0 # Borde que gira en la pestaña en elección.
+const MARCH_GAP := 2.0
+const MARCH_SPEED := 20.0
 const TAB_MARGIN := 1.0 # Distancia al borde de la casilla.
 const TAB_BOTTOM_TOP := 68.0
 const TAB_BG_PRESELECT := Color("#0E1116")
@@ -28,19 +32,25 @@ const TAB_RADII: Array[Vector4i] = [
 # Propiedades públicas
 var entry: CharacterCatalog.Entry = null
 
+# Propiedades privadas
 # Propiedades privadas | Nodos
 @onready var _glyph: Label = %Glyph
 @onready var _name_label: Label = %NameLabel
 @onready var _tabs: Control = %Tabs
 
 # Funciones | Callbacks
+func _ready() -> void:
+	# Sin foco: solo reacciona al clic y no se come Enter de la pantalla.
+	focus_mode = Control.FOCUS_NONE
+	mouse_entered.connect(hovered.emit)
+	# Los hijos no deben tapar la forma del cursor: solo la casilla recibe el hover.
+	for child: Control in find_children("*", "Control", true, false):
+		child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 func _gui_input(event: InputEvent) -> void:
 	var mouse := event as InputEventMouseButton
 	if mouse != null and mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT:
 		pressed.emit()
-	elif event.is_action_pressed(&"ui_accept"):
-		pressed.emit()
-		accept_event()
 
 # Funciones
 func setup(p_entry: CharacterCatalog.Entry) -> void:
@@ -66,7 +76,7 @@ func _build_tab(slot: int, text: String, choosing: bool) -> Label:
 	var color: Color = KernelPalette.player_color(slot)
 	var style := StyleBoxFlat.new()
 	style.bg_color = TAB_BG_PRESELECT if choosing else color
-	style.set_border_width_all(TAB_BORDER)
+	style.set_border_width_all(0 if choosing else TAB_BORDER) # En elección el borde lo dibuja MarchingBorder.
 	style.border_color = color
 	style.content_margin_left = TAB_PADDING.x
 	style.content_margin_top = TAB_PADDING.y
@@ -99,4 +109,21 @@ func _build_tab(slot: int, text: String, choosing: bool) -> Label:
 	label.offset_bottom = top
 	label.grow_horizontal = Control.GROW_DIRECTION_BEGIN if on_right else Control.GROW_DIRECTION_END
 	label.grow_vertical = Control.GROW_DIRECTION_END
+	if choosing:
+		var border := MarchingBorder.new()
+		border.color = color
+		border.width = float(TAB_BORDER)
+		border.dash = MARCH_DASH
+		border.gap = MARCH_GAP
+		border.speed = MARCH_SPEED
+		var half: float = float(TAB_BORDER) / 2.0
+		border.radii = Vector4(maxf(radii.x - half, 0.0), maxf(radii.y - half, 0.0), maxf(radii.z - half, 0.0), maxf(radii.w - half, 0.0))
+		label.add_child(border)
+		border.anchor_right = 1.0
+		border.anchor_bottom = 1.0
+		border.offset_left = half # El trazo se centra medio píxel adentro del borde de la pestaña.
+		border.offset_top = half
+		border.offset_right = -half
+		border.offset_bottom = -half
+		border.active = true
 	return label

@@ -19,6 +19,10 @@ const CORNER_RADIUS := 6.0
 const ACTIVE_BORDER_WIDTH := 2
 const DASH_LENGTH := 6.0
 const DASH_GAP := 4.0
+const MARCH_DASH := 8.0 # Guiones del borde que gira en elección.
+const MARCH_GAP := 6.0
+const MARCH_SPEED := 40.0 # px/s, en sentido horario.
+const MARCH_WIDTH := 2.0
 const SECONDS_PER_TURN := 6.0
 const IDLE_ANIMATION := &"idle"
 const TUX_MESH_OFFSET_Y := -1.2 # Mismo ajuste que PowerFighterConfigurer._build_tux_instance.
@@ -46,6 +50,8 @@ var _controller_slot: int = -1
 var _blink_tween: Tween = null
 var _shown_preview_key: String = ""
 var _card_style: StyleBoxFlat = null # Copia propia del tema, para no mutar el recurso compartido.
+var _marching: bool = false # En elección con controlador: el borde discontinuo gira.
+var _border_overlay: MarchingBorder = null # Borde que gira encima del contenido.
 var _model: Node3D = null # Modelo que gira en el preview; null con Aleatorio o tarjeta vacía.
 
 # Propiedades privadas | Nodos
@@ -64,6 +70,10 @@ var _model: Node3D = null # Modelo que gira en el preview; null con Aleatorio o 
 @onready var _status_choosing: Control = %StatusChoosing
 @onready var _cursor: CanvasItem = %Cursor
 @onready var _kind_label: Label = %KindLabel
+@onready var _join_row: Control = %JoinRow
+@onready var _join_key: Label = %JoinKey
+@onready var _cpu_click_chip: Control = %ClickChip
+@onready var _cpu_or: Control = %Or
 
 # Funciones | Callbacks
 func _ready() -> void:
@@ -74,6 +84,17 @@ func _ready() -> void:
 	for child: Node in _turntable.get_children():
 		_turntable.remove_child(child)
 		child.queue_free()
+	# Los hijos no deben tapar la forma del cursor: solo la tarjeta recibe el hover.
+	for child: Control in find_children("*", "Control", true, false):
+		child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_border_overlay = MarchingBorder.new()
+	_border_overlay.width = MARCH_WIDTH
+	_border_overlay.dash = MARCH_DASH
+	_border_overlay.gap = MARCH_GAP
+	_border_overlay.speed = MARCH_SPEED
+	var corner: float = CORNER_RADIUS - MARCH_WIDTH / 2.0 # Radio de la línea central del trazo.
+	_border_overlay.radii = Vector4(corner, corner, corner, corner)
+	add_child(_border_overlay) # El contenedor lo acomoda en el área de contenido (1 px adentro del borde).
 	set_process(false)
 	_refresh()
 
@@ -118,6 +139,17 @@ func set_slot(slot: int, is_cpu: bool) -> void:
 	_slot = clampi(slot, 0, 3)
 	_is_cpu = is_cpu
 	_refresh()
+
+func set_join_prompt(show_prompt: bool, key_text: String = "") -> void:
+	'''
+	Tarjeta vacía de un slot de humano: muestra "Pulsa [tecla] o [Clic] para unirte" y deja solo "[Tab] agregar CPU".
+	En los demás slots oculta el aviso de unirse y la fila de CPU queda "[Clic] o [Tab] agregar CPU".
+	'''
+	_join_row.visible = show_prompt
+	_cpu_click_chip.visible = not show_prompt
+	_cpu_or.visible = not show_prompt
+	if key_text != "":
+		_join_key.text = key_text
 
 func set_state(state: State) -> void:
 	_state = state
@@ -226,17 +258,21 @@ func _clear_model() -> void:
 		_turntable.remove_child(_model)
 		_model.queue_free()
 		_model = null
+	_update_processing()
 
 func _set_preview_running(running: bool) -> void:
 	'''
 	El SubViewport solo dibuja mientras hay un modelo que mostrar, igual que la OffscreenCam.
 	Apagado se oculta, para que no se quede viendo el último cuadro del modelo anterior.
 	'''
-	set_process(running)
+	_update_processing()
 	_feed.visible = running
 	_viewport.render_target_update_mode = (
 		SubViewport.UPDATE_ALWAYS if running else SubViewport.UPDATE_DISABLED
 	)
+
+func _update_processing() -> void:
+	set_process(_model != null)
 
 func _find_mesh(root: Node) -> MeshInstance3D:
 	var meshes := root.find_children("*", "MeshInstance3D", true, false)
@@ -260,8 +296,13 @@ func _refresh_border() -> void:
 	(ahí lo dibuja _draw discontinuo). El margen interno es fijo para que el contenido no brinque.
 	'''
 	_card_style.set_content_margin_all(float(ACTIVE_BORDER_WIDTH) / 2.0)
-	if _state == State.EMPTY:
-		_card_style.set_border_width_all(0)
+	_marching = _active and _state == State.CHOOSING
+	_update_processing()
+	var who_marches: int = _controller_slot if _controller_slot >= 0 else _slot
+	_border_overlay.color = KernelPalette.player_color(who_marches)
+	_border_overlay.active = _marching
+	if _state == State.EMPTY or _marching:
+		_card_style.set_border_width_all(0) # En elección el borde lo dibuja el overlay.
 	elif _active:
 		_card_style.set_border_width_all(ACTIVE_BORDER_WIDTH)
 		var who: int = _controller_slot if _controller_slot >= 0 else _slot

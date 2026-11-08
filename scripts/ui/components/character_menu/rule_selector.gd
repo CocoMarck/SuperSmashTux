@@ -24,6 +24,7 @@ signal step_requested(direction: int) # -1 flecha izquierda, 1 flecha derecha.
 
 # Funciones | Callbacks
 func _ready() -> void:
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND # Todo el chip es clicable (mitad izquierda resta, derecha suma).
 	_refresh()
 
 func _gui_input(event: InputEvent) -> void:

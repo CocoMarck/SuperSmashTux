@@ -9,7 +9,7 @@ supersmashtux/
 │   └── levels/       # Niveles / mapas jugables (map1.tscn)
 ├── ui/               # Pantallas de interfaz (no son niveles): main_menu, character_menu, fight_hud, controls_menu
 │   ├── components/   # Piezas de UI que se instancian dentro de las pantallas
-│   │   ├── common/   # Componentes reutilizados entre pantallas (key_hint: aviso de tecla con variantes pie, semitransparente y sólido)
+│   │   ├── common/   # Componentes reutilizados entre pantallas (key_hint: aviso de tecla con variantes; marching_border: borde discontinuo que gira)
 │   │   ├── hud/      # Componentes del fight_hud (player_plate, countdown, end_window...)
 │   │   └── character_menu/ # Componentes de la selección de personaje (slot_card, roster_tile...)
 │   └── themes/       # Theme Kernel (theme_kernel.tres)

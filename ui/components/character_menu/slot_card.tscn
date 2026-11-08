@@ -83,30 +83,49 @@ mouse_filter = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="Row1" type="HBoxContainer" parent="VBox/EmptyBody" unique_id=1720583946]
+[node name="JoinRow" type="HBoxContainer" parent="VBox/EmptyBody" unique_id=1720583946]
+unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 6
 alignment = 1
 
-[node name="Press" type="Label" parent="VBox/EmptyBody/Row1" unique_id=839205716]
+[node name="Press" type="Label" parent="VBox/EmptyBody/JoinRow" unique_id=839205716]
 layout_mode = 2
 theme_type_variation = &"KnMuted"
 text = "Pulsa"
 vertical_alignment = 1
 
-[node name="EnterChip" type="PanelContainer" parent="VBox/EmptyBody/Row1" unique_id=1294857306]
+[node name="JoinChip" type="PanelContainer" parent="VBox/EmptyBody/JoinRow" unique_id=1294857306]
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 theme_type_variation = &"KnKeySmall"
 
-[node name="Key" type="Label" parent="VBox/EmptyBody/Row1/EnterChip" unique_id=462019385]
+[node name="JoinKey" type="Label" parent="VBox/EmptyBody/JoinRow/JoinChip" unique_id=462019385]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"KnMuted"
-text = "Enter"
+text = "K"
 
-[node name="Join" type="Label" parent="VBox/EmptyBody/Row1" unique_id=1583920467]
+[node name="JoinOr" type="Label" parent="VBox/EmptyBody/JoinRow" unique_id=1583920501]
+layout_mode = 2
+theme_type_variation = &"KnMuted"
+text = "o"
+vertical_alignment = 1
+
+[node name="JoinClickChip" type="PanelContainer" parent="VBox/EmptyBody/JoinRow" unique_id=1583920502]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"KnKeySmall"
+
+[node name="Key" type="Label" parent="VBox/EmptyBody/JoinRow/JoinClickChip" unique_id=1583920503]
+layout_mode = 2
+theme_type_variation = &"KnMuted"
+text = "Clic"
+
+[node name="Join" type="Label" parent="VBox/EmptyBody/JoinRow" unique_id=1583920467]
 layout_mode = 2
 theme_type_variation = &"KnMuted"
 text = "para unirte"
@@ -119,6 +138,7 @@ theme_override_constants/separation = 6
 alignment = 1
 
 [node name="ClickChip" type="PanelContainer" parent="VBox/EmptyBody/Row2" unique_id=1928305746]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -130,6 +150,7 @@ theme_type_variation = &"KnMuted"
 text = "Clic"
 
 [node name="Or" type="Label" parent="VBox/EmptyBody/Row2" unique_id=1039485726]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"KnMuted"
 text = "o"
