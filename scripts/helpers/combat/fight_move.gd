@@ -24,7 +24,10 @@ Indica del hitbox:
 '''
 
 # Propiedades publicas configuracion
-var name: StringName
+var _name: StringName
+var name: StringName:
+	get:
+		return _name
 var duration: float
 var speed: Vector3
 var direction: Vector3
@@ -62,7 +65,7 @@ func _init(
 	config.merge(p_config, true)  # true = p_config gana
 
 	# Movimiento
-	name = config["name"]
+	_name = config["name"]
 	duration = config["duration"]
 	speed = config["speed"]
 	direction = config["direction"]

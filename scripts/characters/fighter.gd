@@ -45,7 +45,7 @@ var _attack_count: float = 0.0
 var _current_attack: FightMove = null
 var _attack_jump_count :int = 0
 
-var _attacks: Attacks = Attacks.new(
+var attacks: Attacks = Attacks.new(
 	# En el piso
 	FightMove.new(
 		{
@@ -308,15 +308,7 @@ var _spawned_hitbox_ids: Dictionary = {}
 
 # Override funcs
 func _false_inputs() -> void:
-	_move_left = false
-	_move_right = false
-	_move_down = false
-	_move_up = false
-	_jump = false
-	_down_pressed = false
-	_up_pressed = false
-	_left_pressed = false
-	_right_pressed = false
+	super()
 	_attack = false
 	_grab = false
 	#_shield = false # Este no. Se necesita para poder absorver golpe mientras se pone escudo.
@@ -411,31 +403,31 @@ func _init_attack_by_move(direction_buffered: bool, states: MoveStates):
 	if states.neutral:
 		_current_attack = _get_current_neutral_combo_move()
 	elif (states.moving and not states.crouch_move) and direction_buffered:
-		_current_attack = _attacks.heavy_side
+		_current_attack = attacks.heavy_side
 	elif states.walking:
-		_current_attack = _attacks.forward
+		_current_attack = attacks.forward
 	elif states.running:
-		_current_attack = _attacks.dash
+		_current_attack = attacks.dash
 	elif states.neutral_crouch and direction_buffered:
-		_current_attack = _attacks.heavy_down
+		_current_attack = attacks.heavy_down
 	elif states.neutral_crouch or states.crouch_move:
-		_current_attack = _attacks.down
+		_current_attack = attacks.down
 	elif states.neutral_up and direction_buffered:
-		_current_attack = _attacks.heavy_up
+		_current_attack = attacks.heavy_up
 	elif states.neutral_up:
-		_current_attack = _attacks.up
+		_current_attack = attacks.up
 
 	# Ataque en aire
 	elif states.neutral_air:
-		_current_attack = _attacks.air_neutral
+		_current_attack = attacks.air_neutral
 	elif states.air_down:
-		_current_attack = _attacks.air_down
+		_current_attack = attacks.air_down
 	elif states.air_up:
-		_current_attack = _attacks.air_up
+		_current_attack = attacks.air_up
 	elif states.air_forward:
-		_current_attack = _attacks.air_forward
+		_current_attack = attacks.air_forward
 	elif states.air_back:
-		_current_attack = _attacks.air_back
+		_current_attack = attacks.air_back
 
 func _process_attack(direction_buffered: bool, states: MoveStates) -> void:
 	'''
@@ -866,7 +858,7 @@ func _ready() -> void:
 	_init_shield_height = _shield_sphere.height
 	_shield_time = GameBalance.SHIELD_DURATION
 	# Ataques
-	_neutral_combo_attacks = [_attacks.neutral1, _attacks.neutral2, _attacks.neutral3]
+	_neutral_combo_attacks = [attacks.neutral1, attacks.neutral2, attacks.neutral3]
 
 
 # Funciones | Dependencias del physics process
@@ -1018,5 +1010,3 @@ func _process_visual(frame: FrameMotionSignals) -> void:
 # _physics_process, vive en `Person`
 
 # Configuración pública
-func set_attacks(attacks: Attacks):
-	_attacks = attacks

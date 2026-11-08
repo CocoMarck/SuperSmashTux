@@ -2,7 +2,7 @@
 
 > Qué tan fácil es sumar personajes con la arquitectura actual: qué funciona, qué estorba y una propuesta **no implementada**. La jerarquía de clases vive en [arquitectura-personajes.md](arquitectura-personajes.md); el sistema de ataques en [nota-ataques.md](../combate/nota-ataques.md); el hitbox en [hitbox.md](../combate/hitbox.md); los nombres de animación en [asset-personaje.md](../arte/asset-personaje.md).
 >
-> Rutas cortas: `scripts/characters/` (`person.gd`, `fighter.gd`, `power_fighter.gd`, `player.gd`, `npc.gd`), `scripts/match/spawn_point.gd`, `scripts/helpers/combat/` (`attacks.gd`, `power_attacks.gd`, `fight_move.gd`, `hitbox_move.gd`), `scripts/combat/hitbox_damage.gd`. Líneas verificadas el 2026-10-24.
+> Rutas cortas: `scripts/characters/` (`person.gd`, `fighter.gd`, `power_fighter.gd`, `player.gd`, `npc.gd`), `scripts/match/spawn_point.gd`, `scripts/helpers/combat/` (`attacks.gd`, `power_attacks.gd`, `fight_move.gd`, `hitbox_move.gd`), `scripts/combat/hitbox_damage.gd`. Líneas verificadas el 2026-11-07.
 
 ## Resumen
 
@@ -27,11 +27,11 @@
 
 - `Attacks` tiene 15 campos y su `_init` pide los 15 en orden (`attacks.gd:23`). `PowerAttacks` tiene 6 claves fijas (`power_attacks.gd:15-21`, lectura en `power_attacks.gd:30-35`).
 - *Efecto:* un personaje con 3 ataques, o con un especial extra, exige tocar la clase base. `PowerAttacks` ignora en silencio las claves que no conoce: un `"special"` no da error, simplemente no se usa.
-- *Por qué existen así:* `_init_attack_by_move()` (`fighter.gd:408`) elige el ataque por nombre de slot (`_attacks.heavy_side`, etc.). Cambiar el conjunto de slots obliga a cambiar también ese selector.
+- *Por qué existen así:* `_init_attack_by_move()` (`fighter.gd:400`) elige el ataque por nombre de slot (`attacks.heavy_side`, etc.). Cambiar el conjunto de slots obliga a cambiar también ese selector.
 
 ### 3. Doble salto y poderes atados a `PowerFighter`
 
-- `power_fighter.gd:157` (`_max_jumps = 2`, dentro de `_init()`) y el catálogo `_power_attacks` viven en la misma clase. Mezclan dos cosas distintas: "puede lanzar poderes" y "tiene doble salto". Un personaje con poderes y salto simple (o al revés) no puede tomar solo una de las dos sin heredar la otra.
+- `power_fighter.gd:161` (`_max_jumps = 2`, dentro de `_init()`) y el catálogo `power_attacks` viven en la misma clase. Mezclan dos cosas distintas: "puede lanzar poderes" y "tiene doble salto". Un personaje con poderes y salto simple (o al revés) no puede tomar solo una de las dos sin heredar la otra.
 - *Verificado:* `set_script()` sí ejecuta el `_init()` del script nuevo (probado en Godot 4.7.2 con un proyecto de prueba aislado, nodo plano + `set_script`). Por eso el `_max_jumps = 2` sí aplica a `Player` y `NPC` aunque el prefab no tenga script. No es un bug, pero depende de ese comportamiento.
 
 ### 4. `Player`/`NPC` al final de la herencia (problema principal)
@@ -48,7 +48,7 @@
 
 ### 6. Animaciones atadas por nombre
 
-- `_attack_anim()` (`fighter.gd:603-607`) reproduce `_current_attack.name` en el `AnimationPlayer`. El nombre del `FightMove` **es** el nombre de la animación.
+- `_attack_anim()` (`fighter.gd:595-599`) reproduce `_current_attack.name` en el `AnimationPlayer`. El nombre del `FightMove` **es** el nombre de la animación y es de solo lectura (getter), para que no se pueda cambiar por accidente.
 - Un modelo nuevo debe traer esos nombres exactos (lista en [asset-personaje.md](../arte/asset-personaje.md), sección Animaciones). Si falta uno, ese doc advierte que puede romperse.
 - *Efecto:* es una ventaja para variantes (cambiar de modelo no toca código) y un límite para personajes con animaciones distintas.
 

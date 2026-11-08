@@ -71,17 +71,17 @@ Por qué `_process_ai` va **antes** de construir el frame: la IA solo setea los 
 
 Hijo de `Person`. Salta una sola vez (hereda `_max_jumps = 1`). Tiene los métodos para **dar trancazos, protegerse y agarrar**.
 
-- **Dar trancazos**: catálogo `_attacks` (`Attacks`, 15 `FightMove`). `_fight_move()` elige el ataque según el estado de movimiento, lo sostiene mientras dure y spawnea/cierra el hitbox. `_spawn_hitbox(p_size, p_position, p_damage, p_direction)` crea un `Hitbox` como hijo del `Pivot`.
+- **Dar trancazos**: catálogo `attacks` (`Attacks`, 15 `FightMove`). `_fight_move()` elige el ataque según el estado de movimiento, lo sostiene mientras dure y spawnea/cierra el hitbox. `_spawn_hitbox(p_size, p_position, p_damage, p_direction)` crea un `Hitbox` como hijo del `Pivot`.
 - **Protegerse** (`_shield_move`, `_with_shield()`, `_shield_defence()`): escudo con durabilidad (`_shield_time` vs `GameBalance.SHIELD_DURATION`) que **sí anula el daño** y se desgasta según el golpe, con blockstun, pushback y regeneración. Desde el escudo se puede rodar (`_roll_move`).
 - **Agarres** (`_grab_move`, `grabbing_person()`, `_grabbing_move()`): en el piso spawnea un `HitboxGrab`; si conecta, la víctima queda `grabbed` y, al presionar izquierda/derecha, se le lanza con `set_thrown_move()`.
 
 ## `PowerFighter` — el que tiene poderes
 
-Hijo de `Fighter`. Tiene **doble salto** (`_max_jumps = 2`, aplicado en `_init()`) y un catálogo `_power_attacks` (`PowerAttacks`, 6 `FightMove`: `standard`, `down`, `up` y sus versiones `air_*`), activado con el bool `_power_attack`.
+Hijo de `Fighter`. Tiene **doble salto** (`_max_jumps = 2`, aplicado en `_init()`) y un catálogo `power_attacks` (`PowerAttacks`, 6 `FightMove`: `standard`, `down`, `up` y sus versiones `air_*`), activado con el bool `_power_attack`.
 
 **"Tercer salto"**: no es un salto del contador `_jump_count`. Es el ataque de poder hacia arriba (`up` / `air_up`, con `jump_power: 12.0`): `Fighter._fight_move()` aplica ese `jump_power` a `_target_velocity.y`. Cuando se agotan los saltos, el NPC lo dispara (`_move_up` + `_power_attack`) para recuperarse.
 
-**Pendiente**: un poder propio por personaje; hoy todos comparten el mismo catálogo `_power_attacks`.
+**Pendiente**: un poder propio por personaje; hoy todos comparten el mismo catálogo `power_attacks`.
 
 ---
 

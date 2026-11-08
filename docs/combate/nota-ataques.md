@@ -23,7 +23,7 @@ salvo que se diga otra cosa.
 - **`Attacks`** (`scripts/helpers/combat/attacks.gd`): catálogo fijo de **15 `FightMove`** — 10 en piso
   (`neutral1`, `neutral2`, `neutral3`, `down`, `up`, `dash`, `forward`, `heavy_side`, `heavy_up`,
   `heavy_down`) y 5 en aire (`air_neutral`, `air_down`, `air_up`, `air_forward`, `air_back`). `Fighter`
-  lo declara como `var _attacks: Attacks = Attacks.new(...)`, propiedad de instancia.
+  lo declara como `var attacks: Attacks = Attacks.new(...)`, propiedad de instancia pública.
   Los 3 neutrales son el combo de piso; los otros 12 son "un ataque = un estado".
 - **`Fighter._fight_move(delta, signals, states)`**: la máquina que decide cuándo arranca un ataque, lo
   sostiene mientras dura, y lanza/cierra los hitboxes. Se llama desde `_process_action()`.
@@ -175,7 +175,8 @@ de colgado siempre gana.
 
 `_attack_anim()` reproduce `_current_attack.name` en el `AnimationPlayer` (si el nombre estuviera
 vacío, lo detiene). Los nombres de animación son los de `docs/arte/asset-personaje.md` (fuente de verdad);
-el `name` del `FightMove` **es** el nombre de la animación, por eso son `snake_case`.
+el `name` del `FightMove` **es** el nombre de la animación, por eso son `snake_case`. Es de **solo
+lectura** (getter sobre `_name`), así que se fija al construir el `FightMove` y no se puede reasignar.
 
 ## Daño recibido
 
@@ -193,6 +194,11 @@ daño supera `STUN_DAMAGE_THRESHOLD * hp`, activa heavy hitstun (tumbado en piso
 `STUN_DURATION_ON_FLOOR`). Durante `KNOCKBACK_DECAY_TIME` la velocidad se acelera con
 `_normal_damage_power * damage_percentage`, así que **mientras más `damage_percentage` acumulado,
 más lejos vuela**. Los valores están en `scripts/helpers/game_balance.gd`.
+
+> **FALTA**: hacer que `Person` acumule knockback. Por ahora cada golpe reinicia el knockback
+> (dirección, hitstun y ventana de decaimiento), y si el personaje está en el aire también cancela
+> `_target_velocity.y`. En partidas FFA de 4, un golpe débil a mitad del vuelo "salva" al que ya iba
+> volando. Detalle y opciones en [nota-knockback-acumulativo.md](nota-knockback-acumulativo.md).
 
 ## Los 15 ataques — valores reales
 
@@ -238,13 +244,14 @@ equivalen a 12 y 15 frames.
 
 `PowerFighter` sobrescribe `_process_attack()` para llamar primero a `_init_attack_by_move()` y luego a
 `_init_power_attack_by_move()` (si `_power_attack` está activo, este último pisa el ataque normal).
-Sus ataques viven en `_power_attacks` (`PowerAttacks`): `standard`, `down`, `up`, `air_standard`,
+Sus ataques viven en `power_attacks` (`PowerAttacks`): `standard`, `down`, `up`, `air_standard`,
 `air_down`, `air_up`. Son los que usan `jump_power` (`up`, `air_up`) y hitboxes con `use_gravity` /
 `bounce` (`standard`, `air_standard`, proyectiles).
 
 ## Ver también
 
 - `docs/combate/hitbox.md` — construcción y ciclo de vida del `Hitbox` en sí.
+- `docs/combate/nota-knockback-acumulativo.md` — estado actual del knockback y pendiente de hacerlo acumulativo.
 - `docs/arquitectura/arquitectura-personajes.md` — jerarquía `Person` → `Fighter` → `PowerFighter`.
 - `docs/arte/asset-personaje.md` — lista de nombres de animación de ataque (fuente de verdad para nombres).
 - `docs/combate/normal-and-power-attacks-moves.md` — ataques normales y power.

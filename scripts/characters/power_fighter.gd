@@ -5,7 +5,7 @@ extends Fighter
 var _power_attack: bool = false
 
 # Propiedades privadas | Power attacks
-var _power_attacks: PowerAttacks = PowerAttacks.new({
+var power_attacks: PowerAttacks = PowerAttacks.new({
 	"standard" : FightMove.new({
 		"name": &"power_attack", "duration": 0.5833, "speed": Vector3(0,0,0),
 		"air_attack": false, "override_horizontal_move": true,
@@ -130,22 +130,26 @@ var _power_attacks: PowerAttacks = PowerAttacks.new({
 	})
 })
 
+func _false_inputs() -> void:
+	super()
+	_power_attack = false
+
 func _init_power_attack_by_move(direction_buffered: bool, states: MoveStates):
 	if not _power_attack:
 		return
 	# En el piso
 	if states.neutral_up:
-		_current_attack = _power_attacks.up
+		_current_attack = power_attacks.up
 	elif states.neutral_crouch:
-		_current_attack = _power_attacks.down
+		_current_attack = power_attacks.down
 	elif states.neutral or states.walking or states.running or states.crouch_move:
-		_current_attack = _power_attacks.standard
+		_current_attack = power_attacks.standard
 	elif states.air_up:
-		_current_attack = _power_attacks.air_up
+		_current_attack = power_attacks.air_up
 	elif states.air_down:
-		_current_attack = _power_attacks.air_down
+		_current_attack = power_attacks.air_down
 	elif states.rising or states.falling or states.jumping:
-		_current_attack = _power_attacks.air_standard
+		_current_attack = power_attacks.air_standard
 
 # Remplazando funciones.
 func _process_attack(direction_buffered: bool, states: MoveStates) -> void:
@@ -157,5 +161,3 @@ func _init() -> void:
 	_max_jumps = 2
 
 # Configuración publica
-func set_power_attacks(power_attacks: PowerAttacks):
-	_power_attacks = power_attacks

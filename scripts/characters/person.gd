@@ -1132,7 +1132,7 @@ func _physics_process(delta: float) -> void:
 
 
 # Configuración publica
-func set_horizontal_momentum(
+func set_momentum(
 	ground_acceleration: float, air_acceleration: float, ground_friction: float,
 	knockback_friction: float):
 	_ground_acceleration = ground_acceleration
@@ -1140,6 +1140,5 @@ func set_horizontal_momentum(
 	_ground_friction = ground_friction
 	_knockback_friction = knockback_friction
 
-func set_time_of_anims(air_jump_time: float, air_jump_duration: float):
-	_air_jump_time = air_jump_time
+func set_duration_of_anims(air_jump_duration: float):
 	_air_jump_duration = air_jump_duration

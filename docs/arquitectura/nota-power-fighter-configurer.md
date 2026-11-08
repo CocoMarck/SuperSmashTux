@@ -2,9 +2,12 @@
 
 > Cómo se separa el "quién controla" del "qué personaje es", qué hace `PowerFighterConfigurer`,
 > cómo lo usa `SpawnPoint` y cómo debería el `GameManager` repartir las configuraciones.
-> Verificado el 2026-11-06. Rutas: `scripts/helpers/global_utils.gd`,
+> Verificado el 2026-11-07. Rutas: `scripts/helpers/global_utils.gd`,
 > `scripts/match/power_fighter_configurer.gd`, `scripts/match/spawn_point.gd`,
-> `scripts/match/game_manager.gd`, `scripts/characters/person.gd`.
+> `scripts/match/game_manager.gd`, `scripts/characters/person.gd`,
+> `scripts/characters/fighter.gd`, `scripts/characters/power_fighter.gd`,
+> `scripts/helpers/combat/attacks.gd`, `scripts/helpers/combat/power_attacks.gd`,
+> `scripts/helpers/combat/fight_move.gd`.
 
 ## Resumen
 
@@ -73,26 +76,28 @@ static func create(
 ) -> PowerFighter:
 ```
 
-Flujo:
+Flujo real, en orden:
 
 1. Instancia el prefab base `res://prefabs/standard_power_fighter.tscn`.
-2. Aplica la configuración de personaje con un `match`:
-   - `PowerFighterConfig.STANDARD`: no hace nada, se queda el modelo que trae el prefab.
-   - `PowerFighterConfig.TUX`: llama a `_apply_tux_config()`.
-3. Asigna el script según el control con otro `match`:
+2. Si la config es `TUX`, llama a `_build_tux_instance()` para cambiar el modelo visual.
+   - `STANDARD`: no hace nada, se queda el modelo que trae el prefab.
+3. Asigna el script según el control con un `match`:
    - `ControlType.PLAYER`: `player.gd`.
    - `ControlType.NPC`: `npc.gd`.
-4. Retorna el `PowerFighter` ya configurado.
+4. Si la config es `TUX`, llama a `_apply_tux_config()` para aplicar datos del personaje
+   (hoy solo `set_duration_of_anims(0.5)`).
+5. Retorna el `PowerFighter` ya configurado.
 
-> El `set_script()` ocurre antes del `add_child`, así que el `_init()` y el `_ready()` del script
-> elegido corren ya con la configuración correcta.
+> `_build_tux_instance()` corre antes de `set_script()` para que el modelo ya esté listo cuando se
+> monte el script final. `_apply_tux_config()` corre después para llamar setters del script
+> definitivo. `_ready()` corre hasta el `add_child()` que hace `GameManager`, con todo ya aplicado.
 
-### `_apply_tux_config()`
+### `_build_tux_instance()`
 
 Reemplaza el modelo visual del prefab por el de Tux:
 
 ```gdscript
-static func _apply_tux_config(power_fighter: Node3D) -> void:
+static func _build_tux_instance(power_fighter: Node3D) -> void:
 	var visual = power_fighter.get_child(0)
 	var asset = visual.get_child(0)
 
@@ -116,6 +121,17 @@ static func _apply_tux_config(power_fighter: Node3D) -> void:
   modelo standard. El valor es de calibración visual.
 - El modelo viejo se saca de `Visual` y se libera.
 
+### `_apply_tux_config()`
+
+Aplica la configuración de datos de Tux. Hoy solo ajusta la duración de las animaciones de salto:
+
+```gdscript
+static func _apply_tux_config(power_fighter: PowerFighter) -> void:
+	power_fighter.set_duration_of_anims(0.5)
+```
+
+Es el punto donde deberían vivir stats, tiempos y movimientos propios de Tux cuando existan.
+
 ### Contrato de nodos del modelo
 
 `Person._ready()` ya no busca nombres (`"Pivot"`), ahora resuelve por posición
@@ -131,7 +147,7 @@ _animation_player = model_root.get_node("AnimationPlayer")
 
 Por eso todo `.glb` de personaje debe respetar este orden, sin importar los nombres:
 `Pivot` → `Skeleton3D` → `MeshInstance3D`, con el `AnimationPlayer` como hijo del modelo. Está
-documentado en [asset-personaje.md](../arte/asset-personaje.md). `_apply_tux_config` depende de ese
+documentado en [asset-personaje.md](../arte/asset-personaje.md). `_build_tux_instance` depende de ese
 mismo orden (`new_asset.get_child(0).get_child(0).get_child(0)`).
 
 ### Cómo lo usa `SpawnPoint`
@@ -174,81 +190,54 @@ que asigna `GameManager` queda ignorado. Es la decisión actual para poder ver T
 Reactivar el `material_override` volvería a pintar al peleador de un color sólido y taparía la
 textura.
 
-### Configuración fina de movimientos (propuesta)
+### Configuración fina de movimientos
 
-En vez de reemplazar todo el moveset de golpe, conviene poder cambiar un movimiento a la vez por
-slot. Los nombres de slot ya están fijos por arquitectura en `_init_attack_by_move()`
-(`scripts/characters/fighter.gd:408`), así que no se tocan. Lo que sí hay que cuidar es el
-**nombre de animación** (`FightMove.name`), porque es el clip que `_attack_anim()` reproduce
-(`scripts/characters/fighter.gd:604`).
+`Fighter` expone su catálogo de ataques como `attacks` (`Attacks`, 15 `FightMove`) y `PowerFighter`
+expone `power_attacks` (`PowerAttacks`, 6 `FightMove`). Ambos son **públicos**: el configurador
+puede entrar directo a cada slot y ajustar sus valores.
 
-Exponer los contenedores (`_attacks`, `_power_attacks`) permitiría meter un `FightMove` con nombre
-de animación vacío o equivocado, y el ataque quedaría mudo sin avisar. Por eso la propuesta es un
-setter por slot con validación.
-
-#### API propuesta
-
-`Attacks` y `PowerAttacks` exponen un mapa canónico slot → animación y un setter:
+`FightMove.name` quedó como **solo lectura** (`scripts/helpers/combat/fight_move.gd:27-30`):
 
 ```gdscript
-# attacks.gd
-const SLOT_ANIMATION := {
-	&"neutral1": &"neutral_attack1",
-	&"neutral2": &"neutral_attack2",
-	&"neutral3": &"neutral_attack3",
-	&"down": &"down_attack",
-	&"up": &"up_attack",
-	&"dash": &"dash_attack",
-	&"forward": &"forward_attack",
-	&"heavy_side": &"heavy_side_attack",
-	&"heavy_up": &"heavy_up_attack",
-	&"heavy_down": &"heavy_down_attack",
-	&"air_neutral": &"air_neutral_attack",
-	&"air_down": &"air_down_attack",
-	&"air_up": &"air_up_attack",
-	&"air_forward": &"air_forward_attack",
-	&"air_back": &"air_back_attack",
-}
-
-func set_move(slot: StringName, move: FightMove) -> bool:
-	# valida slot, move y nombre de animación antes de asignar
+var _name: StringName
+var name: StringName:
+	get:
+		return _name
 ```
 
-`PowerAttacks` usa el mismo patrón con sus 6 slots:
+El nombre se fija al construir el `FightMove` y ya no se puede reasignar desde fuera. Los demás
+campos (`duration`, `speed`, `direction`, `jump_power`, `hitboxes_moves`, etc.) siguen públicos.
+Eso permite cambiar números sin romper el nombre de animación, que es el clip que `_attack_anim()`
+reproduce (`scripts/characters/fighter.gd:595`).
 
-| Slot | Animación |
-|---|---|
-| `standard` | `power_attack` |
-| `down` | `down_power_attack` |
-| `up` | `up_power_attack` |
-| `air_standard` | `air_power_attack` |
-| `air_down` | `air_down_power_attack` |
-| `air_up` | `air_up_power_attack` |
-
-Y `Fighter` / `PowerFighter` delegan:
+Ejemplo de uso desde el configurador:
 
 ```gdscript
-func set_attack(slot: StringName, move: FightMove) -> bool
-func set_power_attack(slot: StringName, move: FightMove) -> bool
+var move := power_fighter.power_attacks.standard
+move.duration = 0.4
+move.hitboxes_moves[0].damage = 12
+# move.name = &"otra_cosa"  -> error: la propiedad es de solo lectura
 ```
 
-#### Validación y crash
+#### Límites actuales
 
-- Slot inexistente, `FightMove` nulo o `move.name` distinto del canónico → error con mensaje.
-- GDScript no tiene `try/catch`; lo más cercano a una excepción con mensaje es
-  `push_error(msg)` + `assert(false, msg)`, que detiene la ejecución en debug.
-- En builds release `assert` se elimina; el setter debe regresar `false` y dejar el moveset intacto.
+- `attacks` y `power_attacks` son contenedores públicos, así que todavía se puede reemplazar un slot
+  completo por otro `FightMove` (con el nombre que traiga) o por `null`. La protección del nombre
+  aplica solo si se muta el `FightMove` existente.
+- Si se quisiera blindar también el reemplazo de slots, harían falta setters por slot con validación
+  o slots de solo lectura. No es el caso hoy.
 
 #### Combo neutral
 
-`_neutral_combo_attacks` se llena una sola vez en `_ready()`
-(`scripts/characters/fighter.gd:869`). Los setters de `neutral1/2/3` deben refrescarlo con un
-`_refresh_neutral_combo()`, o el combo seguiría apuntando a los moves viejos.
+`_neutral_combo_attacks` se llena en `_ready()` (`scripts/characters/fighter.gd:861`) con las
+referencias de `attacks.neutral1/2/3`. Mutar esos `FightMove` en sitio es seguro: el combo apunta a
+los mismos objetos. Si algún día se reemplaza un `FightMove` del combo después de `_ready()`, habría
+que refrescar el arreglo.
 
 #### Fuera de alcance por ahora
 
-- No se valida que existan todos los clips en el `AnimationPlayer` al hacer `_ready()`.
-- Los contenedores de ataques no se exponen como públicos.
+- Validar en `_ready()` que existan todos los clips en el `AnimationPlayer`.
+- Setters por slot para reemplazar movimientos completos con validación de nombre.
 
 ---
 
@@ -257,18 +246,19 @@ func set_power_attack(slot: StringName, move: FightMove) -> bool
 ### Estado actual
 
 `GameManager._spawn_all_power_fighters()` todavía hardcodea la config para los 4 slots
-(`scripts/match/game_manager.gd:78`):
+(`scripts/match/game_manager.gd:78-79`):
 
 ```gdscript
-var config = GlobalUtils.PowerFighterConfig.STANDARD
+var config_options = [GlobalUtils.PowerFighterConfig.STANDARD, GlobalUtils.PowerFighterConfig.TUX]
+var config = config_options[1] # TUX fijo; `pick_random()` está desactivado
 if is_player:
 	power_fighter = spawn_point.spawn(config, GlobalUtils.ControlType.PLAYER, i)
 else:
 	power_fighter = spawn_point.spawn(config, GlobalUtils.ControlType.NPC, i)
 ```
 
-Es decir: todos los peleadores salen `STANDARD`. El `ControlType` sí varía por slot (1-2 Player,
-3-4 NPC), pero la identidad del personaje aún no.
+Es decir: hoy todos los peleadores salen `TUX`. El `ControlType` sí varía por slot (1-2 Player,
+3-4 NPC), pero la identidad del personaje aún no se elige por jugador.
 
 ### Propuesta
 
@@ -312,7 +302,7 @@ Pasos sugeridos:
 ### Qué falta decidir
 
 - **Dónde vive la selección**: autoload vs resource en la escena del nivel.
-- **NPCs**: ¿config fija por defecto (`STANDARD`), aleatoria entre las disponibles, o definida por
+- **NPCs**: ¿config fija por defecto (`TUX`), aleatoria entre las disponibles, o definida por
   el mapa?
 - **Material/tinte por slot**: con la textura de Tux conservada, hoy no hay color por jugador. Si se
   quiere distinguir jugadores con Tux, habría que definir un material que tiña sin tapar la textura,
@@ -330,8 +320,11 @@ Pasos sugeridos:
 | `scripts/helpers/global_utils.gd` | `CharacterType` → `ControlType`; nuevo enum `PowerFighterConfig` |
 | `scripts/match/power_fighter_configurer.gd` | Nuevo: crea y configura el `PowerFighter` |
 | `scripts/match/spawn_point.gd` | Delega la creación al configurador; solo posiciona y asigna `player_id` |
-| `scripts/match/game_manager.gd` | Pasa `config` y `ControlType` a `spawn()` (config aún fija en `STANDARD`) |
+| `scripts/match/game_manager.gd` | Pasa `config` y `ControlType` a `spawn()` (hoy fija en `TUX`) |
 | `scripts/characters/person.gd` | Resuelve nodos esenciales por índice; `_skeleton3d` |
+| `scripts/characters/fighter.gd` | `attacks` público; ya no tiene `set_attacks()` |
+| `scripts/characters/power_fighter.gd` | `power_attacks` público; ya no tiene `set_power_attacks()` |
+| `scripts/helpers/combat/fight_move.gd` | `name` de solo lectura (`_name` + getter) |
 | `docs/arte/asset-personaje.md` | Documenta el orden obligatorio de nodos del modelo |
 
 ## Ver también
