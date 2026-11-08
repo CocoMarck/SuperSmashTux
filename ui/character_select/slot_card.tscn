@@ -1,0 +1,267 @@
+[gd_scene format=3 uid="uid://d2kc7fpw5ys1n"]
+
+[ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/character_select/slot_card.gd" id="2_script"]
+[ext_resource type="PackedScene" uid="uid://dq7pv3cx6rn2m" path="res://ui/character_select/character_preview.tscn" id="3_preview"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_chip"]
+content_margin_left = 8.0
+content_margin_top = 0.0
+content_margin_right = 8.0
+content_margin_bottom = 0.0
+bg_color = Color(0.9019608, 0.92941177, 0.9529412, 0.07)
+border_width_right = 1
+border_color = Color(0.16470589, 0.19215687, 0.23529412, 1)
+corner_radius_top_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_floor_shadow"]
+bg_color = Color(0.9019608, 0.92941177, 0.9529412, 0.07)
+corner_radius_top_left = 11
+corner_radius_top_right = 11
+corner_radius_bottom_right = 11
+corner_radius_bottom_left = 11
+corner_detail = 12
+
+[node name="SlotCard" type="PanelContainer" unique_id=1938475620]
+custom_minimum_size = Vector2(264, 272)
+offset_right = 264.0
+offset_bottom = 272.0
+theme = ExtResource("1_theme")
+theme_type_variation = &"KnCard"
+script = ExtResource("2_script")
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=720394851]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Titlebar" type="PanelContainer" parent="VBox" unique_id=1502938476]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnTitlebar"
+
+[node name="Row" type="HBoxContainer" parent="VBox/Titlebar" unique_id=384756190]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="ChipPanel" type="PanelContainer" parent="VBox/Titlebar/Row" unique_id=1164829307]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnTitlebarChip"
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_chip")
+
+[node name="TagLabel" type="Label" parent="VBox/Titlebar/Row/ChipPanel" unique_id=1839402756]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnChip"
+theme_override_font_sizes/font_size = 14
+text = "P1"
+vertical_alignment = 1
+
+[node name="NameLabel" type="Label" parent="VBox/Titlebar/Row" unique_id=592038471]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"KnCardName"
+text = "Aleatorio"
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="EmptyBody" type="VBoxContainer" parent="VBox" unique_id=1047382916]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Row1" type="HBoxContainer" parent="VBox/EmptyBody" unique_id=1720583946]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Press" type="Label" parent="VBox/EmptyBody/Row1" unique_id=839205716]
+layout_mode = 2
+theme_type_variation = &"KnMuted"
+text = "Pulsa"
+vertical_alignment = 1
+
+[node name="EnterChip" type="PanelContainer" parent="VBox/EmptyBody/Row1" unique_id=1294857306]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"KnKeySmall"
+
+[node name="Key" type="Label" parent="VBox/EmptyBody/Row1/EnterChip" unique_id=462019385]
+layout_mode = 2
+theme_type_variation = &"KnMuted"
+text = "Enter"
+
+[node name="Join" type="Label" parent="VBox/EmptyBody/Row1" unique_id=1583920467]
+layout_mode = 2
+theme_type_variation = &"KnMuted"
+text = "para unirte"
+vertical_alignment = 1
+
+[node name="Row2" type="HBoxContainer" parent="VBox/EmptyBody" unique_id=307594812]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="ClickChip" type="PanelContainer" parent="VBox/EmptyBody/Row2" unique_id=1928305746]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"KnKeySmall"
+
+[node name="Key" type="Label" parent="VBox/EmptyBody/Row2/ClickChip" unique_id=748392051]
+layout_mode = 2
+theme_type_variation = &"KnMuted"
+text = "Clic"
+
+[node name="Or" type="Label" parent="VBox/EmptyBody/Row2" unique_id=1039485726]
+layout_mode = 2
+theme_type_variation = &"KnMuted"
+text = "o"
+vertical_alignment = 1
+
+[node name="TabChip" type="PanelContainer" parent="VBox/EmptyBody/Row2" unique_id=618293740]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"KnKeySmall"
+
+[node name="Key" type="Label" parent="VBox/EmptyBody/Row2/TabChip" unique_id=1472930586]
+layout_mode = 2
+theme_type_variation = &"KnMuted"
+text = "Tab"
+
+[node name="AddCpu" type="Label" parent="VBox/EmptyBody/Row2" unique_id=295837164]
+layout_mode = 2
+theme_type_variation = &"KnMuted"
+text = "agregar CPU"
+vertical_alignment = 1
+
+[node name="Art" type="PanelContainer" parent="VBox" unique_id=1658302947]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_type_variation = &"KnArt"
+
+[node name="Stack" type="Control" parent="VBox/Art" unique_id=402918375]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Shadow" type="Panel" parent="VBox/Art/Stack" unique_id=1830475926]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -32.0
+offset_right = 80.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_floor_shadow")
+
+[node name="Preview" parent="VBox/Art/Stack" unique_id=1102938475 instance=ExtResource("3_preview")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ArtGlyph" type="Label" parent="VBox/Art/Stack" unique_id=573920184]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"KnTileGlyph"
+theme_override_font_sizes/font_size = 64
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Footer" type="PanelContainer" parent="VBox" unique_id=1394058271]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnCardFooter"
+
+[node name="Row" type="HBoxContainer" parent="VBox/Footer" unique_id=820394716]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="StatusOk" type="HBoxContainer" parent="VBox/Footer/Row" unique_id=1749203856]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="OkTag" type="Label" parent="VBox/Footer/Row/StatusOk" unique_id=362917485]
+layout_mode = 2
+theme_type_variation = &"KnCardStatus"
+theme_override_colors/font_color = Color(0.43529412, 0.8117647, 0.5921569, 1)
+text = "[ OK ]"
+vertical_alignment = 1
+
+[node name="OkText" type="Label" parent="VBox/Footer/Row/StatusOk" unique_id=1204857369]
+layout_mode = 2
+theme_type_variation = &"KnCardStatus"
+theme_override_colors/font_color = Color(0.7882353, 0.81960785, 0.85882354, 1)
+text = "listo"
+vertical_alignment = 1
+
+[node name="StatusChoosing" type="HBoxContainer" parent="VBox/Footer/Row" unique_id=948302175]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="ChoosingText" type="Label" parent="VBox/Footer/Row/StatusChoosing" unique_id=1630294857]
+layout_mode = 2
+theme_type_variation = &"KnCardStatus"
+theme_override_colors/font_color = Color(0.54509807, 0.58431375, 0.6392157, 1)
+text = "> eligiendo"
+vertical_alignment = 1
+
+[node name="Cursor" type="ColorRect" parent="VBox/Footer/Row/StatusChoosing" unique_id=519038264]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(8, 15)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.54509807, 0.58431375, 0.6392157, 1)
+
+[node name="Spacer" type="Control" parent="VBox/Footer/Row" unique_id=1857302946]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="KindLabel" type="Label" parent="VBox/Footer/Row" unique_id=702938415]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnLabel"
+theme_override_font_sizes/font_size = 10
+text = "JUGADOR"
+vertical_alignment = 1

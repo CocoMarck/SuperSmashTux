@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://dq7pv3cx6rn2m"]
+
+[ext_resource type="Script" path="res://scripts/ui/character_select/character_preview.gd" id="1_script"]
+
+[sub_resource type="Environment" id="Environment_preview"]
+ambient_light_source = 2
+ambient_light_color = Color(0.7882353, 0.81960785, 0.85882354, 1)
+ambient_light_energy = 0.5
+
+[node name="CharacterPreview" type="SubViewportContainer" unique_id=1394827560]
+offset_right = 262.0
+offset_bottom = 208.0
+mouse_filter = 2
+stretch = true
+script = ExtResource("1_script")
+
+[node name="Viewport" type="SubViewport" parent="." unique_id=650283917]
+unique_name_in_owner = true
+own_world_3d = true
+transparent_bg = true
+handle_input_locally = false
+msaa_3d = 1
+size = Vector2i(262, 208)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Viewport" unique_id=1820463759]
+environment = SubResource("Environment_preview")
+
+[node name="Camera3D" type="Camera3D" parent="Viewport" unique_id=372950184]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.08, 4.8)
+current = true
+fov = 30.0
+
+[node name="Key" type="DirectionalLight3D" parent="Viewport" unique_id=1572093846]
+transform = Transform3D(0.8660254, -0.3213938, 0.3830222, 0, 0.7660444, 0.6427876, -0.5, -0.5566704, 0.6634139, 2, 3, 3)
+light_energy = 1.1
+
+[node name="Fill" type="DirectionalLight3D" parent="Viewport" unique_id=941728305]
+transform = Transform3D(0.5, 0.2961981, -0.8137977, 0, 0.9396926, 0.3420201, 0.8660254, -0.1710101, 0.4698463, -3, 1, 2)
+light_energy = 0.35
+
+[node name="Turntable" type="Node3D" parent="Viewport" unique_id=1203948576]
+unique_name_in_owner = true
