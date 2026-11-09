@@ -35,6 +35,15 @@ static func all() -> Array[Entry]:
 		_entries.append(_make(&"tux", "Tux", "T", false, GlobalUtils.PowerFighterConfig.TUX, TUX_MODEL))
 	return _entries
 
+static func get_entry_by_config(config: GlobalUtils.PowerFighterConfig) -> Entry:
+	'''
+	Primer personaje real (no Aleatorio) con esa configuración, o null si no hay.
+	'''
+	for entry: Entry in all():
+		if not entry.is_random and entry.config == config:
+			return entry
+	return null
+
 static func get_entry(id: StringName) -> Entry:
 	'''
 	Entrada por id, o null si no existe.

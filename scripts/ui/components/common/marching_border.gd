@@ -23,7 +23,12 @@ var active: bool = false:
 	set(value):
 		active = value
 		visible = value
-		set_process(value)
+		set_process(value and rotating)
+		queue_redraw()
+var rotating: bool = true: # Con false el patrón queda fijo (desfase 0).
+	set(value):
+		rotating = value
+		set_process(active and value)
 		queue_redraw()
 
 # Propiedades privadas
@@ -37,7 +42,7 @@ func _init() -> void:
 	visible = false
 
 func _ready() -> void:
-	set_process(active)
+	set_process(active and rotating)
 
 func _process(_delta: float) -> void:
 	queue_redraw()
@@ -77,6 +82,8 @@ func current_offset() -> float:
 	'''
 	Desfase actual del patrón, según el reloj global.
 	'''
+	if not rotating:
+		return 0.0
 	return fposmod(float(Time.get_ticks_msec()) / 1000.0 * speed, period())
 
 func point_at(distance: float) -> Vector2:

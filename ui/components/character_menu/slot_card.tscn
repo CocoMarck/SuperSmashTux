@@ -137,35 +137,33 @@ mouse_filter = 2
 theme_override_constants/separation = 6
 alignment = 1
 
-[node name="ClickChip" type="PanelContainer" parent="VBox/EmptyBody/Row2" unique_id=1928305746]
-unique_name_in_owner = true
+[node name="CpuTabChip" type="PanelContainer" parent="VBox/EmptyBody/Row2" unique_id=1928305746]
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 theme_type_variation = &"KnKeySmall"
 
-[node name="Key" type="Label" parent="VBox/EmptyBody/Row2/ClickChip" unique_id=748392051]
+[node name="Key" type="Label" parent="VBox/EmptyBody/Row2/CpuTabChip" unique_id=748392051]
 layout_mode = 2
 theme_type_variation = &"KnMuted"
-text = "Clic"
+text = "Tab"
 
 [node name="Or" type="Label" parent="VBox/EmptyBody/Row2" unique_id=1039485726]
-unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"KnMuted"
 text = "o"
 vertical_alignment = 1
 
-[node name="TabChip" type="PanelContainer" parent="VBox/EmptyBody/Row2" unique_id=618293740]
+[node name="CpuClickChip" type="PanelContainer" parent="VBox/EmptyBody/Row2" unique_id=618293740]
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 theme_type_variation = &"KnKeySmall"
 
-[node name="Key" type="Label" parent="VBox/EmptyBody/Row2/TabChip" unique_id=1472930586]
+[node name="Key" type="Label" parent="VBox/EmptyBody/Row2/CpuClickChip" unique_id=1472930586]
 layout_mode = 2
 theme_type_variation = &"KnMuted"
-text = "Tab"
+text = "Clic der."
 
 [node name="AddCpu" type="Label" parent="VBox/EmptyBody/Row2" unique_id=295837164]
 layout_mode = 2

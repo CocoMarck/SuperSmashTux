@@ -65,22 +65,36 @@ func _get_all_materials() -> Array[Material]:
 	return [SLOT_1_MATERIAL, SLOT_2_MATERIAL, SLOT_3_MATERIAL, SLOT_4_MATERIAL]
 
 # Funciones | Spawneo y vidas
+func _get_match_slots() -> Array[Dictionary]:
+	'''
+	Slots elegidos en la selección de personaje (MatchSetup.slots). Si vienen vacíos (map1 abierto
+	directo desde el editor), respaldo: 2 Player + 2 NPC con personaje aleatorio.
+	'''
+	if not MatchSetup.slots.is_empty():
+		return MatchSetup.slots
+	var config_options := [GlobalUtils.PowerFighterConfig.STANDARD, GlobalUtils.PowerFighterConfig.TUX]
+	var slots: Array[Dictionary] = []
+	for i in range(0, 4):
+		var control := GlobalUtils.ControlType.PLAYER if i < 2 else GlobalUtils.ControlType.NPC
+		slots.append({ "control": control, "config": config_options.pick_random(), "player_id": i })
+	return slots
+
 func _spawn_all_power_fighters() -> void:
 	'''
-	Spawnea un peleador por cada SpawnPoint: los slots 1-2 son Player y los 3-4 NPC.
+	Spawnea un peleador por cada slot ocupado, en el SpawnPoint de ese slot (ver _get_match_slots).
 	'''
 	var spawn_points = _get_spawn_points()
-	for i in range(0, spawn_points.size()):
+	var slots := _get_match_slots()
+	for i in range(0, mini(spawn_points.size(), slots.size())):
+		# Slot vacío en la selección: no se spawnea nadie ahí.
+		var slot: Dictionary = slots[i]
+		if slot.get("control") == null:
+			continue
 		# SpawnPoint.spawn se encarga de instanciar y posicionar al peleador.
 		var spawn_point = spawn_points[i]
-		var power_fighter : PowerFighter
-		var is_player := i == 0 or i == 1
-		var config_options = [GlobalUtils.PowerFighterConfig.STANDARD, GlobalUtils.PowerFighterConfig.TUX]
-		var config = config_options.pick_random()
-		if is_player:
-			power_fighter = spawn_point.spawn( config, GlobalUtils.ControlType.PLAYER, i )
-		else:
-			power_fighter = spawn_point.spawn( config, GlobalUtils.ControlType.NPC, i )
+		var control: GlobalUtils.ControlType = slot["control"]
+		var is_player := control == GlobalUtils.ControlType.PLAYER
+		var power_fighter: PowerFighter = spawn_point.spawn( slot["config"], control, slot["player_id"] )
 		power_fighter.material = _get_all_materials()[i]
 		# Establecer spawn fijo.
 		_spawn_point_of_power_fighter[power_fighter] = spawn_point

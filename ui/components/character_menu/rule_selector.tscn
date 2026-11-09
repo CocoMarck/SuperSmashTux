@@ -29,9 +29,12 @@ mouse_filter = 2
 theme_override_constants/separation = 6
 
 [node name="PrevArrow" type="Label" parent="Row/Value" unique_id=1375904826]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 0)
 layout_mode = 2
 theme_type_variation = &"KnRuleArrow"
 text = "‹"
+horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ValueText" type="Label" parent="Row/Value" unique_id=283947106]
@@ -43,7 +46,10 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="NextArrow" type="Label" parent="Row/Value" unique_id=1928374650]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 0)
 layout_mode = 2
 theme_type_variation = &"KnRuleArrow"
 text = "›"
+horizontal_alignment = 1
 vertical_alignment = 1

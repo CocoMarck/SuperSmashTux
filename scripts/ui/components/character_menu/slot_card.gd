@@ -24,16 +24,13 @@ const MARCH_GAP := 6.0
 const MARCH_SPEED := 40.0 # px/s, en sentido horario.
 const MARCH_WIDTH := 2.0
 const SECONDS_PER_TURN := 6.0
+const FAST_TURN_DURATION := 0.6 # Vuelta rápida al elegir, termina de frente.
+const FAST_TURN_TRANS := Tween.TRANS_CUBIC
+const FAST_TURN_EASE := Tween.EASE_OUT
 const IDLE_ANIMATION := &"idle"
 const TUX_MESH_OFFSET_Y := -1.2 # Mismo ajuste que PowerFighterConfigurer._build_tux_instance.
 const FILL_RATIO := 0.7 # Parte del alto del preview que ocupa el personaje.
 const FEET_RATIO := 0.12 # Espacio bajo los pies, como fracción del alto visible.
-const SLOT_MATERIALS: Array[Material] = [
-	preload("res://materials/mat_red.tres"),
-	preload("res://materials/mat_blue.tres"),
-	preload("res://materials/mat_yellow.tres"),
-	preload("res://materials/mat_green.tres"),
-]
 
 # Propiedades publicas | Encuadre de la cámara del preview.
 @export_group("Camera")
@@ -49,6 +46,12 @@ var _active: bool = false
 var _controller_slot: int = -1
 var _blink_tween: Tween = null
 var _shown_preview_key: String = ""
+var _targeted: bool = false
+var _join_prompt_enabled: bool = false # Slot de humano: la tarjeta vacía muestra "[tecla] o [Clic izq.] para unirte".
+var _join_key_normal: String = ""
+var _join_key_targeted: String = "" # Tecla de P1, que maneja el modo bot por teclado.
+var _spinning: bool = false # Giro lento continuo mientras se elige.
+var _fast_turn_tween: Tween = null
 var _card_style: StyleBoxFlat = null # Copia propia del tema, para no mutar el recurso compartido.
 var _marching: bool = false # En elección con controlador: el borde discontinuo gira.
 var _border_overlay: MarchingBorder = null # Borde que gira encima del contenido.
@@ -72,8 +75,11 @@ var _model: Node3D = null # Modelo que gira en el preview; null con Aleatorio o 
 @onready var _kind_label: Label = %KindLabel
 @onready var _join_row: Control = %JoinRow
 @onready var _join_key: Label = %JoinKey
-@onready var _cpu_click_chip: Control = %ClickChip
-@onready var _cpu_or: Control = %Or
+@onready var _join_press: Label = $VBox/EmptyBody/JoinRow/Press
+@onready var _join_click_key: Label = $VBox/EmptyBody/JoinRow/JoinClickChip/Key
+@onready var _join_suffix: Label = $VBox/EmptyBody/JoinRow/Join
+@onready var _cpu_row: Control = $VBox/EmptyBody/Row2
+@onready var _choosing_text: Label = $VBox/Footer/Row/StatusChoosing/ChoosingText
 
 # Funciones | Callbacks
 func _ready() -> void:
@@ -102,7 +108,8 @@ func _process(delta: float) -> void:
 	'''
 	Gira el modelo del preview; solo corre mientras hay uno.
 	'''
-	_turntable.rotation.y = wrapf(_turntable.rotation.y + TAU / SECONDS_PER_TURN * delta, 0.0, TAU)
+	if _spinning:
+		_turntable.rotation.y = wrapf(_turntable.rotation.y + TAU / SECONDS_PER_TURN * delta, 0.0, TAU)
 
 func _gui_input(event: InputEvent) -> void:
 	var mouse := event as InputEventMouseButton
@@ -142,14 +149,21 @@ func set_slot(slot: int, is_cpu: bool) -> void:
 
 func set_join_prompt(show_prompt: bool, key_text: String = "") -> void:
 	'''
-	Tarjeta vacía de un slot de humano: muestra "Pulsa [tecla] o [Clic] para unirte" y deja solo "[Tab] agregar CPU".
-	En los demás slots oculta el aviso de unirse y la fila de CPU queda "[Clic] o [Tab] agregar CPU".
+	Tarjeta vacía de un slot de humano: muestra "[tecla] o [Clic izq.] para unirte". Los demás slots lo ocultan.
+	La fila "[Tab] o [Clic der.] agregar CPU" se queda en todos.
 	'''
-	_join_row.visible = show_prompt
-	_cpu_click_chip.visible = not show_prompt
-	_cpu_or.visible = not show_prompt
-	if key_text != "":
-		_join_key.text = key_text
+	_join_prompt_enabled = show_prompt
+	_join_key_normal = key_text
+	_refresh()
+
+func set_targeted(targeted: bool, join_key: String = "") -> void:
+	'''
+	Modo bot: marca la tarjeta como destino de un CPU (borde discontinuo fijo y "> asignar CPU" / "> cambiar CPU").
+	Una tarjeta vacía apuntada muestra solo "[join_key] o [Clic izq.] para asignar".
+	'''
+	_targeted = targeted
+	_join_key_targeted = join_key
+	_refresh()
 
 func set_state(state: State) -> void:
 	_state = state
@@ -190,11 +204,21 @@ func _refresh() -> void:
 
 	# Cuerpo
 	_empty_body.visible = is_empty
+	var empty_targeted: bool = is_empty and _targeted
+	_join_row.visible = _join_prompt_enabled or empty_targeted
+	_cpu_row.visible = not empty_targeted
+	_join_press.visible = false # Sin "Pulsa": basta con las teclas.
+	_join_click_key.text = "Clic izq."
+	_join_suffix.text = "para asignar" if empty_targeted else "para unirte"
+	var key_text: String = _join_key_targeted if empty_targeted and _join_key_targeted != "" else _join_key_normal
+	if key_text != "":
+		_join_key.text = key_text
 	_art.visible = not is_empty
-	_footer.visible = not is_empty
-	_status_ok.visible = _state == State.READY
-	_status_choosing.visible = _state == State.CHOOSING
-	_kind_label.text = _kind_text()
+	_footer.visible = not is_empty or _targeted
+	_status_ok.visible = _state == State.READY and not _targeted
+	_status_choosing.visible = _state == State.CHOOSING or _targeted
+	_choosing_text.text = ("> asignar CPU" if is_empty else "> cambiar CPU") if _targeted else "> eligiendo"
+	_kind_label.text = "CPU" if _targeted and is_empty else _kind_text()
 	_refresh_preview()
 	_refresh_border()
 	_refresh_blink()
@@ -217,16 +241,16 @@ func _refresh_preview() -> void:
 	# La sombra del piso solo tiene sentido con un modelo encima.
 	_shadow.visible = wants_model
 	var key: String = "%s:%d" % [_fighter.id, _slot] if wants_model else ""
-	if key == _shown_preview_key:
-		return
-	_shown_preview_key = key
-	_clear_model()
-	if wants_model:
-		_show_model(_fighter, _slot)
+	if key != _shown_preview_key:
+		_shown_preview_key = key
+		_clear_model()
+		if wants_model:
+			_show_model(_fighter)
+	_update_spin()
 
-func _show_model(entry: CharacterCatalog.Entry, slot: int) -> void:
+func _show_model(entry: CharacterCatalog.Entry) -> void:
 	'''
-	Pone el modelo del personaje en el preview (B.O.B con el color del slot) y prende el render y el giro.
+	Pone el modelo del personaje en el preview, con su material de siempre, y prende el render y el giro.
 	'''
 	if entry.model == null:
 		return
@@ -239,8 +263,6 @@ func _show_model(entry: CharacterCatalog.Entry, slot: int) -> void:
 	if mesh != null:
 		if entry.config == GlobalUtils.PowerFighterConfig.TUX:
 			mesh.position.y = TUX_MESH_OFFSET_Y
-		else:
-			mesh.material_override = SLOT_MATERIALS[clampi(slot, 0, 3)]
 		_frame_camera(mesh)
 
 	var animation_player := _model.get_node_or_null("AnimationPlayer") as AnimationPlayer
@@ -254,6 +276,8 @@ func _clear_model() -> void:
 	Quita el modelo del preview y apaga el render y el giro.
 	'''
 	_set_preview_running(false)
+	_kill_fast_turn()
+	_spinning = false
 	if _model != null:
 		_turntable.remove_child(_model)
 		_model.queue_free()
@@ -271,8 +295,42 @@ func _set_preview_running(running: bool) -> void:
 		SubViewport.UPDATE_ALWAYS if running else SubViewport.UPDATE_DISABLED
 	)
 
+func _update_spin() -> void:
+	'''
+	En CHOOSING el modelo gira lento; al pasar a READY da una vuelta rápida y queda de frente.
+	Si arranca en READY (repintado) queda de frente sin vuelta.
+	'''
+	var has_model: bool = _model != null
+	if _state == State.CHOOSING and has_model:
+		_kill_fast_turn()
+		_spinning = true
+	elif _spinning:
+		_spinning = false
+		if has_model:
+			_start_fast_turn()
+	elif not _is_fast_turning():
+		_turntable.rotation.y = 0.0
+	_update_processing()
+
+func _is_fast_turning() -> bool:
+	return _fast_turn_tween != null and _fast_turn_tween.is_valid() and _fast_turn_tween.is_running()
+
+func _kill_fast_turn() -> void:
+	if _fast_turn_tween != null:
+		_fast_turn_tween.kill()
+		_fast_turn_tween = null
+
+func _start_fast_turn() -> void:
+	_kill_fast_turn()
+	var start: float = wrapf(_turntable.rotation.y, 0.0, TAU)
+	_turntable.rotation.y = start
+	# Del ángulo actual al siguiente múltiplo de TAU, más una vuelta completa.
+	_fast_turn_tween = create_tween().set_trans(FAST_TURN_TRANS).set_ease(FAST_TURN_EASE)
+	_fast_turn_tween.tween_property(_turntable, "rotation:y", TAU * 2.0, FAST_TURN_DURATION)
+	_fast_turn_tween.tween_callback(func() -> void: _turntable.rotation.y = 0.0)
+
 func _update_processing() -> void:
-	set_process(_model != null)
+	set_process(_model != null and _spinning)
 
 func _find_mesh(root: Node) -> MeshInstance3D:
 	var meshes := root.find_children("*", "MeshInstance3D", true, false)
@@ -292,33 +350,36 @@ func _frame_camera(mesh: MeshInstance3D) -> void:
 
 func _refresh_border() -> void:
 	'''
-	Borde normal de 1 px, activo de 2 px con el color de quien mueve la tarjeta, o sin borde si está vacía
+	Borde normal de 1 px, activo de 2 px con el color del propio slot de la tarjeta, o sin borde si está vacía
 	(ahí lo dibuja _draw discontinuo). El margen interno es fijo para que el contenido no brinque.
 	'''
 	_card_style.set_content_margin_all(float(ACTIVE_BORDER_WIDTH) / 2.0)
 	_marching = _active and _state == State.CHOOSING
 	_update_processing()
-	var who_marches: int = _controller_slot if _controller_slot >= 0 else _slot
-	_border_overlay.color = KernelPalette.player_color(who_marches)
-	_border_overlay.active = _marching
-	if _state == State.EMPTY or _marching:
+	# En elección, el color del slot de la tarjeta; quién la mueve ya lo dice el texto ("CPU · P1").
+	# Como destino del modo bot gira igual pero en gris: el color del slot llega hasta que entra a elegir.
+	_border_overlay.color = KernelPalette.get_color(&"ink_muted") if _targeted else KernelPalette.player_color(_slot)
+	_border_overlay.rotating = true
+	_border_overlay.active = _marching or _targeted
+	if _state == State.EMPTY or _marching or _targeted:
 		_card_style.set_border_width_all(0) # En elección el borde lo dibuja el overlay.
-	elif _active:
+	elif _state == State.READY:
+		# Marco definitivo de una tarjeta confirmada: 2 px del color de su slot, sin importar quién la confirmó.
 		_card_style.set_border_width_all(ACTIVE_BORDER_WIDTH)
-		var who: int = _controller_slot if _controller_slot >= 0 else _slot
-		_card_style.border_color = KernelPalette.player_color(who)
+		_card_style.border_color = KernelPalette.player_color(_slot)
 	else:
 		_card_style.set_border_width_all(1)
 		_card_style.border_color = BORDER_COLOR
 
 func _refresh_blink() -> void:
-	if _state == State.CHOOSING and _blink_tween != null and _blink_tween.is_valid():
+	var blinks: bool = _state == State.CHOOSING or _targeted
+	if blinks and _blink_tween != null and _blink_tween.is_valid():
 		return # Ya parpadea: no reiniciar el ciclo en cada repintado.
 	if _blink_tween != null:
 		_blink_tween.kill()
 		_blink_tween = null
 	_cursor.self_modulate.a = 1.0
-	if _state != State.CHOOSING:
+	if not blinks:
 		return
 	# El cursor parpadea con transparencia para no mover el texto de al lado.
 	_blink_tween = create_tween().set_loops()

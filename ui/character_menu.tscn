@@ -74,6 +74,7 @@ size_flags_horizontal = 3
 mouse_filter = 2
 
 [node name="BackHint" parent="Root/Margin/Layout/Header/Left" unique_id=1748302956 instance=ExtResource("5_key_hint")]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 theme_type_variation = &"KnPanelSolid"
@@ -96,10 +97,12 @@ alignment = 2
 [node name="LivesRule" parent="Root/Margin/Layout/Header/Right" unique_id=402857193 instance=ExtResource("3_rule")]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 
 [node name="TimeRule" parent="Root/Margin/Layout/Header/Right" unique_id=1573920486 instance=ExtResource("3_rule")]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 label_text = "Tiempo"
 value_text = "∞"
 
@@ -151,6 +154,40 @@ custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
+
+[node name="Footer" type="HBoxContainer" parent="Root/Margin/Layout" unique_id=1748392016]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 31)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="HintMove" parent="Root/Margin/Layout/Footer" unique_id=648203915 instance=ExtResource("5_key_hint")]
+modulate = Color(1, 1, 1, 0.35)
+layout_mode = 2
+key_text = "← ↑ ↓ → · WASD"
+action_text = "Mover"
+enabled = false
+
+[node name="HintSelect" parent="Root/Margin/Layout/Footer" unique_id=1392048576 instance=ExtResource("5_key_hint")]
+layout_mode = 2
+key_text = "K · G"
+action_text = "Seleccionar"
+
+[node name="HintCancel" parent="Root/Margin/Layout/Footer" unique_id=375920184 instance=ExtResource("5_key_hint")]
+modulate = Color(1, 1, 1, 0.35)
+layout_mode = 2
+key_text = "L · T"
+action_text = "Cancelar"
+enabled = false
+
+[node name="HintFight" parent="Root/Margin/Layout/Footer" unique_id=1820394657 instance=ExtResource("5_key_hint")]
+modulate = Color(1, 1, 1, 0.35)
+layout_mode = 2
+key_text = "Enter"
+action_text = "Confirmar"
+enabled = false
 
 [node name="PlayersWindow" type="PanelContainer" parent="Root/Margin/Layout" unique_id=1360482957]
 layout_mode = 2
@@ -213,43 +250,6 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Footer" type="HBoxContainer" parent="Root/Margin/Layout" unique_id=1748392016]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 31)
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 18
-
-[node name="HintTakeControl" parent="Root/Margin/Layout/Footer" unique_id=519384702 instance=ExtResource("5_key_hint")]
-layout_mode = 2
-key_text = "Clic en jugador"
-action_text = "Tomar control"
-
-[node name="HintPick" parent="Root/Margin/Layout/Footer" unique_id=1392048576 instance=ExtResource("5_key_hint")]
-layout_mode = 2
-key_text = "Clic en personaje"
-action_text = "Elegir"
-
-[node name="HintMove" parent="Root/Margin/Layout/Footer" unique_id=648203915 instance=ExtResource("5_key_hint")]
-layout_mode = 2
-key_text = "← → ↑ ↓"
-action_text = "Mover"
-
-[node name="HintAccept" parent="Root/Margin/Layout/Footer" unique_id=1820394657 instance=ExtResource("5_key_hint")]
-layout_mode = 2
-key_text = "Enter"
-action_text = "Elegir"
-
-[node name="HintCancel" parent="Root/Margin/Layout/Footer" unique_id=375920184 instance=ExtResource("5_key_hint")]
-layout_mode = 2
-key_text = "Retroceso"
-action_text = "Cancelar"
-
-[node name="HintAddCpu" parent="Root/Margin/Layout/Footer" unique_id=1103948275 instance=ExtResource("5_key_hint")]
-layout_mode = 2
-key_text = "Tab"
-action_text = "Agregar CPU"
-
 [node name="ReadyBanner" type="PanelContainer" parent="Root" unique_id=1584920376]
 unique_name_in_owner = true
 visible = false
@@ -273,54 +273,64 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_banner")
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Left" type="HBoxContainer" parent="Root/ReadyBanner/Row" unique_id=1938201746]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 12
-
-[node name="Title" type="Label" parent="Root/ReadyBanner/Row/Left" unique_id=463920185]
+[node name="Title" type="Label" parent="Root/ReadyBanner/Row" unique_id=463920185]
 layout_mode = 2
 theme_type_variation = &"KnBannerTitle"
-text = "> ¡LISTOS!"
+text = "¿LISTOS PARA PELEAR?"
 vertical_alignment = 1
-
-[node name="BannerCursor" type="ColorRect" parent="Root/ReadyBanner/Row/Left" unique_id=1275930486]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(24, 40)
-layout_mode = 2
-size_flags_vertical = 4
-mouse_filter = 2
-color = Color(0.9019608, 0.92941177, 0.9529412, 1)
 
 [node name="Spacer" type="Control" parent="Root/ReadyBanner/Row" unique_id=830192746]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="Prompt" type="HBoxContainer" parent="Root/ReadyBanner/Row" unique_id=1649302875]
+[node name="Options" type="HBoxContainer" parent="Root/ReadyBanner/Row" unique_id=1649302875]
 layout_mode = 2
 mouse_filter = 2
+theme_override_constants/separation = 40
+
+[node name="YesOption" type="HBoxContainer" parent="Root/ReadyBanner/Row/Options" unique_id=1649302901]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 2
 theme_override_constants/separation = 8
 
-[node name="Press" type="Label" parent="Root/ReadyBanner/Row/Prompt" unique_id=592038174]
+[node name="YesCursor" type="Label" parent="Root/ReadyBanner/Row/Options/YesOption" unique_id=1649302902]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"KnBannerText"
-text = "Pulsa"
+theme_override_font_sizes/font_size = 26
+text = ">"
 vertical_alignment = 1
 
-[node name="KeyChip" type="PanelContainer" parent="Root/ReadyBanner/Row/Prompt" unique_id=1302948576]
-layout_mode = 2
-size_flags_vertical = 4
-mouse_filter = 2
-theme_type_variation = &"KnHintKey"
-
-[node name="Key" type="Label" parent="Root/ReadyBanner/Row/Prompt/KeyChip" unique_id=748201936]
+[node name="YesText" type="Label" parent="Root/ReadyBanner/Row/Options/YesOption" unique_id=1649302903]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"KnBannerText"
-text = "Enter"
+theme_override_font_sizes/font_size = 26
+text = "Sí"
+vertical_alignment = 1
 
-[node name="Fight" type="Label" parent="Root/ReadyBanner/Row/Prompt" unique_id=1092837560]
+[node name="NoOption" type="HBoxContainer" parent="Root/ReadyBanner/Row/Options" unique_id=1649302911]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+theme_override_constants/separation = 8
+
+[node name="NoCursor" type="Label" parent="Root/ReadyBanner/Row/Options/NoOption" unique_id=1649302912]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"KnBannerText"
-text = "para pelear"
+theme_override_font_sizes/font_size = 26
+text = ">"
+vertical_alignment = 1
+
+[node name="NoText" type="Label" parent="Root/ReadyBanner/Row/Options/NoOption" unique_id=1649302913]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnBannerText"
+theme_override_font_sizes/font_size = 26
+text = "No"
 vertical_alignment = 1

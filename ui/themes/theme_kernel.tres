@@ -267,6 +267,11 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
+[sub_resource type="FontVariation" id="FontVariation_kn_rule_arrow"]
+base_font = ExtResource("3_extrabold")
+spacing_top = -8
+spacing_bottom = -6
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_seg_off"]
 bg_color = Color(0.16470589, 0.19215687, 0.23529412, 1)
 corner_radius_top_left = 1
@@ -524,8 +529,8 @@ KnRule/base_type = &"PanelContainer"
 KnRule/styles/panel = SubResource("StyleBoxFlat_rule")
 KnRuleArrow/base_type = &"Label"
 KnRuleArrow/colors/font_color = Color(0.54509807, 0.58431375, 0.6392157, 1)
-KnRuleArrow/font_sizes/font_size = 18
-KnRuleArrow/fonts/font = ExtResource("3_extrabold")
+KnRuleArrow/font_sizes/font_size = 26
+KnRuleArrow/fonts/font = SubResource("FontVariation_kn_rule_arrow")
 KnRuleLabel/base_type = &"Label"
 KnRuleLabel/colors/font_color = Color(0.54509807, 0.58431375, 0.6392157, 1)
 KnRuleLabel/font_sizes/font_size = 18

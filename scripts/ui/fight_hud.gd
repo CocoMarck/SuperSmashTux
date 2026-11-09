@@ -154,7 +154,7 @@ func _register_fighter(power_fighter: PowerFighter, slot: int, is_player: bool, 
 	entry.lives = max_lives
 	entry.label = KernelPalette.slot_label(slot, is_player)
 	entry.color = KernelPalette.player_color(slot)
-	entry.display_name = str(power_fighter.get("display_name")) if "display_name" in power_fighter else DEFAULT_FIGHTER_NAME
+	entry.display_name = _fighter_name(power_fighter, slot)
 
 	if is_new:
 		# Primero al árbol y luego setup: los nodos únicos se resuelven en _ready.
@@ -262,6 +262,17 @@ func _hide_world_widgets(entry: FighterEntry) -> void:
 		entry.cam.set_active(false)
 
 # Funciones | Señales del GameManager
+func _fighter_name(power_fighter: PowerFighter, slot: int) -> String:
+	'''
+	Nombre del personaje: el que se eligió para ese slot en la selección (MatchSetup). Si la partida
+	se abrió directo sin selección, usa display_name del peleador o el nombre por defecto.
+	'''
+	if slot >= 0 and slot < MatchSetup.slots.size() and MatchSetup.slots[slot].get("control") != null:
+		var catalog_entry: CharacterCatalog.Entry = CharacterCatalog.get_entry_by_config(MatchSetup.slots[slot]["config"])
+		if catalog_entry != null:
+			return catalog_entry.display_name
+	return str(power_fighter.get("display_name")) if "display_name" in power_fighter else DEFAULT_FIGHTER_NAME
+
 func _on_power_fighter_spawned(power_fighter: PowerFighter, slot: int, is_player: bool, max_lives: int) -> void:
 	_register_fighter(power_fighter, slot, is_player, max_lives)
 

@@ -34,6 +34,14 @@ const VARIANT_STYLES: Dictionary[Variant, Array] = {
 		action_text = value
 		_refresh()
 
+@export var enabled: bool = true:
+	set(value):
+		enabled = value
+		_refresh()
+
+# Constantes
+const DISABLED_ALPHA := 0.35 # Aviso apagado: se ve atenuado pero no se oculta ni se mueve.
+
 # Propiedades privadas | Nodos
 @onready var _key_chip: PanelContainer = %KeyChip
 @onready var _key_label: Label = %KeyLabel
@@ -52,6 +60,7 @@ func setup(key: String, action: String) -> void:
 	action_text = action
 
 func _refresh() -> void:
+	modulate.a = 1.0 if enabled else DISABLED_ALPHA
 	if not is_node_ready():
 		return
 	var styles: Array = VARIANT_STYLES[variant]
