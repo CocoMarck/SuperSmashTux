@@ -2,7 +2,7 @@
 class_name GlobalUtils
 
 # Enumeración de tipos de personaje que un SpawnPoint puede generar.
-enum ControlType { PLAYER, NPC }
+enum ControlType { PLAYER, NPC, NONE }
 
 # Enumeración de IDs posibles de jugadores.
 enum PlayerId { PLAYER_1, PLAYER_2 }

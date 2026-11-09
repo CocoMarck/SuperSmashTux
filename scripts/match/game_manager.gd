@@ -30,8 +30,8 @@ const CAMERA_FOLLOW_PREFAB: PackedScene = preload("res://prefabs/camera_follow.t
 @export_group("Match Settings")
 @export_range(1, 99, 1) var lives_per_character: int = 3
 @export_range(0.0, 5.0, 0.05) var respawn_delay: float = 1.0   # segundos de espera antes de reaparecer
-@export_range(0, 9, 1) var countdown_seconds: int = 3   # segundos de cuenta regresiva antes de pelear. Con 0 no hay cuenta.
-@export_range(0.0, 5.0, 0.1) var fight_sign_seconds: float = 1.2   # segundos que dura el letrero ¡PELEA! con los peleadores congelados. Con 0 no hay letrero.
+@export_range(0, 9, 1) var countdown_seconds: int = 0   # (3) segundos de cuenta regresiva antes de pelear. Con 0 no hay cuenta.
+@export_range(0.0, 5.0, 0.1) var fight_sign_seconds: float = 0  # (1.2) segundos que dura el letrero ¡PELEA! con los peleadores congelados. Con 0 no hay letrero.
 
 # Propiedades privadas | Estado por personaje.
 # Aca probablemente mejor usar una clase, en vez de varios diccionarios.
@@ -76,11 +76,13 @@ func _spawn_all_power_fighters() -> void:
 		var power_fighter : PowerFighter
 		var is_player := i == 0 or i == 1
 		var config_options = [GlobalUtils.PowerFighterConfig.STANDARD, GlobalUtils.PowerFighterConfig.TUX]
+		#var config = config_options[1]
 		var config = config_options.pick_random()
 		if is_player:
 			power_fighter = spawn_point.spawn( config, GlobalUtils.ControlType.PLAYER, i )
 		else:
 			power_fighter = spawn_point.spawn( config, GlobalUtils.ControlType.NPC, i )
+			#power_fighter = spawn_point.spawn( config, GlobalUtils.ControlType.NONE, i )
 		power_fighter.material = _get_all_materials()[i]
 		# Establecer spawn fijo.
 		_spawn_point_of_power_fighter[power_fighter] = spawn_point

@@ -6,6 +6,7 @@ const POWER_FIGHTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn"
 # Constantes del script.
 const PLAYER_SCRIPT = preload("res://scripts/characters/player.gd")
 const NPC_SCRIPT = preload("res://scripts/characters/npc.gd")
+const POWER_FIGHTER_SCRIPT = preload("res://scripts/characters/power_fighter.gd")
 
 # Assets de personajes
 const TUX_FIGHTER_ASSET = preload("res://assets/tux_fighter.glb")
@@ -26,6 +27,8 @@ static func create(
 			power_fighter.set_script(PLAYER_SCRIPT)
 		GlobalUtils.ControlType.NPC:
 			power_fighter.set_script(NPC_SCRIPT)
+		GlobalUtils.ControlType.NONE:
+			power_fighter.set_script(POWER_FIGHTER_SCRIPT)
 	
 	match config:
 		GlobalUtils.PowerFighterConfig.TUX:
@@ -51,12 +54,50 @@ static func _build_tux_instance(power_fighter: Node3D) -> void:
 
 static func _apply_tux_config(power_fighter: PowerFighter) -> void:
 	power_fighter.set_duration_of_anims(0.5)
+	power_fighter.set_momentum(
+		30.0, 50.0, 20.0, 20.0)
+	# ^
+	# | ground_acceleration, ground_friction, air_acceleration, knockback_friction
 
 	# attacks on floor
 	power_fighter.attacks.neutral1.duration = 0.33
+	power_fighter.attacks.neutral1.hitboxes_moves[0].init_time_ratio = 0.45
+	power_fighter.attacks.neutral1.hitboxes_moves[0].duration = 0.1
+	power_fighter.attacks.neutral1.hitboxes_moves[0].damage = 5
+	power_fighter.attacks.neutral1.hitboxes_moves[0].direction = Vector3(
+		0.4, 0.25, 0.0)
+	power_fighter.attacks.neutral1.hitboxes_moves[0].position = Vector3(
+		0.6, 0.4, 0.0)
+	
+	
 	power_fighter.attacks.neutral2.duration = 0.4583
+	power_fighter.attacks.neutral2.speed = Vector3(0,0,0)
+	power_fighter.attacks.neutral2.hitboxes_moves[0].init_time_ratio = 0.5
+	power_fighter.attacks.neutral2.hitboxes_moves[0].duration = 0.1
+	power_fighter.attacks.neutral2.hitboxes_moves[0].damage = 5
+	power_fighter.attacks.neutral2.hitboxes_moves[0].direction = Vector3(
+		0.4, 0.25, 0.0)
+	power_fighter.attacks.neutral2.hitboxes_moves[0].position = Vector3(
+		0.6, 0.5, 0.0)
+	
 	power_fighter.attacks.neutral3.duration = 0.4167
+	power_fighter.attacks.neutral3.hitboxes_moves[0].duration = 0.2
+	power_fighter.attacks.neutral3.hitboxes_moves[0].init_time_ratio = 0.5
+	power_fighter.attacks.neutral3.hitboxes_moves[0].damage = 20
+	power_fighter.attacks.neutral3.hitboxes_moves[0].direction = Vector3(
+		0.75, 0.75, 0.0)
+	power_fighter.attacks.neutral3.hitboxes_moves[0].position = Vector3(
+		0.65, 0.05, 0.0)
+	
 	power_fighter.attacks.dash.duration = 0.375
+	power_fighter.attacks.dash.hitboxes_moves[0].damage = 7
+	power_fighter.attacks.dash.hitboxes_moves[0].duration = 0.3
+	power_fighter.attacks.dash.hitboxes_moves[0].init_time_ratio = 0.3
+	power_fighter.attacks.dash.hitboxes_moves[0].position = Vector3(
+		0.45, -0.3, 0.0)
+	power_fighter.attacks.dash.hitboxes_moves[0].direction = Vector3(
+		1.0, 0.9, 0.0)
+	
 	power_fighter.attacks.up.duration = 0.375
 	power_fighter.attacks.down.duration = 0.375
 	power_fighter.attacks.heavy_side.duration = 0.5417
@@ -65,6 +106,29 @@ static func _apply_tux_config(power_fighter: PowerFighter) -> void:
 
 	# attacks air
 	power_fighter.attacks.air_neutral.duration = 0.5
+	power_fighter.attacks.air_neutral.hitboxes_moves = [
+		HitboxMove.new({
+			"id": 1, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(1.0, -0.45, 0), "direction": Vector3(1,-1,0),
+			"init_time_ratio": 0.3, "duration": 0.2
+		}),
+		HitboxMove.new({
+			"id": 2, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(-0.8, -0.55, 0), "direction": Vector3(-1,-1,0),
+			"init_time_ratio": 0.3, "duration": 0.2
+		}),
+		HitboxMove.new({
+			"id": 3, "damage": 2, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.7, 0.2, 0.0), "direction": Vector3(1,1,0),
+			"init_time_ratio": 0.3, "duration": 0.2
+		}),
+		HitboxMove.new({
+			"id": 4, "damage": 2, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(-0.5, 0.2, 0.0), "direction": Vector3(-1,1,0),
+			"init_time_ratio": 0.3, "duration": 0.2
+		})
+	]
+	
 	power_fighter.attacks.air_forward.duration = 0.4583
 	power_fighter.attacks.air_back.duration = 0.4583
 	power_fighter.attacks.air_up.duration = 0.625

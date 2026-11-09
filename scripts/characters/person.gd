@@ -1133,7 +1133,7 @@ func _physics_process(delta: float) -> void:
 
 # Configuración publica
 func set_momentum(
-	ground_acceleration: float, air_acceleration: float, ground_friction: float,
+	ground_acceleration: float, ground_friction: float, air_acceleration: float,
 	knockback_friction: float):
 	_ground_acceleration = ground_acceleration
 	_air_acceleration = air_acceleration

@@ -125,3 +125,12 @@
 - **LISTO** Lógica one-way movida de GravityBody3D a Person
 - **LISTO** `gravity_body_3d.gd` movido de `scripts/physics/` a `scripts/characters/`, porque es la base de la cadena de personajes. `physics/` queda con `area_gravity_3d.gd`.
 - **LISTO** `area_gravity_3d.gd` movido de `scripts/physics/` a `scripts/combat/`, porque `Hitbox` es su único uso. La carpeta `physics/` se eliminó.
+
+
+---
+
+## `2026-11-08`
+- GameManager **FALTA**: Que el manejo de HUD de juego sea otro modulo.
+- GameManager **FALTA**: Que el manejo de vidas sea otro modulo.
+- GameManager **FALTA**: Que el manejo de tiempo limite de partida sea otro modulo.
+- GameManager **FALTA**: El conteo regresivo para empezar a jugar, sea otro modulo.
