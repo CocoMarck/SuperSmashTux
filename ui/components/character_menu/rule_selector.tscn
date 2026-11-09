@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://b6rs1lq4vte8k"]
+
+[ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/components/character_menu/rule_selector.gd" id="2_script"]
+
+[node name="RuleSelector" type="PanelContainer" unique_id=1846203917]
+custom_minimum_size = Vector2(0, 31)
+theme = ExtResource("1_theme")
+theme_type_variation = &"KnRule"
+script = ExtResource("2_script")
+label_text = "Vidas"
+value_text = "3"
+
+[node name="Row" type="HBoxContainer" parent="." unique_id=417582093]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="LabelText" type="Label" parent="Row" unique_id=1092837465]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnRuleLabel"
+text = "Vidas"
+vertical_alignment = 1
+
+[node name="Value" type="HBoxContainer" parent="Row" unique_id=658194027]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="PrevArrow" type="Label" parent="Row/Value" unique_id=1375904826]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 0)
+layout_mode = 2
+theme_type_variation = &"KnRuleArrow"
+text = "‹"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ValueText" type="Label" parent="Row/Value" unique_id=283947106]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnRuleValue"
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextArrow" type="Label" parent="Row/Value" unique_id=1928374650]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 0)
+layout_mode = 2
+theme_type_variation = &"KnRuleArrow"
+text = "›"
+horizontal_alignment = 1
+vertical_alignment = 1

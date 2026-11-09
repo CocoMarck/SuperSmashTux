@@ -82,7 +82,7 @@ fuente de verdad. No hardcodear los nombres por fuera.
 | `scripts/helpers/input/player_input_map.gd` | `PlayerInputMap` (`RefCounted`): los nombres de las 10 acciones de un jugador. |
 | `scripts/helpers/global_utils.gd` | `PLAYER_INPUT_MAPS`: el `PlayerInputMap` de P1 y P2. |
 | `scripts/ui/controls_menu.gd` + `ui/controls_menu.tscn` | La UI: un `TabContainer` con una pestaña por jugador y, por acción, una fila con dos botones (teclado / pad) que muestran `event.as_text()`. Los botones se crean por código desde `PLAYER_INPUT_MAPS`. |
-| `scripts/ui/button_controls.gd` | Botón del menú principal que abre `res://ui/controls_menu.tscn`. |
+| `scripts/ui/main_menu.gd` + `ui/main_menu.tscn` | Menú principal: su botón Controls abre `res://ui/controls_menu.tscn`. |
 | `user://controls.cfg` | Config del usuario. Fuera del repo y de la build. |
 
 ### Dónde queda `controls.cfg`

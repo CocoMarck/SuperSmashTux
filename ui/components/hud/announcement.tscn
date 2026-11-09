@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dan5wc4mt7xg"]
 
 [ext_resource type="Theme" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
-[ext_resource type="Script" path="res://scripts/ui/hud/announcement.gd" id="2_script"]
+[ext_resource type="Script" path="res://scripts/ui/components/hud/announcement.gd" id="2_script"]
 
 [node name="Announcement" type="PanelContainer" unique_id=1749302815]
 mouse_filter = 2

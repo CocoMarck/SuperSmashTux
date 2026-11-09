@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://bx3tn8rl4mk2q"]
+
+[ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/components/character_menu/roster_tile.gd" id="2_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tile_art"]
+bg_color = Color(0.08627451, 0.105882354, 0.13333334, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+
+[node name="RosterTile" type="Control" unique_id=1607283941]
+custom_minimum_size = Vector2(96, 116)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 96.0
+offset_bottom = 116.0
+focus_mode = 2
+theme = ExtResource("1_theme")
+script = ExtResource("2_script")
+
+[node name="Frame" type="PanelContainer" parent="." unique_id=384920175]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"KnWindow"
+
+[node name="VBox" type="VBoxContainer" parent="Frame" unique_id=1720394856]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Art" type="PanelContainer" parent="Frame/VBox" unique_id=902817364]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_type_variation = &"KnArt"
+theme_override_styles/panel = SubResource("StyleBoxFlat_tile_art")
+
+[node name="Glyph" type="Label" parent="Frame/VBox/Art" unique_id=1463920578]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnTileGlyph"
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameBar" type="PanelContainer" parent="Frame/VBox" unique_id=571039284]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnTileFooter"
+
+[node name="NameLabel" type="Label" parent="Frame/VBox/NameBar" unique_id=1185730462]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnTileName"
+text = "Aleatorio"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="Tabs" type="Control" parent="." unique_id=2049318576]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

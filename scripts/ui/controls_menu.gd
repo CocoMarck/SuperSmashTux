@@ -1,6 +1,9 @@
 ## Para `controls.tscn`
 extends Node2D
 
+# Escena a la que regresa el botón "Back to menu".
+const MAIN_MENU_SCENE := "res://ui/main_menu.tscn"
+
 # Texto de configuración, y orden de opciones.
 const ACTION_LEBELS :Dictionary = {
 	# Person
@@ -22,11 +25,14 @@ var _capturing_original_text: String
 var _tab_container: TabContainer
 var _vbox_player1: VBoxContainer
 var _vbox_player2: VBoxContainer
+var _button_menu: Button
 
 func _ready() -> void:
 	_tab_container = $CanvasLayer/Control/TabContainer
 	_vbox_player1 = _tab_container.get_child(0)
 	_vbox_player2 = _tab_container.get_child(1)
+	_button_menu = $CanvasLayer/Control/ButtonMenu
+	_button_menu.pressed.connect(_open_main_menu)
 	
 	# Construir contenido de pestañas.
 	var tabs :Dictionary = {
@@ -37,6 +43,10 @@ func _ready() -> void:
 		_build_player_tab(player_id, tabs[player_id])
 	# Asegurar archivo de configuracion
 	InputSettings.save_settings()
+
+## Regresa al menú principal.
+func _open_main_menu() -> void:
+	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 ## Llena el `VBoxContainer` de un juegador con una fila por acción.
 func _build_player_tab(player_id: GlobalUtils.PlayerId, box: VBoxContainer) -> void:
