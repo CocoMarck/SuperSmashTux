@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://6osx0hme4168" path="res://scripts/match/game_manager.gd" id="1_vjlk8"]
 [ext_resource type="Environment" uid="uid://lit05fb87j4a" path="res://environments/env_game.tres" id="2_1ql3t"]
-[ext_resource type="Script" uid="uid://d1ypn1jwers8" path="res://scripts/match/match_lives.gd" id="2_h3ol6"]
+[ext_resource type="Script" uid="uid://cfjlktn8avrpk" path="res://scripts/match/lives_manager.gd" id="2_h3ol6"]
 [ext_resource type="Script" uid="uid://bqr8o7d3ctyo2" path="res://scripts/platforms/ground_platform.gd" id="4_e1cm0"]
 [ext_resource type="Script" uid="uid://bcmv8f218b2yh" path="res://scripts/platforms/one_way_platform.gd" id="5_5lclj"]
 [ext_resource type="Script" uid="uid://cidexfa0jesn6" path="res://scripts/match/spawn_point.gd" id="5_eryo2"]
@@ -33,9 +33,9 @@ size = Vector3(17.028, 1, 4)
 [node name="Main" type="Node" unique_id=1966553712]
 script = ExtResource("1_vjlk8")
 
-[node name="MatchLives" type="Node" parent="." unique_id=688621480]
+[node name="LivesManager" type="Node" parent="." unique_id=2002655253]
 script = ExtResource("2_h3ol6")
-metadata/_custom_type_script = "uid://d1ypn1jwers8"
+metadata/_custom_type_script = "uid://cfjlktn8avrpk"
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=52927572]
 environment = ExtResource("2_1ql3t")

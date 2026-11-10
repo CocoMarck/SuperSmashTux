@@ -1,4 +1,4 @@
-class_name MatchLives
+class_name LivesManager
 extends Node
 
 '''

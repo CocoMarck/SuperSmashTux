@@ -36,7 +36,7 @@ const CAMERA_FOLLOW_PREFAB: PackedScene = preload("res://prefabs/camera_follow.t
 
 
 # Propiedades privadas | Estado por personaje | Match lives
-var _match_lives: MatchLives
+var _lives_manager: LivesManager
 var _fighters: Array[PowerFighter] = [] # roster para congelar
 
 # Propiedades privadas | Estado de la partida (cronómetro y fin).
@@ -97,7 +97,7 @@ func _spawn_all_power_fighters() -> void:
 		power_fighter.material = _get_all_materials()[i]
 		# Agregarles el seguimiento de sus vidas.
 		_fighters.append(power_fighter)
-		_match_lives.track(power_fighter, lives_per_character, spawn_point.global_position)
+		_lives_manager.track(power_fighter, lives_per_character, spawn_point.global_position)
 		# Agregar al mapa
 		add_child(power_fighter)
 
@@ -144,7 +144,7 @@ func _end_match(winner: PowerFighter) -> void:
 	'''
 	_match_over = true
 	_match_running = false
-	_match_lives.stop()
+	_lives_manager.stop()
 	if winner != null:
 		winner.process_mode = Node.PROCESS_MODE_DISABLED
 	match_ended.emit(winner)
@@ -183,14 +183,14 @@ func _ready() -> void:
 	_spawn_point2 = $SpawnPoint2
 	_spawn_point3 = $SpawnPoint3
 	_spawn_point4 = $SpawnPoint4
-	_match_lives = $MatchLives
+	_lives_manager = $LivesManager
 
 	# Información de juego
-	_match_lives.setup(self, _play_area_bounds)
-	_match_lives.lives_changed.connect(_on_lives_changed)
-	_match_lives.eliminated.connect(_on_eliminated)
-	_match_lives.deaths_resolved.connect(_on_death_resolved)
-	add_child(_match_lives)
+	_lives_manager.setup(self, _play_area_bounds)
+	_lives_manager.lives_changed.connect(_on_lives_changed)
+	_lives_manager.eliminated.connect(_on_eliminated)
+	_lives_manager.deaths_resolved.connect(_on_death_resolved)
+	add_child(_lives_manager)
 	
 	# Camera
 	_camera_follow = CAMERA_FOLLOW_PREFAB.instantiate() as CameraFollow
@@ -204,7 +204,7 @@ func _ready() -> void:
 		push_warning("GameManager: fail open no fail-closed. No detect play area bounds")
 	# Spawneo
 	_spawn_all_power_fighters()
-	_match_lives.start()
+	_lives_manager.start()
 	# Tiempo inicial, para que el HUD pinte 00:00 desde el primer frame.
 	match_time_changed.emit(0)
 	# Cuenta regresiva; el cronómetro arranca hasta match_started.
