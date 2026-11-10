@@ -30,7 +30,6 @@ const CAMERA_FOLLOW_PREFAB: PackedScene = preload("res://prefabs/camera_follow.t
 
 # Propiedades publicas | Configuración de partida.
 @export_group("Match Settings")
-@export_range(1, 99, 1) var lives_per_character: int = 3
 @export_range(0, 9, 1) var countdown_seconds: int = 0   # (3) segundos de cuenta regresiva antes de pelear. Con 0 no hay cuenta.
 @export_range(0.0, 5.0, 0.1) var fight_sign_seconds: float = 0  # (1.2) segundos que dura el letrero ¡PELEA! con los peleadores congelados. Con 0 no hay letrero.
 
@@ -52,6 +51,7 @@ var _spawn_point1: SpawnPoint
 var _spawn_point2: SpawnPoint
 var _spawn_point3: SpawnPoint
 var _spawn_point4: SpawnPoint
+var power_fighter_slots: PowerFighterSlots = PowerFighterSlots.new()
 
 # Propiedades privadas | Cámara
 var _camera_follow: CameraFollow
@@ -64,44 +64,33 @@ func _get_all_materials() -> Array[Material]:
 	return [SLOT_1_MATERIAL, SLOT_2_MATERIAL, SLOT_3_MATERIAL, SLOT_4_MATERIAL]
 
 # Funciones | Spawneo y vidas
-func _get_match_slots() -> Array[Dictionary]:
-	'''
-	Slots elegidos en la selección de personaje (MatchSetup.slots). Si vienen vacíos (map1 abierto
-	directo desde el editor), respaldo: 2 Player + 2 NPC con personaje aleatorio.
-	'''
-	if not MatchSetup.slots.is_empty():
-		return MatchSetup.slots
-	var config_options := [GlobalUtils.PowerFighterConfig.STANDARD, GlobalUtils.PowerFighterConfig.TUX]
-	var slots: Array[Dictionary] = []
-	for i in range(0, 4):
-		var control := GlobalUtils.ControlType.PLAYER if i < 2 else GlobalUtils.ControlType.NPC
-		slots.append({ "control": control, "config": config_options.pick_random(), "player_id": i })
-	return slots
-
 func _spawn_all_power_fighters() -> void:
 	'''
-	Spawnea un peleador por cada slot ocupado, en el SpawnPoint de ese slot (ver _get_match_slots).
+	Spawnea un peleador por cada slot ocupado, en el SpawnPoint de ese slot (ver `PowerFightersSetup`).
 	'''
 	var spawn_points = _get_spawn_points()
-	var slots := _get_match_slots()
-	for i in range(0, mini(spawn_points.size(), slots.size())):
+	for i in range(0, spawn_points.size()):
 		# Slot vacío en la selección: no se spawnea nadie ahí.
-		var slot: Dictionary = slots[i]
-		if slot.get("control") == null:
+		var slot: PowerFighterData
+		if power_fighter_slots.has_slot(i):
+			slot = power_fighter_slots.get_slot(i)
+		else:
 			continue
+		
 		# SpawnPoint.spawn se encarga de instanciar y posicionar al peleador.
 		var spawn_point = spawn_points[i]
-		var control: GlobalUtils.ControlType = slot["control"]
-		var is_player := control == GlobalUtils.ControlType.PLAYER
-		var power_fighter: PowerFighter = spawn_point.spawn( slot["config"], control, slot["player_id"] )
+		var power_fighter: PowerFighter = spawn_point.spawn( 
+			slot.config, slot.control, slot.player_id )
 		power_fighter.material = _get_all_materials()[i]
+		var is_player: bool = slot.control == GlobalUtils.ControlType.PLAYER
+		
 		# Agregarles el seguimiento de sus vidas.
 		_fighters.append(power_fighter)
-		_lives_manager.track(power_fighter, lives_per_character, spawn_point.global_position)
+		_lives_manager.track(power_fighter, slot.lives, spawn_point.global_position)
+		
 		# Agregar al mapa
+		power_fighter_spawned.emit(power_fighter, i, is_player, slot.lives)
 		add_child(power_fighter)
-
-		power_fighter_spawned.emit(power_fighter, i, is_player, lives_per_character)
 
 # Funciones | Flujo de partida (cuenta, fin y cronómetro)
 func _set_power_fighters_frozen(frozen: bool) -> void:

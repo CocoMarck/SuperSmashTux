@@ -130,16 +130,16 @@
 ---
 
 ## `2026-11-08`
-- `GameManager` **LISTO**: Que el manejo de vidas sea otro modulo.
-- `GameManager` **FALTA**: Que el manejo de tiempo limite o conteo de partida sea otro modulo.
-- `GameManager` **FALTA**: Que el manejo de HUD de juego sea otro modulo.
+- `GameManager` **LISTO**: Que el manejo de vidas sea otro modulo. `LivesManager`
+- `GameManager` **FALTA**: Que el manejo de tiempo limite o conteo de partida sea otro modulo. Posiblemente se llamara `MatchTime`.
 - `GameManager` **FALTA**: Modulo de manejo velocidad de juego. Para hacer efectos de velocidad lenta, o hacer un freaze al dar un golpe killer.
-- `GameManager` **FALTA**: El conteo regresivo para empezar a jugar, sea otro modulo.
+- `GameManager` **FALTA**: Que el conteo regresivo para empezar a jugar, sea otro modulo.
+- `GameManager` **FALTA**: Que el manejo de HUD de juego sea otro modulo.
 
 ---
 
 ## `2026-11-09`
-- `GameManager` **FALTA**: tratar `Person` (el papá) en vez de `PowerFighter`, para crecer a más modos de juego.
-- `GameManager` **FALTA**: `DataFighters`, información del como seran los peleadores, sus vidas, que tipo de peleadores seran etc. Tienen que ser hijo o directamente `Person`.
+- `GameManager` **LISTO**: `PowerFighterSlots` (usa `PowerFighterData`), información del como seran los peleadores, sus vidas, que tipo de peleadores seran etc. Remplazo `MatchSlots`.
+- `GameManager` **FALTA**: Tratar `Person` (el papá) en vez de `PowerFighter`, para crecer a más modos de juego. (Por ahora `2026-11-10` medio enredado de hacer, pero posible)
 
 - Helper de nombres **FALTA**: utilidad estática enfocada a `Person` (cubre `PowerFighter` y futuros hijos). Usará `Node.name` directamente; **no** se agrega una propiedad `name` nueva.

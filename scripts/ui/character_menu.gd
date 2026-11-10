@@ -328,32 +328,37 @@ func _start_match() -> void:
 	'''
 	Llena MatchSetup con la selección (Aleatorio se resuelve aquí) y arranca la partida.
 	'''
-	MatchSetup.clear()
-	MatchSetup.lives = lives
-	MatchSetup.time_limit_minutes = TIME_OPTIONS[time_index]
+	#TIME_OPTIONS[time_index]
 	var pool: Array[CharacterCatalog.Entry] = []
 	for entry: CharacterCatalog.Entry in _roster:
 		if not entry.is_random:
 			pool.append(entry)
 	var npc_count: int = 0
+	
+	# Instanciar Nivel; que es un `GameManager`. Y meterle el hud.
+	var level: GameManager = load(LEVEL_SCENE).instantiate() as GameManager
+	level.add_child(load(FIGHT_HUD_SCENE).instantiate())
+	
+	# Agregar datos de peleadores al game manager.
 	for i: int in SLOT_COUNT:
+		var data : PowerFighterData = PowerFighterData.new()
 		var slot: SlotModel = _slots[i]
-		var data: Dictionary = {"control": null, "config": GlobalUtils.PowerFighterConfig.STANDARD, "player_id": -1}
 		if slot.kind != SlotKind.EMPTY:
 			var entry: CharacterCatalog.Entry = CharacterCatalog.get_entry(slot.fighter_id)
 			if entry == null or entry.is_random:
 				entry = pool.pick_random()
-			data["config"] = entry.config
+			data.lives = lives
+			data.config = entry.config
 			if slot.kind == SlotKind.PLAYER:
-				data["control"] = GlobalUtils.ControlType.PLAYER
-				data["player_id"] = i
+				data.control = GlobalUtils.ControlType.PLAYER
+				data.player_id = i
 			else:
-				data["control"] = GlobalUtils.ControlType.NPC
-				data["player_id"] = npc_count
+				data.control = GlobalUtils.ControlType.NPC
+				data.player_id = npc_count
 				npc_count += 1
-		MatchSetup.slots.append(data)
-	var level: Node = load(LEVEL_SCENE).instantiate()
-	level.add_child(load(FIGHT_HUD_SCENE).instantiate())
+			level.power_fighter_slots.set_slot(i, data)
+	
+	# Cambiar de scene, al nodo del nivel
 	get_tree().change_scene_to_node(level)
 
 # Funciones | Modelo

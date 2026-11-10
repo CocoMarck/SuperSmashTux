@@ -37,8 +37,10 @@ classDiagram
 	GlobalUtils o-- PlayerInputMap
 	SpawnPoint ..> PowerFighter : instancia
 	GameManager ..> SpawnPoint : usa
-	GameManager o-- MatchLives
-	MatchLives ..> PowerFighter : track / respawn
+	GameManager o-- LivesManager
+	LivesManager ..> PowerFighter : track / respawn
+	GameManager o-- PowerFighterSlots
+	PowerFighterSlots *-- PowerFighterData
 	GameManager ..> CameraFollow : crea y configura
 	GameManager o-- CameraFollow
 ```
@@ -51,6 +53,8 @@ classDiagram
 - `PowerFighter`: doble salto y ataques de poder (`PowerAttacks`); el "tercer salto" es el ataque de poder hacia arriba (`jump_power`).
 - `NPC`: IA propia vía `_process_ai(delta, frame)` (hook definido en `Person`).
 - `GameManager` es **modular**: un concern por módulo en `scripts/match/`, sin que un módulo le pregunte a otro. Ver `docs/arquitectura/nota-game-manager-modular.md`.
-- `GameManager` es el **nodo raíz del mapa**: cada mapa lo trae junto con `PlayArea`, `SpawnPoint1..4` y el nodo `MatchLives`. Las vidas las maneja `MatchLives`; el manager reemite sus señales.
+- `GameManager` es el **nodo raíz del mapa**: cada mapa lo trae junto con `PlayArea`, `SpawnPoint1..4` y el nodo `LivesManager`. Las vidas las maneja `LivesManager`; el manager reemite sus señales.
+- `GameManager` tiene un `PowerFighterSlots` en memoria con un `PowerFighterData` por slot. `CharacterMenu` lo llena antes de cambiar de escena; no hay respaldo si está vacío. Ver `docs/arquitectura/nota-power-fighter-configurer.md`.
+- El tiempo límite todavía no existe. La propuesta `MatchTime` vive en `docs/arquitectura/nota-match-time.md`.
 - A futuro el `GameManager` debería operar sobre `Person` (el papá) en vez de `PowerFighter`, para soportar más modos de juego.
 - Señales-objeto: `VerticalForceSignals`, `MoveSignals`, `MoveStates` (RefCounted en `scripts/helpers/frame`).

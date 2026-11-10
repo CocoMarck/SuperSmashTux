@@ -1,4 +1,4 @@
-class_name MatchSetup
+class_name MatchSetupLegacy
 extends RefCounted
 
 '''
@@ -12,7 +12,7 @@ static var time_limit_minutes: int = 0 # 0 = sin límite.
 # Un dict por slot (0..3): { "control": GlobalUtils.ControlType (null si está vacío),
 # "config": GlobalUtils.PowerFighterConfig, "player_id": int }.
 # player_id es el GlobalUtils.PlayerId si es jugador, o el GlobalUtils.NPCId (en orden de aparición) si es CPU.
-static var slots: Array[Dictionary] = []
+static var slots: Array[DataPowerFighter] = []
 
 # Funciones
 static func clear() -> void:

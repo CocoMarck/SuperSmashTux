@@ -66,7 +66,7 @@ _last_frame = frame              # lo lee la IA el próximo frame
 
 Por qué `_process_ai` va **antes** de construir el frame: la IA solo setea los mismos bools que el humano (`_move_left`, `_jump`, `_attack`...), y esos se consumen en el mismo `_physics_process`. Lee el frame anterior (`_last_frame`) para saber si estaba en el piso, colgado, etc.
 
-**Pendiente**: morir cuando `hp` llega a 0 (ragdoll + respawn por KO). Hoy la muerte real la detecta `MatchLives` (módulo del `GameManager`) cuando alguien se sale del área jugable.
+**Pendiente**: morir cuando `hp` llega a 0 (ragdoll + respawn por KO). Hoy la muerte real la detecta `LivesManager` (módulo del `GameManager`) cuando alguien se sale del área jugable.
 
 > **Deuda de diseño**: el `GameManager` hoy trabaja con `PowerFighter` porque el único modo es pelea. Para crecer a más modos conviene que trate `Person`, el papá común; así no arrastra ataques, saltos ni poderes que no todos los modos necesitan.
 

@@ -13,6 +13,10 @@ enum NPCId { NPC_1, NPC_2, NPC_3, NPC_4 }
 # Enumeración de configuraciones disponibles para `power fighter`
 enum PowerFighterConfig { STANDARD, TUX }
 
+# Opciones de personajes
+const CONFIG_OPTIONS: Array[GlobalUtils.PowerFighterConfig] = [
+	GlobalUtils.PowerFighterConfig.STANDARD, GlobalUtils.PowerFighterConfig.TUX]
+
 # Mapa de input de cada jugador, usado por Player para resolver sus controles segun su ID. Se construye una sola vez al cargar el script.
 static var PLAYER_INPUT_MAPS: Dictionary[PlayerId, PlayerInputMap] = {
 	PlayerId.PLAYER_1: PlayerInputMap.new(

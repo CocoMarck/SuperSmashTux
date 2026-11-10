@@ -2,12 +2,13 @@
 
 > Cómo se separa el "quién controla" del "qué personaje es", qué hace `PowerFighterConfigurer`,
 > cómo lo usa `SpawnPoint` y cómo debería el `GameManager` repartir las configuraciones.
-> Verificado el 2026-11-07; actualizado el 2026-11-09. Rutas: `scripts/helpers/global_utils.gd`,
+> Verificado el 2026-11-07; actualizado el 2026-11-10. Rutas: `scripts/helpers/global_utils.gd`,
+> `scripts/helpers/power_fighter_data.gd`, `scripts/match/power_fighter_slots.gd`,
 > `scripts/match/power_fighter_configurer.gd`, `scripts/match/spawn_point.gd`,
-> `scripts/match/game_manager.gd`, `scripts/characters/person.gd`,
-> `scripts/characters/fighter.gd`, `scripts/characters/power_fighter.gd`,
-> `scripts/helpers/combat/attacks.gd`, `scripts/helpers/combat/power_attacks.gd`,
-> `scripts/helpers/combat/fight_move.gd`.
+> `scripts/match/game_manager.gd`, `scripts/ui/character_menu.gd`, `scripts/ui/fight_hud.gd`,
+> `scripts/characters/person.gd`, `scripts/characters/fighter.gd`,
+> `scripts/characters/power_fighter.gd`, `scripts/helpers/combat/attacks.gd`,
+> `scripts/helpers/combat/power_attacks.gd`, `scripts/helpers/combat/fight_move.gd`.
 
 ## Resumen
 
@@ -247,35 +248,43 @@ que refrescar el arreglo.
 
 ### Estado actual
 
-La selección de personaje ya existe (`ui/character_menu.tscn`) y llena `MatchSetup` antes de cambiar
-de escena. `GameManager._spawn_all_power_fighters()` lee `MatchSetup.slots` y le pasa a
-`SpawnPoint.spawn()` el `config` y el `ControlType` de cada slot.
-
-Si `MatchSetup.slots` está vacío (por ejemplo, `map1.tscn` abierto directo desde el editor), el
-respaldo arma 2 `PLAYER` + 2 `NPC` con `config` aleatoria entre las disponibles:
+La selección de personaje (`ui/character_menu.tscn`, `scripts/ui/character_menu.gd`) ya no usa un
+`MatchSetup` estático. En `_start_match()` crea un `PowerFighterData` por slot ocupado y lo guarda en
+el `PowerFighterSlots` del nivel recién instanciado:
 
 ```gdscript
-var config_options := [GlobalUtils.PowerFighterConfig.STANDARD, GlobalUtils.PowerFighterConfig.TUX]
-for i in range(0, 4):
-	var control := GlobalUtils.ControlType.PLAYER if i < 2 else GlobalUtils.ControlType.NPC
-	slots.append({ "control": control, "config": config_options.pick_random(), "player_id": i })
+var level: GameManager = load(LEVEL_SCENE).instantiate() as GameManager
+...
+level.power_fighter_slots.set_slot(i, data)
+get_tree().change_scene_to_node(level)
 ```
+
+`GameManager` crea `power_fighter_slots` como `PowerFighterSlots.new()` y `_spawn_all_power_fighters()`
+recorre `SpawnPoint1..4`. Para cada slot:
+
+- Si `power_fighter_slots.has_slot(i)` es `false`, no se spawnea nada.
+- Si existe, `get_slot(i)` devuelve su `PowerFighterData`.
+- `SpawnPoint.spawn()` recibe `config`, `control` y `player_id`.
+- `LivesManager.track()` recibe las vidas de `data.lives`.
+
+No hay respaldo de "2 Player + 2 NPC". Abrir `map1.tscn` directo desde el editor deja la partida sin
+peleadores porque `PowerFighterSlots` está vacío.
 
 ### Implementación
 
 El `GameManager` **no decide** qué personaje es cada quién: **recibe** una lista de configuraciones,
 una por slot, y se limita a pasarlas a `SpawnPoint.spawn()`.
 
-La fuente natural de esa lista es una **GUI de selección de personaje** entre el menú principal y
-la partida. Cada jugador elige su personaje (y en el futuro su color/skin); los slots de NPC se
-asignan por defecto o al azar.
+La fuente natural de esa lista es la **GUI de selección de personaje** entre el menú principal y la
+partida. Cada jugador elige su personaje (y en el futuro su color/skin); los slots de NPC se asignan
+desde la misma selección.
 
 Flujo actual:
 
 ```mermaid
 flowchart LR
     MM[Menú principal] --> CS[GUI de selección de personaje]
-    CS -->|config por slot| STORE[(MatchSetup)]
+    CS -->|PowerFighterData por slot| STORE[(PowerFighterSlots)]
     STORE --> GM[GameManager]
     GM -->|spawn config, control_type, id| SP[SpawnPoint]
     SP --> PFC[PowerFighterConfigurer.create]
@@ -284,26 +293,29 @@ flowchart LR
 
 Pasos implementados:
 
-1. **Guardar la selección**: ya implementado con `MatchSetup` (static), que sobrevive al cambio de
-   escena y expone `lives`, `time_limit_minutes` y `slots`.
-2. **`GameManager` lee la config por slot**: ya implementado en `_get_match_slots()`.
-
+1. **Guardar la selección**: `CharacterMenu` crea `PowerFighterData` y lo guarda con
+   `level.power_fighter_slots.set_slot(i, data)` antes de cambiar de escena.
+2. **`GameManager` lee la config por slot**: usa `has_slot(i)` y `get_slot(i)`.
 3. **`SpawnPoint.spawn(config, control_type, player_id)`** sigue igual: recibe y delega. No necesita
    saber de dónde salió la config.
 4. **La GUI no conoce `PowerFighterConfigurer`**: solo produce enums de `PowerFighterConfig`. El
    configurador se encarga del resto.
 
+`PowerFighterSlots.set_slot()` valida que `config` esté en `GlobalUtils.CONFIG_OPTIONS`. Para agregar
+un personaje nuevo hay que registrarlo ahí además de en el catálogo de la selección.
+
 ### Qué falta decidir
 
-- **NPCs**: hoy el respaldo usa config aleatoria; la selección de personaje puede fijarla por slot.
+- **NPCs**: ya se eligen desde la selección; no hay respaldo aleatorio.
 - **Material/tinte por slot**: con la textura de Tux conservada, hoy no hay color por jugador. Si se
   quiere distinguir jugadores con Tux, habría que definir un material que tiña sin tapar la textura,
   y decidir si eso vive en `PowerFighterConfig` o se queda como color por slot.
 - **Stats y ataques por config**: cuando cada personaje tenga datos propios, `PowerFighterConfigurer`
   debería aplicar stats/tiempos y los movimientos por slot (ver "Configuración fina de movimientos")
   desde la misma config.
-- **Vidas y tiempo**: `MatchSetup.lives` y `MatchSetup.time_limit_minutes` todavía no se aplican en
-  la partida; el spawn usa `lives_per_character` y el cronómetro no lee el límite.
+- **Tiempo**: `CharacterMenu` ya tiene `TIME_OPTIONS` y `time_index`, pero `_start_match()` no los pasa
+  a la partida. La propuesta para el límite y la cuenta regresiva vive en
+  [nota-match-time.md](nota-match-time.md). Las vidas sí se aplican desde `PowerFighterData.lives`.
 
 ---
 
@@ -311,10 +323,14 @@ Pasos implementados:
 
 | Archivo | Cambio |
 |---|---|
-| `scripts/helpers/global_utils.gd` | `CharacterType` → `ControlType`; nuevo enum `PowerFighterConfig` |
+| `scripts/helpers/global_utils.gd` | `CharacterType` → `ControlType`; enum `PowerFighterConfig`; `CONFIG_OPTIONS` para validar configs |
+| `scripts/helpers/power_fighter_data.gd` | Nuevo: datos de un slot (`control`, `config`, `lives`, `player_id`) |
+| `scripts/match/power_fighter_slots.gd` | Nuevo: guarda `PowerFighterData` por id de slot |
 | `scripts/match/power_fighter_configurer.gd` | Nuevo: crea y configura el `PowerFighter` |
 | `scripts/match/spawn_point.gd` | Delega la creación al configurador; solo posiciona y asigna `player_id` |
-| `scripts/match/game_manager.gd` | Lee `MatchSetup.slots` y pasa `config`/`ControlType` a `spawn()`; respaldo 2 Player + 2 NPC random |
+| `scripts/match/game_manager.gd` | Lee `power_fighter_slots` con `has_slot`/`get_slot` y pasa `config`/`ControlType` a `spawn()`; sin respaldo |
+| `scripts/ui/character_menu.gd` | Crea `PowerFighterData` y llena `level.power_fighter_slots` antes de cambiar de escena |
+| `scripts/ui/fight_hud.gd` | Lee `power_fighter_slots` para el nombre; deuda: indexa `get_slots().values()` |
 | `scripts/characters/person.gd` | Resuelve nodos esenciales por índice; `_skeleton3d` |
 | `scripts/characters/fighter.gd` | `attacks` público; ya no tiene `set_attacks()` |
 | `scripts/characters/power_fighter.gd` | `power_attacks` público; ya no tiene `set_power_attacks()` |
@@ -326,3 +342,4 @@ Pasos implementados:
 - [asset-personaje.md](../arte/asset-personaje.md): contrato de nodos y nombres de animación.
 - [nota-escalabilidad-personajes.md](nota-escalabilidad-personajes.md): problemas de escalar el roster.
 - [nota-game-manager-modular.md](nota-game-manager-modular.md): módulos de la partida y responsabilidades.
+- [nota-match-time.md](nota-match-time.md): idea del tiempo límite y la cuenta regresiva de la partida.

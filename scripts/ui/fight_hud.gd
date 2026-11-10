@@ -264,11 +264,12 @@ func _hide_world_widgets(entry: FighterEntry) -> void:
 # Funciones | Señales del GameManager
 func _fighter_name(power_fighter: PowerFighter, slot: int) -> String:
 	'''
-	Nombre del personaje: el que se eligió para ese slot en la selección (MatchSetup). Si la partida
+	Nombre del personaje: el que se eligió para ese slot en la selección (PowerFightersSetup). Si la partida
 	se abrió directo sin selección, usa display_name del peleador o el nombre por defecto.
 	'''
-	if slot >= 0 and slot < MatchSetup.slots.size() and MatchSetup.slots[slot].get("control") != null:
-		var catalog_entry: CharacterCatalog.Entry = CharacterCatalog.get_entry_by_config(MatchSetup.slots[slot]["config"])
+	var slots :Array[PowerFighterData] = _game_manager.power_fighter_slots.get_slots().values()
+	if slot >= 0 and slot < slots.size() and slots[slot].control != null:
+		var catalog_entry: CharacterCatalog.Entry = CharacterCatalog.get_entry_by_config( slots[slot].config )
 		if catalog_entry != null:
 			return catalog_entry.display_name
 	return str(power_fighter.get("display_name")) if "display_name" in power_fighter else DEFAULT_FIGHTER_NAME

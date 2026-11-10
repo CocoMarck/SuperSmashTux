@@ -22,6 +22,4 @@ func _open_scene(scene_path: String) -> void:
 
 func _start_debug_match() -> void:
 	# Para probar el juego de manera rápida
-	MatchSetup.clear()
-	MatchSetup.lives = 3
-	MatchSetup.time_limit_minutes = 3.0
+	pass
