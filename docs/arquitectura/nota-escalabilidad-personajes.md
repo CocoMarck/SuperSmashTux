@@ -52,6 +52,11 @@
 - Un modelo nuevo debe traer esos nombres exactos (lista en [asset-personaje.md](../arte/asset-personaje.md), sección Animaciones). Si falta uno, ese doc advierte que puede romperse.
 - *Efecto:* es una ventaja para variantes (cambiar de modelo no toca código) y un límite para personajes con animaciones distintas.
 
+### 7. `GameManager` acoplado a `PowerFighter`
+
+- El lineup, las vidas y el fin de partida del `GameManager` asumen `PowerFighter`. Para modos futuros (equipos, objetivos, `Person` que no pelea) conviene que opere sobre **`Person`**, el papá común, en vez de la capa de combate.
+- *Por qué pesa:* un modo nuevo que no sea pelea tendría que fingir ser `PowerFighter` o duplicar la lógica del manager.
+
 ## Dificultad hoy
 
 | Caso | Dificultad | Por qué |

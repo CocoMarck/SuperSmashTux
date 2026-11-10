@@ -38,6 +38,7 @@ Hijo de `GravityBody3D`. Tiene los métodos y propiedades para **moverse y recib
 - **Agarre de orillas** (`_ledge_grab`, `_hanging_ledge`, `_hang_position`): estilo Smash, solo `GroundPlatform` con esquinas tiene orillas agarrables. Colgado, arriba te subes con impulso y abajo te sueltas.
 - **Vida y daño**: `hp` y `damage_percentage` (`@export`). Recibe golpes con `set_damage*`, knockback (`_damage_move`) y animación de daño (`_damage_anim`), incluyendo el giro "tumble" del cuerpo.
 - **Respawn** (`respawn(at_position)`): limpia posición, velocidad, daño, saltos, orilla agarrada y orientación, para reaparecer como nuevo.
+- **Nombre visible**: se usa `Node.name` directamente. **No** declarar `var name` en `Person`: choca con `Node.name` de Godot. Pendiente: helper estático `PersonName` enfocado a `Person` para centralizar cómo se muestra el nombre (cubre `PowerFighter` y futuros hijos).
 - **Entrada por capas**:
   - `_collect_input()` → **para players**. Por defecto es `pass`; lo llenan los hijos que leen teclado.
   - `_process_ai(delta, frame)` → **para NPCs**. Hook virtual (por defecto `pass`) que `NPC` sobreescribe; recibe el `FrameMotionSignals` del frame anterior (`_last_frame`). Ver `docs/ia/nota-ai-npc.md`.
@@ -65,7 +66,9 @@ _last_frame = frame              # lo lee la IA el próximo frame
 
 Por qué `_process_ai` va **antes** de construir el frame: la IA solo setea los mismos bools que el humano (`_move_left`, `_jump`, `_attack`...), y esos se consumen en el mismo `_physics_process`. Lee el frame anterior (`_last_frame`) para saber si estaba en el piso, colgado, etc.
 
-**Pendiente**: morir cuando `hp` llega a 0 (ragdoll + respawn por KO). Hoy la muerte real es del `GameManager` cuando alguien se sale del área jugable.
+**Pendiente**: morir cuando `hp` llega a 0 (ragdoll + respawn por KO). Hoy la muerte real la detecta `MatchLives` (módulo del `GameManager`) cuando alguien se sale del área jugable.
+
+> **Deuda de diseño**: el `GameManager` hoy trabaja con `PowerFighter` porque el único modo es pelea. Para crecer a más modos conviene que trate `Person`, el papá común; así no arrastra ataques, saltos ni poderes que no todos los modos necesitan.
 
 ## `Fighter` — el que pelea
 

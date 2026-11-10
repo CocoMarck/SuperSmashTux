@@ -130,7 +130,24 @@
 ---
 
 ## `2026-11-08`
-- GameManager **FALTA**: Que el manejo de HUD de juego sea otro modulo.
-- GameManager **FALTA**: Que el manejo de vidas sea otro modulo.
-- GameManager **FALTA**: Que el manejo de tiempo limite de partida sea otro modulo.
-- GameManager **FALTA**: El conteo regresivo para empezar a jugar, sea otro modulo.
+- `GameManager` **LISTO**: Que el manejo de vidas sea otro modulo.
+- `GameManager` **FALTA**: Que el manejo de tiempo limite o conteo de partida sea otro modulo.
+- `GameManager` **FALTA**: Que el manejo de HUD de juego sea otro modulo.
+- `GameManager` **FALTA**: Modulo de manejo velocidad de juego. Para hacer efectos de velocidad lenta, o hacer un freaze al dar un golpe killer.
+- `GameManager` **FALTA**: El conteo regresivo para empezar a jugar, sea otro modulo.
+
+---
+
+## `2026-11-09`
+### MatchLives **LISTO**
+- `MatchLives` (`scripts/match/match_lives.gd`) **LISTO**: módulo de vidas, respawn y eliminación. API `setup()`, `track()`, `start()/stop()`; señales `lives_changed`, `eliminated`, `respawned` y `deaths_resolved`.
+- `GameManager` **LISTO**: delega vidas en `MatchLives` y reemite las señales del HUD; solo conserva `_fighters` para congelar. `respawn_delay` ahora es export del nodo `MatchLives`.
+- `GameManager` es el script del nodo raíz del mapa (`Main` en `map1.tscn`); el mapa trae `PlayArea`, `SpawnPoint1..4` y `MatchLives`.
+- Tux **LISTO**: `heavy_down` (2 golpes), `power_attacks.up` y `air_up` (4 golpes de 5 de daño y `jump_power = 11`).
+
+### Pendientes nuevos
+- `GameManager` **FALTA**: tratar `Person` (el papá) en vez de `PowerFighter`, para crecer a más modos de juego.
+- Helper de nombres **FALTA**: utilidad estática enfocada a `Person` (cubre `PowerFighter` y futuros hijos). Usará `Node.name` directamente; **no** se agrega una propiedad `name` nueva.
+- `MatchSetup.lives` y `MatchSetup.time_limit_minutes` **FALTA**: el spawn sigue usando `lives_per_character` y el tiempo no se lee.
+- `main_menu.gd` **FALTA**: completar `_start_debug_match()` (no carga el mapa) y cambiar `time_limit_minutes = 3.0` por `3`.
+- `game_manager.gd` **FALTA**: quitar `add_child(_match_lives)`, porque el nodo ya viene en `map1.tscn`.

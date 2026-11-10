@@ -17,7 +17,7 @@ supersmashtux/
 │   ├── characters/   # Cadena de personajes: GravityBody3D -> Person -> Fighter -> PowerFighter -> Player / NPC
 │   ├── combat/       # Hitboxes (nodos): AreaGravity3D -> Hitbox -> HitboxDamage / HitboxGrab
 │   ├── platforms/    # Plataformas: Platform, GroundPlatform, OneWayPlatform
-│   ├── match/        # Módulos de la partida, uno por concern (GameManager, CameraFollow, SpawnPoint)
+│   ├── match/        # Módulos de la partida, uno por concern (GameManager, MatchLives, CameraFollow, SpawnPoint)
 │   ├── ui/           # Scripts de las pantallas de UI en ui/; components/ refleja ui/components/ (common, hud, character_menu)
 │   └── helpers/      # Clases de apoyo que NO son nodos: RefCounted y contenedores de datos/constantes
 │       ├── combat/   # Datos de ataques: Attacks, PowerAttacks, FightMove, HitboxMove
@@ -60,6 +60,8 @@ supersmashtux/
 > Los docs se agrupan por dominio en `docs/<dominio>/` (`arquitectura`, `combate`, `ia`, `controles`, `ui`, `arte`). Solo `estructura.md` y `changelog.md` van en la raíz de `docs/`.
 
 > `scripts/` no tiene `.gd` sueltos en la raíz: cada script va en la carpeta de su dominio. Los `class_name` no dependen de la ruta.
+
+> `GameManager` es el script del nodo raíz de cada mapa; los módulos de partida cuelgan de él. `MatchLives` vive como nodo hijo en `map1.tscn`.
 
 ## Godot namespace
 - Nodos en escenas: **PascalCase** (estándar de Godot: `Player`, `CameraPivot`)

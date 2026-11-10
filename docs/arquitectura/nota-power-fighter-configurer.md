@@ -2,7 +2,7 @@
 
 > Cómo se separa el "quién controla" del "qué personaje es", qué hace `PowerFighterConfigurer`,
 > cómo lo usa `SpawnPoint` y cómo debería el `GameManager` repartir las configuraciones.
-> Verificado el 2026-11-07. Rutas: `scripts/helpers/global_utils.gd`,
+> Verificado el 2026-11-07; actualizado el 2026-11-09. Rutas: `scripts/helpers/global_utils.gd`,
 > `scripts/match/power_fighter_configurer.gd`, `scripts/match/spawn_point.gd`,
 > `scripts/match/game_manager.gd`, `scripts/characters/person.gd`,
 > `scripts/characters/fighter.gd`, `scripts/characters/power_fighter.gd`,
@@ -85,7 +85,7 @@ Flujo real, en orden:
    - `ControlType.PLAYER`: `player.gd`.
    - `ControlType.NPC`: `npc.gd`.
 4. Si la config es `TUX`, llama a `_apply_tux_config()` para aplicar datos del personaje
-   (hoy solo `set_duration_of_anims(0.5)`).
+   (duraciones, momentum y hitboxes propias de Tux).
 5. Retorna el `PowerFighter` ya configurado.
 
 > `_build_tux_instance()` corre antes de `set_script()` para que el modelo ya esté listo cuando se
@@ -123,14 +123,16 @@ static func _build_tux_instance(power_fighter: Node3D) -> void:
 
 ### `_apply_tux_config()`
 
-Aplica la configuración de datos de Tux. Hoy solo ajusta la duración de las animaciones de salto:
+Aplica la configuración de datos de Tux. Hoy hace tres cosas:
 
-```gdscript
-static func _apply_tux_config(power_fighter: PowerFighter) -> void:
-	power_fighter.set_duration_of_anims(0.5)
-```
+1. **Duraciones de animación y momentum**: `set_duration_of_anims(0.5)` y `set_momentum(30.0, 50.0, 20.0, 20.0)` (aceleración en piso, fricción en piso, aceleración en aire, fricción de knockback).
+2. **Ataques normales**: tiempos de `neutral1/2/3`, `dash`, `heavy_side`, `heavy_up`, `heavy_down`, `air_neutral` y `air_forward/back/up`.
+3. **Hitboxes propias**:
+   - `neutral1/2/3`, `dash` y `air_neutral` ajustan daño, dirección, posición y tiempos de sus `HitboxMove`.
+   - `heavy_down` reemplaza su hitbox por **2 golpes** de 20 de daño, tamaño `(0.5, 0.5, 1.0)`, uno a cada lado, con `init_time_ratio = 0.4` y `duration = 0.1`.
+   - `power_attacks.up` y `air_up` reemplazan sus hitboxes por **4 golpes** de 5 de daño, tamaño `(0.5, 0.5, 0.5)`, posición `(0, 1.2, 0)`, con `init_time_ratio` de 0.3 a 0.6 y `duration = 0.05`; además fijan `speed = (6, 0, 0)` y `jump_power = 11.0`.
 
-Es el punto donde deberían vivir stats, tiempos y movimientos propios de Tux cuando existan.
+Es el punto donde viven stats, tiempos y movimientos propios de Tux.
 
 ### Contrato de nodos del modelo
 
@@ -241,58 +243,50 @@ que refrescar el arreglo.
 
 ---
 
-## 3. Cómo debería el `GameManager` asignar configuraciones
+## 3. Cómo asigna el `GameManager` las configuraciones
 
 ### Estado actual
 
-`GameManager._spawn_all_power_fighters()` todavía hardcodea la config para los 4 slots
-(`scripts/match/game_manager.gd:78-79`):
+La selección de personaje ya existe (`ui/character_menu.tscn`) y llena `MatchSetup` antes de cambiar
+de escena. `GameManager._spawn_all_power_fighters()` lee `MatchSetup.slots` y le pasa a
+`SpawnPoint.spawn()` el `config` y el `ControlType` de cada slot.
+
+Si `MatchSetup.slots` está vacío (por ejemplo, `map1.tscn` abierto directo desde el editor), el
+respaldo arma 2 `PLAYER` + 2 `NPC` con `config` aleatoria entre las disponibles:
 
 ```gdscript
-var config_options = [GlobalUtils.PowerFighterConfig.STANDARD, GlobalUtils.PowerFighterConfig.TUX]
-var config = config_options[1] # TUX fijo; `pick_random()` está desactivado
-if is_player:
-	power_fighter = spawn_point.spawn(config, GlobalUtils.ControlType.PLAYER, i)
-else:
-	power_fighter = spawn_point.spawn(config, GlobalUtils.ControlType.NPC, i)
+var config_options := [GlobalUtils.PowerFighterConfig.STANDARD, GlobalUtils.PowerFighterConfig.TUX]
+for i in range(0, 4):
+	var control := GlobalUtils.ControlType.PLAYER if i < 2 else GlobalUtils.ControlType.NPC
+	slots.append({ "control": control, "config": config_options.pick_random(), "player_id": i })
 ```
 
-Es decir: hoy todos los peleadores salen `TUX`. El `ControlType` sí varía por slot (1-2 Player,
-3-4 NPC), pero la identidad del personaje aún no se elige por jugador.
+### Implementación
 
-### Propuesta
-
-El `GameManager` **no debería decidir** qué personaje es cada quién. Debería **recibir** una lista
-de configuraciones, una por slot, y limitarse a pasarlas a `SpawnPoint.spawn()`.
+El `GameManager` **no decide** qué personaje es cada quién: **recibe** una lista de configuraciones,
+una por slot, y se limita a pasarlas a `SpawnPoint.spawn()`.
 
 La fuente natural de esa lista es una **GUI de selección de personaje** entre el menú principal y
 la partida. Cada jugador elige su personaje (y en el futuro su color/skin); los slots de NPC se
 asignan por defecto o al azar.
 
-Flujo propuesto:
+Flujo actual:
 
 ```mermaid
 flowchart LR
     MM[Menú principal] --> CS[GUI de selección de personaje]
-    CS -->|config por slot| STORE[(MatchConfig / Resource)]
+    CS -->|config por slot| STORE[(MatchSetup)]
     STORE --> GM[GameManager]
     GM -->|spawn config, control_type, id| SP[SpawnPoint]
     SP --> PFC[PowerFighterConfigurer.create]
     PFC --> PF[PowerFighter configurado]
 ```
 
-Pasos sugeridos:
+Pasos implementados:
 
-1. **Guardar la selección** en un lugar que sobreviva al cambio de escena. Dos opciones:
-   - **Autoload** `MatchConfig` (más simple): expone `configs: Array[GlobalUtils.PowerFighterConfig]`
-     con 4 entradas.
-   - **Resource `.tres`** cargado por la escena del nivel (más testeable y desacoplado).
-2. **`GameManager` lee la config por slot** en vez de hardcodear:
-
-   ```gdscript
-   var configs := MatchConfig.configs  # o el resource inyectado
-   var config := configs[i]
-   ```
+1. **Guardar la selección**: ya implementado con `MatchSetup` (static), que sobrevive al cambio de
+   escena y expone `lives`, `time_limit_minutes` y `slots`.
+2. **`GameManager` lee la config por slot**: ya implementado en `_get_match_slots()`.
 
 3. **`SpawnPoint.spawn(config, control_type, player_id)`** sigue igual: recibe y delega. No necesita
    saber de dónde salió la config.
@@ -301,15 +295,15 @@ Pasos sugeridos:
 
 ### Qué falta decidir
 
-- **Dónde vive la selección**: autoload vs resource en la escena del nivel.
-- **NPCs**: ¿config fija por defecto (`TUX`), aleatoria entre las disponibles, o definida por
-  el mapa?
+- **NPCs**: hoy el respaldo usa config aleatoria; la selección de personaje puede fijarla por slot.
 - **Material/tinte por slot**: con la textura de Tux conservada, hoy no hay color por jugador. Si se
   quiere distinguir jugadores con Tux, habría que definir un material que tiña sin tapar la textura,
   y decidir si eso vive en `PowerFighterConfig` o se queda como color por slot.
 - **Stats y ataques por config**: cuando cada personaje tenga datos propios, `PowerFighterConfigurer`
   debería aplicar stats/tiempos y los movimientos por slot (ver "Configuración fina de movimientos")
   desde la misma config.
+- **Vidas y tiempo**: `MatchSetup.lives` y `MatchSetup.time_limit_minutes` todavía no se aplican en
+  la partida; el spawn usa `lives_per_character` y el cronómetro no lee el límite.
 
 ---
 
@@ -320,7 +314,7 @@ Pasos sugeridos:
 | `scripts/helpers/global_utils.gd` | `CharacterType` → `ControlType`; nuevo enum `PowerFighterConfig` |
 | `scripts/match/power_fighter_configurer.gd` | Nuevo: crea y configura el `PowerFighter` |
 | `scripts/match/spawn_point.gd` | Delega la creación al configurador; solo posiciona y asigna `player_id` |
-| `scripts/match/game_manager.gd` | Pasa `config` y `ControlType` a `spawn()` (hoy fija en `TUX`) |
+| `scripts/match/game_manager.gd` | Lee `MatchSetup.slots` y pasa `config`/`ControlType` a `spawn()`; respaldo 2 Player + 2 NPC random |
 | `scripts/characters/person.gd` | Resuelve nodos esenciales por índice; `_skeleton3d` |
 | `scripts/characters/fighter.gd` | `attacks` público; ya no tiene `set_attacks()` |
 | `scripts/characters/power_fighter.gd` | `power_attacks` público; ya no tiene `set_power_attacks()` |

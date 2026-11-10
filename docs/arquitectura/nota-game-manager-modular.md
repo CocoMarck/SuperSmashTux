@@ -6,6 +6,10 @@
 
 Reemplaza la idea vieja de "un manager que hace todo" (su nota se eliminó; queda en el historial de git).
 
+## `GameManager` es el mapa
+
+`GameManager` es el script del **nodo raíz de cada mapa** (`Main` en `map1.tscn`), no un autoload ni un manager global. Cada mapa lo trae y debe incluir: `PlayArea` (`Area3D` con caja), `SpawnPoint1..4` y un nodo `MatchLives`. Los módulos de partida cuelgan de él.
+
 ## El problema que resuelve
 
 El `GameManager` original (`OldGameManager`, ya eliminado del repo; se puede recuperar del historial de git) mezclaba en un solo archivo:
@@ -36,16 +40,28 @@ cambian**. Nada de reglas depende de que la cámara exista.
 
 | Módulo | `class_name` | Concern | Estado |
 |---|---|---|---|
-| Reglas de partida | `GameManager` | vidas, detección de muerte, respawn, lineup | **LISTO** |
+| Reglas de partida | `GameManager` | lineup, cuenta regresiva, cronómetro, fin y cámara | **LISTO** |
+| Vidas | `MatchLives` | vidas, muerte por salir del `PlayArea`, respawn y eliminación | **LISTO** |
 | Encuadre | `CameraFollow` | sigue a los peleadores, zoom, temblor al morir alguien (escucha `lives_changed`) | **LISTO** |
 | Colocación | `SpawnPoint` | instancia peleadores configurados | **LISTO** |
 
-`GameManager` también spawnea a los 4 peleadores: los slots 1 y 2 como `PLAYER`, el 3 y 4 como `NPC`.
+`GameManager` también spawnea a los peleadores. El lineup sale de `MatchSetup.slots` (lo llena la selección de personaje); si está vacío (mapa abierto directo desde el editor), usa el respaldo de 2 `PLAYER` + 2 `NPC` con personaje aleatorio.
 
 `GameManager` instancia la `CameraFollow` desde el prefab `prefabs/camera_follow.tscn` (igual que
 `SpawnPoint` hace con los peleadores), le asigna el `PlayArea` como `camera_area` antes del `add_child`,
 y la cuelga de sí mismo. El fov y la distancia inicial se ajustan en la `Camera3D` hija del prefab. La cámara **ya no tiene** referencia al manager, y el
 mapa quedó sin nodos de cámara: sus únicas dependencias son `PlayArea` y 4 spawn points.
+
+## `MatchLives` — vidas, respawn y eliminación
+
+Vive en `scripts/match/match_lives.gd` y es un **nodo hijo del mapa** (`MatchLives` en `map1.tscn`). El `GameManager` lo toma con `$MatchLives`.
+
+- **Configuración fija**: solo `respawn_delay` (`@export` del nodo).
+- **Datos por partida**: el `GameManager` los inyecta. `setup(fighter_parent, play_area_bounds)` le pasa el padre y el área; `track(power_fighter, max_lives, respawn_position)` registra a cada peleador recién spawneado. Las vidas salen de `MatchSetup` (hoy el `GameManager` todavía usa su export `lives_per_character`).
+- **Ciclo**: `start()` empieza a revisar salidas del `PlayArea`; `stop()` lo detiene al terminar la partida.
+- **Señales**: `lives_changed`, `eliminated` (antes del `queue_free`), `respawned` y `deaths_resolved(remaining)`.
+
+El `GameManager` **reemite** `lives_changed` y `power_fighter_eliminated` para conservar el contrato del HUD, y con `deaths_resolved` decide el fin de la partida. Los peleadores siguen siendo **hijos directos del `GameManager`** porque la cámara y el HUD los descubren como hermanos; `MatchLives` solo los saca del árbol y los vuelve a meter durante el respawn.
 
 ## Módulos que faltan
 
@@ -64,14 +80,14 @@ Otra dependencia implícita: la cámara encuentra a los peleadores porque es hij
 `power_fighter_spawned` / `power_fighter_eliminated`.
 
 También falta recuperar lo que se perdió al simplificar: **encuadrar el punto de muerte** mientras
-el peleador espera su respawn (`get_pending_respawn_positions()` del manager viejo, eliminado). El manager actual ya guarda `_death_position_of_power_fighter`, pero hoy no lo usa nadie.
+el peleador espera su respawn (`get_pending_respawn_positions()` del manager viejo, eliminado). Hoy `MatchLives` guarda `_death_position` (posición donde cayó cada peleador), pero todavía no lo usa nadie; es el dato que necesita el efecto de cámara.
 
 ### `TalkerManager` — pendiente (el comentarista)
 
 El comentarista es el consumidor más claro del principio, porque **no toca las reglas**: solo
 observa y comenta. Debería ser un módulo que escucha eventos de la partida y decide qué decir.
 
-Eventos que le sirven (hoy el `GameManager` **no emite ninguna señal**, esto es lo que habría que agregar):
+Eventos que le sirven (el `GameManager` ya emite señales y reemite las de `MatchLives`; el comentarista solo tendría que escucharlas):
 
 - muerte de alguien (y a quién le quedan cuántas vidas)
 - último KO de la partida
@@ -100,9 +116,17 @@ muerte por `hp == 0` (que es la que dispararía el ragdoll) sigue pendiente.
 
 ### Otros que probablemente hagan falta
 
-- **`MatchFlow`**: contar el final de la partida (cuándo se acabaron las vidas de todos), rondas.
+- **`MatchClock`**: cronómetro y tiempo límite de la partida. Hoy el cronómetro vive en el `GameManager` y `MatchSetup.time_limit_minutes` no se lee.
+- **`MatchCountdown`**: cuenta regresiva y letrero de ¡PELEA! antes de arrancar.
+- **`MatchHUD`**: puente entre las reglas y el `FightHud`, para sacar del manager el contrato de señales.
+- **`GameSpeed`**: cámara lenta o freeze al dar un golpe killer.
+- **`PersonName`**: helper estático enfocado a `Person` para obtener el nombre visible (sirve para `PowerFighter` y futuros hijos). Usa `Node.name`; no se debe declarar `var name` en `Person` porque choca con `Node.name`.
 - **`ScoreManager`** o similar: quién va ganando, para el HUD.
 - **`AudioManager`**: sonidos de golpe, muerte, KO. Mismo patrón que el comentarista.
+
+### Deuda de diseño: `GameManager` debe tratar `Person`
+
+El `GameManager` hoy trabaja con `PowerFighter` porque el único modo es pelea. Para crecer a otros modos (equipos, objetivos, `Person` que no pelea), conviene que opere sobre **`Person`**, el papá común de `Player`, `NPC`, `PowerFighter` y futuros personajes. Así el manager no arrastra ataques, saltos ni poderes que no todos los modos necesitan.
 
 ## Cómo se documenta la modularidad
 

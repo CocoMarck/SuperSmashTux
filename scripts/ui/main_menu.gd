@@ -19,3 +19,9 @@ func _ready() -> void:
 # Funciones
 func _open_scene(scene_path: String) -> void:
 	get_tree().change_scene_to_file(scene_path)
+
+func _start_debug_match() -> void:
+	# Para probar el juego de manera rápida
+	MatchSetup.clear()
+	MatchSetup.lives = 3
+	MatchSetup.time_limit_minutes = 3.0

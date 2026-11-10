@@ -102,7 +102,20 @@ static func _apply_tux_config(power_fighter: PowerFighter) -> void:
 	power_fighter.attacks.down.duration = 0.375
 	power_fighter.attacks.heavy_side.duration = 0.5417
 	power_fighter.attacks.heavy_up.duration = 0.5833
+	
 	power_fighter.attacks.heavy_down.duration = 0.5833
+	power_fighter.attacks.heavy_down.hitboxes_moves = [
+		HitboxMove.new({
+			"id": 1, "damage": 20, "size": Vector3(0.5,0.5,1.0),
+			"position": Vector3(0.7, -0.95, 0), "direction": Vector3(1.0,0.75,0.0),
+			"init_time_ratio": 0.4, "duration": 0.1
+		}),
+		HitboxMove.new({
+			"id": 2, "damage": 20, "size": Vector3(0.5,0.5,1.0),
+			"position": Vector3(-0.7, -0.95, 0), "direction": Vector3(-1.0,0.75,0.0),
+			"init_time_ratio": 0.4, "duration": 0.1
+		})
+	]
 
 	# attacks air
 	power_fighter.attacks.air_neutral.duration = 0.5
@@ -137,12 +150,60 @@ static func _apply_tux_config(power_fighter: PowerFighter) -> void:
 	power_fighter.power_attacks.standard.duration = 0.5
 	power_fighter.power_attacks.up.duration = 0.5
 	power_fighter.power_attacks.up.speed = Vector3(6,0,0)
+	
 	power_fighter.power_attacks.up.jump_power = 11.0
+	power_fighter.power_attacks.up.hitboxes_moves = [
+		HitboxMove.new({
+			"id": 1, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
+			"init_time_ratio": 0.3, "duration": 0.05
+		}),
+		HitboxMove.new({
+			"id": 2, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
+			"init_time_ratio": 0.4, "duration": 0.05
+		}),
+		HitboxMove.new({
+			"id": 3, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
+			"init_time_ratio": 0.5, "duration": 0.05
+		}),
+		HitboxMove.new({
+			"id": 4, "damage": 5.0, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.75,1.0,0),
+			"init_time_ratio": 0.6, "duration": 0.05
+		}),
+	]
+	
 	power_fighter.power_attacks.down.duration = 1.0417
 
 	# power attacks air
 	power_fighter.power_attacks.air_standard.duration = 0.5
 	power_fighter.power_attacks.air_up.duration = 0.5
 	power_fighter.power_attacks.air_up.speed = Vector3(6,0,0)
+	
 	power_fighter.power_attacks.air_up.jump_power = 11.0
+	power_fighter.power_attacks.air_up.hitboxes_moves = [
+		HitboxMove.new({
+			"id": 1, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
+			"init_time_ratio": 0.3, "duration": 0.05
+		}),
+		HitboxMove.new({
+			"id": 2, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
+			"init_time_ratio": 0.4, "duration": 0.05
+		}),
+		HitboxMove.new({
+			"id": 3, "damage": 5, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
+			"init_time_ratio": 0.5, "duration": 0.05
+		}),
+		HitboxMove.new({
+			"id": 4, "damage": 5.0, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.75,1.0,0),
+			"init_time_ratio": 0.6, "duration": 0.05
+		}),
+	]
+	
 	power_fighter.power_attacks.air_down.duration = 1.0417
