@@ -88,10 +88,13 @@ var _last_damage :float = 0.0
 var _last_damage_percentage :float = 0.0
 var _taking_damage_count : float = 0.0
 
-# Propiedades privadas | Stun
+# Propiedades privadas | Stun damage
 var _heavy_hitstun_time: float = 0.0
 var _heavy_hitstun_get_up_time: float = 0.0
 var _heavy_hitstun_wait_to_get_up: bool = false
+
+# Propiedades privadas | Stun hard move
+var _hard_landing_time: float = 0.0
 
 # Propiedeades privadas | Inmunidad
 var _immunity_to_damage :bool = false
@@ -226,8 +229,9 @@ func respawn(at_position: Vector3) -> void:
 	_one_way_coyote_count = 0.0
 	_clean_heavy_hitstun_state()
 	grabbed = false
-	_knockout_time = 0
-	_hitstun_time = 0
+	_knockout_time = 0.0
+	_hitstun_time = 0.0
+	_hard_landing_time = 0.0
 	_set_x_not_zero_value( _get_initial_facing() )
 	
 # Funciones | Agarre de orillas
@@ -409,7 +413,7 @@ func _is_direction_buffer() -> bool:
 	return _direction_buffer_timer > 0
 
 func _block_inputs() -> bool:
-	return grabbed or _hitstun_active() or _knocked_out()
+	return grabbed or _hitstun_active() or _knocked_out() or _hard_landing_active()
 
 func _false_inputs() -> void:
 	_move_left = false
@@ -425,7 +429,7 @@ func _false_inputs() -> void:
 func taking_damage() -> bool:
 	return _hitstun_active() or _heavy_hitstun_active()
 
-func _can_down_hard():
+func _can_down_hard() -> bool:
 	return _down_count >= GameBalance.TIMES_PRESSING_DOWN
 
 func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
@@ -551,6 +555,27 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 			_set_jumps_to_max()
 		else:
 			_jump_count += 1
+	
+	# Hard landing, lag por caida alta: solo si esta suficiente tiempo en el aire, y la fuerza de aceleración es alta.
+	var one_second_fall_force: float = get_aprox_fall_acceleration_per_frame(
+			delta, int(Engine.get_frames_per_second() ) )
+	var min_heavy_fall_force: float = one_second_fall_force*0.3
+	var max_heavy_fall_force: float = one_second_fall_force*0.6
+	if (
+		signals.on_floor and 
+		signals.last_force <= -min_heavy_fall_force and
+		signals.last_air_count >= 0.5):
+		# Porcentaje de cercania de la fuerza de aceleración, entre lo la fuerza alta minima, y máxima.
+		var weight :float = clampf( 
+			inverse_lerp(
+				min_heavy_fall_force, max_heavy_fall_force, signals.last_force*-1),
+			0.0, 1.0 )
+		# Entre `0-1`. Si es cero lo min, si es 1 lo max.
+		_hard_landing_time = lerpf(
+			GameBalance.HARD_LANDING_MIN_DURATION, 
+			GameBalance.HARD_LANDING_MAX_DURATION, weight)
+		print( 
+			"Weight %s, Last force %s, Hard landing time %s" %[weight, signals.last_force, _hard_landing_time] )
 	
 	# Retornar
 	return MoveSignals.new(
@@ -771,6 +796,15 @@ func is_immune_to_damage() -> bool:
 	Es para no poder modificar a lo loco inmunidad de damage.
 	'''
 	return _immunity_to_damage
+
+# Funcioens | Hard landing
+func _hard_landing_active() -> bool:
+	return _hard_landing_time > 0.0
+
+func _apply_hard_landing(delta: float) -> void:
+	_hard_landing_time -= delta
+	if _hard_landing_time <= 0.0:
+		_hard_landing_time = 0.0
 
 # Funciones | Hitstun
 func _hitstun_active() -> bool:
@@ -995,20 +1029,22 @@ func _tick_frame(delta: float, frame: FrameMotionSignals) -> void:
 		# Forzar soltarse de ledge. Y bloquiar agarrarse del ledge.
 		_release_hanging_ledge()
 		_ledge_release_count = GameBalance.LEDGE_RELEASE_TIME
-		_reset_counts_by_impact()
+		_reset_counts_by_impact() # Es para que fighter lo sobre escriba
+		_hard_landing_time = 0.0 # Cancelar stun por caida alta.
 	_ledge_grab(delta, frame.vertical_force_signals, frame.move_signals)
 	_set_x_not_zero_value(frame.move_signals.direction)
 
 func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
 	'''
-	Se hace referencia a stuns normales
-	- NO los que no te dan efectos locos. Como invertirte los inputs o algo asi.
-	Funcion remplazable por fighter.
+	Se hace referencia a stuns normales. NO los que no te dan efectos locos. Como invertirte los inputs o algo asi. Funcion remplazable por fighter.
+	- Se puede hacer esto menos HOOK para fighter, haciendo una función con lo que va en medio, y usar solo `if`, no `elif`.
 	'''
 	if _hitstun_active():
 		_apply_hitstun(delta)
 	elif _heavy_hitstun_active():
 		_apply_heavy_hitstun(delta, frame.vertical_force_signals)
+	elif _hard_landing_active():
+		_apply_hard_landing(delta)
 
 func _process_damage(delta: float, frame: FrameMotionSignals) -> void:
 	'''

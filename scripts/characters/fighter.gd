@@ -631,7 +631,9 @@ func _grab_move(delta: float, signals: VerticalForceSignals) -> void:
 
 # Funciones | Shield
 func _waiting_shield_move(signals: VerticalForceSignals) -> bool:
-	return _shield_move_time > 0 and signals.on_floor and _shield
+	return (
+		_shield_move_time > 0 and signals.on_floor and _shield and 
+		not _hard_landing_active())
 
 func _shield_blockstun_active() -> bool:
 	return _shield_blockstun_time > 0
@@ -734,11 +736,14 @@ func get_shield_ratio() -> float:
 	return clampf(_shield_time / GameBalance.SHIELD_DURATION, 0.0, 1.0)
 
 func _with_shield(signals: VerticalForceSignals) -> bool:
+	'''
+	Con escudo cuando: El tiempo de escudo no es cero. Esta en el piso. No esta atacando. No esta esperando esperando movimiento para poner escudo. No esta procesando caida fuerte.
+	'''
 	return (
 		(_shield_time > 0) and 
 		(
 			(_shield or _shield_blockstun_active()) and _allow_shield and signals.on_floor and not _attacking()
-		) and (not _waiting_shield_move(signals))
+		) and (not _waiting_shield_move(signals)) and not _hard_landing_active()
 	)
 
 # Funciones | Shield rodar
@@ -973,6 +978,8 @@ func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
 		_apply_heavy_hitstun(delta, frame.vertical_force_signals)
 	elif _shield_blockstun_active():
 		_apply_shield_pushback(delta)
+	elif _hard_landing_active():
+		_apply_hard_landing(delta)
 
 func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 	var not_normal = true

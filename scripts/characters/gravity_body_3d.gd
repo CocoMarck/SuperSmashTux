@@ -76,6 +76,8 @@ func _vertical_force(
 	on_wall = is_on_wall()
 	
 	# Lo que pasa cuando se colisiona.
+	var last_fall_acceleration: float = _target_velocity.y 
+	var last_air_count: float = _air_count
 	if on_floor:
 		# Contadores a cero, para que no se acumule fuerza vertcal.
 		_target_velocity.y = 0
@@ -91,12 +93,12 @@ func _vertical_force(
 		_target_velocity.x = 0
 	
 	return VerticalForceSignals.new(
-		on_floor, 
-		on_ceiling,
-		on_wall,
-		_air_count, 
-		_target_velocity.y # Force
-	)
+		on_floor, on_ceiling, on_wall, _air_count, _target_velocity.y,
+		last_fall_acceleration, last_air_count)
+
+# Obrtener caida aproximada por frame
+func get_aprox_fall_acceleration_per_frame(delta: float, frames: int) -> float:
+	return (fall_acceleration * delta)*frames
 
 # Se usa para plataformas locas.
 func _get_head_y() -> float:

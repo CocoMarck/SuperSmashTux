@@ -35,6 +35,10 @@ const STUN_GETUP_BACKWARD_DURATION: float = 0.5
 const STUN_GETUP_UP_DURATION: float = 0.4
 const STUN_GETUP_DOWN_DURATION: float = 0.4
 
+# Person | Landing lag
+const HARD_LANDING_MAX_DURATION: float = 0.3
+const HARD_LANDING_MIN_DURATION: float = 0.1
+
 # Person | Knockout
 const KNOCKOUT_DURATION: float = 2.0
 
