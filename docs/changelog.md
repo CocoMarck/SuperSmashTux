@@ -1,81 +1,47 @@
 # Changelog
 
-## `2026-08-19`
-> Apenas me di cuenta, pero gdscirpt no tiene para variables privadas. Pero weno, igual es bueno marcarlas como `_var_private`, ya que indica que eso no se toco fuera de la clase dueña. Es una forma de documentar.
+## Resumen de lo listo (2026-08 a 2026-10)
 
-### Hitobox refactor **LISTO**
-- `AreaGravity3D` **LISTO**: Area3D con física simple.
-- `Hitbox` **LISTO**: (Hijo de Area3D. Papa: física + debug + lifetime, comportamiento genérico). Contiene `id`, para identificarlo.
-- `HitboxDamage` **LISTO**: (daño + knockback, el comportamiento actual)
-- `HitboxGrab` **LISTO**: (detecta y avisa al padre que agarre; no daña)
+> Nota histórica (`2026-08-19`): Apenas me di cuenta, pero gdscirpt no tiene para variables privadas. Pero weno, igual es bueno marcarlas como `_var_private`, ya que indica que eso no se toco fuera de la clase dueña. Es una forma de documentar.
 
-### Person
-- `Running` **LISTO**
-- `Walking` **LISTO**
-- `Crouch Walking` **LISTO**
-- `Jumping` **LISTO**
-- `Air jumping` **LISTO**: Posibilidad de saltar en el aire, por defecto no salta en el aire.
-- `Apply hitstun` **LISTO**: Movimiento al recibir daño. Tiene stun pero corto, no deja "secuelas". Lo causan golpes no heavys. Se considera heavy, por cantidad de porcentaje de daño.
-- `Apply heavy hitstun` **LISTO**: 
-    - **LISTO** Movimiento al recibir daño fuerte (15% o mas). Pero no permite moverse en piso, solo en el aire de forma horizontal; sin poder atacar, y salto en el aire anula stun.
-    - **LISTO** En el piso estas tumbado, pero cualquier input te levanta. Si no recibe input en el piso se quedara x segundos en el piso, y se levantara solo. Mientras te levantas, eres inmune al daño. 
-    - **LISTO** Mientras te lavantas, pues no puedes hacer ningún input. Tienes que esperarte. 
-    - **LISTO** El conteo del stun sucede en el piso, levantarse, y inmunidad al levantarse.
-- `Apply knocked out` **LISTO**: Completamente noqueado, en "x" segundos se habilita el poder moverse. Con un golpe, se te quita el estado de noqueado. El knockout, solo se habilita con poderes, o castigos, por ejemplo, habilidad mágica para dormir o romper escudo. 
-- `knocked_out_anim` **LISTO**: Puede ser placeholder. Solo es una anim no se creo func, no se necesitaba.
-- `grabbed anim` **LISTO**: Puede ser placeholder.
+### Personajes y combate
+- Refactor de hitboxes **LISTO**: `AreaGravity3D`, `Hitbox`, `HitboxDamage` y `HitboxGrab`, con daño, knockback, debug y lifetime; varios hitboxes de daño por movimiento.
+- Movimiento base de `Person` **LISTO**: caminar, correr, caminar agachado, salto y salto en el aire.
+- Tercer salto de `PowerFighter` **LISTO**: animaciones para salto en piso y aire, con bloqueo de saltos hasta tocar el piso.
+- Daño y stun **LISTO**: hitstun normal, heavy hitstun, knockout, mejoras de knockback/hitstun y bloqueo de inputs mientras dura el estado.
+- Escudo de `Fighter` **LISTO**: blockstun, pushback, animación placeholder, sin regeneración mientras se rueda y sin gastar capacidad durante el blockstun.
+- Ataques de `Fighter` **LISTO**: grab como ataque, ataques con salto, tres ataques neutrales en piso, cancelación de heavy hitstun en ataques aéreos y margen de error para inputs de dirección.
+- Animaciones placeholder **LISTO**: knocked out, grabbed/grabbing y escudo.
+- Animación de caída al piso **LISTO**: cooldown corto según la velocidad vertical previa, cancelable al recibir daño.
+- Corrección de `Person` **LISTO**: bug al combinar mirar arriba/agacharse con movimiento horizontal.
 
-### Fighter
-- `Shield` **LISTO**: 
-    - `shield blockstun` **LISTO**: Nomas un datallito con el escudo, que todavía no pongo. Cuando se pone el escudo, y se recibe un golpe con el escudo, debe quedarse puesto el escudo por  "x" cantidad de tiempo, input totalmente bloqueado por esa "x" cantidad  de tiempo. Así se castiga el spamear usar escudo. Creo que 1 segundo de castigo debe ser suficiente. 
-    - `shield pushback` **LISTO**: Tambien mover el personaje, en la dirección opuesta del ataque recibido.
-- `Mientras se rueda no regenerar escudo` **LISTO**.
-- `Fight move margen de error` **LISTO**: Input buffer temporal. Los flancos (`_left_pressed`, `_right_pressed`, etc.) duran 1 frame, lo que hace heavy attacks dificiles. Solución: timer `_direction_input_timer` (0.1s, en `GameBalance.INPUT_BUFFER_WINDOW`) en `person.gd`. Cada dirección presionada reinicia el timer. `_fight_move` usa el timer en vez de flancos puros. ~10 frames de ventana como Smash Bros. Si bien esto es para `Fighter` y hijos, esto se hara en `Person`.
-- `Grab` como movimiento de ataque **LISTO**: Requiere de refactor hitbox system. No puede hacer grab cuando el personaje esta en el suelo (Esto no fue planeado asi, por por como esta hecho el aventar a `Person`, sucedió asi, y creo que esta bien.). 
-- `spawn hitboxes damages` **LISTO**: Varios hitbox damage por move. Jala bien.
-- `grabbing_anim` **LISTO**: Puede ser placeholder.
+### Arquitectura y refactor
+- `Person._physics_process` modular **LISTO**: `Fighter` reutiliza el flujo sin reemplazarlo por completo.
+- Funciones de estado **LISTO**: reemplazo de bools redundantes por funciones que consultan sus timers.
+- `GravityBody3D` **LISTO**: ancho y alto públicos con `get_width()`/`get_height()`, y eliminación del helper legacy de media altura.
+- Constantes de juego **LISTO**: duraciones de stun, efectos, movimientos compartidos y márgenes de perdón en `GameBalance`.
+- One-way platforms **LISTO**: lógica movida de `GravityBody3D` a `Person`.
+- Archivos **LISTO**: `gravity_body_3d.gd` movido a `characters/`, `area_gravity_3d.gd` movido a `combat/` y carpeta `physics/` eliminada.
 
-### Constantes
-- Poner contestes de juego en `GameBalance` **LISTO**: Duración de stun, duración de efectos, duración de movimientos compartidos, margenes de perdon/error. Eso si, recordar usar namespace completo; `GameBalence.CONST_NAME`.
+### UI y escenas
+- Menú principal **LISTO**: menú como escena principal, configuración de controles y regreso al menú desde el juego.
+- Interfaz responsiva **LISTO**: menú, controles y HUD ajustables.
+- Reorden de escenas/UI **LISTO**: `scenes/levels/`, `scenes/main.tscn` y pantallas de UI en `ui/`; `scripts/menu/` renombrado a `scripts/ui/`.
 
-## `2026-08-28`
-- **LISTO**: En `Person` y `Fighter`, existen muchas funcs que depender de `bool` y `time`. Jala, pero se puede optimizar para el lector de code. Que simplemente se cambie ese bool, por una func que diga si time es mayor que cero. Ejemplo `func knocked_out(): knockout_time > 0`
+### Documentación y limpieza
+- Limpieza de legacy **LISTO**: eliminación de scripts, escenas, prefabs, animaciones y notas históricas en desuso.
+- Docs ordenados **LISTO**: reorganización por dominio (`arquitectura/`, `combate/`, `ia/`, `controles/`, `ui/`, `arte/`) y fusión de notas de controles.
+- Scripts ordenados por dominio **LISTO**: `characters/`, `combat/`, `platforms/`, `match/`, `ui/`, y helpers en `combat/`, `frame/`, `input/`.
 
+---
+
+## Pendientes anteriores a noviembre de 2026
+
+### `2026-08-28`
 > Aveces ando en modo automático, y pongo cosas redundantes
 
-### GravityBody
-- **LISTO**: Normalizar a obtener width y height valor completo, con shape, y serán funciones publicas. Escalar si se requiere, pero con multiplicador. Ejemplo `get_width()*0.5`.
-    - Funciones publicas **LISTO**: `get_width, get_height`. Y ya esta.
-    - Eliminar la func legacy `_get_body_half_height() ` **LISTO**: Simplemente seria un `get_height()*0.5`.
-
-### Fighter
-- Ataques con salto **LISTO**: 
-    - Ahora los movimientos de ataques pueden incluir un salto. Solo se puede hacer un salto en el aire y en el piso. No dos saltos. 
-    - Si se hace el ataque de salto, ya no se puede hacer saltar normal, hasta caer al piso. 
-    - Un golpe reinicia el conteo de saltos de ataque, por lo que si haces el salto con movimiento de ataque, y en el aire te dan un trancazo, ahora puedes hacer otro salto de ataque.
-- Tres ataques neutrales en el piso **LISTO**: Contador de ataques. Reiniciar contador si no se hace en el mismo combo.
-- El `heavy_hitstun` vuelve a permitir hacer ataques con salto. **LISTO**
-- **LISTO**: Reiniciar contador de ataques con salto, cuando se agarre a ledge de orilla. 
 - Arreglar Bug **FALTA**: hacer ataque con salto mientras `_holding_onto_the_ledge()`, sucede bug visual, porque se eleva first frame del ataque con salto y luego cancela. 
-- Mecánica: **LISTO**: Cuando se hace ataque en el aire, cancelar heavy hitsun.
-    - **LISTO** Solo poder atacar cuando pase "x" tiempo en el aire. 
-- Animación de shield, para poder usarlo **LISTO**: Es necesario, que evita hacer que el jugador se salga de combo, por spamear escudo.. Es placeholder la anim, testear, puede que se me escapase algo. 
-- No restar capacidad de escudo cuando se en el shield hitstun. **LISTO**
-
-### PowerFighter
-- `Tercer salto` **LISTO**: Tendrá anim para saltar en el aire, y para saltar en el piso. En el piso se tarda mas en saltar. Usar este salto, ya no permite hacer saltos hasta llegar al piso. Esto lo hace fighter.
-
-### Person
-- Optimizar, hacer mas modular, es `physics_process` de `Person` **LISTO**: 
-    - El `Fighter`, remplaza el physics process, pero es muy parecido al de Person, por lo cual se puede optimizar Person para que sea modular, para que Fighter, no remplace todo, eso no es fácil de mantener.
-
-    - Se realizo el `2026-09-04`: Asegurarse que jale bien. Primeras impresiones: De diez.
-- Animación de caída en el piso, pequeño cooldown **FALTA**: 
-    - Cuando se cae first frame en el piso, y dependiendo del `velocity.y` anterior, hacer la anim mas lenta, mas rápida, o a velocidad normal. Solo cuando no se esta recibiendo daño.
-    - Si esta recibiendo daño se cancela la animación. 
-    - Se sobrepone sobre move states. Los pone en false todos, para que no se pueda hacer nada mientras se hace la anim de caída en el piso.
-    - Es una anim muy corta, poner constante en game balance, duración de anim como de 0.2 segundos.
-- Efecto visual al hacer movimientos especiales: Ejemplo: Moverse hacia abajo mas rápido. Bajarse de plataforma. **FALTA**
+- Efecto visual al hacer movimientos especiales **FALTA**: Ejemplo: Moverse hacia abajo mas rápido. Al bajarse de plataforma.
 
 - `process_sound` **FALTA**: modulo que obtiene señales, para reproducir sonidos, sonido de pasos, de daño recibido, y etc.
     - Contar tiempo al moverse en el piso o en el aire. (Solo cuando no se recibe daño)
@@ -84,61 +50,24 @@
     - Obtener señal frame uno al saltar en el piso o en el aire.
     - Obtener señal frame uno al caer en cealing/techo o en wall.
 
-- Mejoras en `knockback/hitstun` **LISTO**:
-    - Ahora el no poder moverse, dura mas que el knockback. El duración de; knockback se queda fija. La duración de hitstun varia según el porcentaje de daño, y el daño recibido, y tiene un limite máximo.
-    - `BASE_HITSTUN_DURATION` 0.3. Duración base del hitstun.
-    - `MAX_HITSTUN_DURATION` 0.7. Duración máxima de hitstun.
-    - `KNOCKBACK_DECAY_TIME` 0.3. Duración de movimiento de knockback. Fija.
-
 - Bug **TESTEAR**: Por alguna extraña razón el `heavy_hitstun`, queda fijado de forma rara. Aun no identifico que lo deja siempre activo. hasta parece random. Ya lo cambie, párese jalar. El pedo era el flag/bool de wait heavy hitstun get up.
 
 - Aceleración horizontal **TESTEAR**: al tener poca, si se mueve rapido, pero queda raro cuando se mueve en el aire aveces, ya que al ser poca, aveces se mueve muy rapido en el aire.
 
----
-## `2026-09-22`
-- **LISTO** Menu como scene princial.
-- **LISTO** Menu de configuración de controles.
-- **LISTO** Poder regresar al menu en el juego. Con que se puede mover al menu, no importa si limpia la ecena de juego.
-- **LISTO**: Hacer interfaz menu, controls, y en el jeugo, responsiva.
-
-## `2026-09-28`
+### `2026-09-28`
 - **FALTA** `Person` `GravityBody3D` Arraglar **BUG**: Cuando se colisiona en position perfecta, mismo `x, y, z`, salen volando. Cuando saltan, hago que su colision desaparesca `_toggle_body_collisions`, si sucede que cuando caen, y tienen ambos bodys el mismo `x y z`, salen volando hacia arriba.
 
-## `2026-09-30`
-- **LISTO** `Person` Arreglar **BUG**: Al precionar arriba y abajo (Mirar arriba, y agacharse), y moverse horizontalmente, sucede un error; Se puede mover, pero con el estado en corriendo, y con velocidad de ir agachado. Jajaj bug loco.
-
-## `2026-10-11`
-- **LISTO** Limpieza de archivos en desuso. Se borraron del repo (siguen en el historial de git):
-    - `scripts/legacy/` completa: `old_game_manager.gd`, `old_camera_follow.gd`, `old_spawn_point.gd`.
-    - `scripts/helpers/old_fight_move.gd`.
-    - `scenes/map1_old.tscn`.
-    - `prefabs/character.tscn` y `prefabs/power_fighter.tscn`.
-    - `animations/run.res`.
-    - `scripts/test_player.gd` (`TestPlayer`), sin uso en ninguna escena.
-    - Docs `nota-camara.legacy.md` y `nota-game-manager-inyectable.legacy.md`, de código ya eliminado.
-    - Notas históricas de refactors ya aplicados: `nota-herencia-de-fisicas.md`, `nota-plataformas-character.md` y `uml-refactor-person-fighter-powerfighter.md`.
-    - Lo vigente vive en `scripts/match/` (`game_manager.gd`, `camera_follow.gd`, `spawn_point.gd`) y `prefabs/standard_power_fighter.tscn`.
-- **LISTO** Docs ajustados: `nota-game-manager-modular.md`, `nota-camara.legacy.md` y `nota-game-manager-inyectable.legacy.md` (estas dos se eliminaron después) ya no apuntan a `scripts/legacy/` como si existiera.
-- **LISTO** Reorden de escenas y UI: `scenes/` queda con `levels/` (`map1.tscn`) y `main.tscn` en la raíz; las pantallas de interfaz salen de `scenes/` a una carpeta `ui/` en la raíz del proyecto (`main_menu.tscn`, `fight_hud.tscn`, `controls_menu.tscn`). `scripts/menu/` pasó a `scripts/ui/`; constantes `MAIN_MENU_CANVAS_LAYER_SCENE` → `MAIN_MENU_SCENE` y `FIGHT_CANVAS_LAYER_SCENE` → `FIGHT_HUD_SCENE`. Los nodos raíz conservan nombre.
-- **LISTO** Reorden de `scripts/` por dominio: `characters/`, `combat/`, `physics/`, `platforms/` (más `match/` como antes y `menu/` renombrada a `ui/`) y `helpers/` dividido en `combat/`, `frame/` e `input/` (`game_balance.gd` y `global_utils.gd` quedan en la raíz de `helpers/`). Los `class_name` no cambiaron.
-- **LISTO** Docs ordenados por dominio: `docs/` ahora tiene `arquitectura/`, `combate/`, `ia/`, `controles/`, `ui/` y `arte/` (`estructura.md` y `changelog.md` quedan en la raíz). `configurar-controles.md` y `nota-input-settings.md` se fusionaron en `docs/controles/configurar-controles.md`.
-- **LISTO** Lógica one-way movida de GravityBody3D a Person
-- **LISTO** `gravity_body_3d.gd` movido de `scripts/physics/` a `scripts/characters/`, porque es la base de la cadena de personajes. `physics/` queda con `area_gravity_3d.gd`.
-- **LISTO** `area_gravity_3d.gd` movido de `scripts/physics/` a `scripts/combat/`, porque `Hitbox` es su único uso. La carpeta `physics/` se eliminó.
-
-
 ---
+## `2026-11`
 
-## `2026-11-08`
+#### `2026-11-08`
 - `GameManager` **LISTO**: Que el manejo de vidas sea otro modulo. `LivesManager`
 - `GameManager` **LISTO**: Que el manejo de tiempo limite o conteo de partida sea otro modulo. Posiblemente se llamara `MatchTime`.
 - `GameManager` **LISTO**: Que el conteo regresivo para empezar a jugar, sea otro modulo. `MatchCountdown`
 - `GameManager` **FALTA**: Modulo de manejo velocidad de juego. Para hacer efectos de velocidad lenta, o hacer un freaze al dar un golpe killer.
 - `GameManager` **FALTA**: Que el manejo de HUD de juego sea otro modulo.
 
----
-
-## `2026-11-09`
+#### `2026-11-09`
 - `GameManager` **LISTO**: `PowerFighterSlots` (usa `PowerFighterData`), información del como seran los peleadores, sus vidas, que tipo de peleadores seran etc. Remplazo `MatchSlots`.
 - `GameManager` **FALTA**: Tratar `Person` (el papá) en vez de `PowerFighter`, para crecer a más modos de juego. (Por ahora `2026-11-10` medio enredado de hacer, pero posible)
 

@@ -991,6 +991,8 @@ func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 		_animation_player.play("knocked_out")
 	elif grabbed:
 		_animation_player.play("hurt")
+	elif _hard_landing_active():
+		_animation_player.play("crouch")
 	elif _holding_onto_the_ledge():
 		_ledge_grab_anim(delta)
 	elif _attacking():
