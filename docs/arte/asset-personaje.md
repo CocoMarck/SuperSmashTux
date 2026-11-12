@@ -67,6 +67,7 @@ CharacterBody3D      # script Person/Fighter
 - Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las anims, o no si, posiblemente sucederá crash. 
 - Las animaciones que no especifiquen que son cíclicas, no lo son.
 - Las animaciones que no especifiquen frames, pueden tener frames libres.
+- **Muy recomendado** animaciones inician en frame 0.
 
 #### Lógica de prefix
 Todo nombre que no tenga prefijo `air_`, sucede en el piso. Ejemplo `rising`, conceptualmente se puede entender que sucede si o si en el aire, pero también puedes elevarte en el piso, por lo que poner `air_rising` tiene sentido.
@@ -84,7 +85,7 @@ Todo nombre que no tenga prefijo `air_`, sucede en el piso. Ejemplo `rising`, co
 08. `knockdown`: Tumbado en el piso. Lleva a estado al person. Animación cíclica.
 09. `inpact_front`: Colisión de frente en cualquier lado.
 10. `impact_back`: Colisión de espaldas en cualquier lado.
-11. `turn`: Dar vuelta. (Saltando no puede dar vuelta).
+11. `turn`: Dar vuelta. (Saltando no puede dar vuelta). **8 frames**.
 12. `hold_platform`: Agarrarse de plataforma. Animación cíclica.
 13. `knocked_out`: Noqueado. Animación cíclica.
 14. `neutral_jump`: Sin moverse, solo saltar. Animación cíclica.

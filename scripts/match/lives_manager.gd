@@ -47,6 +47,10 @@ func start() -> void:
 func stop() -> void:
 	_active = false
 
+# Funcione obtener vidas
+func get_lives(power_fighter: PowerFighter) -> int:
+	return _lives.get(power_fighter, 0)
+
 # Funciones | Muerte y respawn
 func _is_out_of_bounds(position: Vector3) -> bool:
 	return (

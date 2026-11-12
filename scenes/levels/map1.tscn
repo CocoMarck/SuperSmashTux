@@ -3,6 +3,8 @@
 [ext_resource type="Script" uid="uid://6osx0hme4168" path="res://scripts/match/game_manager.gd" id="1_vjlk8"]
 [ext_resource type="Environment" uid="uid://lit05fb87j4a" path="res://environments/env_game.tres" id="2_1ql3t"]
 [ext_resource type="Script" uid="uid://cfjlktn8avrpk" path="res://scripts/match/lives_manager.gd" id="2_h3ol6"]
+[ext_resource type="Script" uid="uid://dfiptfyasr75o" path="res://scripts/match/match_time.gd" id="3_fqjsd"]
+[ext_resource type="Script" uid="uid://dsje0lk66o3i3" path="res://scripts/match/match_countdown.gd" id="4_8v2nc"]
 [ext_resource type="Script" uid="uid://bqr8o7d3ctyo2" path="res://scripts/platforms/ground_platform.gd" id="4_e1cm0"]
 [ext_resource type="Script" uid="uid://bcmv8f218b2yh" path="res://scripts/platforms/one_way_platform.gd" id="5_5lclj"]
 [ext_resource type="Script" uid="uid://cidexfa0jesn6" path="res://scripts/match/spawn_point.gd" id="5_eryo2"]
@@ -36,6 +38,14 @@ script = ExtResource("1_vjlk8")
 [node name="LivesManager" type="Node" parent="." unique_id=2002655253]
 script = ExtResource("2_h3ol6")
 metadata/_custom_type_script = "uid://cfjlktn8avrpk"
+
+[node name="MatchTime" type="Node" parent="." unique_id=1067972682]
+script = ExtResource("3_fqjsd")
+metadata/_custom_type_script = "uid://dfiptfyasr75o"
+
+[node name="MatchCountdown" type="Node" parent="." unique_id=177493741]
+script = ExtResource("4_8v2nc")
+metadata/_custom_type_script = "uid://dsje0lk66o3i3"
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=52927572]
 environment = ExtResource("2_1ql3t")

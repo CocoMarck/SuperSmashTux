@@ -28,29 +28,29 @@ const SLOT_4_MATERIAL: Material = preload("res://materials/mat_green.tres")
 # Constantes | Prefabs
 const CAMERA_FOLLOW_PREFAB: PackedScene = preload("res://prefabs/camera_follow.tscn")
 
-# Propiedades publicas | Configuración de partida.
+# Propiedades | Configuración de partida.
 @export_group("Match Settings")
-@export_range(0, 9, 1) var countdown_seconds: int = 0   # (3) segundos de cuenta regresiva antes de pelear. Con 0 no hay cuenta.
-@export_range(0.0, 5.0, 0.1) var fight_sign_seconds: float = 0  # (1.2) segundos que dura el letrero ¡PELEA! con los peleadores congelados. Con 0 no hay letrero.
-
+@export_range(0.0, 5.0, 0.1) var fight_sign_seconds: float = 1.2  # (1.2) segundos que dura el letrero ¡PELEA! con los peleadores congelados. Con 0 no hay letrero.
+@onready var _match_countdown: MatchCountdown = $MatchCountdown
 
 # Propiedades privadas | Estado por personaje | Match lives
-var _lives_manager: LivesManager
-var _fighters: Array[PowerFighter] = [] # roster para congelar
+@onready var _lives_manager: LivesManager = $LivesManager
+var _fighters: Dictionary[int, PowerFighter] = {} # roster para congelar
 
 # Propiedades privadas | Estado de la partida (cronómetro y fin).
-var _match_time: float = 0.0 # Segundos transcurridos desde que arrancó la partida (sin contar la cuenta regresiva).
-var _last_emitted_second: int = 0
 var _match_running: bool = false # false durante la cuenta regresiva y tras el fin; el cronómetro solo avanza en true.
 var _match_over: bool = false # true una vez emitido match_ended. Ya no se restan vidas ni se vuelve a emitir.
 
+# Propiedades publicas | Cronómetro
+@onready var _match_time: MatchTime = $MatchTime
+
 # Propiedades privadas | Dependencias, lo que tiene que tener el mapa.
-var _play_area: Area3D
+@onready var _play_area: Area3D = $PlayArea
 var _play_area_bounds: AABB = AABB()
-var _spawn_point1: SpawnPoint
-var _spawn_point2: SpawnPoint
-var _spawn_point3: SpawnPoint
-var _spawn_point4: SpawnPoint
+@onready var _spawn_point1: SpawnPoint = $SpawnPoint1
+@onready var _spawn_point2: SpawnPoint = $SpawnPoint2
+@onready var _spawn_point3: SpawnPoint = $SpawnPoint3
+@onready var _spawn_point4: SpawnPoint = $SpawnPoint4
 var power_fighter_slots: PowerFighterSlots = PowerFighterSlots.new()
 
 # Propiedades privadas | Cámara
@@ -84,13 +84,85 @@ func _spawn_all_power_fighters() -> void:
 		power_fighter.material = _get_all_materials()[i]
 		var is_player: bool = slot.control == GlobalUtils.ControlType.PLAYER
 		
-		# Agregarles el seguimiento de sus vidas.
-		_fighters.append(power_fighter)
+		# Agregarles vidas, y el seguimiento de sus vidas.
+		_fighters[i] = power_fighter
 		_lives_manager.track(power_fighter, slot.lives, spawn_point.global_position)
 		
 		# Agregar al mapa
 		power_fighter_spawned.emit(power_fighter, i, is_player, slot.lives)
 		add_child(power_fighter)
+
+# Funciones | `PowerFighters`
+func get_valid_fighters() -> Dictionary[int, PowerFighter]:
+	'''
+	Devuelve una copia con solo los peleadores cuya instancia sigue viva.
+	No devuelve `_fghters` directo para no exponer referencias muertas.
+	'''
+	var valid: Dictionary[int, PowerFighter] = {}
+	for id: int in _fighters.keys():
+		var fighter: PowerFighter = _fighters[id]
+		if is_instance_valid(fighter):
+			valid[id] = fighter
+	return valid
+
+func _determine_the_winner() -> int:
+	'''
+	Determina el ganador. Pioridades:
+	- 1. Gana el que tenga mas vidas.
+	- 2. Gana el que tenga menos porcentaje de daño.
+	- 3. Empate. Retorna un menos uno.
+	
+	Retorna el id, si es empate menos uno.
+	'''
+	var valid_fighters :Dictionary[int, PowerFighter] = get_valid_fighters()
+	var candidates : Dictionary[int, PowerFighter] = {}
+	for id: int  in valid_fighters.keys():
+		var fighter: PowerFighter = valid_fighters[id]
+		if _lives_manager.get_lives(fighter) <= 0:
+			continue
+		candidates[id] = fighter
+	if candidates.is_empty():
+		return -1
+	
+	# Solo por vidas. Si solo hay uno con vidas actuales maximas, ese es el ganador.
+	var max_lives: int = 0
+	for fighter in candidates.values():
+		max_lives = maxi(max_lives, _lives_manager.get_lives(fighter))
+	
+	var fighters_with_max_lives: Dictionary[int, PowerFighter] = {}
+	for id in candidates.keys():
+		var fighter: PowerFighter = candidates[id]
+		if _lives_manager.get_lives(fighter) == max_lives:
+			fighters_with_max_lives[id] = fighter
+	if fighters_with_max_lives.keys().size() == 1:
+		return fighters_with_max_lives.keys()[0]
+	
+	# Empate en vidas. Gana el que tenga menos daño
+	var min_damage: float = INF
+	for id in fighters_with_max_lives.keys():
+		var fighter: PowerFighter = fighters_with_max_lives[id]
+		min_damage = minf(min_damage, fighter.damage_percentage)
+	
+	var fighters_with_min_damage: Dictionary[int, PowerFighter] = {}
+	for id in fighters_with_max_lives.keys():
+		var fighter: PowerFighter = fighters_with_max_lives[id]
+		if is_equal_approx(fighter.damage_percentage, min_damage):
+			fighters_with_min_damage[id] = fighter
+	
+	if fighters_with_min_damage.keys().size() == 1:
+		return fighters_with_min_damage.keys()[0]
+	return -1
+
+func get_winner() -> PowerFighter:
+	'''
+	Obtiene el id del ganador determinado, y si existe el id, lo devuelve como `PowerFighter`. De lo contraro retorna `null`.
+	
+	Es publica porque capaz al hud le intereza saber como estadistica de partida, quien es el actual ganador.
+	'''
+	var id: int = _determine_the_winner()
+	if id >= 0:
+		return _fighters[id]
+	return null
 
 # Funciones | Flujo de partida (cuenta, fin y cronómetro)
 func _set_power_fighters_frozen(frozen: bool) -> void:
@@ -99,32 +171,14 @@ func _set_power_fighters_frozen(frozen: bool) -> void:
 	Person.block_move, porque ese flag no lo lee nadie. Así tampoco corre su IA, física ni animación.
 	'''
 	var mode := Node.PROCESS_MODE_DISABLED if frozen else Node.PROCESS_MODE_INHERIT
-	for power_fighter in _fighters:
+	for power_fighter in get_valid_fighters().values():
 		if is_instance_valid(power_fighter):
 			power_fighter.process_mode = mode
 
-func _run_countdown() -> void:
-	'''
-	Cuenta regresiva de inicio: congela, avisa 3-2-1 (1 s cada uno), deja el letrero de ¡PELEA! con todos
-	congelados, y hasta que termina descongela y arranca la partida (y el cronómetro).
-	'''
-	var frozen := countdown_seconds > 0 or fight_sign_seconds > 0.0
-	if frozen:
+func _start_countdown() -> void:
+	if _match_countdown.has_wait():
 		_set_power_fighters_frozen(true)
-	for seconds_left in range(countdown_seconds, 0, -1):
-		countdown_tick.emit(seconds_left)
-		await get_tree().create_timer(1.0).timeout
-		if not is_inside_tree():
-			return
-	if fight_sign_seconds > 0.0:
-		fight_announced.emit(fight_sign_seconds)
-		await get_tree().create_timer(fight_sign_seconds).timeout
-		if not is_inside_tree():
-			return
-	if frozen:
-		_set_power_fighters_frozen(false)
-	_match_running = true
-	match_started.emit()
+	_match_countdown.start()
 
 func _end_match(winner: PowerFighter) -> void:
 	'''
@@ -137,16 +191,7 @@ func _end_match(winner: PowerFighter) -> void:
 	if winner != null:
 		winner.process_mode = Node.PROCESS_MODE_DISABLED
 	match_ended.emit(winner)
-
-func _tick_match_time(delta: float) -> void:
-	'''
-	Suma el tiempo de la partida. Solo avisa al HUD cuando cambia el segundo entero, no cada frame.
-	'''
-	_match_time += delta
-	var second := int(_match_time)
-	if second != _last_emitted_second:
-		_last_emitted_second = second
-		match_time_changed.emit(second)
+	_match_time.stop()
 
 # Funciones | Handlers para `MatchLives`
 func _on_lives_changed(power_fighter: PowerFighter, lives: int) -> void:
@@ -158,28 +203,53 @@ func _on_eliminated(power_fighter: PowerFighter) -> void:
 func _on_death_resolved(remaining: Array[PowerFighter]) -> void:
 	if _match_over or remaining.size() > 1:
 		return
-	var winner: PowerFighter = null
-	if remaining.size() == 1 and is_instance_valid(remaining[0]):
-		winner = remaining[0]
-	_end_match(winner)
+	_end_match(get_winner())
+
+# Funciones |  Handlers para `Time`
+func _on_time_changed(seconds: int):
+	match_time_changed.emit(seconds)
+
+func _on_time_out():
+	_match_over = true
+	_end_match(get_winner())
+
+func set_time_limit(minutes: int) -> void:
+	var match_time := get_node_or_null("MatchTime") as MatchTime
+	if match_time != null:
+		match_time.time_limit_minutes = maxi(minutes, 0)
+
+# Funciones |  Handlers para `Countdown`
+func _on_countdown_tick(seconds_left: int) -> void:
+	countdown_tick.emit(seconds_left)
+	
+func _on_countdown_finished() -> void:
+	# Letrero de ¡PELEA!
+	if fight_sign_seconds > 0.0:
+		fight_announced.emit(fight_sign_seconds)
+		await get_tree().create_timer(fight_sign_seconds).timeout
+		if not is_inside_tree():
+			return
+	# Empezar a juegar
+	_set_power_fighters_frozen(false)
+	_match_running = true
+	_match_time.start()
+	match_started.emit()
 
 # Funciones | Inicializar y procesar
 func _ready() -> void:
 	# Establecer propiedades dependencia
-	_play_area = $PlayArea
 	_play_area_bounds = GlobalUtils.get_box_bounds(GlobalUtils.get_first_collision_shape(_play_area))
-	_spawn_point1 = $SpawnPoint1
-	_spawn_point2 = $SpawnPoint2
-	_spawn_point3 = $SpawnPoint3
-	_spawn_point4 = $SpawnPoint4
-	_lives_manager = $LivesManager
 
 	# Información de juego
 	_lives_manager.setup(self, _play_area_bounds)
 	_lives_manager.lives_changed.connect(_on_lives_changed)
 	_lives_manager.eliminated.connect(_on_eliminated)
 	_lives_manager.deaths_resolved.connect(_on_death_resolved)
-	add_child(_lives_manager)
+	_match_time.time_changed.connect( _on_time_changed )
+	_match_time.time_out.connect( _on_time_out )
+	_match_time.setup()
+	_match_countdown.tick.connect( _on_countdown_tick )
+	_match_countdown.finished.connect( _on_countdown_finished )
 	
 	# Camera
 	_camera_follow = CAMERA_FOLLOW_PREFAB.instantiate() as CameraFollow
@@ -194,17 +264,13 @@ func _ready() -> void:
 	# Spawneo
 	_spawn_all_power_fighters()
 	_lives_manager.start()
-	# Tiempo inicial, para que el HUD pinte 00:00 desde el primer frame.
-	match_time_changed.emit(0)
 	# Cuenta regresiva; el cronómetro arranca hasta match_started.
-	_run_countdown()
+	_start_countdown()
 
 func _physics_process(delta: float) -> void:
 	'''
 	Va en físicas pa no perder salidas del área 3D (un process normal también serviría).
 	'''
 	if _match_over:
-		return # Partida terminada: ya no se restan vidas por salir del escenario.
-	if _match_running:
-		_tick_match_time(delta)
+		return # Partida terminada: ya no se restan vidas por salir del escenario
 		

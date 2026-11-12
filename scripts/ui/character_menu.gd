@@ -328,7 +328,6 @@ func _start_match() -> void:
 	'''
 	Llena MatchSetup con la selección (Aleatorio se resuelve aquí) y arranca la partida.
 	'''
-	#TIME_OPTIONS[time_index]
 	var pool: Array[CharacterCatalog.Entry] = []
 	for entry: CharacterCatalog.Entry in _roster:
 		if not entry.is_random:
@@ -338,6 +337,7 @@ func _start_match() -> void:
 	# Instanciar Nivel; que es un `GameManager`. Y meterle el hud.
 	var level: GameManager = load(LEVEL_SCENE).instantiate() as GameManager
 	level.add_child(load(FIGHT_HUD_SCENE).instantiate())
+	level.set_time_limit(TIME_OPTIONS[time_index])
 	
 	# Agregar datos de peleadores al game manager.
 	for i: int in SLOT_COUNT:

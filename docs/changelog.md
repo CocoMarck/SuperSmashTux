@@ -131,9 +131,9 @@
 
 ## `2026-11-08`
 - `GameManager` **LISTO**: Que el manejo de vidas sea otro modulo. `LivesManager`
-- `GameManager` **FALTA**: Que el manejo de tiempo limite o conteo de partida sea otro modulo. Posiblemente se llamara `MatchTime`.
+- `GameManager` **LISTO**: Que el manejo de tiempo limite o conteo de partida sea otro modulo. Posiblemente se llamara `MatchTime`.
+- `GameManager` **LISTO**: Que el conteo regresivo para empezar a jugar, sea otro modulo. `MatchCountdown`
 - `GameManager` **FALTA**: Modulo de manejo velocidad de juego. Para hacer efectos de velocidad lenta, o hacer un freaze al dar un golpe killer.
-- `GameManager` **FALTA**: Que el conteo regresivo para empezar a jugar, sea otro modulo.
 - `GameManager` **FALTA**: Que el manejo de HUD de juego sea otro modulo.
 
 ---
