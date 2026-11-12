@@ -8,7 +8,7 @@ Reemplaza la idea vieja de "un manager que hace todo" (su nota se eliminó; qued
 
 ## `GameManager` es el mapa
 
-`GameManager` es el script del **nodo raíz de cada mapa** (`Main` en `map1.tscn`), no un autoload ni un manager global. Cada mapa lo trae y debe incluir: `PlayArea` (`Area3D` con caja), `SpawnPoint1..4` y un nodo `LivesManager`. Los módulos de partida cuelgan de él.
+`GameManager` es el script del **nodo raíz de cada mapa** (`Main` en `map1.tscn`), no un autoload ni un manager global. Cada mapa lo trae y debe incluir: `PlayArea` (`Area3D` con caja), `SpawnPoint1..4`, un nodo `LivesManager`, un nodo `MatchTime` y un nodo `MatchCountdown`. Los módulos de partida cuelgan de él.
 
 ## El problema que resuelve
 
@@ -40,9 +40,11 @@ cambian**. Nada de reglas depende de que la cámara exista.
 
 | Módulo | `class_name` | Concern | Estado |
 |---|---|---|---|
-| Reglas de partida | `GameManager` | lineup, cuenta regresiva, cronómetro, fin y cámara | **LISTO** |
+| Reglas de partida | `GameManager` | lineup, spawn, fin, cámara y orquestación de la cuenta inicial y el reloj | **LISTO** |
 | Datos de lineup | `PowerFighterSlots` | datos por slot: control, config, vidas y `player_id` | **LISTO** |
 | Vidas | `LivesManager` | vidas, muerte por salir del `PlayArea`, respawn y eliminación | **LISTO** |
+| Reloj | `MatchTime` | tiempo límite o transcurrido; avisa cada segundo y al agotarse | **LISTO** |
+| Cuenta inicial | `MatchCountdown` | 3-2-1 previo a la pelea; no congela ni muestra letrero | **LISTO** |
 | Encuadre | `CameraFollow` | sigue a los peleadores, zoom, temblor al morir alguien (escucha `lives_changed`) | **LISTO** |
 | Colocación | `SpawnPoint` | instancia peleadores configurados | **LISTO** |
 
@@ -68,8 +70,41 @@ Vive en `scripts/match/lives_manager.gd` y es un **nodo hijo del mapa** (`LivesM
 - **Datos por partida**: el `GameManager` los inyecta. `setup(fighter_parent, play_area_bounds)` le pasa el padre y el área; `track(power_fighter, max_lives, respawn_position)` registra a cada peleador recién spawneado. Las vidas salen de `PowerFighterData.lives`; el `GameManager` llama `track(power_fighter, slot.lives, ...)`. Ya no existe `lives_per_character`.
 - **Ciclo**: `start()` empieza a revisar salidas del `PlayArea`; `stop()` lo detiene al terminar la partida.
 - **Señales**: `lives_changed`, `eliminated` (antes del `queue_free`), `respawned` y `deaths_resolved(remaining)`.
+- **Consulta**: `get_lives(power_fighter) -> int` expone las vidas restantes para que `GameManager` pueda desempatar al agotarse el tiempo.
 
 El `GameManager` **reemite** `lives_changed` y `power_fighter_eliminated` para conservar el contrato del HUD, y con `deaths_resolved` decide el fin de la partida. Los peleadores siguen siendo **hijos directos del `GameManager`** porque la cámara y el HUD los descubren como hermanos; `LivesManager` solo los saca del árbol y los vuelve a meter durante el respawn.
+
+## `MatchTime` — reloj de la partida
+
+Vive en `scripts/match/match_time.gd` y es un **nodo hijo del mapa** (`MatchTime` en `map1.tscn`).
+El `GameManager` lo toma con `$MatchTime`, lo configura y escucha sus señales.
+
+- **Configuración**: `@export time_limit_minutes` (`0` = sin límite).
+- **Ciclo**: `setup()` reinicia y pinta el tiempo inicial; `start()` / `stop()` controlan si avanza.
+- **Señales**: `time_changed(seconds)` y `time_out` (una sola vez).
+- **Semántica**: con límite, `time_changed` emite segundos **restantes**; sin límite, segundos
+  **transcurridos**. El HUD solo formatea lo que recibe.
+- **Arranque**: `GameManager` no lo arranca hasta que termina `MatchCountdown` y el letrero de
+  ¡PELEA!. `_end_match()` lo detiene.
+
+El fin por tiempo no vive en `MatchTime`: cuando llega `time_out`, `GameManager` consulta
+`LivesManager.get_lives()` y el daño de los peleadores para decidir al ganador. Ver
+[nota-match-time.md](nota-match-time.md).
+
+## `MatchCountdown` — cuenta inicial
+
+Vive en `scripts/match/match_countdown.gd` y es un **nodo hijo del mapa**
+(`MatchCountdown` en `map1.tscn`). El `GameManager` lo toma con `$MatchCountdown`.
+
+- **Configuración**: `@export countdown_seconds` (`0` pasa directo a la pelea).
+- **Ciclo**: `has_wait()`, `start()` y `stop()`.
+- **Señales**: `tick(seconds_left)` y `finished`.
+- **Límite de responsabilidad**: solo cuenta. **No** congela peleadores, **no** muestra el letrero
+  de ¡PELEA! y **no** arranca el reloj; eso lo hace `GameManager`.
+
+El letrero y su duración viven en `GameManager.fight_sign_seconds`. `GameManager` también decide si
+congela a los peleadores durante la cuenta. Ver
+[nota-match-countdown.md](nota-match-countdown.md).
 
 ## `PowerFighterSlots` — lineup por slot
 
@@ -144,11 +179,6 @@ muerte por `hp == 0` (que es la que dispararía el ragdoll) sigue pendiente.
 
 ### Otros que probablemente hagan falta
 
-- **`MatchTime`**: cuenta regresiva y tiempo límite de la partida. Hoy el cronómetro vive en el
-  `GameManager` y `TIME_OPTIONS` todavía no se pasa a la partida. Idea y API propuesta en
-  [nota-match-time.md](nota-match-time.md). El nombre `MatchClock` de notas anteriores queda
-  descartado.
-- **`MatchCountdown`**: cuenta regresiva y letrero de ¡PELEA! antes de arrancar.
 - **`MatchHUD`**: puente entre las reglas y el `FightHud`, para sacar del manager el contrato de señales.
 - **`GameSpeed`**: cámara lenta o freeze al dar un golpe killer.
 - **`PersonName`**: helper estático enfocado a `Person` para obtener el nombre visible (sirve para `PowerFighter` y futuros hijos). Usa `Node.name`; no se debe declarar `var name` en `Person` porque choca con `Node.name`.

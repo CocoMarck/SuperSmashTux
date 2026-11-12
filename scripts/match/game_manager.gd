@@ -205,7 +205,7 @@ func _on_death_resolved(remaining: Array[PowerFighter]) -> void:
 		return
 	_end_match(get_winner())
 
-# Funciones |  Handlers para `Time`
+# Funciones |  Handlers para `MatchTime`
 func _on_time_changed(seconds: int):
 	match_time_changed.emit(seconds)
 
@@ -215,8 +215,7 @@ func _on_time_out():
 
 func set_time_limit(minutes: int) -> void:
 	var match_time := get_node_or_null("MatchTime") as MatchTime
-	if match_time != null:
-		match_time.time_limit_minutes = maxi(minutes, 0)
+	match_time.time_limit_minutes = maxi(minutes, 0)
 
 # Funciones |  Handlers para `Countdown`
 func _on_countdown_tick(seconds_left: int) -> void:
@@ -234,6 +233,10 @@ func _on_countdown_finished() -> void:
 	_match_running = true
 	_match_time.start()
 	match_started.emit()
+
+func set_countdown_seconds(seconds: int) -> void:
+	var match_countdown :MatchCountdown = get_node_or_null("MatchCountdown") as MatchCountdown
+	match_countdown.countdown_seconds = seconds
 
 # Funciones | Inicializar y procesar
 func _ready() -> void:

@@ -2,10 +2,11 @@
 
 > Cómo se separa el "quién controla" del "qué personaje es", qué hace `PowerFighterConfigurer`,
 > cómo lo usa `SpawnPoint` y cómo debería el `GameManager` repartir las configuraciones.
-> Verificado el 2026-11-07; actualizado el 2026-11-10. Rutas: `scripts/helpers/global_utils.gd`,
+> Verificado el 2026-11-07; actualizado el 2026-11-11. Rutas: `scripts/helpers/global_utils.gd`,
 > `scripts/helpers/power_fighter_data.gd`, `scripts/match/power_fighter_slots.gd`,
 > `scripts/match/power_fighter_configurer.gd`, `scripts/match/spawn_point.gd`,
-> `scripts/match/game_manager.gd`, `scripts/ui/character_menu.gd`, `scripts/ui/fight_hud.gd`,
+> `scripts/match/game_manager.gd`, `scripts/match/match_time.gd`, `scripts/match/match_countdown.gd`,
+> `scripts/ui/character_menu.gd`, `scripts/ui/fight_hud.gd`,
 > `scripts/characters/person.gd`, `scripts/characters/fighter.gd`,
 > `scripts/characters/power_fighter.gd`, `scripts/helpers/combat/attacks.gd`,
 > `scripts/helpers/combat/power_attacks.gd`, `scripts/helpers/combat/fight_move.gd`.
@@ -304,6 +305,13 @@ Pasos implementados:
 `PowerFighterSlots.set_slot()` valida que `config` esté en `GlobalUtils.CONFIG_OPTIONS`. Para agregar
 un personaje nuevo hay que registrarlo ahí además de en el catálogo de la selección.
 
+El tiempo de partida también sale de la selección: `CharacterMenu._start_match()` llama
+`level.set_time_limit(TIME_OPTIONS[time_index])` antes de cambiar de escena. `GameManager` lo aplica
+al nodo `MatchTime`; la cuenta inicial la maneja `MatchCountdown` y el letrero de ¡PELEA! queda en
+`GameManager`. Ver [nota-match-time.md](nota-match-time.md) y
+[nota-match-countdown.md](nota-match-countdown.md). Las vidas sí se aplican desde
+`PowerFighterData.lives`.
+
 ### Qué falta decidir
 
 - **NPCs**: ya se eligen desde la selección; no hay respaldo aleatorio.
@@ -313,9 +321,6 @@ un personaje nuevo hay que registrarlo ahí además de en el catálogo de la sel
 - **Stats y ataques por config**: cuando cada personaje tenga datos propios, `PowerFighterConfigurer`
   debería aplicar stats/tiempos y los movimientos por slot (ver "Configuración fina de movimientos")
   desde la misma config.
-- **Tiempo**: `CharacterMenu` ya tiene `TIME_OPTIONS` y `time_index`, pero `_start_match()` no los pasa
-  a la partida. La propuesta para el límite y la cuenta regresiva vive en
-  [nota-match-time.md](nota-match-time.md). Las vidas sí se aplican desde `PowerFighterData.lives`.
 
 ---
 
@@ -329,7 +334,7 @@ un personaje nuevo hay que registrarlo ahí además de en el catálogo de la sel
 | `scripts/match/power_fighter_configurer.gd` | Nuevo: crea y configura el `PowerFighter` |
 | `scripts/match/spawn_point.gd` | Delega la creación al configurador; solo posiciona y asigna `player_id` |
 | `scripts/match/game_manager.gd` | Lee `power_fighter_slots` con `has_slot`/`get_slot` y pasa `config`/`ControlType` a `spawn()`; sin respaldo |
-| `scripts/ui/character_menu.gd` | Crea `PowerFighterData` y llena `level.power_fighter_slots` antes de cambiar de escena |
+| `scripts/ui/character_menu.gd` | Crea `PowerFighterData`, llena `level.power_fighter_slots` y pasa `TIME_OPTIONS[time_index]` con `level.set_time_limit()` antes de cambiar de escena |
 | `scripts/ui/fight_hud.gd` | Lee `power_fighter_slots` para el nombre; deuda: indexa `get_slots().values()` |
 | `scripts/characters/person.gd` | Resuelve nodos esenciales por índice; `_skeleton3d` |
 | `scripts/characters/fighter.gd` | `attacks` público; ya no tiene `set_attacks()` |
@@ -342,4 +347,5 @@ un personaje nuevo hay que registrarlo ahí además de en el catálogo de la sel
 - [asset-personaje.md](../arte/asset-personaje.md): contrato de nodos y nombres de animación.
 - [nota-escalabilidad-personajes.md](nota-escalabilidad-personajes.md): problemas de escalar el roster.
 - [nota-game-manager-modular.md](nota-game-manager-modular.md): módulos de la partida y responsabilidades.
-- [nota-match-time.md](nota-match-time.md): idea del tiempo límite y la cuenta regresiva de la partida.
+- [nota-match-time.md](nota-match-time.md): reloj de la partida y fin por tiempo.
+- [nota-match-countdown.md](nota-match-countdown.md): cuenta regresiva previa a la pelea.
