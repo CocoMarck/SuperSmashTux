@@ -31,9 +31,18 @@ Objeto de persona. Tiene lo necesario para tener fisicas 2D en un mundo 3D.
 @export var hp :int = 100
 @export var damage_percentage :float = 0
 
+@export_group("Interval") # sounds effects
+@export var walk_step_interval: float = 0.35
+@export var run_step_interval: float = 0.25
+@export var crouch_move_step_interval: float = 0.32
+
 var block_move :bool = false
 
-# Coordenada Z segura. Para poder seguir jugando.
+# Propiedades privadas | Intervals sounds effects
+var _step_time: float = 0.0
+var _was_stepping: bool = false
+
+# Propiedades privadas | Coordenada Z segura. Para poder seguir jugando.
 var _safe_z_coord : float = 0.0
 
 # Essential character nodes
@@ -884,12 +893,10 @@ func _heavy_hitstun_anim(delta: float, signals: VerticalForceSignals) -> void:
 		_damage_degrees = 0
 		_animation_player.play("idle")
 	elif signals.air_count < 0.2:
-		_damage_degrees = -90
-		_pivot.position.y = -1.0
+		_damage_degrees = 0 
 		_animation_player.play("knockdown")
 	elif signals.on_floor:
-		_damage_degrees = -90
-		_pivot.position.y = -1.0
+		_damage_degrees = 0
 		_animation_player.play("knockdown")
 	else:
 		_animation_player.play("air_hurt")
@@ -1105,6 +1112,57 @@ func _commit_frame(delta, frame) -> void:
 	move_and_slide()
 	_ensure_safe_z_coord()
 
+# Fucniones | Sonido
+func _get_step_interval(states: MoveStates) -> float:
+	if states.walking: 			return walk_step_interval
+	elif states.running: 		return run_step_interval
+	elif states.crouch_move: 	return crouch_move_step_interval
+	else:						return 0.0
+
+func _process_sound(delta:float, frame: FrameMotionSignals) -> void:
+	'''
+	- first frame on floor, solo se usa cuando no se esta recibiendo daño (porque repite mucho el sonido en mini saltos imperseptibles).
+	- stepping: Solo cuando se esta en el piso moviendose.
+	'''
+	var first_frame_on_floor: bool = (
+		frame.vertical_force_signals.last_air_count > 0 and 
+		frame.vertical_force_signals.on_floor and
+		not taking_damage() )
+	var stepping: bool = (
+			frame.move_states.walking or frame.move_states.running or 
+			frame.move_states.crouch_move)
+	var first_frame_jumping: bool = (
+		frame.move_states.jumping and frame.vertical_force_signals.last_force <= 0)
+	var sound_name: String = ""
+	
+	# on floor movimiento horizontal
+	if not stepping:
+		_step_time = 0.0
+		_was_stepping = false
+	else:
+		if not _was_stepping:
+			_was_stepping = true
+			_step_time = 0.0
+		_step_time -= delta
+		if _step_time <= 0.0:
+			_step_time = _get_step_interval(frame.move_states)
+			if _step_time > 0:
+				sound_name = ("Sonido de paso. Intervalo de %s" %_step_time)
+
+	# caida en el piso
+	if first_frame_on_floor:
+		sound_name = "Sonido caida en piso"
+	
+	# salto
+	if first_frame_jumping:
+		sound_name = "Sonido de salto"
+	
+	# Reproducir
+	if not sound_name == "":
+		print(sound_name)
+	
+
+# Funciones | Remplazables
 func _process_action(delta: float, frame: FrameMotionSignals) -> void:
 	'''
 	Acciones especiales. Esta func la sobrescribira fighter.
@@ -1161,6 +1219,9 @@ func _physics_process(delta: float) -> void:
 
 	# Effects
 	_process_effects(delta)
+
+	# Sound
+	_process_sound(delta, frame)
 
 	# Cometer cambios.
 	_commit_frame(delta, frame)

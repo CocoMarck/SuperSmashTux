@@ -176,6 +176,50 @@ static func _apply_tux_config(power_fighter: PowerFighter) -> void:
 	]
 	
 	power_fighter.power_attacks.down.duration = 1.0417
+	power_fighter.power_attacks.down.hitboxes_moves = [
+		# Frente
+		HitboxMove.new({
+			"id": 1, "damage": 5, "size": Vector3(0.5,0.5,0.75),
+			"position": Vector3(1.0,-0.15,0.0), "direction": Vector3(-1.0,0.25,0.0),
+			"init_time_ratio": 0.5, "duration": 0.08
+		}),
+		HitboxMove.new({
+			"id": 2, "damage": 5, "size": Vector3(0.5,0.5,0.75),
+			"position": Vector3(1.0,-0.15,0.0), "direction": Vector3(-1.0,0.25,0.0),
+			"init_time_ratio": 0.6, "duration": 0.08
+		}),
+		HitboxMove.new({
+			"id": 3, "damage": 5, "size": Vector3(0.5,0.5,0.75),
+			"position": Vector3(1.0,-0.15,0.0), "direction": Vector3(-1.0,0.25,0.0),
+			"init_time_ratio": 0.7, "duration": 0.08
+		}),
+		HitboxMove.new({
+			"id": 4, "damage": 10, "size": Vector3(0.5,0.5,0.75),
+			"position": Vector3(1.0,-0.15,0.0), "direction": Vector3(0.0,0.75,0.0),
+			"init_time_ratio": 0.8, "duration": 0.08
+		}),
+		# Espalda
+		HitboxMove.new({
+			"id": 5, "damage": 5, "size": Vector3(0.5,0.5,0.75),
+			"position": Vector3(-1.0,-0.15,0.0), "direction": Vector3(1.0,0.25,0.0),
+			"init_time_ratio": 0.5, "duration": 0.08
+		}),
+		HitboxMove.new({
+			"id": 6, "damage": 5, "size": Vector3(0.5,0.5,0.75),
+			"position": Vector3(-1.0,-0.15,0.0), "direction": Vector3(1.0,0.25,0.0),
+			"init_time_ratio": 0.6, "duration": 0.08
+		}),
+		HitboxMove.new({
+			"id": 7, "damage": 5, "size": Vector3(0.5,0.5,0.75),
+			"position": Vector3(-1.0,-0.15,0.0), "direction": Vector3(1.0,0.25,0.0),
+			"init_time_ratio": 0.7, "duration": 0.08
+		}),
+		HitboxMove.new({
+			"id": 8, "damage": 10, "size": Vector3(0.5,0.5,0.75),
+			"position": Vector3(-1.0,-0.15,0.0), "direction": Vector3(0.0,0.75,0.0),
+			"init_time_ratio": 0.8, "duration": 0.08
+		})
+	]
 
 	# power attacks air
 	power_fighter.power_attacks.air_standard.duration = 0.5

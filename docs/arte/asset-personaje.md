@@ -67,7 +67,9 @@ CharacterBody3D      # script Person/Fighter
 - Nombres de animaciones. Estos no se cambian y se espera que se tengan todas las anims, o no si, posiblemente sucederá crash. 
 - Las animaciones que no especifiquen que son cíclicas, no lo son.
 - Las animaciones que no especifiquen frames, pueden tener frames libres.
-- **Muy recomendado** animaciones inician en frame 0.
+- **Muy recomendado** animaciones inician en frame `0`.
+- FPS de animación: `60`. Es estándar, y blender lo usa por defecto.
+- No aplicar simetría en ninguna dimensión.
 
 #### Lógica de prefix
 Todo nombre que no tenga prefijo `air_`, sucede en el piso. Ejemplo `rising`, conceptualmente se puede entender que sucede si o si en el aire, pero también puedes elevarte en el piso, por lo que poner `air_rising` tiene sentido.
@@ -91,50 +93,51 @@ Todo nombre que no tenga prefijo `air_`, sucede en el piso. Ejemplo `rising`, co
 14. `neutral_jump`: Sin moverse, solo saltar. Animación cíclica.
 15. `moving_jump`: Moviéndose, y saltar. Animación cíclica.
 16. `grabbed`: Siendo agarrado. Animación cíclica.
+17. `land`: Caída en el piso. `18 frames`, `0.3 segundos`.
 
 #### Fighter
-17. `neutral_attack1`: Cuando no se mueve y esta parado. (Concepto empezando en idle, y terminando en idle.).
-18. `neutral_attack2`: Lo mismo que `neutral_attack1`.
-19. `neutral_attack3`: Lo mismo que `neutral_attack1`.
-20. `down_attack`: Cuando esta agachado y sin moverse.
-21. `dash_attack`: Corriendo y atacar.
-22. `forward_attack`: Caminando y attack.
-23. `up_attack`: Sin moverse, y presionar ataque arriba.
-24. `heavy_side_attack`: Cuando se presiona al mismo tiempo ataque y der o izq.
-25. `heavy_up_attack`: Sin moverse, y presionar al mismo tiempo ataque y arriba.
-26. `heavy_down_attack`: Sin moverse, y presionar al mismo tiempo ataque y abajo.
-27. `pickup`: Agarrar item.
-28. `grab`: Intentar agarrar a alguien.
-29. `grabbing`: Agarrando a alguien. Animación cíclica.
-30. `guard`: Animación de defensa. Protección. Animación cíclica.
-31. `roll_forward`: `guard`, y luego vuelta adelante estilo parkur. 15 frames.
-32. `roll_backward`: `guard`, y luego vuelta atrás estilo parkur. 15 frames.
-33. `throw_forward`: `grabbing` y luego arrojar victima al frente.
-34. `throw_backward`: `grabbing` y luego arrojar victima hacia atrás.
+18. `neutral_attack1`: Cuando no se mueve y esta parado. (Concepto empezando en idle, y terminando en idle.).
+19. `neutral_attack2`: Lo mismo que `neutral_attack1`.
+20. `neutral_attack3`: Lo mismo que `neutral_attack1`.
+21. `down_attack`: Cuando esta agachado y sin moverse.
+22. `dash_attack`: Corriendo y atacar.
+23. `forward_attack`: Caminando y attack.
+24. `up_attack`: Sin moverse, y presionar ataque arriba.
+25. `heavy_side_attack`: Cuando se presiona al mismo tiempo ataque y der o izq.
+26. `heavy_up_attack`: Sin moverse, y presionar al mismo tiempo ataque y arriba.
+27. `heavy_down_attack`: Sin moverse, y presionar al mismo tiempo ataque y abajo.
+28. `pickup`: Agarrar item.
+29. `grab`: Intentar agarrar a alguien.
+30. `grabbing`: Agarrando a alguien. Animación cíclica.
+31. `guard`: Animación de defensa. Protección. Animación cíclica.
+32. `roll_forward`: `guard`, y luego vuelta adelante estilo parkur. `15 frames`.
+33. `roll_backward`: `guard`, y luego vuelta atrás estilo parkur. `15 frames`.
+34. `throw_forward`: `grabbing` y luego arrojar victima al frente.
+35. `throw_backward`: `grabbing` y luego arrojar victima hacia atrás.
 
 
 #### PowerFighter
-35. `power_attack`: Proyectil, ráfaga de energía, o carga de ataque.
-36. `up_power_attack`: Poder hacia arriba que da propulsión. Puede hacer daño o no.
-37. `down_power_attack`: Poder hacia abajo, puede ser ataque o no.
+36. `power_attack`: Proyectil, ráfaga de energía, o carga de ataque.
+37. `up_power_attack`: Poder hacia arriba que da propulsión. Puede hacer daño o no.
+38. `down_power_attack`: Poder hacia abajo, puede ser ataque o no.
 
 ### En el aire
 #### Person
-38. `air_rising`: Elevándose en el aire sin saltar. Por un golpe, por un trampolín, etc. Animación cíclica.
-39. `air_jump`: Salto en el aire neutral.
-40. `air_back_jump`: Salto en el aire de espaldas.
-41. `air_forward_jump`: Salto en el aire de frente.
-42. `air_hurt`: Daño recibido en el aire.
-43. `air_fall`: Cayendo normal, sin stun ni nada. Animación cíclica.
+39. `air_rising`: Elevándose en el aire sin saltar. Por un golpe, por un trampolín, etc. Animación cíclica.
+40. `air_jump`: Salto en el aire neutral.
+41. `air_back_jump`: Salto en el aire de espaldas.
+42. `air_forward_jump`: Salto en el aire de frente.
+43. `air_hurt`: Daño recibido en el aire.
+44. `air_fall`: Cayendo normal, sin stun ni nada. Animación cíclica.
 
 #### Fighter
-44. `air_neutral_attack`: En el aire, sin moverse y atacar.
-45. `air_back_attack`: En el aire moviéndose de espaldas y atacar.
-46. `air_forward_attack`: En el aire moviéndose de frente y atacar.
-47. `air_down_attack`: En el aire y atacar presionando abajo. Ya sea moviéndose o no.
-48. `air_up_attack`: En el aire y atacar presionando arriba. Ya sea moviéndose o no.
+45. `air_neutral_attack`: En el aire, sin moverse y atacar.
+46. `air_back_attack`: En el aire moviéndose de espaldas y atacar.
+47. `air_forward_attack`: En el aire moviéndose de frente y atacar.
+48. `air_down_attack`: En el aire y atacar presionando abajo. Ya sea moviéndose o no.
+49. `air_up_attack`: En el aire y atacar presionando arriba. Ya sea moviéndose o no.
 
 #### PowerFighter
-49. `air_up_power_attack`: Lo mismo que power up. Pero animación en el aire.
-50. `air_down_power_attack`: Lo mismo que power down. Pero animación en el aire.
-51. `air_power_attack`: Proyectil, ráfaga de energía, o carga de ataque.
+50. `air_up_power_attack`: Lo mismo que power up. Pero animación en el aire.
+51. `air_down_power_attack`: Lo mismo que power down. Pero animación en el aire.
+52. `air_power_attack`: Proyectil, ráfaga de energía, o carga de ataque.
