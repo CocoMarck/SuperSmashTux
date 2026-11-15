@@ -38,6 +38,11 @@ Objeto de persona. Tiene lo necesario para tener fisicas 2D en un mundo 3D.
 
 var block_move :bool = false
 
+@export_group("SFX")
+@export var stream_jump: AudioStreamRandomizer = preload("res://assets/audio/sfx/rand_jump.tres")
+@export var stream_step: AudioStreamRandomizer = preload("res://assets/audio/sfx/rand_step.tres")
+@export var stream_land: AudioStreamRandomizer = preload("res://assets/audio/sfx/rand_land.tres")
+
 # Propiedades privadas | Intervals sounds effects
 var _step_time: float = 0.0
 var _was_stepping: bool = false
@@ -51,6 +56,7 @@ var _pivot: Node3D
 var _skeleton3d: Skeleton3D
 var _mesh_instance: MeshInstance3D
 var _animation_player: AnimationPlayer
+@onready var _audio_stream_player: AudioStreamPlayer3D = $AudioStreamPlayer3D
 
 # `_target_velocity`, pertenece a `GravityBody3D`.
 
@@ -1147,19 +1153,25 @@ func _process_sound(delta:float, frame: FrameMotionSignals) -> void:
 		if _step_time <= 0.0:
 			_step_time = _get_step_interval(frame.move_states)
 			if _step_time > 0:
+				_audio_stream_player.stream = stream_step
 				sound_name = ("Sonido de paso. Intervalo de %s" %_step_time)
 
 	# caida en el piso
 	if first_frame_on_floor:
+		_audio_stream_player.stream = stream_land
 		sound_name = "Sonido caida en piso"
 	
 	# salto
 	if first_frame_jumping:
+		_audio_stream_player.stream = stream_jump
+		
 		sound_name = "Sonido de salto"
 	
 	# Reproducir
 	if not sound_name == "":
 		print(sound_name)
+		_audio_stream_player.stop()
+		_audio_stream_player.play()
 	
 
 # Funciones | Remplazables

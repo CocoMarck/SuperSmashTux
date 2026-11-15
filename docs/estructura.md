@@ -26,7 +26,10 @@ supersmashtux/
 │       └── ...       # Sueltos en la raíz: game_balance.gd (constantes de balance), global_utils.gd, power_fighter_data.gd
 ├── materials/        # Materiales (.tres)
 ├── environments/     # Entornos de mundo (.tres)
-├── assets/           # Assets raw (texturas, modelos, audios fuente) — aún no creada
+├── assets/           # Assets raw (modelos, audios, fuentes)
+│   ├── audio/        # Audios fuente
+│   │   └── sfx/      # SFX (wavs) y sus randomizers (.tres)
+│   └── fonts/        # Fuentes
 ├── addons/           # Plugins de Godot (godot_ai: MCP de Godot para agentes de IA)
 ├── docs/             # Documentación, notas, ideas (estructura.md y changelog.md viven en la raíz de docs/)
 │   ├── arquitectura/ # Jerarquía de clases, UML y decisiones de diseño (GameManager, process vs physics_process)

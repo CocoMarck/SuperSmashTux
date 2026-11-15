@@ -4,8 +4,12 @@ Documenta los sonidos deseados de personaje (placeholders / uso por defecto) y l
 
 ## Estado actual
 
-- `person.gd::_process_sound` ya calcula los momentos en que debería sonar algo (paso, salto y aterrizaje), pero por ahora solo hace `print`.
-- La reproducción real está pendiente. Coincide con el pendiente de `process_sound` en `docs/changelog.md`.
+- **Archivos**: los nueve wavs ya viven en `assets/audio/sfx/`, cada categoría con su randomizer (`rand_jump.tres`, `rand_step.tres`, `rand_land.tres`).
+- **`Person`**: `person.gd` declara `@export var stream_jump` / `stream_step` / `stream_land` (`AudioStreamRandomizer`) y cachea el nodo con `@onready var _audio_stream_player: AudioStreamPlayer3D = $AudioStreamPlayer3D`.
+- **Prefab**: `standard_power_fighter.tscn` ya trae un nodo `AudioStreamPlayer3D` (sin `stream` asignado).
+- **Detección de eventos**: `person.gd::_process_sound` ya calcula los momentos (paso, salto y aterrizaje), pero por ahora solo hace `print`.
+- **Reproducción real**: pendiente. Falta asignar los randomizers y llamar `play()`.
+- **Ojo con `set_script`**: el prefab aún no tiene script en el root, así que el grupo `SFX` no aparece en el inspector; y aunque se asigne, `PowerFighterConfigurer.create()` cambia el script con `set_script`, que **borra los `@export` de escena**. Por eso `stream_jump` llega `null` en partida. Se resuelve cuando se quite el `set_script` (ver [nota-power-fighter-controller.md](../arquitectura/nota-power-fighter-controller.md)).
 - Los sonidos listados aquí son placeholders: sirven como comportamiento por defecto hasta que cada personaje tenga sus propios SFX.
 
 ## Sonidos deseados (ahora)
@@ -71,7 +75,10 @@ assets/audio/sfx/
 ├── jump_03.wav
 ├── land_01.wav
 ├── land_02.wav
-└── land_03.wav
+├── land_03.wav
+├── rand_step.tres    # AudioStreamRandomizer con las 3 variantes de paso
+├── rand_jump.tres    # AudioStreamRandomizer con las 3 variantes de salto
+└── rand_land.tres    # AudioStreamRandomizer con las 3 variantes de caída
 
 assets/audio/music/
 └── <nombre>.ogg
@@ -98,11 +105,12 @@ assets/audio/music/
 - **BPM / Beat Count / Bar Beats**: solo relevantes para música interactiva.
 - Mantener mono si el sonido se va a reproducir con `AudioStreamPlayer3D`.
 
-## Uso en runtime (futuro)
+## Uso en runtime
 
-- **`AudioStreamRandomizer`**: un recurso por categoría que contiene las tres variantes y elige una al azar en cada reproducción. Permite variar pitch y volumen, y usar modo "random no repeats" para no repetir el mismo paso seguido.
+- **`AudioStreamRandomizer`**: un recurso por categoría (`rand_step.tres`, `rand_jump.tres`, `rand_land.tres`) con las tres variantes; elige una al azar en cada reproducción. Permite variar pitch y volumen, y usar modo "random no repeats" para no repetir el mismo paso seguido.
 - **`AudioStreamPlayer3D`**: para que el sonido se posicione en el mundo. Ubicar el nodo cerca de los pies del personaje y ajustar `max_polyphony` para permitir traslapes.
 - **Hook actual**: `person.gd::_process_sound` es el punto donde se decide qué sonido toca; hoy imprime y mañana llamará a los players correspondientes.
+- **Un player vs tres**: con un solo `AudioStreamPlayer3D` hay que cambiar `stream` por categoría, y asignar `stream` llama `stop()`, así que se corta el sonido anterior. Con tres nodos (uno por categoría) los sonidos traslapan. Decisión pendiente.
 - Prioridad actual de eventos en el mismo frame: aterrizaje > salto > paso.
 
 ## Licencias

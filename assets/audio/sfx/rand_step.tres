@@ -1,0 +1,11 @@
+[gd_resource type="AudioStreamRandomizer" format=3 uid="uid://b13p58b711u1p"]
+
+[ext_resource type="AudioStream" uid="uid://esory3v4tf62" path="res://assets/audio/sfx/step_01.wav" id="1_dhl8h"]
+[ext_resource type="AudioStream" uid="uid://c81wtlha5u6ac" path="res://assets/audio/sfx/step_02.wav" id="2_4wliy"]
+[ext_resource type="AudioStream" uid="uid://jcbu5m2aphfi" path="res://assets/audio/sfx/step_03.wav" id="3_flfj4"]
+
+[resource]
+streams_count = 3
+stream_0/stream = ExtResource("1_dhl8h")
+stream_1/stream = ExtResource("2_4wliy")
+stream_2/stream = ExtResource("3_flfj4")

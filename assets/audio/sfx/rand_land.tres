@@ -1,0 +1,11 @@
+[gd_resource type="AudioStreamRandomizer" format=3 uid="uid://bkjugge437gr0"]
+
+[ext_resource type="AudioStream" uid="uid://di201ahgswy0j" path="res://assets/audio/sfx/land_01.wav" id="1_eh5fc"]
+[ext_resource type="AudioStream" uid="uid://vshuqp1wg8aq" path="res://assets/audio/sfx/land_02.wav" id="2_gf1hs"]
+[ext_resource type="AudioStream" uid="uid://c3okgcjwy3unv" path="res://assets/audio/sfx/land_03.wav" id="3_1gbbi"]
+
+[resource]
+streams_count = 3
+stream_0/stream = ExtResource("1_eh5fc")
+stream_1/stream = ExtResource("2_gf1hs")
+stream_2/stream = ExtResource("3_1gbbi")
