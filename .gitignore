@@ -3,11 +3,11 @@
 /android/
 *.import
 
-# Assets Resources. Por ahora nadota.
+# Assets Resources.
 *.obj
 *.blend
 *.mp3
-*.wav
+#*.wav # SFX Tener mucho cuidado, no mandar cualquier cosa.
 
 # Archivos de configuración MCP (Claude Code, OpenCode, Codex)
 *.mcp.json

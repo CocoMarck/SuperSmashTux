@@ -72,3 +72,21 @@
 - `GameManager` **FALTA**: Tratar `Person` (el papá) en vez de `PowerFighter`, para crecer a más modos de juego. (Por ahora `2026-11-10` medio enredado de hacer, pero posible)
 
 - Helper de nombres **FALTA**: utilidad estática enfocada a `Person` (cubre `PowerFighter` y futuros hijos). Usará `Node.name` directamente; **no** se agrega una propiedad `name` nueva.
+
+#### `2026-11-15`
+> Refactor a **controladores por composición**: el rol (jugador/NPC) deja de ser herencia (`Player`/`NPC extends PowerFighter`) y pasa a ser un nodo hijo. Detalle del diseño en `docs/arquitectura/nota-power-fighter-controller.md` y de la IA en `docs/ia/nota-ai-npc.md`.
+
+- `PersonController3D` **LISTO**: base `Node3D` que solo decide inputs. Expone `get_input(delta, frame) -> MoveInput` y guarda un `MoveInput` reutilizado. No conoce a `Person`/`Fighter`/`PowerFighter`. (`scripts/characters/person_controller_3d.gd`)
+- `MoveInput` **LISTO**: `RefCounted` con los 10 flags (`move_left/right/up/down`, `jump`, `walk`, `attack`, `grab`, `shield`, `power_attack`). (`scripts/helpers/frame/move_input.gd`)
+- `PlayerController` **LISTO**: lee `Input` con `player_input_map` según `player_id`. Ya reemplaza a `player.gd` en partida.
+- `NPCController` **EN PROGRESO**: ya trae la detección (`Area3D` propia), los helpers y los timers de `npc.gd`, pero `get_input()` es un **stub**: falta migrar el reset y la IA. Aún **no se usa** (el configurer sigue con `set_script(npc.gd)`).
+- `Person` **LISTO**: propiedad `controller` con setter que hace `add_child`; `_collect_controller_input`/`_process_controller`; `_physics_process` llama al controller. Los hooks viejos `_collect_input`/`_process_ai` siguen vivos para el NPC legacy.
+- `PowerFighter` **LISTO**: `_collect_controller_input` copia los 10 campos (la base de `Person` solo copia 6: movimiento + salto + caminar).
+- `PowerFighterConfigurer` **EN PROGRESO**: `PLAYER` -> `PlayerController.new()`; `NPC` sigue con `set_script(npc.gd)`; `NONE` -> `pass`.
+- `SpawnPoint`, `LivesManager`, `FightHUD` **LISTO**: `player_id`/`is Player` migrados al `PlayerController`.
+- `standard_power_fighter.tscn` **LISTO**: root con `script = power_fighter.gd`, para que existan los `@export` sin `set_script`.
+- `player.gd` **LISTO**: eliminado; queda `player_legacy.gd` solo como referencia.
+
+- SFX de personaje **EN PROGRESO**: bandera `_first_jump_frame` (seteada en `_move`) para disparar el sonido de salto; ya no se infiere de `last_force <= 0`. `_process_sound` asigna `stream_*` y hace `play()`, pero sigue con `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D`.
+
+- Limpieza de `Person` **LISTO**: fuera `@export material`/`mesh` y `_get_default_material()`; `_set_material`/`_set_mesh` -> públicas `set_material`/`set_mesh`, ahora sí aplican (`material_override`/`mesh`); `_ready` ya no asigna mesh/material y `GameManager` ya no asigna material.
