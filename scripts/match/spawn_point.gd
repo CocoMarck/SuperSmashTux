@@ -17,7 +17,7 @@ func spawn(config: GlobalUtils.PowerFighterConfig, control_type: GlobalUtils.Con
 	match control_type:
 		# El Player resuelve sus inputs y material según su ID.
 		GlobalUtils.ControlType.PLAYER:
-			power_fighter.player_id = player_id
+			power_fighter.controller.player_id = player_id
 
 	# Configurar direccion de vista del personaje.
 	power_fighter.init_looking_at_right = init_looking_at_right

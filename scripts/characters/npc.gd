@@ -56,13 +56,6 @@ var _jump_intervals : Array[float] = [8.0, 5.5, 4.2]
 var _turbo_jump: bool = false
 var _count_jump_frames: int = 0
 
-# Funciones | Apariencia.
-func _get_default_material() -> Material:
-	'''
-	Material propio de los NPC.
-	'''
-	return GlobalUtils.NPC_MATERIAL
-
 # Funciones | Detección de objetos
 func _check_nearby_objects(delta: float) -> void:
 	# Solo checar si esta en el intervalo
@@ -305,6 +298,14 @@ func _calcule_max_jump_height_frames(fall_acceleration: float, impulse: float) -
 func _process_ai(delta: float, frame: FrameMotionSignals):
 	'''
 	Recomendado hacer esto modular, por ahora puede ser súper monolítico.
+
+	Cosas que no tiene frame:
+	- `fall_acceleration`.
+	- `jump_impulse`.
+	- `_jump_count`.
+	- `_max_jumps`.
+	- `_holding_onto_the_ledge()`.
+	> La intención es que ese obtenga este en frame. Eso no es dificil, lo dificil de decidir es el como, capaz una clase con `getters` a lo que tiene `person` sea suficiente.
 	'''
 	# En person sucede primero el `_collect_input()`
 

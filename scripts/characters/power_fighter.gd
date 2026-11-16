@@ -156,6 +156,19 @@ func _process_attack(direction_buffered: bool, states: MoveStates) -> void:
 	_init_attack_by_move(direction_buffered, states)
 	_init_power_attack_by_move(direction_buffered, states)
 
+func _collect_controller_input(delta: float, frame: FrameMotionSignals) -> void:
+	var input :MoveInput = _controller.get_input(delta, frame)
+	_move_left = input.move_left
+	_move_right = input.move_right
+	_move_up = input.move_up
+	_move_down = input.move_down
+	_walk = input.walk
+	_jump = input.jump
+	_attack = input.attack
+	_power_attack = input.power_attack
+	_grab = input.grab
+	_shield = input.shield
+
 # Init
 func _init() -> void:
 	_max_jumps = 2

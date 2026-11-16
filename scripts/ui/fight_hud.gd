@@ -121,8 +121,8 @@ func _discover_new_fighters() -> void:
 		var power_fighter := child as PowerFighter
 		if power_fighter == null or _entries.has(power_fighter):
 			continue
-		var is_player := power_fighter is Player
-		var slot: int = (power_fighter as Player).player_id if is_player else _next_free_slot()
+		var is_player := power_fighter.controller is PlayerController
+		var slot: int = power_fighter.controller.player_id if is_player else _next_free_slot()
 		_register_fighter(power_fighter, slot, is_player, _game_manager.lives_per_character)
 
 func _next_free_slot() -> int:

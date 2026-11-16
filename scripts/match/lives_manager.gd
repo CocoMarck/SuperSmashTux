@@ -105,8 +105,8 @@ func _get_label(power_fighter: PowerFighter) -> String:
 	'''
 	Nombre legible del peleador, para los prints de debug.
 	'''
-	if power_fighter is Player:
-		var player_id: int = (power_fighter as Player).player_id
+	if power_fighter.controller is PlayerController:
+		var player_id: int = power_fighter.controller.player_id
 		return power_fighter.name + str(GlobalUtils.PlayerId.keys()[player_id])
 	return power_fighter.name
 

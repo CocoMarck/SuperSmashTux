@@ -23,10 +23,6 @@ Objeto de persona. Tiene lo necesario para tener fisicas 2D en un mundo 3D.
 @export_group("Vertical Movement")
 @export var jump_impulse: int = 10
 
-@export_group("Appearance")
-@export var material: Material = null
-@export var mesh: Mesh = null
-
 @export_group("Health")
 @export var hp :int = 100
 @export var damage_percentage :float = 0
@@ -60,7 +56,7 @@ var _animation_player: AnimationPlayer
 
 # `_target_velocity`, pertenece a `GravityBody3D`.
 
-# Propiedades privadas | Animación air jump
+# Propiedades privadas | Saltos | Animación air jump
 var _air_jump_time :float = 0
 var _air_jump_duration :float = 0.5833
 var _current_air_jump_anim :String = "air_jump"
@@ -72,9 +68,10 @@ var _air_acceleration: float = 40.0
 var _ground_friction: float = 100.0
 var _knockback_friction: float = 20.0
 
-# Propiedades privadas | Múltiples saltos
+# Propiedades privadas | Saltos | Múltiples saltos
 var _max_jumps : int = 1
 var _jump_count : int = 0
+var _first_jump_frame: bool = false
 
 # Propiedades privadas | Bajar de plataforma, o bajar rápido.
 var _down_count : int = 0
@@ -161,6 +158,22 @@ var _one_way_coyote_count: float = 0.0
 # NPC Things
 var _last_frame : FrameMotionSignals = null
 
+# Controller things
+var _controller: PersonController3D
+
+# Setter Getter | Controllers
+var controller: PersonController3D:
+	# Establecer controller, lo mete como hijo.
+	get:
+		return _controller
+	set(value):
+		if _controller == value: return
+		if _controller and is_instance_valid(_controller):
+			_controller.queue_free()
+		_controller = value
+		if not _controller.is_inside_tree():
+			add_child(_controller)
+
 
 # Fuciones | Direccion
 func _get_initial_facing() -> Vector3:
@@ -194,28 +207,22 @@ func _set_x_not_zero_value(p_direction: Vector3) -> void:
 			_x_not_zero_value = -1.0
 		_last_x_direction = _x_not_zero_value
 
-# Funciones | Apariencia
-func _set_material( p_meterial: Material ) -> void:
+# Funciones | Apariencia 
+func set_material( p_meterial: Material ) -> void:
 	'''
-	Establecer material al jugador.
-	Aunque preferiblemente sea nomas color.
-	Pero por ahora, asi está bien.
-	'''
-	if p_meterial != null:
-		pass #_mesh_instance.material_override = p_meterial
+	(Publica para que la agrege algun configurer)
+	
+	Establecer material al jugador. Aunque preferiblemente sea nomas color. Pero por ahora, asi está bien.
 
-func _set_mesh( p_mesh: Mesh ) -> void:
+	Solo jala despues del ready. De agregarlo a una escena.
 	'''
-	Establecer malla nueva
-	'''
-	if p_mesh != null:
-		_mesh_instance.mesh = p_mesh
+	_mesh_instance.material_override = p_meterial
 
-func _get_default_material() -> Material:
+func set_mesh( p_mesh: Mesh ) -> void:
 	'''
-	Material por defecto segun el tipo de personaje. Los scripts hijos lo sobrescriben.
+	Establecer malla nueva. Solo jala despues del ready. De agregarlo a una escena.
 	'''
-	return null
+	_mesh_instance.mesh = p_mesh
 
 # Funciones | Input
 func _collect_input() -> void:
@@ -562,7 +569,8 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 				can_jump = false 
 
 	# Salto | Aplicar salto normal o doble salto segun sea el caso.
-	if can_jump and _jump_count < _max_jumps:
+	_first_jump_frame = can_jump and _jump_count < _max_jumps
+	if _first_jump_frame:
 		_target_velocity.y = jump_impulse
 		_clean_heavy_hitstun_state() # Cancelar heavy hitstun si es que hay.
 		_allow_jump_anim = true
@@ -993,12 +1001,6 @@ func _ready() -> void:
 	_skeleton3d = _pivot.get_child(0) # Pivot/Skeleton3D
 	_mesh_instance = _skeleton3d.get_child(0) # Pivot/Skeleton3D/MeshInstance3D
 	_animation_player = model_root.get_node("AnimationPlayer")
-	
-	# Apariencia
-	_set_mesh(mesh)
-	if material == null:
-		material = _get_default_material()
-	_set_material(material)
 
 	# Direccion
 	_pivot.basis = Basis.looking_at(_get_initial_facing())
@@ -1137,8 +1139,6 @@ func _process_sound(delta:float, frame: FrameMotionSignals) -> void:
 	var stepping: bool = (
 			frame.move_states.walking or frame.move_states.running or 
 			frame.move_states.crouch_move)
-	var first_frame_jumping: bool = (
-		frame.move_states.jumping and frame.vertical_force_signals.last_force <= 0)
 	var sound_name: String = ""
 	
 	# on floor movimiento horizontal
@@ -1162,15 +1162,13 @@ func _process_sound(delta:float, frame: FrameMotionSignals) -> void:
 		sound_name = "Sonido caida en piso"
 	
 	# salto
-	if first_frame_jumping:
+	if _first_jump_frame:
 		_audio_stream_player.stream = stream_jump
-		
 		sound_name = "Sonido de salto"
 	
 	# Reproducir
 	if not sound_name == "":
 		print(sound_name)
-		_audio_stream_player.stop()
 		_audio_stream_player.play()
 	
 
@@ -1199,12 +1197,28 @@ func _process_ai(delta: float, frame: FrameMotionSignals) -> void:
 	'''
 	pass
 
+
+# Controller | Functions
+func _collect_controller_input(delta: float, frame: FrameMotionSignals) -> void:
+	var input :MoveInput = _controller.get_input(delta, frame)
+	_move_left = input.move_left
+	_move_right = input.move_right
+	_move_up = input.move_up
+	_move_down = input.move_down
+	_walk = input.walk
+	_jump = input.jump
+
+func _process_controller(delta: float, frame: FrameMotionSignals) -> void:
+	if _controller is PersonController3D:
+		_collect_controller_input(delta, frame)
+
 # Funciones | Procesar
 func _physics_process(delta: float) -> void:
 	'''
 	Funcion de procesamiento de fisicas.
     Este puede ser remplazado segun se necesite.
 	'''
+	_process_controller(delta, _last_frame)
 	_collect_input()
 	
 	# Para la AI, por defecto no hace nada.

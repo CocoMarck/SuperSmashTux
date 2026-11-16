@@ -4,7 +4,6 @@ class_name PowerFighterConfigurer
 const POWER_FIGHTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn")
 
 # Constantes del script.
-const PLAYER_SCRIPT = preload("res://scripts/characters/player.gd")
 const NPC_SCRIPT = preload("res://scripts/characters/npc.gd")
 const POWER_FIGHTER_SCRIPT = preload("res://scripts/characters/power_fighter.gd")
 
@@ -24,11 +23,12 @@ static func create(
 	# Asignar script
 	match control_type:
 		GlobalUtils.ControlType.PLAYER:
-			power_fighter.set_script(PLAYER_SCRIPT)
+			power_fighter.controller = PlayerController.new()
 		GlobalUtils.ControlType.NPC:
+			# NPC necesita un ¡¡cotroller!!
 			power_fighter.set_script(NPC_SCRIPT)
 		GlobalUtils.ControlType.NONE:
-			power_fighter.set_script(POWER_FIGHTER_SCRIPT)
+			pass
 	
 	match config:
 		GlobalUtils.PowerFighterConfig.TUX:

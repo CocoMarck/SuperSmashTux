@@ -81,7 +81,8 @@ func _spawn_all_power_fighters() -> void:
 		var spawn_point = spawn_points[i]
 		var power_fighter: PowerFighter = spawn_point.spawn( 
 			slot.config, slot.control, slot.player_id )
-		power_fighter.material = _get_all_materials()[i]
+
+		
 		var is_player: bool = slot.control == GlobalUtils.ControlType.PLAYER
 		
 		# Agregarles vidas, y el seguimiento de sus vidas.
@@ -91,6 +92,9 @@ func _spawn_all_power_fighters() -> void:
 		# Agregar al mapa
 		power_fighter_spawned.emit(power_fighter, i, is_player, slot.lives)
 		add_child(power_fighter)
+
+		# Apariencia despues de agregar al mapa. Por ahora nada.
+		#power_fighter.set_material( _get_all_materials()[i] )
 
 # Funciones | `PowerFighters`
 func get_valid_fighters() -> Dictionary[int, PowerFighter]:
