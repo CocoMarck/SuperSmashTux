@@ -224,13 +224,6 @@ func set_mesh( p_mesh: Mesh ) -> void:
 	'''
 	_mesh_instance.mesh = p_mesh
 
-# Funciones | Input
-func _collect_input() -> void:
-	'''
-	Funcion para obtener acciones sobrescritas por otro script hijo de character.
-	'''
-	pass
-
 
 # Funciones | Respawn
 func respawn(at_position: Vector3) -> void:
@@ -1195,12 +1188,6 @@ func _process_visual(frame: FrameMotionSignals) -> void:
 	'''
 	pass
 
-func _process_ai(delta: float, frame: FrameMotionSignals) -> void:
-	'''
-	Procesar AI
-	'''
-	pass
-
 
 # Controller | Functions
 func _collect_controller_input(delta: float, frame: FrameMotionSignals) -> void:
@@ -1223,10 +1210,6 @@ func _physics_process(delta: float) -> void:
     Este puede ser remplazado segun se necesite.
 	'''
 	_process_controller(delta, _last_frame)
-	_collect_input()
-	
-	# Para la AI, por defecto no hace nada.
-	_process_ai(delta, _last_frame)
 	
 	# Normal move
 	var frame = _build_frame(delta)

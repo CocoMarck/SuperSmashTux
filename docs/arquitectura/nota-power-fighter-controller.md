@@ -1,13 +1,13 @@
 # Nota: Controladores por composición (`PersonController3D`)
 
-> **Implementado parcialmente** al 2026-11-15. `PlayerController` ya funciona; `NPCController` está
-> escrito pero su `get_input()` todavía es un stub (ver [../ia/nota-ai-npc.md](../ia/nota-ai-npc.md)).
-> Verificado contra el código el 2026-11-15.
+> **Implementado** al 2026-11-16. `PlayerController` y `NpcController` ya funcionan en partida; solo
+> faltan limpieza menor y prueba (ver [../ia/nota-ai-npc.md](../ia/nota-ai-npc.md)).
+> Verificado contra el código el 2026-11-16.
 > Rutas: `scripts/characters/person_controller_3d.gd`, `scripts/characters/player_controller.gd`,
 > `scripts/characters/npc_controller.gd`, `scripts/helpers/frame/move_input.gd`,
-> `scripts/characters/person.gd`, `scripts/characters/power_fighter.gd`,
-> `scripts/match/power_fighter_configurer.gd`, `scripts/match/spawn_point.gd`,
-> `scripts/match/lives_manager.gd`, `scripts/ui/fight_hud.gd`,
+> `scripts/helpers/frame/jump_signals.gd`, `scripts/characters/person.gd`,
+> `scripts/characters/power_fighter.gd`, `scripts/match/power_fighter_configurer.gd`,
+> `scripts/match/spawn_point.gd`, `scripts/match/lives_manager.gd`, `scripts/ui/fight_hud.gd`,
 > `prefabs/standard_power_fighter.tscn`.
 
 ## Resumen
@@ -49,7 +49,7 @@ prefab sobreviven y el prefab se configura sin pedos.
   `Person`/`Fighter`/`PowerFighter`.
 - **`PlayerController`** (`scripts/characters/player_controller.gd`): lee `Input` con el mapa del
   jugador. Guarda `player_id` y `player_input_map`.
-- **`NPCController`** (`scripts/characters/npc_controller.gd`): la IA de `npc.gd` + su `Area3D` de
+- **`NpcController`** (`scripts/characters/npc_controller.gd`): la IA de `npc.gd` + su `Area3D` de
   detección como hija del controller.
 
 Se llama `PersonController3D` (y no `PowerFighterController`) porque lo que se controla es un `Person`
@@ -135,17 +135,16 @@ func _process_controller(delta: float, frame: FrameMotionSignals) -> void:
 - `Person` **copia** el `MoveInput` a sus propios bools (la base copia 6). `PowerFighter` sobreescribe
   `_collect_controller_input` para copiar también `attack`, `grab`, `shield` y `power_attack`.
 - `_physics_process` corre `_process_controller(delta, _last_frame)` **al inicio**, antes de
-  `_collect_input()` y `_build_frame()`.
-- **Nota de limpieza pendiente**: `_physics_process` todavía llama los hooks viejos `_collect_input()`
-  y `_process_ai(delta, _last_frame)`. Están vivos solo para el NPC legacy (`npc.gd`); se borran cuando
-  el NPC migre al controller.
+  `_build_frame()`.
+- Los hooks viejos `_collect_input()` y `_process_ai()` ya se borraron (2026-11-16): el controller
+  es la única fuente de input.
 
 ### Flujo
 
 ```mermaid
 flowchart LR
     IN["Input del jugador"] --> PC["PlayerController"]
-    AI["IA"] --> NC["NPCController"]
+    AI["IA"] --> NC["NpcController"]
     PC -->|MoveInput| P["PowerFighter<br/>(Person / Fighter)"]
     NC -->|MoveInput| P
     P -->|FrameMotionSignals| PC
@@ -165,20 +164,29 @@ neutrales:
 Consecuencia: `Person` copia los valores del `MoveInput` a sus bools, en vez de que el controller los
 escriba directo.
 
-### Huecos a resolver (para el NPC)
+### Datos que la IA saca del person
 
-Si el controller no ve al person, hay datos que hoy `npc.gd` toma de `self` y no están en el frame:
+El controller no ve al person, así que estos datos que hoy `npc.gd` tomaba de `self` viajan por el
+`frame` (no por un objeto de stats aparte):
 
-| Dato | Uso hoy | Decisión |
+| Dato | Uso | Cómo viaja |
 |---|---|---|
 | `global_position` | Detección de plataformas/personas | **Resuelto**: el controller es `Node3D` y su `Area3D` cuelga de él |
-| `_jump_count`, `_max_jumps` | Decidir salto turbo (`_jump_count >= _max_jumps`) | Mandarlos en el `frame` (pendiente) |
-| `jump_impulse`, `fall_acceleration` | Calcular altura de salto | Mandarlos en el `frame` (pendiente) |
-| `_holding_onto_the_ledge()` | Detección de orilla | Exponerlo en el `frame` (pendiente) |
+| `_jump_count`, `_max_jumps` | Decidir salto turbo (`count >= max`) | **Resuelto**: `frame.jump_signals.count` / `.max` |
+| `jump_impulse`, `fall_acceleration` | Calcular altura de salto | **Resuelto**: `frame.jump_signals.impulse` / `.fall_acceleration` |
+| `_holding_onto_the_ledge()` | Detección de orilla | **Decidido**: `frame.move_states.hanging` (falta implementar) |
 
-Se decidió que estos datos viajen por el `frame` (no por un objeto de stats aparte). Falta implementar
-un `JumpSignals` colgado de `FrameMotionSignals` y un `MoveStates.hanging`. Detalle en
-[../ia/nota-ai-npc.md](../ia/nota-ai-npc.md).
+`JumpSignals` (`scripts/helpers/frame/jump_signals.gd`) cuelga de `FrameMotionSignals` y lo llena
+`Person._build_frame`. Detalle en [../ia/nota-ai-npc.md](../ia/nota-ai-npc.md).
+
+#### Decisión: orilla en `MoveStates.hanging`
+
+`MoveStates` ya agrupa los estados de movimiento que sirven para animar (`neutral`, `running`,
+`jumping`, `falling`, ...). Estar colgado de una orilla es un estado más de esos (hoy
+`_holding_onto_the_ledge()` ya se usa para animar en `_not_normal_move_anim`), así que encaja ahí y
+deja a `FrameMotionSignals` solo con sub-objetos, sin un bool suelto rompiendo el patrón.
+**Por ahora** la orilla viaja como bool temporal en `FrameMotionSignals.holding_onto_the_ledge`; falta
+moverla a `MoveStates.hanging` (lo llenaría `Person._get_move_states`).
 
 ## Decisiones tomadas
 
@@ -190,9 +198,10 @@ un `JumpSignals` colgado de `FrameMotionSignals` y un `MoveStates.hanging`. Deta
 - **El NPC arma su propia `Area3D` de detección**, no la base `PersonController3D`.
 - **`player_id` vive en el `PlayerController`.** Implicó ajustar `spawn_point.gd`, `lives_manager.gd`
   y `fight_hud.gd`.
-- **`player.gd` se borró** (queda `player_legacy.gd` de referencia). **`npc.gd` se borra** cuando el
-  refactor funcione.
+- **`player.gd`, `player_legacy.gd` y `npc.gd` se borraron.** El rol vive solo en los controllers.
 - **El configurer usa el setter `controller` en vez de `set_script`.**
+- **La orilla viaja por el `frame`.** Por ahora como bool temporal en `FrameMotionSignals`; su hogar
+  final es `MoveStates.hanging`.
 
 ## Estado actual
 
@@ -201,41 +210,46 @@ un `JumpSignals` colgado de `FrameMotionSignals` y un `MoveStates.hanging`. Deta
 | `PersonController3D` | **LISTO** (base `Node3D`, `get_input` + `MoveInput` reutilizado) |
 | `MoveInput` | **LISTO** (10 flags) |
 | `PlayerController` | **LISTO** (en uso en partida) |
-| `NPCController` | **EN PROGRESO** (`get_input` es stub; falta migrar IA y datos del frame) |
-| `Person.controller` + reenvío | **LISTO** (los hooks viejos siguen vivos para el NPC legacy) |
-| `PowerFighterConfigurer` | **EN PROGRESO** (`PLAYER` migrado; `NPC` sigue con `set_script`) |
+| `NpcController` | **LISTO** (IA migrada; lee `frame.jump_signals` y `frame.holding_onto_the_ledge`) |
+| `JumpSignals` | **LISTO** (`count`/`max`/`impulse`/`fall_acceleration`, colgado de `FrameMotionSignals`) |
+| `Person.controller` + reenvío | **LISTO** (hooks viejos `_collect_input`/`_process_ai` borrados) |
+| `PowerFighterConfigurer` | **LISTO** (`PLAYER`/`NPC` con controller; `POWER_FIGHTER_SCRIPT` sin uso) |
 | `SpawnPoint` / `LivesManager` / `FightHUD` | **LISTO** (`player_id` migrado) |
 | `standard_power_fighter.tscn` | **LISTO** (root con `script = power_fighter.gd`) |
-| Borrar `npc.gd` / `player_legacy.gd` | **FALTA** |
+| Borrar `npc.gd` / `player_legacy.gd` | **LISTO** |
+| Mover la orilla a `MoveStates.hanging` | **FALTA** |
 
 ## Impacto en el resto
 
 | Archivo | Cambio |
 |---|---|
-| `scripts/match/power_fighter_configurer.gd` | `PLAYER` -> `power_fighter.controller = PlayerController.new()`; `NPC` sigue con `set_script(npc.gd)`; `NONE` -> `pass`. Borrar `NPC_SCRIPT`/`POWER_FIGHTER_SCRIPT` al terminar |
+| `scripts/match/power_fighter_configurer.gd` | `PLAYER` -> `power_fighter.controller = PlayerController.new()`; `NPC` -> `NpcController.new()`; `NONE` -> `pass`. Queda `POWER_FIGHTER_SCRIPT` sin uso (borrar) |
 | `scripts/match/spawn_point.gd` | `power_fighter.controller.player_id = player_id` |
 | `scripts/match/lives_manager.gd` | `power_fighter.controller is PlayerController` |
 | `scripts/ui/fight_hud.gd` | `power_fighter.controller is PlayerController` |
 | `prefabs/standard_power_fighter.tscn` | Root con `script = power_fighter.gd` para que existan los `@export` |
-| `scripts/characters/person.gd` | `controller` (nodo hijo) + `_collect_controller_input`/`_process_controller` |
-| `scripts/characters/player.gd`, `npc.gd` | `player.gd` eliminado; `npc.gd` se elimina al terminar |
+| `scripts/characters/person.gd` | `controller` (nodo hijo) + `_collect_controller_input`/`_process_controller`; `_build_frame` llena `jump_signals` y `holding_onto_the_ledge` |
+| `scripts/helpers/frame/jump_signals.gd` | `JumpSignals` nuevo; colgado de `FrameMotionSignals` |
+| `scripts/characters/npc.gd`, `player_legacy.gd` | Eliminados (legacy) |
 
 ## Plan por pasos
 
 1. ~~Documentar (esta nota) y actualizar `docs/estructura.md`.~~
-2. ~~Crear `PersonController3D`, `PlayerController`, `NPCController`.~~
+2. ~~Crear `PersonController3D`, `PlayerController`, `NpcController`.~~
 3. ~~Crear `MoveInput`.~~
 4. ~~Adaptar `person.gd`: `controller`, reenvío de hooks.~~
-5. ~~Migrar `player.gd` a `PlayerController`.~~ **`NPCController` FALTA** (IA + datos del frame).
-6. ~~Configurer `PLAYER` con el controller.~~ **Rama `NPC` FALTA.**
+5. ~~Migrar `player.gd` a `PlayerController` y la IA de `npc.gd` a `NpcController`.~~
+6. ~~Configurer `PLAYER`/`NPC` con el controller.~~
 7. ~~Prefab: root con `script = power_fighter.gd`.~~
 8. ~~Ajustar `lives_manager.gd`, `fight_hud.gd` y `spawn_point.gd`.~~
-9. **FALTA**: borrar `player.gd` legacy y `npc.gd`.
-10. **FALTA**: probar 1 player + 1 NPC, movimiento, ataques y que los `@export` del prefab sobrevivan.
+9. ~~Borrar `player.gd`, `player_legacy.gd` y `npc.gd`, y los hooks viejos de `Person`.~~
+10. **FALTA**: borrar `POWER_FIGHTER_SCRIPT` (sin uso en el configurer).
+11. **FALTA**: mover `holding_onto_the_ledge` de `FrameMotionSignals` a `MoveStates.hanging`.
+12. **FALTA**: probar 1 player + 1 NPC, movimiento, ataques y que los `@export` del prefab sobrevivan.
 
 ## Ver también
 
-- [../ia/nota-ai-npc.md](../ia/nota-ai-npc.md): diseño de la IA y migración pendiente a `NPCController`.
+- [../ia/nota-ai-npc.md](../ia/nota-ai-npc.md): diseño de la IA y su migración (ya aplicada) a `NpcController`.
 - [nota-escalabilidad-personajes.md](nota-escalabilidad-personajes.md): problemas de escalar el roster.
 - [nota-power-fighter-configurer.md](nota-power-fighter-configurer.md): quién arma al peleador hoy.
 - [arquitectura-personajes.md](arquitectura-personajes.md): jerarquía `Person` → `Fighter` → `PowerFighter`.

@@ -14,14 +14,14 @@ supersmashtux/
 │   │   └── character_menu/ # Componentes de la selección de personaje (slot_card, roster_tile...)
 │   └── themes/       # Theme Kernel (theme_kernel.tres)
 ├── scripts/          # GDScripts para nodos y lógica del juego
-│   ├── characters/   # Cadena de personajes: GravityBody3D -> Person -> Fighter -> PowerFighter. Controladores por composicion (nodo hijo): PersonController3D -> PlayerController / NPCController
+│   ├── characters/   # Cadena de personajes: GravityBody3D -> Person -> Fighter -> PowerFighter. Controladores por composicion (nodo hijo): PersonController3D -> PlayerController / NpcController
 │   ├── combat/       # Hitboxes (nodos): AreaGravity3D -> Hitbox -> HitboxDamage / HitboxGrab
 │   ├── platforms/    # Plataformas: Platform, GroundPlatform, OneWayPlatform
 │   ├── match/        # Módulos de la partida, uno por concern (GameManager, LivesManager, MatchTime, MatchCountdown, PowerFighterSlots, CameraFollow, SpawnPoint)
 │   ├── ui/           # Scripts de las pantallas de UI en ui/; components/ refleja ui/components/ (common, hud, character_menu)
 │   └── helpers/      # Clases de apoyo que NO son nodos: RefCounted y contenedores de datos/constantes
 │       ├── combat/   # Datos de ataques: Attacks, PowerAttacks, FightMove, HitboxMove
-│       ├── frame/    # Señales-objeto y estados por frame: MoveSignals, MoveStates, FrameMotionSignals, VerticalForceSignals, MoveInput
+│       ├── frame/    # Señales-objeto y estados por frame: MoveSignals, MoveStates, FrameMotionSignals, VerticalForceSignals, JumpSignals, MoveInput
 │       ├── input/    # Controles: InputSettings (autoload), PlayerInputMap
 │       └── ...       # Sueltos en la raíz: game_balance.gd (constantes de balance), global_utils.gd, power_fighter_data.gd
 ├── materials/        # Materiales (.tres)

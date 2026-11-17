@@ -7,9 +7,9 @@ Documenta los sonidos deseados de personaje (placeholders / uso por defecto) y l
 - **Archivos**: los nueve wavs ya viven en `assets/audio/sfx/`, cada categoría con su randomizer (`rand_jump.tres`, `rand_step.tres`, `rand_land.tres`).
 - **`Person`**: `person.gd` declara `@export var stream_jump` / `stream_step` / `stream_land` (`AudioStreamRandomizer`) y cachea el nodo con `@onready var _audio_stream_player: AudioStreamPlayer3D = $AudioStreamPlayer3D`.
 - **Prefab**: `standard_power_fighter.tscn` ya trae un nodo `AudioStreamPlayer3D` (sin `stream` asignado).
-- **Detección de eventos**: `person.gd::_process_sound` ya calcula los momentos (paso, salto y aterrizaje), pero por ahora solo hace `print`.
-- **Reproducción real**: pendiente. Falta asignar los randomizers y llamar `play()`.
-- **Ojo con `set_script`**: el prefab aún no tiene script en el root, así que el grupo `SFX` no aparece en el inspector; y aunque se asigne, `PowerFighterConfigurer.create()` cambia el script con `set_script`, que **borra los `@export` de escena**. Por eso `stream_jump` llega `null` en partida. Se resuelve cuando se quite el `set_script` (ver [nota-power-fighter-controller.md](../arquitectura/nota-power-fighter-controller.md)).
+- **Detección de eventos**: `person.gd::_process_sound` calcula los momentos (paso, salto y aterrizaje) y asigna el `stream` correspondiente.
+- **Reproducción real**: ya llama `play()`, pero aún trae un `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D` (un `AudioStreamPlayer3D` tiene un solo `stream`).
+- **`set_script` resuelto**: el prefab ya trae `script = power_fighter.gd` en el root y el configurer asigna `controller` (nodo hijo) en vez de `set_script`, así que los `@export` de escena (el grupo `SFX`) sobreviven y `stream_jump` ya no llega `null`. Ver [nota-power-fighter-controller.md](../arquitectura/nota-power-fighter-controller.md).
 - Los sonidos listados aquí son placeholders: sirven como comportamiento por defecto hasta que cada personaje tenga sus propios SFX.
 
 ## Sonidos deseados (ahora)

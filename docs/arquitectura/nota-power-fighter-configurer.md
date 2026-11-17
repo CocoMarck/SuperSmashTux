@@ -83,16 +83,19 @@ Flujo real, en orden:
 1. Instancia el prefab base `res://prefabs/standard_power_fighter.tscn`.
 2. Si la config es `TUX`, llama a `_build_tux_instance()` para cambiar el modelo visual.
    - `STANDARD`: no hace nada, se queda el modelo que trae el prefab.
-3. Asigna el script según el control con un `match`:
-   - `ControlType.PLAYER`: `player.gd`.
-   - `ControlType.NPC`: `npc.gd`.
+3. Asigna el **controller** según el control con un `match`:
+   - `ControlType.PLAYER`: `power_fighter.controller = PlayerController.new()`.
+   - `ControlType.NPC`: `power_fighter.controller = NpcController.new()`.
+   - `ControlType.NONE`: `pass`.
 4. Si la config es `TUX`, llama a `_apply_tux_config()` para aplicar datos del personaje
    (duraciones, momentum y hitboxes propias de Tux).
 5. Retorna el `PowerFighter` ya configurado.
 
-> `_build_tux_instance()` corre antes de `set_script()` para que el modelo ya esté listo cuando se
-> monte el script final. `_apply_tux_config()` corre después para llamar setters del script
-> definitivo. `_ready()` corre hasta el `add_child()` que hace `GameManager`, con todo ya aplicado.
+> Antes se usaba `set_script()` (que borraba los `@export` del prefab); hoy el rol es un nodo hijo y el
+> prefab lleva `script = power_fighter.gd`. Ver [nota-power-fighter-controller.md](nota-power-fighter-controller.md).
+> `_build_tux_instance()` corre antes de asignar el controller para que el modelo ya esté listo;
+> `_apply_tux_config()` corre después para llamar setters del personaje. `_ready()` corre hasta el
+> `add_child()` que hace `GameManager`, con todo ya aplicado.
 
 ### `_build_tux_instance()`
 

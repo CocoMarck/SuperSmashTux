@@ -3,10 +3,12 @@
 /android/
 *.import
 
-# Assets Resources.
+# Assets Resources no permitidos
 *.obj
 *.blend
 *.mp3
+
+# Assets permitidos
 #*.wav # SFX Tener mucho cuidado, no mandar cualquier cosa.
 
 # Archivos de configuración MCP (Claude Code, OpenCode, Codex)

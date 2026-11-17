@@ -79,14 +79,28 @@
 - `PersonController3D` **LISTO**: base `Node3D` que solo decide inputs. Expone `get_input(delta, frame) -> MoveInput` y guarda un `MoveInput` reutilizado. No conoce a `Person`/`Fighter`/`PowerFighter`. (`scripts/characters/person_controller_3d.gd`)
 - `MoveInput` **LISTO**: `RefCounted` con los 10 flags (`move_left/right/up/down`, `jump`, `walk`, `attack`, `grab`, `shield`, `power_attack`). (`scripts/helpers/frame/move_input.gd`)
 - `PlayerController` **LISTO**: lee `Input` con `player_input_map` según `player_id`. Ya reemplaza a `player.gd` en partida.
-- `NPCController` **EN PROGRESO**: ya trae la detección (`Area3D` propia), los helpers y los timers de `npc.gd`, pero `get_input()` es un **stub**: falta migrar el reset y la IA. Aún **no se usa** (el configurer sigue con `set_script(npc.gd)`).
-- `Person` **LISTO**: propiedad `controller` con setter que hace `add_child`; `_collect_controller_input`/`_process_controller`; `_physics_process` llama al controller. Los hooks viejos `_collect_input`/`_process_ai` siguen vivos para el NPC legacy.
+- `NpcController` **LISTO** (2026-11-16): trae la detección (`Area3D` propia), los helpers y los timers de `npc.gd`, y su `get_input()` migró el reset y la IA completa. Ya se usa en partida.
+- `Person` **LISTO**: propiedad `controller` con setter que hace `add_child`; `_collect_controller_input`/`_process_controller`; `_physics_process` llama al controller. Los hooks viejos `_collect_input`/`_process_ai` se borraron (2026-11-16).
 - `PowerFighter` **LISTO**: `_collect_controller_input` copia los 10 campos (la base de `Person` solo copia 6: movimiento + salto + caminar).
-- `PowerFighterConfigurer` **EN PROGRESO**: `PLAYER` -> `PlayerController.new()`; `NPC` sigue con `set_script(npc.gd)`; `NONE` -> `pass`.
+- `PowerFighterConfigurer` **LISTO** (2026-11-16): `PLAYER` -> `PlayerController.new()`; `NPC` -> `NpcController.new()`; `NONE` -> `pass`. (Queda `POWER_FIGHTER_SCRIPT` sin uso, pendiente de borrar.)
 - `SpawnPoint`, `LivesManager`, `FightHUD` **LISTO**: `player_id`/`is Player` migrados al `PlayerController`.
 - `standard_power_fighter.tscn` **LISTO**: root con `script = power_fighter.gd`, para que existan los `@export` sin `set_script`.
-- `player.gd` **LISTO**: eliminado; queda `player_legacy.gd` solo como referencia.
+- `player.gd` **LISTO**: eliminado. `player_legacy.gd` también se borró (2026-11-16).
 
 - SFX de personaje **EN PROGRESO**: bandera `_first_jump_frame` (seteada en `_move`) para disparar el sonido de salto; ya no se infiere de `last_force <= 0`. `_process_sound` asigna `stream_*` y hace `play()`, pero sigue con `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D`.
 
 - Limpieza de `Person` **LISTO**: fuera `@export material`/`mesh` y `_get_default_material()`; `_set_material`/`_set_mesh` -> públicas `set_material`/`set_mesh`, ahora sí aplican (`material_override`/`mesh`); `_ready` ya no asigna mesh/material y `GameManager` ya no asigna material.
+
+#### `2026-11-16`
+> Commit `70891cd`. `NpcController` queda funcional leyendo `JumpSignals`; se borran las clases legacy `npc.gd` y `player_legacy.gd`. Detalle en `docs/arquitectura/nota-power-fighter-controller.md` y `docs/ia/nota-ai-npc.md`.
+
+- `JumpSignals` **LISTO**: `RefCounted` con `count`, `max`, `impulse` y `fall_acceleration`. Se quitó el prefijo `jump_` porque el objeto ya se llama `jump_signals`. Cuelga de `FrameMotionSignals.jump_signals` y `Person._build_frame` lo llena. (`scripts/helpers/frame/jump_signals.gd`)
+- `NpcController` **LISTO**: `get_input()` migró el reset de `_input` y toda la IA (`frame.jump_signals.*` y `frame.holding_onto_the_ledge`). Se instancia con `NpcController.new()`.
+- `PersonController3D.reset_input()` **LISTO**: baja los 10 flags del `MoveInput` reutilizado, para que no se queden pegados entre frames.
+- `FrameMotionSignals` **LISTO**: se le agregó `jump_signals` y `holding_onto_the_ledge` (bool temporal) en `_defaults`/`_init`.
+- `main_menu.gd` **LISTO**: slot de NPC de debug agregado.
+- Legacy **LISTO**: `npc.gd` y `player_legacy.gd` eliminados.
+- Hooks legacy de `Person` **LISTO**: `_collect_input` y `_process_ai` borrados; `_physics_process` ya solo llama `_process_controller(delta, _last_frame)`.
+- Orilla en el frame **DECIDIDO**: mover `holding_onto_the_ledge` de bool suelto en `FrameMotionSignals` a `MoveStates.hanging` (encaja con los demás estados que sirven para animar). **FALTA** implementar.
+- `POWER_FIGHTER_SCRIPT` **FALTA**: constante sin uso en `PowerFighterConfigurer`; borrar.
+- Prueba en partida 1 player + 1 NPC **FALTA**: movimiento, recovery, vagabundeo y ataque por cercanía.

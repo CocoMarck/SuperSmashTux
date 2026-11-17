@@ -1,6 +1,8 @@
 # Arquitectura de personajes — `Person`, `Fighter` y `PowerFighter`
 
 > Jerarquía real (aplicada) de los personajes. Reemplazó al viejo `Character` (ya borrado) con tres capas: `Person` (moverse y recibir daño), `Fighter` (dar trancazos) y `PowerFighter` (golpes con poder + doble salto). El mapa de clases completo vive en `docs/arquitectura/uml-arquitectura.md`.
+>
+> El **rol** (jugador/NPC) ya no es herencia: es un **nodo hijo** `PersonController3D` (`PlayerController` / `NpcController`). Ver [nota-power-fighter-controller.md](nota-power-fighter-controller.md).
 
 ## Jerarquía
 
@@ -8,13 +10,12 @@
 CharacterBody3D
 └─ GravityBody3D        → física: gravedad 2D + colisiones normales y entre cuerpos
    └─ Person            → moverse, saltar, agarrarse de orillas, recibir daño, respawn
-	  └─ Fighter        → trancazos (FightMove), protegerse, agarres
-		 └─ PowerFighter → doble salto + ataques de poder (`PowerAttacks`)
-			├─ Player       → jugador real, con `player_id` e `input_map`
-			└─ NPC          → con IA propia (`_process_ai`)
+      └─ Fighter        → trancazos (FightMove), protegerse, agarres
+         └─ PowerFighter → doble salto + ataques de poder (`PowerAttacks`)
+            └─ (controller hijo: PersonController3D → PlayerController / NpcController)
 ```
 
-> `Character` (la clase vieja) y `OldFightMove` ya se borraron del proyecto (quedan en el historial de git).
+> `Character` (la clase vieja) y `OldFightMove` ya se borraron del proyecto (quedan en el historial de git). `Player`, `NPC`, `player.gd` y `npc.gd` también se borraron con el refactor a controllers (2026-11-16).
 
 ---
 
@@ -39,9 +40,7 @@ Hijo de `GravityBody3D`. Tiene los métodos y propiedades para **moverse y recib
 - **Vida y daño**: `hp` y `damage_percentage` (`@export`). Recibe golpes con `set_damage*`, knockback (`_damage_move`) y animación de daño (`_damage_anim`), incluyendo el giro "tumble" del cuerpo.
 - **Respawn** (`respawn(at_position)`): limpia posición, velocidad, daño, saltos, orilla agarrada y orientación, para reaparecer como nuevo.
 - **Nombre visible**: se usa `Node.name` directamente. **No** declarar `var name` en `Person`: choca con `Node.name` de Godot. Pendiente: helper estático `PersonName` enfocado a `Person` para centralizar cómo se muestra el nombre (cubre `PowerFighter` y futuros hijos).
-- **Entrada por capas**:
-  - `_collect_input()` → **para players**. Por defecto es `pass`; lo llenan los hijos que leen teclado.
-  - `_process_ai(delta, frame)` → **para NPCs**. Hook virtual (por defecto `pass`) que `NPC` sobreescribe; recibe el `FrameMotionSignals` del frame anterior (`_last_frame`). Ver `docs/ia/nota-ai-npc.md`.
+- **Entrada por controller**: un nodo hijo `PersonController3D` decide los inputs. `Person` copia su `MoveInput` a sus bools vía `_collect_controller_input`. El controller **no accede al person**: recibe `delta` y el `FrameMotionSignals` del frame anterior (`_last_frame`) y devuelve su `MoveInput`. Ver [nota-power-fighter-controller.md](nota-power-fighter-controller.md).
 - **Plataformas one-way** (`_one_way_platforms()`, `_get_floor_one_way()`, estado `_drop_through_count`, `_one_way_ignored`, `_last_floor_one_way`, `_one_way_coyote_count`): se atraviesan de abajo hacia arriba pero son sólidas al caer encima, con drop-through voluntario (tap abajo) y coyote time. Vive aquí y no en `GravityBody3D` porque depende del input (`_down_pressed`) y de Person; `Person` llama `_one_way_platforms(...)` justo antes de `_vertical_force(...)`.
 - **Flancos de input**: `_up_pressed` / `_down_pressed` (con su memoria `_was_move_up` / `_was_move_down`) y `_was_jumping` para el salto. Sirven para drop-through y para acciones especiales simultáneas con dos teclas.
 - **Disabled**: Estado en el cual esta incapacitado para moverse adecuadante el person (Solo puede moverse horizontalmente en el aire). Se desbloquea movimiento adecuado en el piso, por x tiempo, o porque se recibio input de moverse.
@@ -50,21 +49,20 @@ Hijo de `GravityBody3D`. Tiene los métodos y propiedades para **moverse y recib
 **Pipeline `_physics_process`** (vive en `Person`; los hijos no lo reescriben, sobreescriben los hooks `_process_*`). Cada hook es `pass` en `Person` salvo donde se indica:
 
 ```
-_collect_input()                 # humano (NPC lo usa para limpiar bools)
-_process_ai(delta, _last_frame)  # IA, con el frame ANTERIOR
-frame = _build_frame(delta)      # gravedad + _move + _get_move_states
-_tick_frame(delta, frame)        # orillas, cooldowns, dirección
-_process_action(delta, frame)    # Fighter: ataque, shield, grab
-_process_damage(delta, frame)    # stuns, knockout
-_cancel_action(frame)            # Fighter
-_process_visual(frame)           # Fighter
+_process_controller(delta, _last_frame)  # input del controller (PlayerController / NpcController)
+frame = _build_frame(delta)              # gravedad + _move + _get_move_states
+_tick_frame(delta, frame)                # orillas, cooldowns, dirección
+_process_action(delta, frame)            # Fighter: ataque, shield, grab
+_process_damage(delta, frame)            # stuns, knockout
+_cancel_action(frame)                    # Fighter
+_process_visual(frame)                   # Fighter
 _animate(delta, frame)
 _process_effects(delta)
-_commit_frame(delta, frame)      # empuje, velocity, move_and_slide()
-_last_frame = frame              # lo lee la IA el próximo frame
+_commit_frame(delta, frame)              # empuje, velocity, move_and_slide()
+_last_frame = frame                      # lo lee el controller el próximo frame
 ```
 
-Por qué `_process_ai` va **antes** de construir el frame: la IA solo setea los mismos bools que el humano (`_move_left`, `_jump`, `_attack`...), y esos se consumen en el mismo `_physics_process`. Lee el frame anterior (`_last_frame`) para saber si estaba en el piso, colgado, etc.
+Por qué `_process_controller` va **antes** de construir el frame: el controller solo setea los mismos bools que el humano (`_move_left`, `_jump`, `_attack`...), y esos se consumen en el mismo `_physics_process`. Lee el frame anterior (`_last_frame`) para saber si estaba en el piso, colgado, etc.
 
 **Pendiente**: morir cuando `hp` llega a 0 (ragdoll + respawn por KO). Hoy la muerte real la detecta `LivesManager` (módulo del `GameManager`) cuando alguien se sale del área jugable.
 
@@ -82,29 +80,31 @@ Hijo de `Person`. Salta una sola vez (hereda `_max_jumps = 1`). Tiene los métod
 
 Hijo de `Fighter`. Tiene **doble salto** (`_max_jumps = 2`, aplicado en `_init()`) y un catálogo `power_attacks` (`PowerAttacks`, 6 `FightMove`: `standard`, `down`, `up` y sus versiones `air_*`), activado con el bool `_power_attack`.
 
-**"Tercer salto"**: no es un salto del contador `_jump_count`. Es el ataque de poder hacia arriba (`up` / `air_up`, con `jump_power: 12.0`): `Fighter._fight_move()` aplica ese `jump_power` a `_target_velocity.y`. Cuando se agotan los saltos, el NPC lo dispara (`_move_up` + `_power_attack`) para recuperarse.
+**"Tercer salto"**: no es un salto del contador `_jump_count`. Es el ataque de poder hacia arriba (`up` / `air_up`, con `jump_power: 12.0`): `Fighter._fight_move()` aplica ese `jump_power` a `_target_velocity.y`. Cuando se agotan los saltos, el `NpcController` lo dispara (`_input.move_up` + `_input.power_attack`) para recuperarse.
 
 **Pendiente**: un poder propio por personaje; hoy todos comparten el mismo catálogo `power_attacks`.
 
 ---
 
-## Entrada de los hijos terminales
+## Controllers (rol)
 
-| Clase | `_collect_input` | Estado |
+El rol vive en un **nodo hijo**, no en herencia. Base común `PersonController3D` (`Node3D`), que expone `get_input(delta, frame) -> MoveInput` y un `MoveInput` reutilizado:
+
+| Clase | Rol | Estado |
 |---|---|---|
-| `Player` | Lee `input_map` (`player1_*` / `player2_*`), incluye `walk`, `grab` y `shield` | Jugador real |
-| `NPC` | Limpia todos los bools; luego `_process_ai` los llena | Con IA (ver abajo) |
+| `PlayerController` | Lee `input_map` (`player1_*` / `player2_*`), incluye `walk`, `grab` y `shield` | Jugador real |
+| `NpcController` | IA propia; arma su `Area3D` de detección | NPC |
 
-## `NPC` — la IA
+## `NpcController` — la IA
 
-Hijo de `PowerFighter` (`scripts/characters/npc.gd`). No toca el gameplay: sobreescribe `_collect_input()` (limpia bools) y `_process_ai()` (los setea), así hereda ataques, escudo y saltos sin cambios.
+Nodo hijo de `PersonController3D` (`scripts/characters/npc_controller.gd`). No toca el gameplay: escribe los mismos flags en su `MoveInput`, así hereda ataques, escudo y saltos sin cambios. Antes era `NPC` (hijo de `PowerFighter`), ya borrado.
 
 - **Detección**: un `Area3D` hijo (`DetectionArea`, caja 16x9x0.5) revisado cada 0.1 s. Guarda `Platform` y `Person` cercanos (`_detected_platforms`, `_detected_persons`).
-- **Recovery**: si está en el aire o colgado de una orilla, apunta a la plataforma más cercana (`_get_nearest_platform_position`), se mueve hacia ella y, si está por encima, activa `_turbo_jump`: salta en el piso, vuelve a saltar al llegar a la altura máxima estimada (`_calcule_max_jump_height_frames`) y, agotados los saltos, usa el ataque de poder hacia arriba (el "tercer salto").
+- **Recovery**: si está en el aire o colgado de una orilla, apunta a la plataforma más cercana (`_get_nearest_platform_position`), se mueve hacia ella y, si está por encima, activa `_turbo_jump`: salta en el piso, vuelve a saltar al llegar a la altura máxima estimada (`_calcule_max_jump_height_frames`, con `frame.jump_signals.impulse` / `.fall_acceleration`) y, agotados los saltos (`frame.jump_signals.count` / `.max`), usa el ataque de poder hacia arriba (el "tercer salto").
 - **Vagabundeo**: fuera del recovery, cambia dirección y velocidad (idle/run/walk/crouch) por temporizadores aleatorios.
 - **Ataque**: si hay un `Person` muy cerca (`_get_very_close_person_position`, diferencia promedio XYZ <= 0.4), se queda quieto y ataca.
 
-Detalle y por qué del hook en `docs/ia/nota-ai-npc.md`; plan de mejora de detección en `docs/ia/nota-npc-aabb-deteccion.md`.
+Detalle y por qué en [../ia/nota-ai-npc.md](../ia/nota-ai-npc.md); plan de mejora de detección en [../ia/nota-npc-aabb-deteccion.md](../ia/nota-npc-aabb-deteccion.md).
 
 ## Estado
 
@@ -121,4 +121,4 @@ Detalle y por qué del hook en `docs/ia/nota-ai-npc.md`; plan de mejora de detec
 | Ataques de poder (6 `FightMove`) + "tercer salto" (`up`) | — | — | ✅ |
 | Poder propio por personaje | — | — | 🕓 |
 | Muerte por `hp == 0` (ragdoll) | 🕓 (planeado) | — | — |
-| Hook `_process_ai` para NPCs | ✅ (virtual; `NPC` lo implementa) | — | — |
+| Rol por controller (`PlayerController` / `NpcController`) | ✅ (nodo hijo `PersonController3D`) | — | — |

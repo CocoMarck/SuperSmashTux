@@ -187,7 +187,7 @@ muerte por `hp == 0` (que es la que dispararía el ragdoll) sigue pendiente.
 
 ### Deuda de diseño: `GameManager` debe tratar `Person`
 
-El `GameManager` hoy trabaja con `PowerFighter` porque el único modo es pelea. Para crecer a otros modos (equipos, objetivos, `Person` que no pelea), conviene que opere sobre **`Person`**, el papá común de `Player`, `NPC`, `PowerFighter` y futuros personajes. Así el manager no arrastra ataques, saltos ni poderes que no todos los modos necesitan.
+El `GameManager` hoy trabaja con `PowerFighter` porque el único modo es pelea. Para crecer a otros modos (equipos, objetivos, `Person` que no pelea), conviene que opere sobre **`Person`**, el papá común de `Fighter`, `PowerFighter` y futuros personajes (el rol jugador/NPC es un controller hijo, no una subclase). Así el manager no arrastra ataques, saltos ni poderes que no todos los modos necesitan.
 
 ## Cómo se documenta la modularidad
 

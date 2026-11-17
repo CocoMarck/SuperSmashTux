@@ -5,8 +5,8 @@
 > `docs/arquitectura/arquitectura-personajes.md`.
 
 El sistema de ataques vive en **`scripts/characters/fighter.gd`** (clase `Fighter`, hija de `Person`). Lo
-extienden `PowerFighter` → `Player` / `NPC`. Todo lo de este doc sale de `Fighter`
-salvo que se diga otra cosa.
+extiende `PowerFighter` (el rol jugador/NPC es un nodo hijo controller, no una subclase). Todo lo de
+este doc sale de `Fighter` salvo que se diga otra cosa.
 
 ## Piezas
 

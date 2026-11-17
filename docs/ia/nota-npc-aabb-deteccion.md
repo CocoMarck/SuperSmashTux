@@ -2,12 +2,12 @@
 
 ## Objetivo
 
-Mejorar la detección de objetos del NPC para considerar sus bordes reales (AABB) en lugar de solo el centro. Esto debe hacerse de forma **generalista** (sin acoplarlo a `Platform`), siguiendo la filosofía actual de `get_nodes_positions()` para poder extenderlo a otros objetos (Fighters, hitboxes, etc.) en el futuro.
+Mejorar la detección de objetos del NPC para considerar sus bordes reales (AABB) en lugar de solo el centro. Esto debe hacerse de forma **generalista** (sin acoplarlo a `Platform`), siguiendo la filosofía actual de `_get_nodes_positions()` para poder extenderlo a otros objetos (Fighters, hitboxes, etc.) en el futuro.
 
 ## Estado actual
 
-- `scripts/characters/npc.gd` guarda solo plataformas en `_detected_platforms: Array[Platform]`.
-- Utiliza `get_nodes_positions()` + `get_nearest_platform_position()` para obtener la plataforma más cercana por su centro.
+- `scripts/characters/npc_controller.gd` guarda solo plataformas en `_detected_platforms: Array[Platform]`.
+- Utiliza `_get_nodes_positions()` + `_get_nearest_platform_position()` para obtener la plataforma más cercana por su centro.
 - Durante el recovery, el NPC apunta al centro de la plataforma.
 - `scripts/platforms/platform.gd` ya cuenta con `get_aabb_global()` (líneas 79-88), que devuelve un `AABB` en coordenadas globales respetando rotación y escala.
 
@@ -19,7 +19,7 @@ Usar únicamente `global_position` (centro) pierde información sobre los bordes
 
 ### 1. Helpers generalistas para obtener AABBs
 
-En `npc.gd` se añadirán funciones que detecten nodos con `has_method("get_aabb_global")`, evitando acoplarse a una clase específica:
+En `npc_controller.gd` se añadirán funciones que detecten nodos con `has_method("get_aabb_global")`, evitando acoplarse a una clase específica:
 
 ```gdscript
 # Obtener AABBs de nodos que implementen get_aabb_global()
@@ -65,7 +65,7 @@ var target_pos = Vector3(target_x, aabb.get_end().y, global_position.z)  # usar 
 
 ### 3. Integración con recovery actual
 
-- Reemplazar `get_nearest_platform_position()` por lógica basada en AABB.
+- Reemplazar `_get_nearest_platform_position()` por lógica basada en AABB.
 - Mantener `_detected_platforms` como `Array[Node3D]`/`Array[Platform]`. Sigue siendo generalista porque solo se comprueba `has_method("get_aabb_global")`.
 - No modificar `Platform`. Esto prepara la detección para almacenar Fighters, hitboxes u otros objetos cuando corresponda.
 - Ajustar `directional_orientation_relative_to_oneself()` o calcular la dirección directamente a partir de `target_pos` si es necesario.
@@ -85,4 +85,4 @@ var target_pos = Vector3(target_x, aabb.get_end().y, global_position.z)  # usar 
 
 ## Veredicto
 
-Cambio fácil, localizado en `npc.gd`, que mejora el comportamiento del recovery sin romper la lógica actual. Además deja la base preparada para extender la detección a otros tipos de objetos.
+Cambio fácil, localizado en `npc_controller.gd`, que mejora el comportamiento del recovery sin romper la lógica actual. Además deja la base preparada para extender la detección a otros tipos de objetos.
