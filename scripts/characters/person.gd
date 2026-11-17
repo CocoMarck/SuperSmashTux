@@ -1018,9 +1018,13 @@ func _build_frame(delta: float) -> FrameMotionSignals:
 	var vertical_force_signals = _vertical_force(delta, _fall_acceleration_multiplier)
 	var move_signals = _move(delta, vertical_force_signals)
 	var move_states = _get_move_states(move_signals)
+	var jump_signals = JumpSignals.new(
+		_jump_count, _max_jumps, jump_impulse, fall_acceleration)
 	return FrameMotionSignals.new({
 		"vertical_force_signals": vertical_force_signals,
-		"move_signals": move_signals, "move_states": move_states
+		"move_signals": move_signals, "move_states": move_states,
+		"jump_signals": jump_signals, 
+		"holding_onto_the_ledge": _holding_onto_the_ledge()
 	})
 
 func _reset_counts_by_impact() -> void:

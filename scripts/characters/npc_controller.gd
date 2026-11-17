@@ -285,6 +285,93 @@ func _calcule_max_jump_height_frames(fall_acceleration: float, impulse: float) -
 
 # Funciones remplazadas
 func get_input(delta: float, frame: FrameMotionSignals) -> MoveInput:
+	reset_input()
+
+	# Detectar objetos mas que entraron al area y trabajar con ello.
+	_check_nearby_objects(delta)
+
+	# Validar que existan datos para el NPC
+	if frame == null:
+		return _input
+
+	# Mover NPC
+	if (
+		(not frame.vertical_force_signals.on_floor or frame.holding_onto_the_ledge) and
+		not _try_recovery):
+		_try_recovery = true
+	if (
+		_try_recovery and frame.vertical_force_signals.on_floor and
+		not frame.holding_onto_the_ledge):
+		_try_recovery = false
+
+	if (
+		(_try_recovery and _detected_platforms.size() > 0) or 
+		frame.holding_onto_the_ledge):
+		var nearest_platform_position :Vector3 = _get_nearest_platform_position()
+		var direction :Vector3 = _directional_orientation_relative_to_oneself(
+			nearest_platform_position)
+		_turbo_jump = false
+		if direction.x == 1.0:
+			_pin_left = false
+			_pin_right = true
+		elif direction.x == -1.0:
+			_pin_left = true
+			_pin_right = false
+		if direction.y == 1.0 or frame.holding_onto_the_ledge:
+			_turbo_jump = true
+		#print("Posición de plataforma mas cercana: ", nearest_platform_position)
+	
+	# Cambio de direccion y velocidad aleatorio.
+	if not _try_recovery:
+		_random_horizontal_move(delta)
+		_random_speed_move(delta)
+	
+	# Ataque si esta muy cerca algun Person.
+	if _detected_persons.size() != 0 and not _try_recovery:
+		if _get_very_close_person_position() != Vector3.ZERO:
+			# Forzar estar paradito
+			_pin_left = false
+			_pin_right = false
+			# Atacar
+			_input.attack = true
+	
+	# Commit movimiento horizonal
+	if _npc_horizontal_move or _try_recovery:
+		# Mover, ya sea izq o der. No ambos.
+		if not (_pin_left and _pin_right):
+			_input.move_left = _pin_left
+			_input.move_right = _pin_right
+
+	# Commit movimiento vertical
+	if _turbo_jump and _try_recovery:
+		# Salto en el piso.
+		if frame.vertical_force_signals.on_floor:#and frame.jump_signals.count == 0:
+			_input.jump = true
+			_count_jump_frames = 0
+		# Los demas saltos
+		var reached_max_jumps :bool = frame.jump_signals.count >= frame.jump_signals.max
+		if _input.jump == false or reached_max_jumps:
+			var frames :int = _calcule_max_jump_height_frames(frame.jump_signals.fall_acceleration*delta, frame.jump_signals.impulse)
+			#var short_time_in_the_air :bool = frame.vertical_force_signals.air_count <= delta
+			#print(frames)
+			if (_count_jump_frames >= frames):
+				if reached_max_jumps:
+					_input.move_up = true
+					_input.power_attack = true
+					_count_jump_frames = 0
+				else:
+					_input.jump = true
+					_count_jump_frames = 0
+		# Contar frames de salto.
+		_count_jump_frames += 1
+	if _pin_down and not _turbo_jump: # Pioridad a salto
+		_input.move_down = true
+
+	# Commit velocidad
+	if not _try_recovery:
+		if _pin_walk:
+			_input.walk = true
+	
 	return _input
 
 # Inicializar area de detección/vista de NPC
