@@ -1,8 +1,8 @@
 # Nota: Controladores por composición (`PersonController3D`)
 
-> **Implementado** al 2026-11-16. `PlayerController` y `NpcController` ya funcionan en partida; solo
-> faltan limpieza menor y prueba (ver [../ia/nota-ai-npc.md](../ia/nota-ai-npc.md)).
-> Verificado contra el código el 2026-11-16.
+> **Implementado** al 2026-11-16. `PlayerController` y `NpcController` ya funcionan en partida, la
+> limpieza menor está hecha y la prueba 1 player + 1 NPC pasó (ver [../ia/nota-ai-npc.md](../ia/nota-ai-npc.md)).
+> Verificado contra el working tree el 2026-11-16.
 > Rutas: `scripts/characters/person_controller_3d.gd`, `scripts/characters/player_controller.gd`,
 > `scripts/characters/npc_controller.gd`, `scripts/helpers/frame/move_input.gd`,
 > `scripts/helpers/frame/jump_signals.gd`, `scripts/characters/person.gd`,
@@ -174,7 +174,7 @@ El controller no ve al person, así que estos datos que hoy `npc.gd` tomaba de `
 | `global_position` | Detección de plataformas/personas | **Resuelto**: el controller es `Node3D` y su `Area3D` cuelga de él |
 | `_jump_count`, `_max_jumps` | Decidir salto turbo (`count >= max`) | **Resuelto**: `frame.jump_signals.count` / `.max` |
 | `jump_impulse`, `fall_acceleration` | Calcular altura de salto | **Resuelto**: `frame.jump_signals.impulse` / `.fall_acceleration` |
-| `_holding_onto_the_ledge()` | Detección de orilla | **Decidido**: `frame.move_states.hanging` (falta implementar) |
+| `_holding_onto_the_ledge()` | Detección de orilla | **LISTO**: `frame.move_states.hanging` |
 
 `JumpSignals` (`scripts/helpers/frame/jump_signals.gd`) cuelga de `FrameMotionSignals` y lo llena
 `Person._build_frame`. Detalle en [../ia/nota-ai-npc.md](../ia/nota-ai-npc.md).
@@ -185,8 +185,8 @@ El controller no ve al person, así que estos datos que hoy `npc.gd` tomaba de `
 `jumping`, `falling`, ...). Estar colgado de una orilla es un estado más de esos (hoy
 `_holding_onto_the_ledge()` ya se usa para animar en `_not_normal_move_anim`), así que encaja ahí y
 deja a `FrameMotionSignals` solo con sub-objetos, sin un bool suelto rompiendo el patrón.
-**Por ahora** la orilla viaja como bool temporal en `FrameMotionSignals.holding_onto_the_ledge`; falta
-moverla a `MoveStates.hanging` (lo llenaría `Person._get_move_states`).
+**LISTO**: la orilla viaja en `MoveStates.hanging` — la llena `Person._build_frame` y la lee
+`NpcController.get_input()`. El bool temporal `FrameMotionSignals.holding_onto_the_ledge` se borró.
 
 ## Decisiones tomadas
 
@@ -200,8 +200,7 @@ moverla a `MoveStates.hanging` (lo llenaría `Person._get_move_states`).
   y `fight_hud.gd`.
 - **`player.gd`, `player_legacy.gd` y `npc.gd` se borraron.** El rol vive solo en los controllers.
 - **El configurer usa el setter `controller` en vez de `set_script`.**
-- **La orilla viaja por el `frame`.** Por ahora como bool temporal en `FrameMotionSignals`; su hogar
-  final es `MoveStates.hanging`.
+- **La orilla viaja por el `frame`, en `MoveStates.hanging`.**
 
 ## Estado actual
 
@@ -210,26 +209,30 @@ moverla a `MoveStates.hanging` (lo llenaría `Person._get_move_states`).
 | `PersonController3D` | **LISTO** (base `Node3D`, `get_input` + `MoveInput` reutilizado) |
 | `MoveInput` | **LISTO** (10 flags) |
 | `PlayerController` | **LISTO** (en uso en partida) |
-| `NpcController` | **LISTO** (IA migrada; lee `frame.jump_signals` y `frame.holding_onto_the_ledge`) |
+| `NpcController` | **LISTO** (IA migrada; lee `frame.jump_signals` y `frame.move_states.hanging`) |
 | `JumpSignals` | **LISTO** (`count`/`max`/`impulse`/`fall_acceleration`, colgado de `FrameMotionSignals`) |
 | `Person.controller` + reenvío | **LISTO** (hooks viejos `_collect_input`/`_process_ai` borrados) |
-| `PowerFighterConfigurer` | **LISTO** (`PLAYER`/`NPC` con controller; `POWER_FIGHTER_SCRIPT` sin uso) |
+| `PowerFighterConfigurer` | **LISTO** (`PLAYER`/`NPC` con controller; sin `POWER_FIGHTER_SCRIPT`) |
 | `SpawnPoint` / `LivesManager` / `FightHUD` | **LISTO** (`player_id` migrado) |
 | `standard_power_fighter.tscn` | **LISTO** (root con `script = power_fighter.gd`) |
 | Borrar `npc.gd` / `player_legacy.gd` | **LISTO** |
-| Mover la orilla a `MoveStates.hanging` | **FALTA** |
+| Mover la orilla a `MoveStates.hanging` | **LISTO** |
+| Borrar `POWER_FIGHTER_SCRIPT` | **LISTO** |
+| Prueba 1 player + 1 NPC | **LISTO** (movimiento, recovery, vagabundeo y ataque por cercanía) |
 
 ## Impacto en el resto
 
 | Archivo | Cambio |
 |---|---|
-| `scripts/match/power_fighter_configurer.gd` | `PLAYER` -> `power_fighter.controller = PlayerController.new()`; `NPC` -> `NpcController.new()`; `NONE` -> `pass`. Queda `POWER_FIGHTER_SCRIPT` sin uso (borrar) |
+| `scripts/match/power_fighter_configurer.gd` | `PLAYER` -> `power_fighter.controller = PlayerController.new()`; `NPC` -> `NpcController.new()`; `NONE` -> `pass`. Sin `POWER_FIGHTER_SCRIPT` |
 | `scripts/match/spawn_point.gd` | `power_fighter.controller.player_id = player_id` |
 | `scripts/match/lives_manager.gd` | `power_fighter.controller is PlayerController` |
 | `scripts/ui/fight_hud.gd` | `power_fighter.controller is PlayerController` |
 | `prefabs/standard_power_fighter.tscn` | Root con `script = power_fighter.gd` para que existan los `@export` |
-| `scripts/characters/person.gd` | `controller` (nodo hijo) + `_collect_controller_input`/`_process_controller`; `_build_frame` llena `jump_signals` y `holding_onto_the_ledge` |
+| `scripts/characters/person.gd` | `controller` (nodo hijo) + `_collect_controller_input`/`_process_controller`; `_build_frame` llena `jump_signals` y `move_states.hanging` |
 | `scripts/helpers/frame/jump_signals.gd` | `JumpSignals` nuevo; colgado de `FrameMotionSignals` |
+| `scripts/helpers/frame/move_states.gd` | `hanging` agregado a los estados |
+| `scripts/helpers/frame/frame_motion_signals.gd` | Fuera el bool suelto `holding_onto_the_ledge` |
 | `scripts/characters/npc.gd`, `player_legacy.gd` | Eliminados (legacy) |
 
 ## Plan por pasos
@@ -243,9 +246,9 @@ moverla a `MoveStates.hanging` (lo llenaría `Person._get_move_states`).
 7. ~~Prefab: root con `script = power_fighter.gd`.~~
 8. ~~Ajustar `lives_manager.gd`, `fight_hud.gd` y `spawn_point.gd`.~~
 9. ~~Borrar `player.gd`, `player_legacy.gd` y `npc.gd`, y los hooks viejos de `Person`.~~
-10. **FALTA**: borrar `POWER_FIGHTER_SCRIPT` (sin uso en el configurer).
-11. **FALTA**: mover `holding_onto_the_ledge` de `FrameMotionSignals` a `MoveStates.hanging`.
-12. **FALTA**: probar 1 player + 1 NPC, movimiento, ataques y que los `@export` del prefab sobrevivan.
+10. ~~Borrar `POWER_FIGHTER_SCRIPT` (sin uso en el configurer).~~
+11. ~~Mover `holding_onto_the_ledge` de `FrameMotionSignals` a `MoveStates.hanging`.~~
+12. ~~Probar 1 player + 1 NPC, movimiento, ataques y que los `@export` del prefab sobrevivan.~~
 
 ## Ver también
 

@@ -10,9 +10,9 @@
 CharacterBody3D
 └─ GravityBody3D        → física: gravedad 2D + colisiones normales y entre cuerpos
    └─ Person            → moverse, saltar, agarrarse de orillas, recibir daño, respawn
-      └─ Fighter        → trancazos (FightMove), protegerse, agarres
-         └─ PowerFighter → doble salto + ataques de poder (`PowerAttacks`)
-            └─ (controller hijo: PersonController3D → PlayerController / NpcController)
+	  └─ Fighter        → trancazos (FightMove), protegerse, agarres
+		 └─ PowerFighter → doble salto + ataques de poder (`PowerAttacks`)
+			└─ (controller hijo: PersonController3D → PlayerController / NpcController)
 ```
 
 > `Character` (la clase vieja) y `OldFightMove` ya se borraron del proyecto (quedan en el historial de git). `Player`, `NPC`, `player.gd` y `npc.gd` también se borraron con el refactor a controllers (2026-11-16).

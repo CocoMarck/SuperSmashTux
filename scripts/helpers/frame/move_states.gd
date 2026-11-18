@@ -20,10 +20,12 @@ var air_down: bool
 var air_forward: bool
 var air_back: bool
 
+var hanging: bool
+
 var _defaults :Dictionary = {
 	"walking": false, "moving": false, "rising": false, "jumping": false, 
 	"falling": false, "neutral": false, "running": false, "neutral_up": false, 
-	"neutral_crouch": false, "crouch_move": false, "neutral_air": false, "air_move": false, "air_up": false, "air_down": false, "air_forward": false, "air_back": false,
+	"neutral_crouch": false, "crouch_move": false, "neutral_air": false, "air_move": false, "air_up": false, "air_down": false, "air_forward": false, "air_back": false, "hanging": false
 }
 
 func _init(
@@ -51,3 +53,5 @@ func _init(
 	air_down = config["air_down"]
 	air_forward = config["air_forward"]
 	air_back = config["air_back"]
+
+	hanging = config["hanging"]

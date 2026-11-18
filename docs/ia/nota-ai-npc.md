@@ -69,8 +69,7 @@ general en [../arquitectura/nota-power-fighter-controller.md](../arquitectura/no
    - `frame.jump_signals.count` / `.max` (antes `_jump_count` / `_max_jumps`).
    - `frame.jump_signals.impulse` / `.fall_acceleration` (cálculo de altura de salto,
      `_calcule_max_jump_height_frames`).
-   - La orilla: hoy `frame.holding_onto_the_ledge` (bool temporal); **decidido** moverlo a
-     `MoveStates.hanging` (falta implementar).
+   - La orilla: `frame.move_states.hanging` (antes bool temporal en `FrameMotionSignals`; ya migrado).
 3. **Configurer**: rama `NPC` -> `power_fighter.controller = NpcController.new()`; se borró `NPC_SCRIPT`.
 4. **Hooks viejos de `Person`** (`_collect_input` y `_process_ai`) borrados.
 
@@ -89,8 +88,8 @@ general en [../arquitectura/nota-power-fighter-controller.md](../arquitectura/no
   `PlayerController`. No crear uno nuevo por frame.
 - El nombre de clase es `NpcController` (no `NPCController`); el player es `PlayerController`.
 
-### Pendiente
+### Ya resuelto (2026-11-16)
 
-- Mover la orilla de `FrameMotionSignals.holding_onto_the_ledge` a `MoveStates.hanging`.
-- Borrar `POWER_FIGHTER_SCRIPT` (sin uso) en el configurer.
-- Probar 1 player + 1 NPC en partida: movimiento, recovery, vagabundeo y ataque por cercanía.
+- ~~Mover la orilla de `FrameMotionSignals.holding_onto_the_ledge` a `MoveStates.hanging`.~~
+- ~~Borrar `POWER_FIGHTER_SCRIPT` (sin uso) en el configurer.~~
+- ~~Probar 1 player + 1 NPC en partida: movimiento, recovery, vagabundeo y ataque por cercanía.~~

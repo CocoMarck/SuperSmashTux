@@ -3,9 +3,6 @@ class_name PowerFighterConfigurer
 # Constantes prefab
 const POWER_FIGHTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn")
 
-# Constantes del script.
-const POWER_FIGHTER_SCRIPT = preload("res://scripts/characters/power_fighter.gd")
-
 # Assets de personajes
 const TUX_FIGHTER_ASSET = preload("res://assets/tux_fighter.glb")
 
@@ -249,3 +246,68 @@ static func _apply_tux_config(power_fighter: PowerFighter) -> void:
 	]
 	
 	power_fighter.power_attacks.air_down.duration = 1.0417
+	power_fighter.power_attacks.air_down.hitboxes_moves = [
+		# Frente
+		HitboxMove.new({
+			"id": 1, "damage": 2, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.7,0.6,0.0), "direction": Vector3(-1.0,-1.0,0.0),
+			"init_time_ratio": 0.2, "duration": 0.18
+		}),
+		HitboxMove.new({
+			"id": 2, "damage": 2, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.8,-0.5,0.0), "direction": Vector3(-1.0,1.0,0.0),
+			"init_time_ratio": 0.2, "duration": 0.18
+		}),
+		HitboxMove.new({
+			"id": 3, "damage": 2, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.7,0.6,0.0), "direction": Vector3(-1.0,-1.0,0.0),
+			"init_time_ratio": 0.4, "duration": 0.18
+		}),
+		HitboxMove.new({
+			"id": 4, "damage": 2, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.8,-0.5,0.0), "direction": Vector3(-1.0,1.0,0.0),
+			"init_time_ratio": 0.4, "duration": 0.18
+		}),
+		HitboxMove.new({
+			"id": 5, "damage": 3, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.7,0.6,0.0), "direction": Vector3(1.0,1.0,0.0),
+			"init_time_ratio": 0.6, "duration": 0.18
+		}),
+		HitboxMove.new({
+			"id": 6, "damage": 3, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(0.8,-0.5,0.0), "direction": Vector3(1.0,-1.0,0.0),
+			"init_time_ratio": 0.6, "duration": 0.18
+		}),
+		
+		# Espalda
+		HitboxMove.new({
+			"id": 7, "damage": 2, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(-0.7,0.6,0.0), "direction": Vector3(-1.0,-1.0,0.0),
+			"init_time_ratio": 0.2, "duration": 0.18
+		}),
+		HitboxMove.new({
+			"id": 8, "damage": 2, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(-0.8,-0.5,0.0), "direction": Vector3(-1.0,1.0,0.0),
+			"init_time_ratio": 0.2, "duration": 0.18
+		}),
+		HitboxMove.new({
+			"id": 9, "damage": 2, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(-0.7,0.6,0.0), "direction": Vector3(-1.0,-1.0,0.0),
+			"init_time_ratio": 0.4, "duration": 0.18
+		}),
+		HitboxMove.new({
+			"id": 10, "damage": 2, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(-0.8,-0.5,0.0), "direction": Vector3(-1.0,1.0,0.0),
+			"init_time_ratio": 0.4, "duration": 0.18
+		}),
+		HitboxMove.new({
+			"id": 11, "damage": 3, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(-0.7,0.6,0.0), "direction": Vector3(-1.0,1.0,0.0),
+			"init_time_ratio": 0.6, "duration": 0.18
+		}),
+		HitboxMove.new({
+			"id": 12, "damage": 3, "size": Vector3(0.5,0.5,0.5),
+			"position": Vector3(-0.8,-0.5,0.0), "direction": Vector3(-1.0,-1.0,0.0),
+			"init_time_ratio": 0.6, "duration": 0.18
+		}),
+	]

@@ -296,17 +296,17 @@ func get_input(delta: float, frame: FrameMotionSignals) -> MoveInput:
 
 	# Mover NPC
 	if (
-		(not frame.vertical_force_signals.on_floor or frame.holding_onto_the_ledge) and
+		(not frame.vertical_force_signals.on_floor or frame.move_states.hanging) and
 		not _try_recovery):
 		_try_recovery = true
 	if (
 		_try_recovery and frame.vertical_force_signals.on_floor and
-		not frame.holding_onto_the_ledge):
+		not frame.move_states.hanging):
 		_try_recovery = false
 
 	if (
 		(_try_recovery and _detected_platforms.size() > 0) or 
-		frame.holding_onto_the_ledge):
+		frame.move_states.hanging):
 		var nearest_platform_position :Vector3 = _get_nearest_platform_position()
 		var direction :Vector3 = _directional_orientation_relative_to_oneself(
 			nearest_platform_position)
@@ -317,7 +317,7 @@ func get_input(delta: float, frame: FrameMotionSignals) -> MoveInput:
 		elif direction.x == -1.0:
 			_pin_left = true
 			_pin_right = false
-		if direction.y == 1.0 or frame.holding_onto_the_ledge:
+		if direction.y == 1.0 or frame.move_states.hanging:
 			_turbo_jump = true
 		#print("Posición de plataforma mas cercana: ", nearest_platform_position)
 	
