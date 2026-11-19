@@ -101,16 +101,17 @@
 
 ### FALTA / en progreso
 
-#### `2026-11-08`
+#### `2026-11`
 - `GameManager` **FALTA**: módulo de velocidad de juego (cámara lenta, freeze al golpe killer).
 - `GameManager` **FALTA**: módulo del HUD de partida.
 
-#### `2026-11-09`
 - `GameManager` **FALTA**: tratar `Person` (el papá) en vez de `PowerFighter`, para crecer a más modos de juego.
-- Helper de nombres **FALTA**: utilidad estática enfocada a `Person` (cubre `PowerFighter` y futuros hijos), con `Node.name` directo; sin propiedad `name` nueva.
+- Helper de nombres **LISTO**: utilidad estática enfocada a `Person` (cubre `PowerFighter` y futuros hijos), con `Node.character_name`, string de nombre de peleador.
 
-#### `2026-11-15`
-- SFX de personaje **EN PROGRESO**: bandera `_first_jump_frame` (en `_move`) ya dispara el sonido de salto sin inferirlo de `last_force <= 0`; `_process_sound` asigna `stream_*` y hace `play()`, pero sigue con `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D`. Los `.wav` ya entraron (commit `7a2ff1f`).
+- SFX de `Person` **EN PROGRESO**: bandera `_first_jump_frame` (en `_move`) ya dispara el sonido de salto sin inferirlo de `last_force <= 0`; `_process_sound` asigna `stream_*` y hace `play()`, pero sigue con `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D`. Los `.wav` ya entraron (commit `7a2ff1f`).
 
-#### `2026-11-17`
 - **FALTA** `PowerFighterConfigurer`: Usar archivos de configuración que contengan la configuración del peleador, junto a la ruta del `glb`. Puede ser un `file.tres` (poco util para hacer personajes despues de compilar el juego, pero mas adecuado), o un `file.json` (abra que validar datos, y parsear).
+
+- **FALTA** `NpcController`: Detección de posiciones con `AABB detection`.
+
+- **FALTA** `CharacterMenu`: Remplazar el modo que se obtinen los nombres de los personajes, ahora debe ser con un simple `PowerFighter.character_name`.

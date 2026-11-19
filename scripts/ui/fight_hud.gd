@@ -154,7 +154,8 @@ func _register_fighter(power_fighter: PowerFighter, slot: int, is_player: bool, 
 	entry.lives = max_lives
 	entry.label = KernelPalette.slot_label(slot, is_player)
 	entry.color = KernelPalette.player_color(slot)
-	entry.display_name = _fighter_name(power_fighter, slot)
+	#entry.display_name = _fighter_name(power_fighter, slot)
+	entry.display_name = power_fighter.character_name
 
 	if is_new:
 		# Primero al árbol y luego setup: los nodos únicos se resuelven en _ready.
@@ -264,6 +265,8 @@ func _hide_world_widgets(entry: FighterEntry) -> void:
 # Funciones | Señales del GameManager
 func _fighter_name(power_fighter: PowerFighter, slot: int) -> String:
 	'''
+	Función legacy y que no se usa: pero se podria hacer refactor para custom tags. Que seria nombre de usuario, no del peleador.
+
 	Nombre del personaje: el que se eligió para ese slot en la selección (PowerFightersSetup). Si la partida
 	se abrió directo sin selección, usa display_name del peleador o el nombre por defecto.
 	'''

@@ -57,6 +57,6 @@ func _start_debug_match() -> void:
 	data_p3.config = GlobalUtils.PowerFighterConfig.TUX
 	data_p3.control = GlobalUtils.ControlType.NPC
 	data_p3.player_id = 0
-	level.power_fighter_slots.set_slot(0, data_p3)
+	#level.power_fighter_slots.set_slot(0, data_p3)
 
 	get_tree().change_scene_to_node(level)

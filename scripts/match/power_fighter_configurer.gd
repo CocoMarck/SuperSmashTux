@@ -48,6 +48,7 @@ static func _build_tux_instance(power_fighter: Node3D) -> void:
 	asset.queue_free()
 
 static func _apply_tux_config(power_fighter: PowerFighter) -> void:
+	power_fighter.character_name = "Tux"
 	power_fighter.set_duration_of_anims(0.5)
 	power_fighter.set_momentum(
 		30.0, 50.0, 20.0, 20.0)

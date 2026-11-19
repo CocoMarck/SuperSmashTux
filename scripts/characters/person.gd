@@ -15,6 +15,8 @@ Objeto de persona. Tiene lo necesario para tener fisicas 2D en un mundo 3D.
 # Constantes de agarre de orillas y plataformas de un solo sentido en `GameBalance`.
 
 # Propiedades publicas
+@export var character_name: StringName = &""
+
 @export_group("Horizontal Movement")
 @export var walking_speed: int = 3
 @export var running_speed: int = 8
