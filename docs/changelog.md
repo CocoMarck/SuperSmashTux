@@ -99,6 +99,13 @@
 - `Person`: fuera `@export material`/`mesh` y `_get_default_material()`; `_set_material`/`_set_mesh` pasaron a `set_material`/`set_mesh` y ahora sí aplican. `GameManager` ya no asigna material.
 - `Person`: hard landing con duración escalada y bloqueo de inputs, y animación de cooldown al caer en el piso (`2026-11-12`).
 
+#### Identidad y configuración de personajes
+- `Person.id` **LISTO**: `StringName` en vez de `character_name`; el prefab trae `id = &"standard"` y `HitboxDamage` loguea `body.id` (`2026-11-20`).
+- `PowerFighterIdentity` **LISTO**: `RefCounted` con `id`, `character_name`, `model` y `position_offset` (`2026-11-20`).
+- `PowerFighterConfigurer` **LISTO**: `TUX_IDENTITY_CONFIG` apunta a `data/power_fighters/tux.identity.cfg`; `_load_identity()` usa `ConfigFile` y no valida nada a propósito (data mala = crash) (`2026-11-20`).
+- `character_name` **LISTO**: el nombre completo (`"Tux"`) se guarda en la identity config; HUD y CharacterMenu **deben** resolverlo desde ahí, aún pendiente (`2026-11-20`).
+- Modelo y offset **LISTO**: `_build_instance()` toma `model` y `position_offset` del cfg; `_apply_tux_config()` asigna `power_fighter.id = identity.id` (`2026-11-20`).
+
 ### FALTA / en progreso
 
 #### `2026-11`
@@ -106,12 +113,14 @@
 - `GameManager` **FALTA**: módulo del HUD de partida.
 
 - `GameManager` **FALTA**: tratar `Person` (el papá) en vez de `PowerFighter`, para crecer a más modos de juego.
-- Helper de nombres **LISTO**: utilidad estática enfocada a `Person` (cubre `PowerFighter` y futuros hijos), con `Node.character_name`, string de nombre de peleador.
+- Helper de nombres **FALTA**: la utilidad estática enfocada a `Person` (cubre `PowerFighter` y futuros hijos) debe usar `Person.id` y resolver `character_name` desde la identity config; ya no aplica `Node.character_name`.
 
 - SFX de `Person` **EN PROGRESO**: bandera `_first_jump_frame` (en `_move`) ya dispara el sonido de salto sin inferirlo de `last_force <= 0`; `_process_sound` asigna `stream_*` y hace `play()`, pero sigue con `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D`. Los `.wav` ya entraron (commit `7a2ff1f`).
 
-- **FALTA** `PowerFighterConfigurer`: Usar archivos de configuración que contengan la configuración del peleador, junto a la ruta del `glb`. Puede ser un `file.tres` (poco util para hacer personajes despues de compilar el juego, pero mas adecuado), o un `file.json` (abra que validar datos, y parsear).
+- `PowerFighterConfigurer` **EN PROGRESO**: la identity de Tux ya se lee desde `.cfg` (`TUX_IDENTITY_CONFIG` + `ConfigFile`); faltan `stats`, `attacks` y `power_attacks`, y que los consumidores resuelvan el nombre desde la identity.
 
 - **FALTA** `NpcController`: Detección de posiciones con `AABB detection`.
 
-- **FALTA** `CharacterMenu`: Remplazar el modo que se obtinen los nombres de los personajes, ahora debe ser con un simple `PowerFighter.character_name`.
+- **FALTA** `CharacterMenu`: resolver el nombre de los personajes desde `PowerFighterIdentity` (identity config), ya que `PowerFighter.character_name` ya no existe.
+
+- `FightHUD` **FALTA**: hoy `entry.display_name = power_fighter.id` (muestra `tux`); debe mostrar `character_name` desde la identity config (`Tux`).

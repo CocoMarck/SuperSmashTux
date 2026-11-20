@@ -6,15 +6,21 @@ const POWER_FIGHTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn"
 # Assets de personajes
 const TUX_FIGHTER_ASSET = preload("res://assets/tux_fighter.glb")
 
+# Config hardcode jejej (Despues solo se leera los cfg del dir)
+const TUX_IDENTITY_CONFIG: String = "res://data/power_fighters/tux.identity.cfg"
+
 # Funciones
 static func create( 
 	config: GlobalUtils.PowerFighterConfig, control_type: GlobalUtils.ControlType ) -> PowerFighter:
 
 	# Preparar instancia
 	var power_fighter = POWER_FIGHTER_PREFAB.instantiate()
+	var identity: PowerFighterIdentity
 	match config:
 		GlobalUtils.PowerFighterConfig.TUX:
-			_build_tux_instance(power_fighter)
+			identity = _load_identity(TUX_IDENTITY_CONFIG)
+	if identity != null:
+		_build_instance(power_fighter, identity)
 	
 	# Asignar script
 	match control_type:
@@ -27,19 +33,35 @@ static func create(
 	
 	match config:
 		GlobalUtils.PowerFighterConfig.TUX:
-			_apply_tux_config(power_fighter as PowerFighter)
+			_apply_tux_config(power_fighter as PowerFighter, identity)
 	
 	return power_fighter as PowerFighter
 
-static func _build_tux_instance(power_fighter: Node3D) -> void:
+static func _load_identity(path:String) -> PowerFighterIdentity:
+	'''
+	No validar nada, el crash es bueno. Data mala, crash por mal educado. GG.
+	'''
+	var cfg := ConfigFile.new()
+	cfg.load(path)
+
+	var identity: PowerFighterIdentity = PowerFighterIdentity.new()
+	identity.id  = String(cfg.get_value("identity", "id"))
+	identity.character_name = String( cfg.get_value("identity", "character_name") )
+	identity.model = String( cfg.get_value("identity", "model") )
+	identity.position_offset = Vector3( cfg.get_value("identity", "position_offset") )
+
+	return identity
+
+static func _build_instance(power_fighter: Node3D, identity: PowerFighterIdentity) -> void:
 	var visual = power_fighter.get_child(0)
 	var asset = visual.get_child(0)
 
-	var new_asset = TUX_FIGHTER_ASSET.instantiate()
+	var loaded_model = load(identity.model)
+	var new_asset = loaded_model.instantiate()
 	var pivot = new_asset.get_child(0)
 	var skeleton = pivot.get_child(0)
 	var mesh = skeleton.get_child(0) 
-	mesh.position.y = -1.2
+	mesh.position = identity.position_offset
 
 	visual.add_child(new_asset)
 	visual.move_child(new_asset, 0)
@@ -47,8 +69,8 @@ static func _build_tux_instance(power_fighter: Node3D) -> void:
 	visual.remove_child(asset)
 	asset.queue_free()
 
-static func _apply_tux_config(power_fighter: PowerFighter) -> void:
-	power_fighter.character_name = "Tux"
+static func _apply_tux_config(power_fighter: PowerFighter, identity: PowerFighterIdentity) -> void:
+	power_fighter.id = identity.id
 	power_fighter.set_duration_of_anims(0.5)
 	power_fighter.set_momentum(
 		30.0, 50.0, 20.0, 20.0)

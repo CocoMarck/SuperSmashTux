@@ -155,7 +155,7 @@ func _register_fighter(power_fighter: PowerFighter, slot: int, is_player: bool, 
 	entry.label = KernelPalette.slot_label(slot, is_player)
 	entry.color = KernelPalette.player_color(slot)
 	#entry.display_name = _fighter_name(power_fighter, slot)
-	entry.display_name = power_fighter.character_name
+	entry.display_name = power_fighter.id
 
 	if is_new:
 		# Primero al árbol y luego setup: los nodos únicos se resuelven en _ready.
