@@ -979,7 +979,7 @@ func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
 	elif _shield_blockstun_active():
 		_apply_shield_pushback(delta)
 	elif _hard_landing_active():
-		_apply_hard_landing(delta)
+		_apply_hard_landing(delta, frame.vertical_force_signals)
 
 func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 	var not_normal = true

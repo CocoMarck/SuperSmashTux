@@ -819,9 +819,9 @@ func is_immune_to_damage() -> bool:
 func _hard_landing_active() -> bool:
 	return _hard_landing_time > 0.0
 
-func _apply_hard_landing(delta: float) -> void:
+func _apply_hard_landing(delta: float, signals: VerticalForceSignals) -> void:
 	_hard_landing_time -= delta
-	if _hard_landing_time <= 0.0:
+	if _hard_landing_time <= 0.0 or not signals.on_floor:
 		_hard_landing_time = 0.0
 
 # Funciones | Hitstun
@@ -1058,7 +1058,7 @@ func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
 	elif _heavy_hitstun_active():
 		_apply_heavy_hitstun(delta, frame.vertical_force_signals)
 	elif _hard_landing_active():
-		_apply_hard_landing(delta)
+		_apply_hard_landing(delta, frame.vertical_force_signals)
 
 func _process_damage(delta: float, frame: FrameMotionSignals) -> void:
 	'''
