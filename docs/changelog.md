@@ -101,10 +101,12 @@
 
 #### Identidad y configuración de personajes
 - `Person.id` **LISTO**: `StringName` en vez de `character_name`; el prefab trae `id = &"standard"` y `HitboxDamage` loguea `body.id` (`2026-11-20`).
-- `PowerFighterIdentity` **LISTO**: `RefCounted` con `id`, `character_name`, `model` y `position_offset` (`2026-11-20`).
-- `PowerFighterConfigurer` **LISTO**: `TUX_IDENTITY_CONFIG` apunta a `data/power_fighters/tux.identity.cfg`; `_load_identity()` usa `ConfigFile` y no valida nada a propósito (data mala = crash) (`2026-11-20`).
-- `character_name` **LISTO**: el nombre completo (`"Tux"`) se guarda en la identity config; HUD y CharacterMenu **deben** resolverlo desde ahí, aún pendiente (`2026-11-20`).
-- Modelo y offset **LISTO**: `_build_instance()` toma `model` y `position_offset` del cfg; `_apply_tux_config()` asigna `power_fighter.id = identity.id` (`2026-11-20`).
+- `PersonConfig` **LISTO**: `RefCounted` con `id`, `character_name`, `model`, `position_offset`; momentum (`ground_acceleration`, `ground_friction`, `air_acceleration`, `knockback_friction`); `walking_speed`, `running_speed`, `jump_impulse`; `walk_step_interval`, `run_step_interval`, `crouch_move_step_interval` y `air_jump_duration` (`2026-11-21`).
+- `PowerFighterConfigurer` **LISTO**: `TUX_PERSON_CONFIG` apunta a `data/power_fighters/tux.person.cfg`; `_load_person()` usa `ConfigFile` y no valida nada a propósito (data mala = crash) (`2026-11-21`).
+- `tux.person.cfg` **LISTO**: secciones `[identity]`, `[momentum]`, `[horizontal_movement]`, `[vertical_movement]`, `[interval]` y `[duration_of_anims]` (`2026-11-21`).
+- Movimiento desde cfg **LISTO**: `_apply_tux_config()` aplica momentum, velocidades, `jump_impulse`, intervalos de pasos y `air_jump_duration`; `_build_instance()` toma `model` y `position_offset` del cfg (`2026-11-21`).
+- Nombre visible **LISTO**: se queda en `power_fighter.id` (p. ej. `tux`). `PersonConfig.character_name` (`"Tux"`) queda disponible para uso futuro; hoy HUD/menu no lo consumen (`2026-11-21`).
+- Plantillas de persona **LISTO**: `name.person.cfg` usa secciones válidas (`[horizontal_movement]`, `[vertical_movement]`, `[interval]`) y sirve de base para copiar (`2026-11-21`).
 
 ### FALTA / en progreso
 
@@ -113,14 +115,9 @@
 - `GameManager` **FALTA**: módulo del HUD de partida.
 
 - `GameManager` **FALTA**: tratar `Person` (el papá) en vez de `PowerFighter`, para crecer a más modos de juego.
-- Helper de nombres **FALTA**: la utilidad estática enfocada a `Person` (cubre `PowerFighter` y futuros hijos) debe usar `Person.id` y resolver `character_name` desde la identity config; ya no aplica `Node.character_name`.
 
 - SFX de `Person` **EN PROGRESO**: bandera `_first_jump_frame` (en `_move`) ya dispara el sonido de salto sin inferirlo de `last_force <= 0`; `_process_sound` asigna `stream_*` y hace `play()`, pero sigue con `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D`. Los `.wav` ya entraron (commit `7a2ff1f`).
 
-- `PowerFighterConfigurer` **EN PROGRESO**: la identity de Tux ya se lee desde `.cfg` (`TUX_IDENTITY_CONFIG` + `ConfigFile`); faltan `stats`, `attacks` y `power_attacks`, y que los consumidores resuelvan el nombre desde la identity.
+- `PowerFighterConfigurer` **FALTA**: los ataques siguen hardcodeados en `_apply_tux_config()` (desde ~línea 120); `name.fighter.cfg` y `name.power_fighter.cfg` existen, pero el configurer no las carga (`2026-11-21`).
 
 - **FALTA** `NpcController`: Detección de posiciones con `AABB detection`.
-
-- **FALTA** `CharacterMenu`: resolver el nombre de los personajes desde `PowerFighterIdentity` (identity config), ya que `PowerFighter.character_name` ya no existe.
-
-- `FightHUD` **FALTA**: hoy `entry.display_name = power_fighter.id` (muestra `tux`); debe mostrar `character_name` desde la identity config (`Tux`).

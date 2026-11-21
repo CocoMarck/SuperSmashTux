@@ -47,8 +47,8 @@ cambian**. Nada de reglas depende de que la cámara exista.
 | Cuenta inicial | `MatchCountdown` | 3-2-1 previo a la pelea; no congela ni muestra letrero | **LISTO** |
 | Encuadre | `CameraFollow` | sigue a los peleadores, zoom, temblor al morir alguien (escucha `lives_changed`) | **LISTO** |
 | Colocación | `SpawnPoint` | instancia peleadores configurados | **LISTO** |
-| Identidad | `PowerFighterIdentity` | `RefCounted` con `id`, `character_name`, `model` y `position_offset` | **LISTO** |
-| Armado | `PowerFighterConfigurer` | lee `data/power_fighters/tux.identity.cfg` con `ConfigFile` (sin validación) y aplica la identity al prefab | **LISTO** |
+| Config de persona | `PersonConfig` | `RefCounted` con identidad, model/offset, momentum, movimiento, salto, intervals y `air_jump_duration` | **LISTO** |
+| Armado | `PowerFighterConfigurer` | lee `data/power_fighters/tux.person.cfg` con `ConfigFile` (sin validación) y aplica la config al prefab; ataques siguen hardcodeados (FALTA) | **LISTO/PARCIAL** |
 
 `GameManager` también spawnea a los peleadores. El lineup sale de `power_fighter_slots`
 (`PowerFighterSlots`), que llena `CharacterMenu` antes de cambiar de escena. **No hay respaldo**: si
@@ -183,7 +183,7 @@ muerte por `hp == 0` (que es la que dispararía el ragdoll) sigue pendiente.
 
 - **`MatchHUD`**: puente entre las reglas y el `FightHud`, para sacar del manager el contrato de señales.
 - **`GameSpeed`**: cámara lenta o freeze al dar un golpe killer.
-- **Nombre visible en HUD/menu (pendiente)**: `Person` ya no guarda `character_name`, solo `id`; el nombre completo vive en la identity config (`PowerFighterIdentity` / `data/power_fighters/tux.identity.cfg`). HUD y menú deben resolverlo desde ahí (hoy `FightHUD` muestra `power_fighter.id`). No declarar `var name` en `Person` porque choca con `Node.name`.
+- **Nombre visible en HUD/menu (decisión actual)**: `Person` guarda solo `id`; `character_name` existe en `PersonConfig` (`data/power_fighters/tux.person.cfg`) y queda disponible para HUD/menú en el futuro. Hoy `FightHUD` muestra `power_fighter.id` (`fight_hud.gd:158`). No declarar `var name` en `Person` porque choca con `Node.name`.
 - **`ScoreManager`** o similar: quién va ganando, para el HUD.
 - **`AudioManager`**: sonidos de golpe, muerte, KO. Mismo patrón que el comentarista.
 

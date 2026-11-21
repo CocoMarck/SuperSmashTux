@@ -47,7 +47,7 @@ func _start_debug_match() -> void:
 	
 	var data_p2 : PowerFighterData = PowerFighterData.new()
 	data_p2.lives = 1
-	data_p2.config = GlobalUtils.PowerFighterConfig.TUX
+	data_p2.config = GlobalUtils.PowerFighterConfig.STANDARD#GlobalUtils.PowerFighterConfig.TUX
 	data_p2.control = GlobalUtils.ControlType.PLAYER
 	data_p2.player_id = 1
 	level.power_fighter_slots.set_slot(3, data_p2)

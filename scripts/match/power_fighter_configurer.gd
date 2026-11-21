@@ -7,7 +7,7 @@ const POWER_FIGHTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn"
 const TUX_FIGHTER_ASSET = preload("res://assets/tux_fighter.glb")
 
 # Config hardcode jejej (Despues solo se leera los cfg del dir)
-const TUX_IDENTITY_CONFIG: String = "res://data/power_fighters/tux.identity.cfg"
+const TUX_PERSON_CONFIG: String = "res://data/power_fighters/tux.person.cfg"
 
 # Funciones
 static func create( 
@@ -15,12 +15,12 @@ static func create(
 
 	# Preparar instancia
 	var power_fighter = POWER_FIGHTER_PREFAB.instantiate()
-	var identity: PowerFighterIdentity
+	var person_config: PersonConfig
 	match config:
 		GlobalUtils.PowerFighterConfig.TUX:
-			identity = _load_identity(TUX_IDENTITY_CONFIG)
-	if identity != null:
-		_build_instance(power_fighter, identity)
+			person_config = _load_person(TUX_PERSON_CONFIG)
+	if person_config != null:
+		_build_instance(power_fighter, person_config)
 	
 	# Asignar script
 	match control_type:
@@ -33,35 +33,63 @@ static func create(
 	
 	match config:
 		GlobalUtils.PowerFighterConfig.TUX:
-			_apply_tux_config(power_fighter as PowerFighter, identity)
+			_apply_tux_config(power_fighter as PowerFighter, person_config)
 	
 	return power_fighter as PowerFighter
 
-static func _load_identity(path:String) -> PowerFighterIdentity:
+# Texto de config a clase de config
+static func _load_person(path: String) -> PersonConfig:
 	'''
 	No validar nada, el crash es bueno. Data mala, crash por mal educado. GG.
 	'''
-	var cfg := ConfigFile.new()
+	var cfg: ConfigFile = ConfigFile.new()
 	cfg.load(path)
 
-	var identity: PowerFighterIdentity = PowerFighterIdentity.new()
-	identity.id  = String(cfg.get_value("identity", "id"))
-	identity.character_name = String( cfg.get_value("identity", "character_name") )
-	identity.model = String( cfg.get_value("identity", "model") )
-	identity.position_offset = Vector3( cfg.get_value("identity", "position_offset") )
+	var config := PersonConfig.new()
+	
+	# Identity
+	config.id  = String(cfg.get_value("identity", "id"))
+	config.character_name = String( cfg.get_value("identity", "character_name") )
+	config.model = String( cfg.get_value("identity", "model") )
+	config.position_offset = Vector3( cfg.get_value("identity", "position_offset") )
+	
+	# Momentum
+	config.ground_acceleration = float(
+		cfg.get_value("momentum", "ground_acceleration"))
+	config.ground_friction = float(cfg.get_value("momentum", "ground_friction"))
+	config.air_acceleration = float(cfg.get_value("momentum", "air_acceleration"))
+	config.knockback_friction = float(cfg.get_value("momentum", "knockback_friction"))
 
-	return identity
+	# Horizontal movement
+	config.walking_speed = int(cfg.get_value("horizontal_movement", "walking_speed"))
+	config.running_speed = int(cfg.get_value("horizontal_movement", "running_speed"))
 
-static func _build_instance(power_fighter: Node3D, identity: PowerFighterIdentity) -> void:
+	# Vertical movement
+	config.jump_impulse = int(cfg.get_value("vertical_movement", "jump_impulse"))
+
+	# Interval
+	config.walk_step_interval = float(cfg.get_value("interval", "walk_step_interval"))
+	config.run_step_interval = float(cfg.get_value("interval", "run_step_interval"))
+	config.crouch_move_step_interval = float(
+		cfg.get_value("interval", "crouch_move_step_interval"))
+
+	# Duration of anims
+	config.air_jump_duration = float(
+		cfg.get_value("duration_of_anims", "air_jump_duration"))
+
+	return config
+
+# Construir instancia
+static func _build_instance(power_fighter: Node3D, config: PersonConfig) -> void:
 	var visual = power_fighter.get_child(0)
 	var asset = visual.get_child(0)
 
-	var loaded_model = load(identity.model)
+	var loaded_model = load(config.model)
 	var new_asset = loaded_model.instantiate()
 	var pivot = new_asset.get_child(0)
 	var skeleton = pivot.get_child(0)
 	var mesh = skeleton.get_child(0) 
-	mesh.position = identity.position_offset
+	mesh.position = config.position_offset
 
 	visual.add_child(new_asset)
 	visual.move_child(new_asset, 0)
@@ -69,13 +97,25 @@ static func _build_instance(power_fighter: Node3D, identity: PowerFighterIdentit
 	visual.remove_child(asset)
 	asset.queue_free()
 
-static func _apply_tux_config(power_fighter: PowerFighter, identity: PowerFighterIdentity) -> void:
-	power_fighter.id = identity.id
-	power_fighter.set_duration_of_anims(0.5)
+# Aplicar configuración
+static func _apply_tux_config(
+	power_fighter: PowerFighter, person_config: PersonConfig) -> void:
+	power_fighter.id = person_config.id
+	
+	# Person config
+	power_fighter.set_duration_of_anims(person_config.air_jump_duration)
 	power_fighter.set_momentum(
-		30.0, 50.0, 20.0, 20.0)
+		person_config.ground_acceleration, person_config.ground_friction, 
+		person_config.air_acceleration, person_config.knockback_friction)
 	# ^
 	# | ground_acceleration, ground_friction, air_acceleration, knockback_friction
+
+	power_fighter.jump_impulse = person_config.jump_impulse
+	power_fighter.walking_speed = person_config.walking_speed
+	power_fighter.running_speed = person_config.running_speed
+	power_fighter.walk_step_interval = person_config.walk_step_interval
+	power_fighter.run_step_interval = person_config.run_step_interval
+	power_fighter.crouch_move_step_interval = person_config.crouch_move_step_interval
 
 	# attacks on floor
 	power_fighter.attacks.neutral1.duration = 0.33

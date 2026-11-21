@@ -31,8 +31,8 @@ Objeto de persona. Tiene lo necesario para tener fisicas 2D en un mundo 3D.
 
 @export_group("Interval") # sounds effects
 @export var walk_step_interval: float = 0.35
-@export var run_step_interval: float = 0.25
-@export var crouch_move_step_interval: float = 0.32
+@export var run_step_interval: float = 0.32
+@export var crouch_move_step_interval: float = 0.4
 
 var block_move :bool = false
 

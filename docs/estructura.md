@@ -17,7 +17,7 @@ supersmashtux/
 │   ├── characters/   # Cadena de personajes: GravityBody3D -> Person -> Fighter -> PowerFighter. Controladores por composicion (nodo hijo): PersonController3D -> PlayerController / NpcController
 │   ├── combat/       # Hitboxes (nodos): AreaGravity3D -> Hitbox -> HitboxDamage / HitboxGrab
 │   ├── platforms/    # Plataformas: Platform, GroundPlatform, OneWayPlatform
-│   ├── match/        # Módulos de la partida, uno por concern (GameManager, LivesManager, MatchTime, MatchCountdown, PowerFighterSlots, CameraFollow, SpawnPoint, PowerFighterConfigurer, PowerFighterIdentity)
+│   ├── match/        # Módulos de la partida, uno por concern (GameManager, LivesManager, MatchTime, MatchCountdown, PowerFighterSlots, CameraFollow, SpawnPoint, PowerFighterConfigurer, PersonConfig)
 │   ├── ui/           # Scripts de las pantallas de UI en ui/; components/ refleja ui/components/ (common, hud, character_menu)
 │   └── helpers/      # Clases de apoyo que NO son nodos: RefCounted y contenedores de datos/constantes
 │       ├── combat/   # Datos de ataques: Attacks, PowerAttacks, FightMove, HitboxMove
@@ -31,8 +31,8 @@ supersmashtux/
 │   │   └── sfx/      # SFX (wavs) y sus randomizers (.tres)
 │   └── fonts/        # Fuentes
 ├── data/             # Configs de personajes en texto (.cfg)
-│   ├── templates/    # Plantillas: identity, stats, attacks, power_attacks
-│   └── power_fighters/  # Configs por personaje (tux.identity.cfg)
+│   ├── templates/    # Plantillas: name.person.cfg, name.fighter.cfg, name.power_fighter.cfg
+│   └── power_fighters/  # Configs por personaje (tux.person.cfg)
 ├── addons/           # Plugins de Godot (godot_ai: MCP de Godot para agentes de IA)
 ├── docs/             # Documentación, notas, ideas (estructura.md y changelog.md viven en la raíz de docs/)
 │   ├── arquitectura/ # Jerarquía de clases, UML y decisiones de diseño (GameManager, process vs physics_process)
@@ -60,7 +60,7 @@ supersmashtux/
 | Escenas | `snake_case.tscn` | `player.tscn`, `main_menu.tscn` |
 | Scripts | `snake_case.gd` | `player.gd`, `camera_follow.gd` |
 | Assets | `snake_case.ext` | `ground_texture.png`, `jump_sfx.wav` |
-| Configs | `<personaje_o_plantilla>.<dominio>.cfg` | `tux.identity.cfg`, `power_fighter.identity.cfg` |
+| Configs | `<personaje_o_plantilla>.<dominio>.cfg` | `tux.person.cfg`, `name.person.cfg`, `name.fighter.cfg`, `name.power_fighter.cfg` |
 | Recursos | `prefijo_nombre.tres` | `mat_red.tres`, `env_game.tres` |
 | Docs | `lower-kebab-case.md` (agrupados por dominio en `docs/<dominio>/`) | `estructura.md`, `titulo-descriptivo.md` |
 

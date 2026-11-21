@@ -2,10 +2,11 @@
 
 > Cómo se separa el "quién controla" del "qué personaje es", qué hace `PowerFighterConfigurer`,
 > cómo lo usa `SpawnPoint` y cómo debería el `GameManager` repartir las configuraciones.
-> Verificado el 2026-11-07; actualizado el 2026-11-11. Rutas: `scripts/helpers/global_utils.gd`,
+> Verificado el 2026-11-07; actualizado el 2026-11-21. Rutas: `scripts/helpers/global_utils.gd`,
 > `scripts/helpers/power_fighter_data.gd`, `scripts/match/power_fighter_slots.gd`,
-> `scripts/match/power_fighter_configurer.gd`, `scripts/match/spawn_point.gd`,
-> `scripts/match/game_manager.gd`, `scripts/match/match_time.gd`, `scripts/match/match_countdown.gd`,
+> `scripts/match/power_fighter_configurer.gd`, `scripts/match/person_config.gd`,
+> `scripts/match/spawn_point.gd`, `scripts/match/game_manager.gd`,
+> `scripts/match/match_time.gd`, `scripts/match/match_countdown.gd`,
 > `scripts/ui/character_menu.gd`, `scripts/ui/fight_hud.gd`,
 > `scripts/characters/person.gd`, `scripts/characters/fighter.gd`,
 > `scripts/characters/power_fighter.gd`, `scripts/helpers/combat/attacks.gd`,
@@ -81,7 +82,7 @@ static func create(
 Flujo real, en orden:
 
 1. Instancia el prefab base `res://prefabs/standard_power_fighter.tscn`.
-2. Si la config es `TUX`, carga la identity desde el `.cfg` (`_load_identity()`) y llama a
+2. Si la config es `TUX`, carga la config de persona desde el `.cfg` (`_load_person()`) y llama a
    `_build_instance()` para cambiar el modelo visual.
    - `STANDARD`: no hace nada, se queda el modelo que trae el prefab.
 3. Asigna el **controller** según el control con un `match`:
@@ -89,7 +90,7 @@ Flujo real, en orden:
    - `ControlType.NPC`: `power_fighter.controller = NpcController.new()`.
    - `ControlType.NONE`: `pass`.
 4. Si la config es `TUX`, llama a `_apply_tux_config()` para aplicar datos del personaje
-   (el `id` del cfg, duraciones, momentum y hitboxes propias de Tux).
+   (id, duraciones, momentum, movimiento, saltos, intervals y, por ahora, ataques hardcodeados).
 5. Retorna el `PowerFighter` ya configurado.
 
 > Antes se usaba `set_script()` (que borraba los `@export` del prefab); hoy el rol es un nodo hijo y el
@@ -98,37 +99,81 @@ Flujo real, en orden:
 > `_apply_tux_config()` corre después para llamar setters del personaje. `_ready()` corre hasta el
 > `add_child()` que hace `GameManager`, con todo ya aplicado.
 
-### Identidad desde archivo `.cfg`
+### Config de persona desde archivo `.cfg`
 
-`create()` ya no toma el modelo de una constante: para `TUX` llama a `_load_identity()` con
-`res://data/power_fighters/tux.identity.cfg`, lee el `.cfg` con `ConfigFile` y obtiene un
-`PowerFighterIdentity`.
+`create()` ya no toma el modelo de una constante: para `TUX` llama a `_load_person()` con
+`res://data/power_fighters/tux.person.cfg`, lee el `.cfg` con `ConfigFile` y obtiene un
+`PersonConfig`.
 
-`scripts/match/power_fighter_identity.gd`:
+`scripts/match/person_config.gd`:
 
 ```gdscript
-class_name PowerFighterIdentity
+class_name PersonConfig
 extends RefCounted
 
+# Identity
 var id: StringName
 var character_name: StringName
 var model: String
 var position_offset: Vector3
+
+# Momentum
+var ground_acceleration: float
+var ground_friction: float
+var air_acceleration: float
+var knockback_friction: float
+
+# Horizontal movement
+var walking_speed: int
+var running_speed: int
+
+# Vartical movement
+var jump_impulse: int
+
+# Intervals
+var walk_step_interval: float
+var run_step_interval: float
+var crouch_move_step_interval: float
+
+# Duration of anims
+var air_jump_duration: float
 ```
 
 El prefab sigue siendo `res://prefabs/standard_power_fighter.tscn`. Lo que sale del cfg es el
-modelo (`load(identity.model)`), el offset de la malla (`mesh.position = identity.position_offset`)
-y el `id` (`power_fighter.id = identity.id`). Las plantillas base viven en `data/templates/`
-(identity, stats, attacks y power_attacks).
+modelo (`load(config.model)`), el offset de la malla (`mesh.position = config.position_offset`)
+y datos de persona: id, momentum, movimiento, salto, intervals y duración de anims. Las plantillas
+base viven en `data/templates/`: `name.person.cfg`, `name.fighter.cfg` y
+`name.power_fighter.cfg`.
 
-Ejemplo (`data/power_fighters/tux.identity.cfg`):
+Ejemplo (`data/power_fighters/tux.person.cfg`):
 
 ```ini
 [identity]
 id = "tux"
 character_name = "Tux"
-model = "res://assets/tux_fighter.glb"
+model = "res://assets/tux_fighter.glb" ; Ruta del `res://assets//personaje.glb`. Remplaza malla del `prefab`
 position_offset = Vector3(0.0,-1.2,0.0)
+
+[momentum]
+ground_acceleration = 30.0
+ground_friction = 50.0
+air_acceleration = 20.0
+knockback_friction = 20.0
+
+[horizontal_movement]
+walking_speed = 3
+running_speed = 8
+
+[vertical_movement]
+jump_impulse = 10
+
+[interval]
+walk_step_interval = 0.35
+run_step_interval = 0.25
+crouch_move_step_interval = 0.32
+
+[duration_of_anims]
+air_jump_duration = 0.5
 ```
 
 `ConfigFile` es formato INI: secciones y keys sin espacios, `load()`/`save()` y comentarios con `;`
@@ -136,28 +181,30 @@ position_offset = Vector3(0.0,-1.2,0.0)
 [class_configfile](https://docs.godotengine.org/en/4.7/classes/class_configfile.html).
 
 > **Sin validación**: si falta el cfg o una key, revienta a propósito ("No validar nada, el crash es
-> bueno"). Es la decisión actual del código, no un descuido.
+> bueno. Data mala, crash por mal educado. GG."). Es la decisión actual del código, no un descuido.
 
-`Person` guarda solo `id` (`person.gd:18`): es la identidad estable. `character_name` es texto de UI
-y vive en la identity config. **Pendiente**: `FightHUD` hoy muestra `power_fighter.id`
-(`fight_hud.gd:158`); HUD y `CharacterMenu` deben resolver el nombre desde la identity config. Aún
-no está implementado.
+`Person` guarda solo `id` (`person.gd:18`): es la identidad estable. `character_name` existe en
+`PersonConfig` y queda disponible para HUD/menú en el futuro; hoy la decisión actual es mostrar el
+`id` en `FightHUD` (`fight_hud.gd:158`). No está implementado el consumo de `character_name`.
+
+> `data/templates/name.person.cfg` ya usa secciones válidas (`[horizontal_movement]`,
+> `[vertical_movement]` y `[interval]`); es la base para copiar configs nuevas.
 
 ### `_build_instance()`
 
-Reemplaza el modelo visual del prefab por el que dice la identity config:
+Reemplaza el modelo visual del prefab por el que dice la config de persona:
 
 ```gdscript
-static func _build_instance(power_fighter: Node3D, identity: PowerFighterIdentity) -> void:
+static func _build_instance(power_fighter: Node3D, config: PersonConfig) -> void:
 	var visual = power_fighter.get_child(0)
 	var asset = visual.get_child(0)
 
-	var loaded_model = load(identity.model)
+	var loaded_model = load(config.model)
 	var new_asset = loaded_model.instantiate()
 	var pivot = new_asset.get_child(0)
 	var skeleton = pivot.get_child(0)
 	var mesh = skeleton.get_child(0)
-	mesh.position = identity.position_offset
+	mesh.position = config.position_offset
 
 	visual.add_child(new_asset)
 	visual.move_child(new_asset, 0)
@@ -169,24 +216,34 @@ static func _build_instance(power_fighter: Node3D, identity: PowerFighterIdentit
 - El hijo `0` de la raíz es `Visual`; el hijo `0` de `Visual` es el modelo importado actual.
 - El nuevo modelo se agrega y se mueve al índice `0` para conservar el contrato que espera
   `Person._ready()` (el modelo es el primer hijo de `Visual`, `ShieldMeshInstance3D` queda aparte).
-- `mesh.position = identity.position_offset` reemplaza el viejo `mesh.position.y = -1.2` quemado en
+- `mesh.position = config.position_offset` reemplaza el viejo `mesh.position.y = -1.2` quemado en
   el código: la calibración visual ahora vive en el cfg (`Vector3(0.0,-1.2,0.0)` para Tux).
 - El modelo viejo se saca de `Visual` y se libera.
 
 ### `_apply_tux_config()`
 
-Aplica la configuración de datos de Tux. Hoy hace cuatro cosas:
+Firma actual:
 
-1. **Identidad**: `power_fighter.id = identity.id`. `Person` guarda solo ese `id`; `character_name`
-   vive en la identity config (ver "Identidad desde archivo `.cfg`").
-2. **Duraciones de animación y momentum**: `set_duration_of_anims(0.5)` y `set_momentum(30.0, 50.0, 20.0, 20.0)` (aceleración en piso, fricción en piso, aceleración en aire, fricción de knockback).
-3. **Ataques normales**: tiempos de `neutral1/2/3`, `dash`, `heavy_side`, `heavy_up`, `heavy_down`, `air_neutral` y `air_forward/back/up`.
-4. **Hitboxes propias**:
-   - `neutral1/2/3`, `dash` y `air_neutral` ajustan daño, dirección, posición y tiempos de sus `HitboxMove`.
-   - `heavy_down` reemplaza su hitbox por **2 golpes** de 20 de daño, tamaño `(0.5, 0.5, 1.0)`, uno a cada lado, con `init_time_ratio = 0.4` y `duration = 0.1`.
-   - `power_attacks.up` y `air_up` reemplazan sus hitboxes por **4 golpes** de 5 de daño, tamaño `(0.5, 0.5, 0.5)`, posición `(0, 1.2, 0)`, con `init_time_ratio` de 0.3 a 0.6 y `duration = 0.05`; además fijan `speed = (6, 0, 0)` y `jump_power = 11.0`.
+```gdscript
+static func _apply_tux_config(
+	power_fighter: PowerFighter, person_config: PersonConfig) -> void:
+```
 
-Es el punto donde viven stats, tiempos y movimientos propios de Tux.
+Aplica la configuración de datos de Tux. Hoy hace dos bloques:
+
+1. **Datos desde `PersonConfig`**:
+   - **Identidad**: `power_fighter.id = person_config.id`. `Person` guarda solo ese `id`; `character_name` existe en `PersonConfig`, pero hoy no se consume en HUD/menú.
+   - **Anim/momentum**: `set_duration_of_anims(person_config.air_jump_duration)` y `set_momentum(person_config.ground_acceleration, person_config.ground_friction, person_config.air_acceleration, person_config.knockback_friction)`.
+   - **Movimiento**: `jump_impulse`, `walking_speed`, `running_speed`.
+   - **Intervals**: `walk_step_interval`, `run_step_interval`, `crouch_move_step_interval`.
+2. **Ataques hardcodeados (FALTA pasar a cfg)**:
+   - `attacks.neutral1/2/3`, `dash`, `up/down`, `heavy_side/up/down`, `air_neutral/forward/back/up`.
+   - `power_attacks.standard/up/down/air_standard/air_up/air_down`.
+   - Se ajustan tiempos, speed, jump_power, hitboxes y variantes multigolpe (por ejemplo `heavy_down`, `power_attacks.up/air_up`, `power_attacks.down/air_down`).
+
+> **FALTA**: los ataques siguen hardcodeados en `_apply_tux_config()`. Existen
+> `data/templates/name.fighter.cfg` y `data/templates/name.power_fighter.cfg`, pero **no se cargan**
+> todavía. Cuando se implemente, esos datos deberían salir de cfg y no del código.
 
 ### Contrato de nodos del modelo
 
@@ -370,9 +427,9 @@ al nodo `MatchTime`; la cuenta inicial la maneja `MatchCountdown` y el letrero d
 - **Material/tinte por slot**: con la textura de Tux conservada, hoy no hay color por jugador. Si se
   quiere distinguir jugadores con Tux, habría que definir un material que tiña sin tapar la textura,
   y decidir si eso vive en `PowerFighterConfig` o se queda como color por slot.
-- **Stats y ataques por config**: cuando cada personaje tenga datos propios, `PowerFighterConfigurer`
-  debería aplicar stats/tiempos y los movimientos por slot (ver "Configuración fina de movimientos")
-  desde la misma config.
+- **Ataques por cfg (FALTA)**: ya existe `PersonConfig`/`tux.person.cfg` para datos de persona, y
+  existen las plantillas `name.fighter.cfg` y `name.power_fighter.cfg`, pero `PowerFighterConfigurer`
+  todavía no las carga. Los ataques siguen hardcodeados en `_apply_tux_config()`.
 
 ---
 
@@ -383,18 +440,20 @@ al nodo `MatchTime`; la cuenta inicial la maneja `MatchCountdown` y el letrero d
 | `scripts/helpers/global_utils.gd` | `CharacterType` → `ControlType`; enum `PowerFighterConfig`; `CONFIG_OPTIONS` para validar configs |
 | `scripts/helpers/power_fighter_data.gd` | Nuevo: datos de un slot (`control`, `config`, `lives`, `player_id`) |
 | `scripts/match/power_fighter_slots.gd` | Nuevo: guarda `PowerFighterData` por id de slot |
-| `scripts/match/power_fighter_configurer.gd` | Nuevo: crea y configura el `PowerFighter`; carga la identity con `ConfigFile` |
-| `scripts/match/power_fighter_identity.gd` | Nuevo: `RefCounted` con `id`, `character_name`, `model` y `position_offset` |
+| `scripts/match/power_fighter_configurer.gd` | Crea y configura el `PowerFighter`; carga `tux.person.cfg` con `ConfigFile` vía `PersonConfig` |
+| `scripts/match/person_config.gd` | Nuevo: `RefCounted` con identidad, model/offset, momentum, movimiento, salto, intervals y `air_jump_duration` |
 | `scripts/match/spawn_point.gd` | Delega la creación al configurador; solo posiciona y asigna `player_id` |
 | `scripts/match/game_manager.gd` | Lee `power_fighter_slots` con `has_slot`/`get_slot` y pasa `config`/`ControlType` a `spawn()`; sin respaldo |
 | `scripts/ui/character_menu.gd` | Crea `PowerFighterData`, llena `level.power_fighter_slots` y pasa `TIME_OPTIONS[time_index]` con `level.set_time_limit()` antes de cambiar de escena |
-| `scripts/ui/fight_hud.gd` | Muestra `power_fighter.id` (`fight_hud.gd:158`); pendiente: resolver `character_name` desde la identity config |
-| `scripts/characters/person.gd` | Resuelve nodos esenciales por índice; `_skeleton3d` |
+| `scripts/ui/fight_hud.gd` | Muestra `power_fighter.id` (`fight_hud.gd:158`); `character_name` existe en `PersonConfig` pero hoy no se consume |
+| `scripts/characters/person.gd` | Resuelve nodos esenciales por índice; `_skeleton3d`; guarda solo `id` |
 | `scripts/characters/fighter.gd` | `attacks` público; ya no tiene `set_attacks()` |
 | `scripts/characters/power_fighter.gd` | `power_attacks` público; ya no tiene `set_power_attacks()` |
 | `scripts/helpers/combat/fight_move.gd` | `name` de solo lectura (`_name` + getter) |
-| `data/power_fighters/tux.identity.cfg` | Nuevo: `[identity]` de Tux; `model` y `position_offset` salen de acá |
-| `data/templates/` | 4 plantillas `.cfg`: identity, stats, attacks y power_attacks |
+| `data/power_fighters/tux.person.cfg` | Nuevo: config de Tux con `[identity]`, `[momentum]`, `[horizontal_movement]`, `[vertical_movement]`, `[interval]`, `[duration_of_anims]` |
+| `data/templates/name.person.cfg` | Plantilla de persona con secciones válidas para `ConfigFile` |
+| `data/templates/name.fighter.cfg` | Plantilla de ataques fighter; **FALTA**: existe, pero no se carga |
+| `data/templates/name.power_fighter.cfg` | Plantilla de power attacks; **FALTA**: existe, pero no se carga |
 | `docs/arte/asset-personaje.md` | Documenta el orden obligatorio de nodos del modelo |
 
 ## Ver también
