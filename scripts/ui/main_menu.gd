@@ -57,6 +57,6 @@ func _start_debug_match() -> void:
 	data_p3.config_id = "tux"
 	data_p3.control = GlobalUtils.ControlType.NPC
 	data_p3.npc_id = GlobalUtils.NPCId.NPC_1
-	#level.power_fighter_slots.set_slot(0, data_p3)
+	level.power_fighter_slots.set_slot(0, data_p3)
 
 	get_tree().change_scene_to_node(level)

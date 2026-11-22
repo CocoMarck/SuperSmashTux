@@ -20,6 +20,7 @@ Reglas para agentes de IA en el proyecto Super Smash Tux, un juego de lucha de c
 ## 3. Arquitectura del proyecto
 
 1. **RESPETA LA ESTRUCTURA.** La estructura del proyecto y sus convenciones se describen en [estructura.md](./docs/estructura.md).
+2. **NO "LIMPIES" INVARIANTES SIN CONTEXTO.** Antes de migrar datos hardcodeados a cfg, revisa las invariantes documentadas. En particular, `standard` es base/dummy a propósito: detalle en [nota-power-fighter-configurer.md](./docs/arquitectura/nota-power-fighter-configurer.md).
 
 ## 4. Orquestación de agentes y subagentes
 

@@ -176,6 +176,9 @@ var controller: PersonController3D:
 		if not _controller.is_inside_tree():
 			add_child(_controller)
 
+# Propiedades privadas | Offset animations
+var _hanging_anim_offset: Vector3 = Vector3.ZERO
+
 
 # Fuciones | Direccion
 func _get_initial_facing() -> Vector3:
@@ -340,7 +343,10 @@ func _ledge_grab(
 			var ledge_x := ground.get_ledge_x(right_side)
 			var anchor_x := (ledge_x + GameBalance.LEDGE_HANG_OFFSET) if right_side else (ledge_x - GameBalance.LEDGE_HANG_OFFSET)
 			var anchor_y := global_position.y - (_get_head_y() - top_y)
-			_hang_position = Vector3(anchor_x, anchor_y, global_position.z)
+			_hang_position = Vector3(
+				anchor_x+_hanging_anim_offset.x, 
+				anchor_y+_hanging_anim_offset.y, 
+				global_position.z+_hanging_anim_offset.z )
 			_target_velocity = Vector3.ZERO
 			return
 
@@ -1242,11 +1248,14 @@ func _physics_process(delta: float) -> void:
 # Configuración publica
 func set_momentum(
 	ground_acceleration: float, ground_friction: float, air_acceleration: float,
-	knockback_friction: float):
+	knockback_friction: float) -> void:
 	_ground_acceleration = ground_acceleration
 	_air_acceleration = air_acceleration
 	_ground_friction = ground_friction
 	_knockback_friction = knockback_friction
 
-func set_duration_of_anims(air_jump_duration: float):
+func set_duration_of_anims(air_jump_duration: float) -> void:
 	_air_jump_duration = air_jump_duration
+
+func set_anim_offset(hanging_anim_offset: Vector3) -> void:
+	_hanging_anim_offset = hanging_anim_offset

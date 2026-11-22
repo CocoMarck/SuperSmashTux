@@ -34,10 +34,8 @@ static func _make(
 	return entry
 
 static func _model_for(id: StringName) -> PackedScene:
-	var config_path: String = CharacterRegistry.person_config_path(id)
-	var person_config: PersonConfig = CharacterRegistry.load_person_config(
-		config_path)
-	var model := load(person_config.model) as PackedScene
+	var model_path: String = CharacterRegistry.model_path(id)
+	var model := load(model_path) as PackedScene
 	return model
 
 # Funciones texto

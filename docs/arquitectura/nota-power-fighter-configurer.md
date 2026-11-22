@@ -70,6 +70,13 @@ y tener su `.person.cfg`. El catálogo también arma una entrada de selección a
 solo de UI: se resuelve en `CharacterMenu` antes de llenar `PowerFighterData`, así que el
 configurador nunca recibe un id no jugable.
 
+> **Invariante**: `standard` es el personaje base/dummy de dependencia, **jugable**, hardcodeado a
+> propósito. No tiene entrada en `identities.cfg` ni archivos `.person.cfg` / `.fighter.cfg`: su id
+> y su modelo viven en `CharacterRegistry` y en `standard_power_fighter.tscn`. Su moveset final vive
+> en code (`scripts/characters/power_fighter.gd`); ajustarlo desde la GUI del prefab es solo temporal.
+> No migrarlo a cfg "por higiene": solo se cambia con una decisión explícita de diseño. Por eso
+> `PowerFighterConfigurer.create()` lo excluye del flujo de configs y lo deja con el prefab base.
+
 ### Por qué importa
 
 - **Combinaciones libres**: `PLAYER + tux` y `NPC + standard` funcionan sin tocar enums ni duplicar clases.

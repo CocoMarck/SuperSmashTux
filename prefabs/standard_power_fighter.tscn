@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b4cy7pey5xxe"]
 
-[ext_resource type="PackedScene" uid="uid://dhfu76dvlacbw" path="res://assets/models/standard/standard_character_a_pose.glb" id="1_glb0"]
+[ext_resource type="PackedScene" uid="uid://bimdedgdrk485" path="res://assets/models/standard/standard_character_a_pose.glb" id="1_glb0"]
 [ext_resource type="Script" uid="uid://bsl1wkidbyp0v" path="res://scripts/characters/power_fighter.gd" id="1_h3aoa"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nwdyk"]

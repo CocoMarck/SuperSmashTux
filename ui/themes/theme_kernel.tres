@@ -267,6 +267,11 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
+[sub_resource type="FontVariation" id="FontVariation_kn_rule_arrow"]
+base_font = ExtResource("3_extrabold")
+spacing_top = -8
+spacing_bottom = -6
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rule_row"]
 content_margin_left = 10.0
 content_margin_top = 0.0
@@ -298,11 +303,6 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-
-[sub_resource type="FontVariation" id="FontVariation_kn_rule_arrow"]
-base_font = ExtResource("3_extrabold")
-spacing_top = -8
-spacing_bottom = -6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_seg_off"]
 bg_color = Color(0.16470589, 0.19215687, 0.23529412, 1)

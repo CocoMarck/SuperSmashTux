@@ -39,7 +39,7 @@ supersmashtux/
 ├── data/             # Configs en texto (.cfg) y, en el futuro, CSV de traducciones
 │   ├── templates/    # Plantillas: name.person.cfg, name.fighter.cfg, name.power_fighter.cfg
 │   ├── locale/       # (FALTA) strings.csv con columnas keys,en,es
-│   └── power_fighters/  # identities.cfg (manifiesto, admite hidden) + configs por personaje <id>.person.cfg (standard, tux)
+│   └── power_fighters/  # identities.cfg (manifiesto, admite hidden) + configs <id>.person.cfg (p. ej. tux); standard es base hardcodeada sin cfg
 ├── addons/           # Plugins de Godot (godot_ai: MCP de Godot para agentes de IA)
 ├── docs/             # Documentación, notas, ideas (estructura.md y changelog.md viven en la raíz de docs/)
 │   ├── arquitectura/ # Jerarquía de clases, UML y decisiones de diseño (GameManager, process vs physics_process)

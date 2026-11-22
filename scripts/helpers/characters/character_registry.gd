@@ -11,8 +11,10 @@ extends RefCounted
 const IDENTITIES_PATH := "res://data/power_fighters/identities.cfg"
 const DATA_DIR := "res://data/power_fighters/"
 
-# Constantes | Personaje base (el del prefab). Vive en `identities.cfg` como los demás.
+# Constantes | Personaje base/dummy hardcodeado. NO debe vivir en ningún `cfg`, o file data. Su movement final, moveset final, todo vive en code. GUI del prefab es solo ajuste temporal. No migrar a data solo por "higiene".
 const STANDARD_ID := &"standard"
+const STANDARD_NAME := "B.O.B"
+const STANDARD_MODEL_PATH := "res://assets/models/standard/standard_character_a_pose.glb" # Malla que ya trae el prefab.
 
 # Propiedades privadas
 static var _ids: Array[StringName] = []
@@ -48,8 +50,13 @@ static func _ensure_loaded():
 	if err != OK:
 		_fail("don't load %s (error %d)" %[IDENTITIES_PATH, err])
 	
+	_names[STANDARD_ID] = STANDARD_NAME
+	_ids.append(STANDARD_ID)
 	for section: String in cfg.get_sections():
 		var id := StringName(section)
+		if id == STANDARD_ID:
+			_fail("don't use the id `%s` in %s" % [STANDARD_ID, IDENTITIES_PATH])
+			continue
 		if not is_snake_case(id):
 			_fail("id no `snake_case`: `%s`" % section)
 			continue
@@ -66,9 +73,6 @@ static func _ensure_loaded():
 		_ids.append(id)
 		if bool(cfg.get_value(section, "hidden", false)):
 			_hidden.append(id)
-	
-	if not _names.has(STANDARD_ID):
-		_fail("missing base id `%s` in %s" % [STANDARD_ID, IDENTITIES_PATH])
 
 	_loaded = true
 
@@ -147,5 +151,18 @@ static func load_person_config(path: String) -> PersonConfig:
 	return config
 
 static func has_person_config(id: StringName) -> bool:
+	if id == STANDARD_ID:
+		return false
 	var path: String = person_config_path(id)
 	return path != "" and FileAccess.file_exists(path)
+
+static func model_path(id: StringName) -> String:
+	'''
+	Obtener path de modelo de personaje.
+	'''
+	if id == STANDARD_ID:
+		return STANDARD_MODEL_PATH
+	else:
+		var config_path: String = person_config_path(id)
+		var config: PersonConfig = load_person_config(config_path)
+		return config.model

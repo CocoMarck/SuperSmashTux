@@ -1,8 +1,8 @@
 class_name PowerFighterConfigurer
 
 # Constantes prefab
+# Este es el standard prefab. Es la base/dummy. Sin cfg, ni build especial, por diseño. No "arreglar" cargando un `cfg` o algo asi. Los cambios finales del moveset van en code.
 const POWER_FIGHTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn")
-const PREFAB_MODEL_PATH := "res://assets/models/standard/standard_character_a_pose.glb" # Malla que ya trae el prefab.
 
 # Funciones
 static func create( 
@@ -11,15 +11,16 @@ static func create(
 	# Preparar instancia
 	var power_fighter = POWER_FIGHTER_PREFAB.instantiate()
 	var person_config: PersonConfig
-	var have_character_registy: bool = CharacterRegistry.is_playable(config_id)
-	if have_character_registy:
+
+	# Cambiar o no construcción de instancia
+	var has_person_config: bool = CharacterRegistry.has_person_config(config_id)
+	if has_person_config:
 		var path: String = CharacterRegistry.person_config_path(config_id)
 		person_config = CharacterRegistry.load_person_config(path)
-	# Solo cambiar la malla si el cfg pide otra distinta a la del prefab.
-	if person_config != null and person_config.model != PREFAB_MODEL_PATH:
+	if has_person_config:
 		_build_instance(power_fighter, person_config)
 	
-	# Asignar script
+	# Establecer tipo de control
 	match control_type:
 		GlobalUtils.ControlType.PLAYER:
 			power_fighter.controller = PlayerController.new()
@@ -28,7 +29,8 @@ static func create(
 		GlobalUtils.ControlType.NONE:
 			pass
 	
-	if have_character_registy:
+	# Establecer configuración al personaje
+	if has_person_config:
 		_apply_person_config(power_fighter as PowerFighter, person_config)
 		# Ataques aún hardcodeados por personaje; los demás usan los del prefab.
 		if config_id == &"tux":
@@ -69,6 +71,8 @@ static func _apply_person_config(
 		person_config.air_acceleration, person_config.knockback_friction)
 	# ^
 	# | ground_acceleration, ground_friction, air_acceleration, knockback_friction
+	power_fighter.set_anim_offset(
+		Vector3(0.0,-0.2,0.0))
 
 	power_fighter.jump_impulse = person_config.jump_impulse
 	power_fighter.walking_speed = person_config.walking_speed
