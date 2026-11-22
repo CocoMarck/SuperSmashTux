@@ -1,0 +1,96 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/components/common/ready_banner.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="2_theme"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_banner"]
+content_margin_left = 28.0
+content_margin_top = 8.0
+content_margin_right = 28.0
+content_margin_bottom = 8.0
+bg_color = Color(0.05490196, 0.06666667, 0.08627451, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.9019608, 0.92941177, 0.9529412, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="ReadyBanner" type="PanelContainer" unique_id=1584920376]
+visible = false
+custom_minimum_size = Vector2(0, 76)
+mouse_filter = 2
+theme = ExtResource("2_theme")
+theme_type_variation = &"KnGo"
+theme_override_styles/panel = SubResource("StyleBoxFlat_banner")
+script = ExtResource("1_script")
+
+[node name="Row" type="HBoxContainer" parent="." unique_id=702918364]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="Row" unique_id=463920185]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnBannerTitle"
+text = "¿LISTOS?"
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="Row" unique_id=830192746]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Options" type="HBoxContainer" parent="Row" unique_id=1649302875]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 40
+
+[node name="YesOption" type="HBoxContainer" parent="Row/Options" unique_id=1649302901]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+theme_override_constants/separation = 8
+
+[node name="YesCursor" type="Label" parent="Row/Options/YesOption" unique_id=1649302902]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnBannerText"
+theme_override_font_sizes/font_size = 26
+text = ">"
+vertical_alignment = 1
+
+[node name="YesText" type="Label" parent="Row/Options/YesOption" unique_id=1649302903]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnBannerText"
+theme_override_font_sizes/font_size = 26
+text = "Sí"
+vertical_alignment = 1
+
+[node name="NoOption" type="HBoxContainer" parent="Row/Options" unique_id=1649302911]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+theme_override_constants/separation = 8
+
+[node name="NoCursor" type="Label" parent="Row/Options/NoOption" unique_id=1649302912]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnBannerText"
+theme_override_font_sizes/font_size = 26
+text = ">"
+vertical_alignment = 1
+
+[node name="NoText" type="Label" parent="Row/Options/NoOption" unique_id=1649302913]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnBannerText"
+theme_override_font_sizes/font_size = 26
+text = "No"
+vertical_alignment = 1

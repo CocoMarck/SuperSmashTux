@@ -267,6 +267,38 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rule_row"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 12.0
+content_margin_bottom = 0.0
+bg_color = Color(0.08627451, 0.105882354, 0.13333334, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.16470589, 0.19215687, 0.23529412, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rule_row_focused"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 12.0
+content_margin_bottom = 0.0
+bg_color = Color(0.08627451, 0.105882354, 0.13333334, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.41960785, 0.4627451, 0.5176471, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="FontVariation" id="FontVariation_kn_rule_arrow"]
 base_font = ExtResource("3_extrabold")
 spacing_top = -8
@@ -285,6 +317,44 @@ corner_radius_top_left = 1
 corner_radius_top_right = 1
 corner_radius_bottom_right = 1
 corner_radius_bottom_left = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stage_chosen"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.05490196, 0.06666667, 0.08627451, 0.55)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7882353, 0.81960785, 0.85882354, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0.019607844, 0.02745098, 0.039215688, 0.35)
+shadow_size = 18
+shadow_offset = Vector2(0, 6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stage_preselect"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.05490196, 0.06666667, 0.08627451, 0.55)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 0)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0.019607844, 0.02745098, 0.039215688, 0.35)
+shadow_size = 18
+shadow_offset = Vector2(0, 6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tag"]
 content_margin_left = 9.0
@@ -531,10 +601,18 @@ KnRuleArrow/base_type = &"Label"
 KnRuleArrow/colors/font_color = Color(0.54509807, 0.58431375, 0.6392157, 1)
 KnRuleArrow/font_sizes/font_size = 26
 KnRuleArrow/fonts/font = SubResource("FontVariation_kn_rule_arrow")
+KnRuleDetail/base_type = &"Label"
+KnRuleDetail/colors/font_color = Color(0.54509807, 0.58431375, 0.6392157, 1)
+KnRuleDetail/font_sizes/font_size = 11
+KnRuleDetail/fonts/font = ExtResource("1_medium")
 KnRuleLabel/base_type = &"Label"
 KnRuleLabel/colors/font_color = Color(0.54509807, 0.58431375, 0.6392157, 1)
 KnRuleLabel/font_sizes/font_size = 18
 KnRuleLabel/fonts/font = ExtResource("2_bold")
+KnRuleRow/base_type = &"PanelContainer"
+KnRuleRow/styles/panel = SubResource("StyleBoxFlat_rule_row")
+KnRuleRowFocused/base_type = &"PanelContainer"
+KnRuleRowFocused/styles/panel = SubResource("StyleBoxFlat_rule_row_focused")
 KnRuleValue/base_type = &"Label"
 KnRuleValue/colors/font_color = Color(0.9019608, 0.92941177, 0.9529412, 1)
 KnRuleValue/font_sizes/font_size = 18
@@ -547,6 +625,10 @@ KnSegOff/base_type = &"Panel"
 KnSegOff/styles/panel = SubResource("StyleBoxFlat_seg_off")
 KnSegOn/base_type = &"Panel"
 KnSegOn/styles/panel = SubResource("StyleBoxFlat_seg_on")
+KnStageChosen/base_type = &"PanelContainer"
+KnStageChosen/styles/panel = SubResource("StyleBoxFlat_stage_chosen")
+KnStagePreselect/base_type = &"PanelContainer"
+KnStagePreselect/styles/panel = SubResource("StyleBoxFlat_stage_preselect")
 KnStatusRich/base_type = &"RichTextLabel"
 KnStatusRich/colors/default_color = Color(0.9019608, 0.92941177, 0.9529412, 1)
 KnStatusRich/font_sizes/normal_font_size = 20

@@ -1,0 +1,82 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
+[ext_resource type="Script" path="res://scripts/ui/components/match_menu/rule_row.gd" id="2_script"]
+
+[node name="RuleRow" type="PanelContainer" unique_id=1529384071]
+custom_minimum_size = Vector2(376, 56)
+offset_right = 376.0
+offset_bottom = 56.0
+theme = ExtResource("1_theme")
+theme_type_variation = &"KnRuleRow"
+script = ExtResource("2_script")
+
+[node name="Row" type="HBoxContainer" parent="." unique_id=384019257]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Cursor" type="Label" parent="Row" unique_id=1067293845]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnRuleLabel"
+theme_override_colors/font_color = Color(0.9019608, 0.92941177, 0.9529412, 1)
+text = ">"
+vertical_alignment = 1
+
+[node name="Texts" type="VBoxContainer" parent="Row" unique_id=920384756]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="RuleLabel" type="Label" parent="Row/Texts" unique_id=1748203961]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnRuleLabel"
+text = "Vidas"
+vertical_alignment = 1
+
+[node name="DetailLabel" type="Label" parent="Row/Texts" unique_id=563920184]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"KnRuleDetail"
+text = "por jugador · 1 a 10"
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="Row" unique_id=1203847596]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Value" type="HBoxContainer" parent="Row" unique_id=471920385]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="PrevArrow" type="Label" parent="Row/Value" unique_id=1893027465]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 0)
+layout_mode = 2
+theme_type_variation = &"KnRuleArrow"
+text = "‹"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ValueLabel" type="Label" parent="Row/Value" unique_id=648203917]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(66, 0)
+layout_mode = 2
+theme_type_variation = &"KnRuleValue"
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextArrow" type="Label" parent="Row/Value" unique_id=1302958476]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 0)
+layout_mode = 2
+theme_type_variation = &"KnRuleArrow"
+text = "›"
+horizontal_alignment = 1
+vertical_alignment = 1

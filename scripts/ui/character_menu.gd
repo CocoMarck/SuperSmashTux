@@ -13,22 +13,14 @@ enum Zone { ROSTER, CARDS }
 # Constantes
 const ROSTER_TILE_SCENE := "res://ui/components/character_menu/roster_tile.tscn"
 const MAIN_MENU_SCENE := "res://ui/main_menu.tscn"
-const LEVEL_SCENE := "res://scenes/levels/map1.tscn"
-const FIGHT_HUD_SCENE := "res://ui/fight_hud.tscn"
-const BLINK_INTERVAL := 0.4
-const POP_SCALE := 1.2 # Escala inicial del rebote al aparecer, igual que el anuncio de la partida.
-const POP_DURATION := 0.25
+const MATCH_MENU_SCENE := "res://ui/match_menu.tscn"
 const SLOT_COUNT := 4
 const HUMAN_COUNT := 2 # P1 = slot 0 y P2 = slot 1, siempre unidos.
 const CONTROLLER_NONE := -2
 const CONTROLLER_MOUSE := -1 # Los humanos usan su número (0, 1).
 const NO_SLOT := -1
 const CPU_CONTROLLER := 0 # Solo P1 controla la selección de los CPU (sin ratón).
-const LIVES_MIN := 1
-const LIVES_MAX := 9
-const TIME_OPTIONS: Array[int] = [0, 2, 3, 5, 8] # Minutos, 0 = sin límite.
 const STICK_THRESHOLD := 0.5
-const KEY_SEPARATOR := " · "
 
 # Clases
 class SlotModel:
@@ -49,10 +41,6 @@ class CursorModel:
 	var controlled_slot: int = NO_SLOT
 	var joined: bool = false
 
-# Propiedades públicas
-var lives: int = 3
-var time_index: int = 0
-
 # Propiedades privadas
 var _tiles: Dictionary[StringName, RosterTile] = {}
 var _roster: Array[CharacterCatalog.Entry] = []
@@ -66,27 +54,19 @@ var _mouse_bot: bool = false # Modo bot del ratón: el destino es la tarjeta baj
 var _mouse_bot_target: int = NO_SLOT
 var _last_bot_target: int = NO_SLOT # Último destino del modo bot (compartido entre teclado y ratón).
 var _held_axes: Dictionary[StringName, bool] = {}
-var _banner_visible: bool = false
 var _hint_move: KeyHint = null
 var _hint_select: KeyHint = null
 var _hint_cancel: KeyHint = null
 var _hint_fight: KeyHint = null
-var _banner_dismissed: bool = false # Esc lo ocultó con todos READY; Enter lo vuelve a mostrar, o reaparece cuando la condición pase de falsa a verdadera.
-var _banner_option: int = 0 # 0 = Sí, 1 = No.
-var _banner_cursor_on: bool = true
-var _banner_blink_tween: Tween = null
-var _banner_pop_tween: Tween = null
+var _match_menu: MatchMenu = null # Configuración de partida abierta encima; null si no está.
+var _banner_dismissed: bool = false # Se ocultó con todos READY; Enter o clic en "Confirmar" lo vuelven a mostrar, o reaparece cuando la condición pase de falsa a verdadera.
 
 # Propiedades privadas | Nodos
+@onready var _root: Control = $Root
 @onready var _tiles_container: Container = %Tiles
-@onready var _banner: Control = %ReadyBanner
-@onready var _banner_options: Array[Control] = [%YesOption, %NoOption]
-@onready var _banner_cursors: Array[Label] = [%YesCursor, %NoCursor]
-@onready var _banner_texts: Array[Label] = [%YesText, %NoText]
-@onready var _lives_rule: RuleSelector = %LivesRule
-@onready var _time_rule: RuleSelector = %TimeRule
 @onready var _footer: Container = %Footer
 @onready var _back_hint: KeyHint = %BackHint
+@onready var _ready_banner: ReadyBanner = %ReadyBanner
 
 # Funciones | Callbacks
 func _ready() -> void:
@@ -102,35 +82,25 @@ func _ready() -> void:
 		_tiles[_roster[i].config_id] = tile
 	for i: int in SLOT_COUNT:
 		_cards[i].pressed.connect(_on_card_pressed.bind(i))
-	_lives_rule.setup("Vidas", str(lives))
-	_lives_rule.step_requested.connect(_on_lives_step)
-	_time_rule.setup("Tiempo", _time_text())
-	_time_rule.step_requested.connect(_on_time_step)
 	_setup_footer()
 	for i: int in SLOT_COUNT:
-		var join_key: String = _action_key_text(GlobalUtils.PLAYER_INPUT_MAPS[i as GlobalUtils.PlayerId].attack) if i < HUMAN_COUNT else ""
+		var join_key: String = KeyText.action_key(GlobalUtils.PLAYER_INPUT_MAPS[i as GlobalUtils.PlayerId].attack) if i < HUMAN_COUNT else ""
 		_cards[i].set_join_prompt(i < HUMAN_COUNT, join_key)
-	_banner.visible = false
-	# Cada opción del letrero se selecciona con el hover y se confirma con clic; los hijos no tapan el ratón.
-	for i: int in _banner_options.size():
-		_banner_options[i].mouse_entered.connect(_select_banner_option.bind(i))
-		_banner_options[i].gui_input.connect(_on_banner_option_input.bind(i))
-	_refresh_banner_options()
-	# El aviso "Esc Regresar" también se puede clicar: hace lo mismo que Esc.
-	_back_hint.mouse_filter = Control.MOUSE_FILTER_STOP
-	_back_hint.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	for child: Node in _back_hint.find_children("*", "Control", true, false):
-		(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Los avisos "Esc Regresar" y "Enter Confirmar" también se pueden clicar: hacen lo mismo que la tecla.
+	_make_clickable(_back_hint)
 	_back_hint.gui_input.connect(_on_back_hint_input)
+	_make_clickable(_hint_fight)
+	_hint_fight.gui_input.connect(_on_fight_hint_input)
+	_ready_banner.answered.connect(_on_banner_answered)
 	_reset_model()
-	_refresh.call_deferred() # Con el layout ya acomodado, para que el letrero rebote desde su centro.
+	_refresh()
 
 func _input(event: InputEvent) -> void:
 	'''
 	Se usa _input y no _unhandled_input para que ningún control con foco se coma las teclas globales.
 	Tab, Enter y Esc son teclas físicas: ui_accept/ui_cancel las comparten todos los pads.
 	'''
-	if _banner_visible:
+	if _ready_banner.is_open:
 		_handle_banner_input(event) # La pregunta bloquea el resto de la pantalla mientras está visible.
 		return
 	var mouse := event as InputEventMouseButton
@@ -155,12 +125,7 @@ func _input(event: InputEvent) -> void:
 				return
 			KEY_ENTER, KEY_KP_ENTER:
 				get_viewport().set_input_as_handled()
-				if _banner_visible:
-					_start_match()
-				elif _banner_dismissed:
-					_banner_dismissed = false # Oculto por Esc con todos READY: Enter lo vuelve a mostrar.
-					_update_banner()
-					_update_hints()
+				_ask_ready()
 				return
 			KEY_ESCAPE:
 				get_viewport().set_input_as_handled()
@@ -207,60 +172,14 @@ func apply_state(slots: Array[Dictionary]) -> void:
 		tabs.assign(tabs_by_tile.get(id, []))
 		_tiles[id].set_tabs(tabs)
 
-func show_ready_banner(show_banner: bool) -> void:
-	'''
-	Muestra u oculta la pregunta "¿LISTOS PARA PELEAR?" con rebote al aparecer. Siempre arranca en "Sí",
-	con el cursor ">" parpadeando delante de la opción elegida.
-	'''
-	_kill_banner_tweens()
-	_banner.visible = show_banner
-	if not show_banner:
-		return
-	_banner_option = 0
-	_banner_cursor_on = true
-	_refresh_banner_options()
-	_banner.pivot_offset = _banner.size / 2.0
-	_banner.scale = Vector2(POP_SCALE, POP_SCALE)
-	_banner_pop_tween = create_tween()
-	_banner_pop_tween.tween_property(_banner, "scale", Vector2.ONE, POP_DURATION).from(Vector2(POP_SCALE, POP_SCALE)).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	_banner_blink_tween = create_tween().set_loops()
-	_banner_blink_tween.tween_callback(func() -> void:
-		_banner_cursor_on = not _banner_cursor_on
-		_refresh_banner_options()).set_delay(BLINK_INTERVAL)
-
-func _refresh_banner_options() -> void:
-	'''
-	Opción elegida en ink con el ">" parpadeando (alfa, para no mover el texto); la otra en muted y sin cursor.
-	'''
-	for i: int in _banner_options.size():
-		var selected: bool = i == _banner_option
-		_banner_texts[i].add_theme_color_override(&"font_color", KernelPalette.get_color(&"ink") if selected else KernelPalette.get_color(&"ink_muted"))
-		_banner_cursors[i].self_modulate.a = 1.0 if selected and _banner_cursor_on else 0.0
-
-func _select_banner_option(index: int) -> void:
-	if not _banner_visible or index == _banner_option:
-		return
-	_banner_option = index
-	_banner_cursor_on = true
-	_refresh_banner_options()
-
-func _confirm_banner() -> void:
-	'''
-	Sí arranca la partida; No oculta el letrero (igual que Esc).
-	'''
-	if _banner_option == 0:
-		_start_match()
-	else:
-		_hide_banner()
-
 func _go_back() -> void:
 	'''
 	Esc o clic en "Esc Regresar": con la pregunta a la vista solo la oculta; si no, regresa al menú principal.
 	'''
-	if _banner_visible:
+	if _ready_banner.is_open:
 		_hide_banner()
-	else:
-		get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+		return
+	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 func _on_back_hint_input(event: InputEvent) -> void:
 	var mouse := event as InputEventMouseButton
@@ -268,98 +187,143 @@ func _on_back_hint_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		_go_back()
 
+func _make_clickable(hint: KeyHint) -> void:
+	hint.mouse_filter = Control.MOUSE_FILTER_STOP
+	for child: Control in hint.find_children("*", "Control", true, false):
+		child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+func _on_fight_hint_input(event: InputEvent) -> void:
+	var mouse := event as InputEventMouseButton
+	if mouse != null and mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT and not _ready_banner.is_open:
+		get_viewport().set_input_as_handled()
+		_ask_ready()
+
+func _on_banner_answered(yes: bool) -> void:
+	'''
+	Sí abre la configuración de partida; No oculta el letrero (igual que Esc).
+	'''
+	if yes:
+		_open_match_menu()
+	else:
+		_hide_banner()
+
+# Funciones | Letrero
+func _ask_ready() -> void:
+	'''
+	Muestra la pregunta "¿CONTINUAR?" de nuevo si estaba oculta y todavía se puede abrir la configuración.
+	'''
+	if not _can_open_match() or _ready_banner.is_open:
+		return
+	_banner_dismissed = false
+	_update_banner()
+	_update_hints()
+
 func _hide_banner() -> void:
 	_banner_dismissed = true
 	_update_banner()
 	_update_hints()
 
+func _update_banner() -> void:
+	'''
+	El letrero aparece cuando _can_open_match() pasa de falsa a verdadera y se queda hasta que se oculta.
+	'''
+	var condition: bool = _can_open_match()
+	if not condition:
+		_banner_dismissed = false
+	var should_show: bool = condition and not _banner_dismissed
+	if should_show and not _ready_banner.is_open:
+		_ready_banner.popup()
+	elif not should_show and _ready_banner.is_open:
+		_ready_banner.close()
+
 func _handle_banner_input(event: InputEvent) -> void:
 	'''
-	Con el letrero visible solo responde él, y solo con los controles de P1 (el anfitrión) o el ratón:
-	izquierda/derecha cambian la opción, Enter o attack confirman, Esc o cancelar lo ocultan. El resto del teclado y los pads se consume para que nadie toque las tarjetas.
+	Con el letrero visible solo responde P1 (← → mueven, attack confirma, cancelar = No), Enter, Esc y el ratón.
+	El resto del teclado se consume para que nadie toque la pantalla.
 	'''
-	var viewport: Viewport = get_viewport() # La partida puede sacar esta escena del árbol al confirmar.
+	var viewport: Viewport = get_viewport() # La pantalla puede cambiar al confirmar.
 	var key := event as InputEventKey
 	if key != null and key.pressed and not key.echo:
 		match key.physical_keycode:
 			KEY_ENTER, KEY_KP_ENTER:
 				viewport.set_input_as_handled()
-				_confirm_banner()
+				_ready_banner.confirm()
 				return
 			KEY_ESCAPE:
 				viewport.set_input_as_handled()
 				_hide_banner()
 				return
-	# Las demás teclas: solo los controles de P1, el anfitrión, responden la pregunta.
-	for human: int in [0]:
-		var map: PlayerInputMap = GlobalUtils.PLAYER_INPUT_MAPS[human as GlobalUtils.PlayerId]
-		if _just_pressed(event, map.move_left):
-			viewport.set_input_as_handled()
-			_select_banner_option(0)
-		elif _just_pressed(event, map.move_right):
-			viewport.set_input_as_handled()
-			_select_banner_option(1)
-		elif _just_pressed(event, map.attack):
-			viewport.set_input_as_handled()
-			_confirm_banner()
-		elif _just_pressed(event, map.power_attack):
-			viewport.set_input_as_handled()
-			_hide_banner()
-		else:
-			continue
+	var map: PlayerInputMap = GlobalUtils.PLAYER_INPUT_MAPS[CPU_CONTROLLER as GlobalUtils.PlayerId]
+	if _just_pressed(event, map.move_left):
+		_ready_banner.move_option(-1)
+	elif _just_pressed(event, map.move_right):
+		_ready_banner.move_option(1)
+	elif _just_pressed(event, map.attack):
+		_ready_banner.confirm()
+	elif _just_pressed(event, map.power_attack):
+		_hide_banner()
+	elif key == null:
 		return
-	if key != null:
-		viewport.set_input_as_handled() # Cualquier otra tecla no toca las tarjetas mientras está la pregunta.
+	viewport.set_input_as_handled() # Cualquier otra tecla tampoco toca la pantalla mientras está la pregunta.
 
-func _on_banner_option_input(event: InputEvent, index: int) -> void:
-	var mouse := event as InputEventMouseButton
-	if mouse != null and mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT and _banner_visible:
-		_banner_option = index
-		_confirm_banner()
-
-func _kill_banner_tweens() -> void:
-	for tween: Tween in [_banner_blink_tween, _banner_pop_tween]:
-		if tween != null:
-			tween.kill()
-	_banner_blink_tween = null
-	_banner_pop_tween = null
-
-func _start_match() -> void:
+func _can_open_match() -> bool:
 	'''
-	Llena MatchSetup con la selección (Aleatorio se resuelve aquí) y arranca la partida.
+	Con al menos 2 peleadores y todos READY se puede abrir la configuración de partida.
+	'''
+	var fighters: int = 0
+	for slot: SlotModel in _slots:
+		if slot.kind == SlotKind.EMPTY:
+			continue
+		fighters += 1
+		if slot.state != SlotCard.State.READY:
+			return false
+	return fighters >= 2
+
+func _open_match_menu() -> void:
+	'''
+	Arma la selección (Aleatorio se resuelve aquí) y abre la configuración de partida encima de esta pantalla.
 	'''
 	var pool: Array[CharacterCatalog.Entry] = []
 	for entry: CharacterCatalog.Entry in _roster:
 		if not entry.is_random:
 			pool.append(entry)
 	var npc_count: int = 0
-	
-	# Instanciar Nivel; que es un `GameManager`. Y meterle el hud.
-	var level: GameManager = load(LEVEL_SCENE).instantiate() as GameManager
-	level.add_child(load(FIGHT_HUD_SCENE).instantiate())
-	level.set_time_limit(TIME_OPTIONS[time_index])
-	
-	# Agregar datos de peleadores al game manager.
+	var fighters: Dictionary[int, PowerFighterData] = {}
 	for i: int in SLOT_COUNT:
-		var data : PowerFighterData = PowerFighterData.new()
 		var slot: SlotModel = _slots[i]
-		if slot.kind != SlotKind.EMPTY:
-			var entry: CharacterCatalog.Entry = CharacterCatalog.get_entry(slot.fighter_id)
-			if entry == null or entry.is_random:
-				entry = pool.pick_random()
-			data.lives = lives
-			data.config_id = entry.config_id
-			if slot.kind == SlotKind.PLAYER:
-				data.control = GlobalUtils.ControlType.PLAYER
-				data.player_id = i as GlobalUtils.PlayerId
-			else:
-				data.control = GlobalUtils.ControlType.NPC
-				data.npc_id = npc_count as GlobalUtils.NPCId # En orden de aparición.
-				npc_count += 1
-			level.power_fighter_slots.set_slot(i, data)
-	
-	# Cambiar de scene, al nodo del nivel
-	get_tree().change_scene_to_node(level)
+		if slot.kind == SlotKind.EMPTY:
+			continue
+		var data: PowerFighterData = PowerFighterData.new()
+		var entry: CharacterCatalog.Entry = CharacterCatalog.get_entry(slot.fighter_id)
+		if entry == null or entry.is_random:
+			entry = pool.pick_random()
+		data.config_id = entry.config_id
+		if slot.kind == SlotKind.PLAYER:
+			data.control = GlobalUtils.ControlType.PLAYER
+			data.player_id = i as GlobalUtils.PlayerId
+		else:
+			data.control = GlobalUtils.ControlType.NPC
+			data.npc_id = npc_count as GlobalUtils.NPCId # En orden de aparición.
+			npc_count += 1
+		fighters[i] = data
+
+	_banner_dismissed = true # Al volver, la pantalla queda con el letrero oculto; Enter lo muestra.
+	_update_banner()
+	_match_menu = load(MATCH_MENU_SCENE).instantiate() as MatchMenu
+	add_child(_match_menu)
+	_match_menu.setup(fighters)
+	_match_menu.back_requested.connect(_on_match_menu_back)
+	_root.visible = false
+	set_process_input(false)
+
+func _on_match_menu_back() -> void:
+	'''
+	Vuelve de la configuración de partida con la pantalla tal cual estaba.
+	'''
+	_match_menu.queue_free()
+	_match_menu = null
+	_root.visible = true
+	set_process_input(true)
 
 # Funciones | Modelo
 func _reset_model() -> void:
@@ -729,7 +693,7 @@ func _cancel(human: int) -> void:
 
 # Funciones | Callbacks de UI
 func _on_tile_pressed(index: int) -> void:
-	if _banner_visible:
+	if _ready_banner.is_open:
 		return
 	if _mouse_slot == NO_SLOT:
 		return
@@ -738,11 +702,11 @@ func _on_tile_pressed(index: int) -> void:
 	_refresh()
 
 func _on_tile_hovered(index: int) -> void:
-	if _banner_visible:
-		return
 	'''
 	Pasar el puntero por una casilla mueve la preselección de la tarjeta que tiene el ratón (se queda al salir).
 	'''
+	if _ready_banner.is_open:
+		return
 	if _mouse_slot == NO_SLOT:
 		return
 	var slot: SlotModel = _slots[_mouse_slot]
@@ -752,7 +716,7 @@ func _on_tile_hovered(index: int) -> void:
 	_refresh()
 
 func _on_card_pressed(index: int) -> void:
-	if _banner_visible:
+	if _ready_banner.is_open:
 		return
 	if _mouse_bot:
 		_bot_confirm(CONTROLLER_MOUSE, index)
@@ -780,37 +744,7 @@ func _mouse_cancel(index: int) -> void:
 	_cursors[index].joined = false
 	_cursors[index].controlled_slot = NO_SLOT
 
-func _on_lives_step(direction: int) -> void:
-	if _banner_visible:
-		return
-	lives = clampi(lives + direction, LIVES_MIN, LIVES_MAX)
-	_lives_rule.set_value(str(lives))
-
-func _on_time_step(direction: int) -> void:
-	if _banner_visible:
-		return
-	time_index = clampi(time_index + direction, 0, TIME_OPTIONS.size() - 1)
-	_time_rule.set_value(_time_text())
-
 # Funciones | Pintado
-func _time_text() -> String:
-	var minutes: int = TIME_OPTIONS[time_index]
-	return "∞" if minutes == 0 else "%d min" % minutes
-
-func _action_key_text(action: StringName) -> String:
-	'''
-	Texto de la tecla de teclado asignada a la acción, leída del Input Map (sigue bien si se reasignan controles).
-	'''
-	for event: InputEvent in InputMap.action_get_events(action):
-		var key := event as InputEventKey
-		if key != null:
-			var text: String = key.as_text_physical_keycode() if key.physical_keycode != KEY_NONE else key.as_text_keycode()
-			return text.replace(" (Physical)", "")
-	return "?"
-
-func _action_pair_text(first: StringName, second: StringName) -> String:
-	return _action_key_text(first) + KEY_SEPARATOR + _action_key_text(second)
-
 func _update_hints() -> void:
 	'''
 	Enciende o apaga los avisos del pie según lo que haría cada acción ahora mismo para P1 o P2.
@@ -825,7 +759,9 @@ func _update_hints() -> void:
 	_hint_move.enabled = can_move
 	_hint_select.enabled = can_select
 	_hint_cancel.enabled = can_cancel
-	_hint_fight.enabled = _banner_visible or _banner_dismissed # Oculto por Esc, Enter lo vuelve a mostrar.
+	var can_open: bool = _can_open_match()
+	_hint_fight.enabled = can_open
+	_hint_fight.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if can_open else Control.CURSOR_ARROW
 
 func _can_move(human: int) -> bool:
 	if human == CPU_CONTROLLER and _p1_bot:
@@ -858,8 +794,8 @@ func _setup_footer() -> void:
 	var map_2: PlayerInputMap = GlobalUtils.PLAYER_INPUT_MAPS[GlobalUtils.PlayerId.PLAYER_2]
 	var texts: Array[Array] = [
 		["← ↑ ↓ → · WASD", "Mover"],
-		[_action_pair_text(map_1.attack, map_2.attack), "Seleccionar"],
-		[_action_pair_text(map_1.power_attack, map_2.power_attack), "Cancelar"],
+		[KeyText.action_pair(map_1.attack, map_2.attack), "Seleccionar"],
+		[KeyText.action_pair(map_1.power_attack, map_2.power_attack), "Cancelar"],
 		["Enter", "Confirmar"],
 	]
 	var hints: Array[Node] = _footer.get_children()
@@ -913,7 +849,7 @@ func _refresh() -> void:
 	apply_state(data)
 	for i: int in SLOT_COUNT:
 		_cards[i].set_targeted((_p1_bot and i == _p1_bot_target) or (_mouse_bot and i == _mouse_bot_target),
-				_action_key_text(GlobalUtils.PLAYER_INPUT_MAPS[GlobalUtils.PlayerId.PLAYER_1].attack))
+				KeyText.action_key(GlobalUtils.PLAYER_INPUT_MAPS[GlobalUtils.PlayerId.PLAYER_1].attack))
 	_update_banner()
 	_update_hints()
 	_update_cursor_shapes()
@@ -923,38 +859,17 @@ func _update_cursor_shapes() -> void:
 	Mano solo donde un clic hace algo: tarjetas que el ratón puede tomar o quitar y, mientras el ratón
 	elige en una tarjeta, las casillas del roster. Flecha en tarjetas que elige un humano.
 	'''
-	var rule_cursor: Control.CursorShape = Control.CURSOR_ARROW if _banner_visible else Control.CURSOR_POINTING_HAND
-	_lives_rule.set_arrows_cursor(rule_cursor)
-	_time_rule.set_arrows_cursor(rule_cursor)
 	for i: int in SLOT_COUNT:
 		var slot: SlotModel = _slots[i]
 		var clickable: bool
-		if _banner_visible:
-			clickable = false # Mientras la pregunta está visible, las tarjetas no reciben clics.
-		elif _mouse_bot:
+		if _mouse_bot:
 			clickable = _bot_targets().has(i)
 		elif slot.kind == SlotKind.EMPTY:
 			clickable = i < HUMAN_COUNT # En los demás slots el clic no hace nada.
 		else:
 			clickable = slot.controller == CONTROLLER_NONE or slot.controller == CONTROLLER_MOUSE
+		clickable = clickable and not _ready_banner.is_open
 		_cards[i].mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if clickable else Control.CURSOR_ARROW
-	var mouse_choosing: bool = not _banner_visible and _mouse_slot != NO_SLOT and _slots[_mouse_slot].state == SlotCard.State.CHOOSING
+	var mouse_choosing: bool = not _ready_banner.is_open and _mouse_slot != NO_SLOT and _slots[_mouse_slot].state == SlotCard.State.CHOOSING
 	for tile: RosterTile in _tiles.values():
 		tile.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if mouse_choosing else Control.CURSOR_ARROW
-
-func _update_banner() -> void:
-	var fighters: int = 0
-	var all_ready: bool = true
-	for slot: SlotModel in _slots:
-		if slot.kind == SlotKind.EMPTY:
-			continue
-		fighters += 1
-		if slot.state != SlotCard.State.READY:
-			all_ready = false
-	var condition: bool = fighters >= 2 and all_ready
-	if not condition:
-		_banner_dismissed = false
-	var should_show: bool = condition and not _banner_dismissed
-	if should_show != _banner_visible:
-		_banner_visible = should_show
-		show_ready_banner(should_show)

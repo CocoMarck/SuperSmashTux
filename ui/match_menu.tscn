@@ -1,0 +1,311 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/match_menu.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="2_theme"]
+[ext_resource type="PackedScene" uid="uid://cn4kh8wt2jd5x" path="res://ui/components/common/key_hint.tscn" id="3_key_hint"]
+[ext_resource type="PackedScene" path="res://ui/components/match_menu/rule_row.tscn" id="4_rule_row"]
+[ext_resource type="Script" path="res://scripts/ui/components/match_menu/stage_plan.gd" id="5_plan"]
+[ext_resource type="PackedScene" path="res://ui/components/common/ready_banner.tscn" id="6_ready_banner"]
+
+[node name="MatchMenu" type="CanvasLayer" unique_id=1846029375]
+layer = 2
+script = ExtResource("1_script")
+
+[node name="Root" type="Control" parent="." unique_id=530918264]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+
+[node name="Background" type="ColorRect" parent="Root" unique_id=1192837460]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.043137256, 0.05490196, 0.07450981, 1)
+
+[node name="Margin" type="MarginContainer" parent="Root" unique_id=1740293851]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="Layout" type="VBoxContainer" parent="Root/Margin" unique_id=702938164]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="Root/Margin/Layout" unique_id=1475920386]
+custom_minimum_size = Vector2(0, 31)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Left" type="HBoxContainer" parent="Root/Margin/Layout/Header" unique_id=391027485]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="BackHint" parent="Root/Margin/Layout/Header/Left" unique_id=1658203947 instance=ExtResource("3_key_hint")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 31)
+layout_mode = 2
+theme_type_variation = &"KnPanelSolid"
+variant = 2
+
+[node name="Title" type="Label" parent="Root/Margin/Layout/Header" unique_id=928374016]
+layout_mode = 2
+theme_type_variation = &"KnScreenTitle"
+text = "Configuración de partida"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Right" type="HBoxContainer" parent="Root/Margin/Layout/Header" unique_id=1820473956]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+alignment = 2
+
+[node name="StagesWindow" type="PanelContainer" parent="Root/Margin/Layout" unique_id=640192837]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnWindow"
+
+[node name="VBox" type="VBoxContainer" parent="Root/Margin/Layout/StagesWindow" unique_id=1302847561]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Titlebar" type="PanelContainer" parent="Root/Margin/Layout/StagesWindow/VBox" unique_id=485920173]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnTitlebar"
+
+[node name="TitleMargin" type="MarginContainer" parent="Root/Margin/Layout/StagesWindow/VBox/Titlebar" unique_id=1930482765]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+
+[node name="TitleText" type="Label" parent="Root/Margin/Layout/StagesWindow/VBox/Titlebar/TitleMargin" unique_id=573019284]
+layout_mode = 2
+theme_type_variation = &"KnTileName"
+text = "Escenarios"
+vertical_alignment = 1
+
+[node name="TilesMargin" type="MarginContainer" parent="Root/Margin/Layout/StagesWindow/VBox" unique_id=1068293745]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="Stages" type="HFlowContainer" parent="Root/Margin/Layout/StagesWindow/VBox/TilesMargin" unique_id=829401736]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 116)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+
+[node name="FooterSpacer" type="Control" parent="Root/Margin/Layout" unique_id=1592037486]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Footer" type="HBoxContainer" parent="Root/Margin/Layout" unique_id=394827105]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 31)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="HintMove" parent="Root/Margin/Layout/Footer" unique_id=1739204856 instance=ExtResource("3_key_hint")]
+unique_name_in_owner = true
+layout_mode = 2
+key_text = "← ↑ ↓ →"
+action_text = "Mover"
+
+[node name="HintSelect" parent="Root/Margin/Layout/Footer" unique_id=618392047 instance=ExtResource("3_key_hint")]
+unique_name_in_owner = true
+layout_mode = 2
+key_text = "K"
+action_text = "Seleccionar"
+
+[node name="HintCancel" parent="Root/Margin/Layout/Footer" unique_id=1284759036 instance=ExtResource("3_key_hint")]
+unique_name_in_owner = true
+layout_mode = 2
+key_text = "L"
+action_text = "Cancelar"
+
+[node name="HintFight" parent="Root/Margin/Layout/Footer" unique_id=947201538 instance=ExtResource("3_key_hint")]
+unique_name_in_owner = true
+layout_mode = 2
+key_text = "Enter"
+action_text = "Pelear"
+
+[node name="BottomRow" type="HBoxContainer" parent="Root/Margin/Layout" unique_id=1657382904]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="PreviewWindow" type="PanelContainer" parent="Root/Margin/Layout/BottomRow" unique_id=302958164]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_type_variation = &"KnWindow"
+
+[node name="VBox" type="VBoxContainer" parent="Root/Margin/Layout/BottomRow/PreviewWindow" unique_id=1846392057]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Titlebar" type="PanelContainer" parent="Root/Margin/Layout/BottomRow/PreviewWindow/VBox" unique_id=759302841]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnTitlebar"
+
+[node name="TitleMargin" type="MarginContainer" parent="Root/Margin/Layout/BottomRow/PreviewWindow/VBox/Titlebar" unique_id=1420583967]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+
+[node name="TitleText" type="Label" parent="Root/Margin/Layout/BottomRow/PreviewWindow/VBox/Titlebar/TitleMargin" unique_id=286019473]
+layout_mode = 2
+theme_type_variation = &"KnTileName"
+text = "Vista previa"
+vertical_alignment = 1
+
+[node name="Art" type="PanelContainer" parent="Root/Margin/Layout/BottomRow/PreviewWindow/VBox" unique_id=1573920468]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_type_variation = &"KnArt"
+
+[node name="PreviewPlan" type="Control" parent="Root/Margin/Layout/BottomRow/PreviewWindow/VBox/Art" unique_id=904827361]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(359, 230)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+script = ExtResource("5_plan")
+scene_path = "res://scenes/levels/map1.tscn"
+
+[node name="PreviewGlyph" type="Label" parent="Root/Margin/Layout/BottomRow/PreviewWindow/VBox/Art" unique_id=1209384756]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"KnTileGlyph"
+theme_override_font_sizes/font_size = 96
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InfoBar" type="PanelContainer" parent="Root/Margin/Layout/BottomRow/PreviewWindow/VBox" unique_id=638291047]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnCardFooter"
+
+[node name="Row" type="HBoxContainer" parent="Root/Margin/Layout/BottomRow/PreviewWindow/VBox/InfoBar" unique_id=1748392650]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PreviewName" type="Label" parent="Root/Margin/Layout/BottomRow/PreviewWindow/VBox/InfoBar/Row" unique_id=420918375]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"KnCardName"
+theme_override_font_sizes/font_size = 14
+text = "Mapa 1"
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="RulesWindow" type="PanelContainer" parent="Root/Margin/Layout/BottomRow" unique_id=592038417]
+custom_minimum_size = Vector2(410, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnWindow"
+
+[node name="VBox" type="VBoxContainer" parent="Root/Margin/Layout/BottomRow/RulesWindow" unique_id=1475038296]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Titlebar" type="PanelContainer" parent="Root/Margin/Layout/BottomRow/RulesWindow/VBox" unique_id=730192845]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"KnTitlebar"
+
+[node name="TitleMargin" type="MarginContainer" parent="Root/Margin/Layout/BottomRow/RulesWindow/VBox/Titlebar" unique_id=1604928375]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+
+[node name="TitleText" type="Label" parent="Root/Margin/Layout/BottomRow/RulesWindow/VBox/Titlebar/TitleMargin" unique_id=318029476]
+layout_mode = 2
+theme_type_variation = &"KnTileName"
+text = "Reglas"
+vertical_alignment = 1
+
+[node name="RulesMargin" type="MarginContainer" parent="Root/Margin/Layout/BottomRow/RulesWindow/VBox" unique_id=1867203945]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="Rules" type="VBoxContainer" parent="Root/Margin/Layout/BottomRow/RulesWindow/VBox/RulesMargin" unique_id=496038271]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="LivesRow" parent="Root/Margin/Layout/BottomRow/RulesWindow/VBox/RulesMargin/Rules" unique_id=1038475620 instance=ExtResource("4_rule_row")]
+unique_name_in_owner = true
+layout_mode = 2
+rule_text = "Vidas"
+detail_text = "por jugador · 1 a 10"
+value_text = "3"
+
+[node name="TimeRow" parent="Root/Margin/Layout/BottomRow/RulesWindow/VBox/RulesMargin/Rules" unique_id=274910385 instance=ExtResource("4_rule_row")]
+unique_name_in_owner = true
+layout_mode = 2
+rule_text = "Tiempo"
+detail_text = "minutos · ∞ sin límite"
+value_text = "∞"
+
+[node name="ReadyBanner" parent="Root" unique_id=1584920377 instance=ExtResource("6_ready_banner")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 24.0
+offset_top = -95.0
+offset_right = -24.0
+offset_bottom = -19.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

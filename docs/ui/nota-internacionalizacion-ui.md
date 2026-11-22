@@ -128,13 +128,15 @@ Pendientes obvios:
 
 | Dominio | Ejemplos |
 |---|---|
-| `character_menu.tscn` / `character_menu.gd` | `Selección de personaje`, `Vidas`, `Tiempo`, `Personajes`, `Jugadores`, `Mover`, `Seleccionar`, `Cancelar`, `Confirmar`, `¿LISTOS PARA PELEAR?`, `Sí`, `No` |
+| `character_menu.tscn` / `character_menu.gd` | `Selección de personaje`, `Personajes`, `Jugadores`, `Mover`, `Seleccionar`, `Cancelar`, `Confirmar` |
+| `match_menu.tscn` / `match_menu.gd` | `Configuración de partida`, `Escenarios`, `Vista previa`, `Reglas`, `Mapa 1`, `Mover`, `Seleccionar`, `Cancelar`, `Pelear` |
 | `slot_card.tscn` / `slot_card.gd` | `libre`, `Clic izq.`, `para unirte`, `> eligiendo`, `> asignar CPU`, `JUGADOR`, `CPU`, `agregar CPU` |
 | `fight_hud.tscn` / `fight_hud.gd` | `Pausar`, `> ¡PELEA!` |
 | `announcement.tscn` / `.gd` | `> ¡PELEA!` (repetido) |
 | `end_window.tscn` / `.gd` | `Ganador`, `Empate`, `> ¡SE ACABÓ!`, `> SIN GANADOR`, `Pulsa`, `Enter`, `para continuar` |
 | `key_hint.tscn` / `.gd` | `Esc`, `Regresar` |
-| `rule_selector.tscn` | `Vidas` |
+| `ready_banner.tscn` / `character_menu.tscn` | `¿LISTOS?`, `¿CONTINUAR?`, `Sí`, `No` |
+| `ui/components/match_menu/rule_row.tscn` / `ui/match_menu.tscn` | `Vidas`, `Tiempo`, `por jugador · 1 a 10`, `minutos · ∞ sin límite` |
 
 Los números (`3`, `00:00`, `∞`, `%`) y las teclas (`K`, `Tab`, `Enter`, `WASD`) no necesitan tag;
 sí lo necesitan las palabras que los acompañan (`min`, `Pulsa`, `para continuar`).

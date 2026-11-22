@@ -312,11 +312,19 @@ func _on_match_started() -> void:
 func _on_match_time_changed(seconds: int) -> void:
 	'''
 	Cronómetro de la partida en mm:ss, arriba a la derecha. Oculto hasta el primer aviso,
-	así un mapa sin cronómetro no muestra 00:00.
+	así un mapa sin cronómetro no muestra 00:00. Con límite se tiñe hacia rojo mientras se acaba.
 	'''
 	var safe_seconds := maxi(seconds, 0)
 	_match_timer.text = "%02d:%02d" % [floori(safe_seconds / 60.0), safe_seconds % 60]
+	_match_timer.add_theme_color_override("font_color", KernelPalette.time_color(safe_seconds, _time_limit_seconds()))
 	_timer_box.visible = true
+
+func _time_limit_seconds() -> int:
+	'''
+	Duración total de la partida en segundos, leída del MatchTime del nivel; 0 si no tiene límite (cuenta hacia arriba).
+	'''
+	var match_time := _game_manager.get_node_or_null("MatchTime") as MatchTime if _game_manager != null else null
+	return match_time.time_limit_minutes * 60 if match_time != null else 0
 
 func _on_match_ended(winner: PowerFighter) -> void:
 	var entry := _find_entry(winner) if is_instance_valid(winner) else null

@@ -11,6 +11,9 @@ const THEME_TYPE := &"KernelPalette"
 # Porcentaje de daño desde el que el número se pinta en rojo (damage_3).
 const CRITICAL_DAMAGE_THRESHOLD := 160.0
 
+# Fracción de tiempo restante desde la que el cronómetro se pinta en rojo (damage_3).
+const CRITICAL_TIME_RATIO := 0.1
+
 # Funciones
 static func get_color(color_name: StringName) -> Color:
 	'''Color con nombre del tipo KernelPalette del theme: ink, ink_muted, player_1..4, damage_1..3.'''
@@ -25,6 +28,23 @@ static func damage_color(percent: float) -> Color:
 	if percent < 120.0:
 		return get_color(&"damage_1")
 	if percent < CRITICAL_DAMAGE_THRESHOLD:
+		return get_color(&"damage_2")
+	return get_color(&"damage_3")
+
+static func time_color(seconds_left: int, total_seconds: int) -> Color:
+	'''
+	Color del cronómetro con límite: al revés que el daño, se calienta mientras menos tiempo queda.
+	Más de la mitad del tiempo va en blanco (ink); luego damage_1, damage_2 y en el último 10 % damage_3.
+	Sin límite (total 0) siempre blanco.
+	'''
+	if total_seconds <= 0:
+		return get_color(&"ink")
+	var ratio: float = float(seconds_left) / float(total_seconds)
+	if ratio > 0.5:
+		return get_color(&"ink")
+	if ratio > 0.25:
+		return get_color(&"damage_1")
+	if ratio > CRITICAL_TIME_RATIO:
 		return get_color(&"damage_2")
 	return get_color(&"damage_3")
 

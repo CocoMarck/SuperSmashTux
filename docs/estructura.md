@@ -7,11 +7,12 @@ supersmashtux/
 ├── prefabs/          # Escenas reutilizables (personajes, enemigos, items)
 ├── scenes/           # Escenas del juego (main.tscn, la escena principal, vive en la raíz)
 │   └── levels/       # Niveles / mapas jugables (map1.tscn)
-├── ui/               # Pantallas de interfaz (no son niveles): main_menu, character_menu, fight_hud, controls_menu
+├── ui/               # Pantallas de interfaz (no son niveles): main_menu, character_menu, match_menu, fight_hud, controls_menu
 │   ├── components/   # Piezas de UI que se instancian dentro de las pantallas
-│   │   ├── common/   # Componentes reutilizados entre pantallas (key_hint: aviso de tecla con variantes; marching_border: borde discontinuo que gira)
+│   │   ├── common/   # Componentes reutilizados entre pantallas (key_hint: aviso de tecla con variantes; marching_border: borde discontinuo que gira; ready_banner: pregunta Sí/No con título configurable, «¿CONTINUAR?» en la selección y «¿LISTOS?» en la configuración)
 │   │   ├── hud/      # Componentes del fight_hud (player_plate, countdown, end_window...)
-│   │   └── character_menu/ # Componentes de la selección de personaje (slot_card, roster_tile...)
+│   │   ├── character_menu/ # Componentes de la selección de personaje (slot_card, roster_tile...)
+│   │   └── match_menu/     # Componentes de la Configuración de partida (stage_tile, rule_row)
 │   └── themes/       # Theme Kernel (theme_kernel.tres)
 ├── scripts/          # GDScripts para nodos y lógica del juego
 │   ├── characters/   # Cadena de personajes: GravityBody3D -> Person -> Fighter -> PowerFighter
@@ -19,12 +20,12 @@ supersmashtux/
 │   ├── combat/       # Hitboxes (nodos): AreaGravity3D -> Hitbox -> HitboxDamage / HitboxGrab
 │   ├── platforms/    # Plataformas: Platform, GroundPlatform, OneWayPlatform
 │   ├── match/        # Módulos de la partida, uno por concern (GameManager, LivesManager, MatchTime, MatchCountdown, PowerFighterSlots, CameraFollow, SpawnPoint, PowerFighterConfigurer)
-│   ├── ui/           # Scripts de las pantallas de UI en ui/; components/ refleja ui/components/ (common, hud, character_menu)
+│   ├── ui/           # Scripts de las pantallas de UI en ui/; components/ refleja ui/components/ (common, hud, character_menu, match_menu: stage_tile, rule_row, stage_plan con el plano 2D del nivel)
 │   └── helpers/      # Clases de apoyo que NO son nodos: RefCounted y contenedores de datos/constantes
 │       ├── combat/   # Datos de ataques: Attacks, PowerAttacks, FightMove, HitboxMove
 │       ├── frame/    # Señales-objeto y estados por frame: MoveSignals, MoveStates, FrameMotionSignals, VerticalForceSignals, JumpSignals, MoveInput
 │       ├── input/    # Controles: InputSettings (autoload), PlayerInputMap
-│       ├── ui/       # Helpers de UI: CharacterCatalog (Entry con config_id, display_name, glyph, model)
+│       ├── ui/       # Helpers de UI: CharacterCatalog (Entry con config_id, display_name, glyph, model), StageCatalog (escenarios del menú: Random + map1), KeyText (texto de teclas leído del Input Map; lo comparten character_menu y match_menu)
 │       ├── characters/ # Fichas de personaje: CharacterRegistry (lee los .cfg), PersonConfig (ficha ya leída)
 │       ├── match/    # Datos de partida: PowerFighterData (un slot)
 │       └── ...       # Sueltos en la raíz (globales): game_balance.gd, global_utils.gd
