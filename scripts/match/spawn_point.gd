@@ -4,7 +4,7 @@ extends Marker3D
 # Propiedades publicas del script.
 @export var init_looking_at_right: bool = false
 
-func spawn(config: GlobalUtils.PowerFighterConfig, control_type: GlobalUtils.ControlType, player_id: int) -> PowerFighter:
+func spawn(config_id: StringName, control_type: GlobalUtils.ControlType, player_id: int) -> PowerFighter:
 	'''
 	Instanciar un personaje en este punto, con el tipo e ID que indique quien llama
 	(normalmente el GameManager). El add_child es diferido, pero la referencia que se
@@ -12,7 +12,7 @@ func spawn(config: GlobalUtils.PowerFighterConfig, control_type: GlobalUtils.Con
 	ande metido en el arbol.
 	'''
 	var power_fighter :PowerFighter = PowerFighterConfigurer.create(
-		config, control_type )
+		config_id, control_type )
 	
 	match control_type:
 		# El Player resuelve sus inputs y material según su ID.

@@ -80,7 +80,7 @@ func _spawn_all_power_fighters() -> void:
 		# SpawnPoint.spawn se encarga de instanciar y posicionar al peleador.
 		var spawn_point = spawn_points[i]
 		var power_fighter: PowerFighter = spawn_point.spawn( 
-			slot.config, slot.control, slot.player_id )
+			slot.config_id, slot.control, slot.player_id )
 
 		
 		var is_player: bool = slot.control == GlobalUtils.ControlType.PLAYER

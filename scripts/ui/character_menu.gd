@@ -99,7 +99,7 @@ func _ready() -> void:
 		tile.setup(_roster[i])
 		tile.pressed.connect(_on_tile_pressed.bind(i))
 		tile.hovered.connect(_on_tile_hovered.bind(i))
-		_tiles[_roster[i].id] = tile
+		_tiles[_roster[i].config_id] = tile
 	for i: int in SLOT_COUNT:
 		_cards[i].pressed.connect(_on_card_pressed.bind(i))
 	_lives_rule.setup("Vidas", str(lives))
@@ -194,9 +194,9 @@ func apply_state(slots: Array[Dictionary]) -> void:
 		card.set_active(bool(data.get("active", false)), int(data.get("controller", -1)))
 
 		if state != SlotCard.State.EMPTY and entry != null:
-			if not tabs_by_tile.has(entry.id):
-				tabs_by_tile[entry.id] = []
-			tabs_by_tile[entry.id].append({
+			if not tabs_by_tile.has(entry.config_id):
+				tabs_by_tile[entry.config_id] = []
+			tabs_by_tile[entry.config_id].append({
 				"slot": i,
 				"label": KernelPalette.slot_label(i, kind != "cpu"),
 				"choosing": state == SlotCard.State.CHOOSING,
@@ -348,7 +348,7 @@ func _start_match() -> void:
 			if entry == null or entry.is_random:
 				entry = pool.pick_random()
 			data.lives = lives
-			data.config = entry.config
+			data.config_id = entry.config_id
 			if slot.kind == SlotKind.PLAYER:
 				data.control = GlobalUtils.ControlType.PLAYER
 				data.player_id = i
@@ -376,7 +376,7 @@ func _reset_model() -> void:
 
 func _tile_index_of(fighter_id: StringName) -> int:
 	for i: int in _roster.size():
-		if _roster[i].id == fighter_id:
+		if _roster[i].config_id == fighter_id:
 			return i
 	return 0
 
@@ -694,7 +694,7 @@ func _move_horizontal(human: int, direction: int) -> void:
 	var slot: SlotModel = _controlled(cursor)
 	cursor.tile_index = wrapi(cursor.tile_index + direction, 0, _roster.size())
 	if slot != null:
-		slot.fighter_id = _roster[cursor.tile_index].id # Preselección.
+		slot.fighter_id = _roster[cursor.tile_index].config_id # Preselección.
 
 func _confirm(human: int) -> void:
 	var cursor: CursorModel = _cursors[human]
@@ -703,7 +703,7 @@ func _confirm(human: int) -> void:
 	var slot: SlotModel = _controlled(cursor)
 	if slot == null or slot.state != SlotCard.State.CHOOSING:
 		return
-	_pick(slot, _roster[cursor.tile_index].id)
+	_pick(slot, _roster[cursor.tile_index].config_id)
 	slot.controller = CONTROLLER_NONE
 	_return_home(human)
 
@@ -733,7 +733,7 @@ func _on_tile_pressed(index: int) -> void:
 		return
 	if _mouse_slot == NO_SLOT:
 		return
-	_pick(_slots[_mouse_slot], _roster[index].id)
+	_pick(_slots[_mouse_slot], _roster[index].config_id)
 	_release_controller(CONTROLLER_MOUSE)
 	_refresh()
 
@@ -746,9 +746,9 @@ func _on_tile_hovered(index: int) -> void:
 	if _mouse_slot == NO_SLOT:
 		return
 	var slot: SlotModel = _slots[_mouse_slot]
-	if slot.state != SlotCard.State.CHOOSING or slot.fighter_id == _roster[index].id:
+	if slot.state != SlotCard.State.CHOOSING or slot.fighter_id == _roster[index].config_id:
 		return
-	slot.fighter_id = _roster[index].id
+	slot.fighter_id = _roster[index].config_id
 	_refresh()
 
 func _on_card_pressed(index: int) -> void:

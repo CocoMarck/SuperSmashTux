@@ -11,8 +11,8 @@ var _slots: Dictionary[int, PowerFighterData]
 func set_slot(id: int, data: PowerFighterData) -> void:
 	if not data is PowerFighterData:
 		assert("Need PowerFighterData, not {data}")
-	if not data.config in GlobalUtils.CONFIG_OPTIONS:
-		assert("No avaible config.")
+	if not data.config_id in CharacterRegistry.playable_ids():
+		assert("No avaible config id.")
 	_slots[id] = data
 		
 

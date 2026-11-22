@@ -3,22 +3,18 @@ class_name PowerFighterConfigurer
 # Constantes prefab
 const POWER_FIGHTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn")
 
-# Assets de personajes
-const TUX_FIGHTER_ASSET = preload("res://assets/tux_fighter.glb")
-
-# Config hardcode jejej (Despues solo se leera los cfg del dir)
-const TUX_PERSON_CONFIG: String = "res://data/power_fighters/tux.person.cfg"
-
 # Funciones
 static func create( 
-	config: GlobalUtils.PowerFighterConfig, control_type: GlobalUtils.ControlType ) -> PowerFighter:
+	config_id: StringName, control_type: GlobalUtils.ControlType ) -> PowerFighter:
 
 	# Preparar instancia
 	var power_fighter = POWER_FIGHTER_PREFAB.instantiate()
 	var person_config: PersonConfig
-	match config:
-		GlobalUtils.PowerFighterConfig.TUX:
-			person_config = _load_person(TUX_PERSON_CONFIG)
+	var have_character_registy: bool = (
+		CharacterRegistry.is_playable(config_id) and config_id != "standard" )
+	if have_character_registy:
+		var path: String = CharacterRegistry.person_config_path(config_id)
+		person_config = _load_person(path)
 	if person_config != null:
 		_build_instance(power_fighter, person_config)
 	
@@ -31,9 +27,8 @@ static func create(
 		GlobalUtils.ControlType.NONE:
 			pass
 	
-	match config:
-		GlobalUtils.PowerFighterConfig.TUX:
-			_apply_tux_config(power_fighter as PowerFighter, person_config)
+	if have_character_registy:
+		_apply_tux_config(power_fighter as PowerFighter, person_config)
 	
 	return power_fighter as PowerFighter
 
@@ -49,7 +44,6 @@ static func _load_person(path: String) -> PersonConfig:
 	
 	# Identity
 	config.id  = String(cfg.get_value("identity", "id"))
-	config.character_name = String( cfg.get_value("identity", "character_name") )
 	config.model = String( cfg.get_value("identity", "model") )
 	config.position_offset = Vector3( cfg.get_value("identity", "position_offset") )
 	

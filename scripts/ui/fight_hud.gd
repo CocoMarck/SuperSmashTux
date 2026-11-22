@@ -13,7 +13,6 @@ const PLAYER_PLATE_SCENE: PackedScene = preload("res://ui/components/hud/player_
 const PLAYER_TAG_SCENE: PackedScene = preload("res://ui/components/hud/player_tag.tscn")
 const OFFSCREEN_CAM_SCENE: PackedScene = preload("res://ui/components/hud/offscreen_cam.tscn")
 
-const DEFAULT_FIGHTER_NAME := "B.O.B" # Si el PowerFighter no trae display_name.
 const MAIN_MENU_SCENE := "res://ui/main_menu.tscn" # A donde regresa Esc (aviso "Esc Regresar").
 const BODY_OFFSET := Vector3.ZERO # El origen del PowerFighter ya es el centro de su cápsula.
 const OFFSCREEN_MARGIN := 16.0 # Distancia de la mini cámara a los bordes de pantalla y a las placas.
@@ -154,8 +153,7 @@ func _register_fighter(power_fighter: PowerFighter, slot: int, is_player: bool, 
 	entry.lives = max_lives
 	entry.label = KernelPalette.slot_label(slot, is_player)
 	entry.color = KernelPalette.player_color(slot)
-	#entry.display_name = _fighter_name(power_fighter, slot)
-	entry.display_name = power_fighter.id
+	entry.display_name = _fighter_name(power_fighter)
 
 	if is_new:
 		# Primero al árbol y luego setup: los nodos únicos se resuelven en _ready.
@@ -263,19 +261,12 @@ func _hide_world_widgets(entry: FighterEntry) -> void:
 		entry.cam.set_active(false)
 
 # Funciones | Señales del GameManager
-func _fighter_name(power_fighter: PowerFighter, slot: int) -> String:
+func _fighter_name(power_fighter: PowerFighter) -> String:
 	'''
-	Función legacy y que no se usa: pero se podria hacer refactor para custom tags. Que seria nombre de usuario, no del peleador.
-
-	Nombre del personaje: el que se eligió para ese slot en la selección (PowerFightersSetup). Si la partida
-	se abrió directo sin selección, usa display_name del peleador o el nombre por defecto.
+	Nombre del personaje: el que se eligió para ese slot en la selección (PowerFightersSetup).
 	'''
-	var slots :Array[PowerFighterData] = _game_manager.power_fighter_slots.get_slots().values()
-	if slot >= 0 and slot < slots.size() and slots[slot].control != null:
-		var catalog_entry: CharacterCatalog.Entry = CharacterCatalog.get_entry_by_config( slots[slot].config )
-		if catalog_entry != null:
-			return catalog_entry.display_name
-	return str(power_fighter.get("display_name")) if "display_name" in power_fighter else DEFAULT_FIGHTER_NAME
+	var catalog_entry: CharacterCatalog.Entry = CharacterCatalog.get_entry_by_config_id( power_fighter.id )
+	return catalog_entry.display_name
 
 func _on_power_fighter_spawned(power_fighter: PowerFighter, slot: int, is_player: bool, max_lives: int) -> void:
 	_register_fighter(power_fighter, slot, is_player, max_lives)

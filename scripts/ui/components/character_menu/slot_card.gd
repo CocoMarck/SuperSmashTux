@@ -28,7 +28,6 @@ const FAST_TURN_DURATION := 0.6 # Vuelta rápida al elegir, termina de frente.
 const FAST_TURN_TRANS := Tween.TRANS_CUBIC
 const FAST_TURN_EASE := Tween.EASE_OUT
 const IDLE_ANIMATION := &"idle"
-const TUX_MESH_OFFSET_Y := -1.2 # Mismo ajuste que PowerFighterConfigurer._build_tux_instance.
 const FILL_RATIO := 0.7 # Parte del alto del preview que ocupa el personaje.
 const FEET_RATIO := 0.12 # Espacio bajo los pies, como fracción del alto visible.
 
@@ -240,7 +239,7 @@ func _refresh_preview() -> void:
 	_art_glyph.text = "?"
 	# La sombra del piso solo tiene sentido con un modelo encima.
 	_shadow.visible = wants_model
-	var key: String = "%s:%d" % [_fighter.id, _slot] if wants_model else ""
+	var key: String = "%s:%d" % [_fighter.config_id, _slot] if wants_model else ""
 	if key != _shown_preview_key:
 		_shown_preview_key = key
 		_clear_model()
@@ -261,8 +260,6 @@ func _show_model(entry: CharacterCatalog.Entry) -> void:
 	# La estructura del glb es Raíz/Pivot/Skeleton3D/Mesh y Raíz/AnimationPlayer.
 	var mesh := _find_mesh(_model)
 	if mesh != null:
-		if entry.config == GlobalUtils.PowerFighterConfig.TUX:
-			mesh.position.y = TUX_MESH_OFFSET_Y
 		_frame_camera(mesh)
 
 	var animation_player := _model.get_node_or_null("AnimationPlayer") as AnimationPlayer
