@@ -2,7 +2,7 @@
 
 > Qué tan fácil es sumar personajes con la arquitectura actual: qué funciona, qué estorba y una propuesta (**parcialmente implementada** al 2026-11-16). La jerarquía de clases vive en [arquitectura-personajes.md](arquitectura-personajes.md); el sistema de ataques en [nota-ataques.md](../combate/nota-ataques.md); el hitbox en [hitbox.md](../combate/hitbox.md); los nombres de animación en [asset-personaje.md](../arte/asset-personaje.md).
 >
-> Rutas cortas: `scripts/characters/` (`person.gd`, `fighter.gd`, `power_fighter.gd`, `player_controller.gd`, `npc_controller.gd`), `scripts/match/spawn_point.gd`, `scripts/helpers/combat/` (`attacks.gd`, `power_attacks.gd`, `fight_move.gd`, `hitbox_move.gd`), `scripts/combat/hitbox_damage.gd`. Líneas verificadas el 2026-11-07; rol migrado a controllers el 2026-11-16.
+> Rutas cortas: `scripts/characters/` (`person.gd`, `fighter.gd`, `power_fighter.gd`), `scripts/controllers/` (`player_controller.gd`, `npc_controller.gd`), `scripts/match/spawn_point.gd`, `scripts/helpers/combat/` (`attacks.gd`, `power_attacks.gd`, `fight_move.gd`, `hitbox_move.gd`), `scripts/combat/hitbox_damage.gd`. Líneas verificadas el 2026-11-07; rol migrado a controllers el 2026-11-16.
 
 ## Resumen
 

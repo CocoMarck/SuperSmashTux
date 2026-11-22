@@ -35,6 +35,11 @@ const STUN_GETUP_BACKWARD_DURATION: float = 0.5
 const STUN_GETUP_UP_DURATION: float = 0.4
 const STUN_GETUP_DOWN_DURATION: float = 0.4
 
+# Person | Tiempo en el aire (air_count, en segundos)
+const AIR_COUNT_HITSTUN_AIR_ANIM_THRESHOLD: float = 0.2 # Minimo en el aire para usar la animacion de golpe aereo (antes se considera piso)
+const AIR_COUNT_AIR_CONTROL_THRESHOLD: float = 0.5 # Minimo en el aire para recuperar control (mover o saltar) estando en heavy hitstun
+const AIR_COUNT_HARD_LANDING_THRESHOLD: float = 0.5 # Minimo en el aire previo para que aterrizar active hard landing
+
 # Person | Landing lag
 const HARD_LANDING_MAX_DURATION: float = 0.3
 const HARD_LANDING_MIN_DURATION: float = 0.1

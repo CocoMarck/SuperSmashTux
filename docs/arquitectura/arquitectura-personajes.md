@@ -97,7 +97,7 @@ El rol vive en un **nodo hijo**, no en herencia. Base común `PersonController3D
 
 ## `NpcController` — la IA
 
-Nodo hijo de `PersonController3D` (`scripts/characters/npc_controller.gd`). No toca el gameplay: escribe los mismos flags en su `MoveInput`, así hereda ataques, escudo y saltos sin cambios. Antes era `NPC` (hijo de `PowerFighter`), ya borrado.
+Nodo hijo de `PersonController3D` (`scripts/controllers/npc_controller.gd`). No toca el gameplay: escribe los mismos flags en su `MoveInput`, así hereda ataques, escudo y saltos sin cambios. Antes era `NPC` (hijo de `PowerFighter`), ya borrado.
 
 - **Detección**: un `Area3D` hijo (`DetectionArea`, caja 16x9x0.5) revisado cada 0.1 s. Guarda `Platform` y `Person` cercanos (`_detected_platforms`, `_detected_persons`).
 - **Recovery**: si está en el aire o colgado de una orilla, apunta a la plataforma más cercana (`_get_nearest_platform_position`), se mueve hacia ella y, si está por encima, activa `_turbo_jump`: salta en el piso, vuelve a saltar al llegar a la altura máxima estimada (`_calcule_max_jump_height_frames`, con `frame.jump_signals.impulse` / `.fall_acceleration`) y, agotados los saltos (`frame.jump_signals.count` / `.max`), usa el ataque de poder hacia arriba (el "tercer salto").

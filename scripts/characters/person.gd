@@ -558,7 +558,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 		if signals.on_floor:
 			can_jump = false 
 		else:
-			if signals.air_count >= 0.5:
+			if signals.air_count >= GameBalance.AIR_COUNT_AIR_CONTROL_THRESHOLD:
 				pass
 			else:
 				can_jump = false 
@@ -582,7 +582,7 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 	if (
 		signals.on_floor and 
 		signals.last_force <= -min_heavy_fall_force and
-		signals.last_air_count >= 0.5):
+		signals.last_air_count >= GameBalance.AIR_COUNT_HARD_LANDING_THRESHOLD):
 		# Porcentaje de cercania de la fuerza de aceleración, entre lo la fuerza alta minima, y máxima.
 		var weight :float = clampf( 
 			inverse_lerp(
@@ -847,7 +847,7 @@ func _apply_hitstun(delta: float) -> void:
 		_knockback_decay_time = 0.0 # Para reiniciar tiempo de movimiento de knockback
 	
 func _hitstun_anim(delta: float, signals: VerticalForceSignals) -> void:
-	if signals.air_count < 0.2 or signals.on_floor:
+	if signals.air_count < GameBalance.AIR_COUNT_HITSTUN_AIR_ANIM_THRESHOLD or signals.on_floor:
 		_damage_degrees = 0
 		if _taking_damage_count >= 0.4: # Mucho tiempo en el piso.
 			_animation_player.play("knocked_out")
@@ -871,7 +871,7 @@ func _apply_heavy_hitstun(delta: float, signals: VerticalForceSignals) -> void:
 		if not _heavy_hitstun_wait_to_get_up:
 			_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
 		# Solo poder moverse si esta medio segundo en el aire.
-		if signals.air_count >= 0.5:
+		if signals.air_count >= GameBalance.AIR_COUNT_AIR_CONTROL_THRESHOLD:
 			_horizontal_move = true
 	_heavy_hitstun_get_up_move(delta, signals)
 
@@ -901,10 +901,7 @@ func _heavy_hitstun_anim(delta: float, signals: VerticalForceSignals) -> void:
 	if  _heavy_hitstun_time <= 0.0:
 		_damage_degrees = 0
 		_animation_player.play("idle")
-	elif signals.air_count < 0.2:
-		_damage_degrees = 0 
-		_animation_player.play("knockdown")
-	elif signals.on_floor:
+	elif signals.air_count < GameBalance.AIR_COUNT_HITSTUN_AIR_ANIM_THRESHOLD or signals.on_floor:
 		_damage_degrees = 0
 		_animation_player.play("knockdown")
 	else:
@@ -983,9 +980,6 @@ func _ready() -> void:
 	super()
 	_safe_z_coord = global_position.z
 
-	# Fall
-	fall_acceleration = 25
-	
 	# Essentail nodes
 	# El hijo de Visual es la raiz del .glb importado; su nombre depende del
 	# archivo fuente (ej. "standard_character_a_pose"), asi que se toma

@@ -3,7 +3,7 @@
 > **Aplicado y migrado (2026-11-16).** Nació como propuesta (`_ai_process(signals)` al final del frame)
 > y quedó implementado como hook `_process_ai(delta, frame)` en `Person` que sobreescribía `NPC`
 > (`npc.gd`). Hoy ese hook se borró: la IA vive en `NpcController`
-> (`scripts/characters/npc_controller.gd`), un controller por composición. Esta nota explica el diseño
+> (`scripts/controllers/npc_controller.gd`), un controller por composición. Esta nota explica el diseño
 > y la migración. Ver la última sección, "Migración a `NpcController`".
 
 ## Idea central
@@ -56,7 +56,7 @@ El `_attack` viaja como bool de un frame porque `reset_input()` lo baja cada fra
 ## Migración a `NpcController` (aplicada, 2026-11-16)
 
 `npc.gd` se partió en un controller por composición. `NpcController`
-(`scripts/characters/npc_controller.gd`, `extends PersonController3D`) ya tiene la detección, los
+(`scripts/controllers/npc_controller.gd`, `extends PersonController3D`) ya tiene la detección, los
 helpers, los timers **y la IA**. El configurer ya usa `NpcController.new()` y `npc.gd` se borró. Diseño
 general en [../arquitectura/nota-power-fighter-controller.md](../arquitectura/nota-power-fighter-controller.md).
 

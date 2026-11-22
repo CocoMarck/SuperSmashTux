@@ -3,8 +3,8 @@
 > **Implementado** al 2026-11-16. `PlayerController` y `NpcController` ya funcionan en partida, la
 > limpieza menor está hecha y la prueba 1 player + 1 NPC pasó (ver [../ia/nota-ai-npc.md](../ia/nota-ai-npc.md)).
 > Verificado contra el working tree el 2026-11-16.
-> Rutas: `scripts/characters/person_controller_3d.gd`, `scripts/characters/player_controller.gd`,
-> `scripts/characters/npc_controller.gd`, `scripts/helpers/frame/move_input.gd`,
+> Rutas: `scripts/controllers/person_controller_3d.gd`, `scripts/controllers/player_controller.gd`,
+> `scripts/controllers/npc_controller.gd`, `scripts/helpers/frame/move_input.gd`,
 > `scripts/helpers/frame/jump_signals.gd`, `scripts/characters/person.gd`,
 > `scripts/characters/power_fighter.gd`, `scripts/match/power_fighter_configurer.gd`,
 > `scripts/match/spawn_point.gd`, `scripts/match/lives_manager.gd`, `scripts/ui/fight_hud.gd`,
@@ -44,12 +44,12 @@ prefab sobreviven y el prefab se configura sin pedos.
 
 ### Clases
 
-- **`PersonController3D`** (base, `extends Node3D`, `scripts/characters/person_controller_3d.gd`):
+- **`PersonController3D`** (base, `extends Node3D`, `scripts/controllers/person_controller_3d.gd`):
   nodo hijo del peleador. Solo traduce "quién decide" en inputs. No conoce
   `Person`/`Fighter`/`PowerFighter`.
-- **`PlayerController`** (`scripts/characters/player_controller.gd`): lee `Input` con el mapa del
+- **`PlayerController`** (`scripts/controllers/player_controller.gd`): lee `Input` con el mapa del
   jugador. Guarda `player_id` y `player_input_map`.
-- **`NpcController`** (`scripts/characters/npc_controller.gd`): la IA de `npc.gd` + su `Area3D` de
+- **`NpcController`** (`scripts/controllers/npc_controller.gd`): la IA de `npc.gd` + su `Area3D` de
   detección como hija del controller.
 
 Se llama `PersonController3D` (y no `PowerFighterController`) porque lo que se controla es un `Person`

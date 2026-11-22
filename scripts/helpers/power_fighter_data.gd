@@ -4,4 +4,7 @@ extends RefCounted
 var control: GlobalUtils.ControlType
 var config_id: StringName
 var lives: int
-var player_id: int
+# Solo uno de los dos aplica, según `control`: PLAYER usa player_id, NPC usa npc_id.
+# Separados para que el NPC 1 no se confunda con PLAYER_1 (ambos valen 0).
+var player_id: GlobalUtils.PlayerId
+var npc_id: GlobalUtils.NPCId

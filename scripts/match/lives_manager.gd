@@ -108,6 +108,9 @@ func _get_label(power_fighter: PowerFighter) -> String:
 	if power_fighter.controller is PlayerController:
 		var player_id: int = power_fighter.controller.player_id
 		return power_fighter.name + str(GlobalUtils.PlayerId.keys()[player_id])
+	if power_fighter.controller is NpcController:
+		var npc_id: int = power_fighter.controller.npc_id
+		return power_fighter.name + str(GlobalUtils.NPCId.keys()[npc_id])
 	return power_fighter.name
 
 # Funciones | Procesamiento

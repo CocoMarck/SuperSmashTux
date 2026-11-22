@@ -724,11 +724,6 @@ func _apply_shield_pushback(delta):
 		var accel := _normal_damage_power * 1
 		_target_velocity.x += (_knockback_direction.x * accel * delta)
 
-func _get_shield_porcent() -> float:
-	if _shield_time > 0:
-		return _shield_time / GameBalance.SHIELD_DURATION
-	return 0.0
-
 func get_shield_ratio() -> float:
 	'''
 	Capacidad restante del escudo, de 0.0 (vacio) a 1.0 (lleno). Para mostrarla en el HUD.
@@ -762,8 +757,10 @@ func _roll_move(delta: float, signals: VerticalForceSignals) -> void:
 			elif _left_pressed or _right_pressed:
 				_roll_backward = false
 				_roll_forward = true
-			_roll_time = _roll_duration
-			_shield_time -= GameBalance.SHIELD_DURATION * GameBalance.ROLL_SHIELD_COST_RATIO # Costo de usar rodada.
+			# Solo armar el timer y cobrar si realmente se activo una direccion.
+			if _roll_forward or _roll_backward:
+				_roll_time = _roll_duration
+				_shield_time -= GameBalance.SHIELD_DURATION * GameBalance.ROLL_SHIELD_COST_RATIO # Costo de usar rodada.
 	if signals.on_floor == false:
 		_roll_time = 0
 	if _rolling():
@@ -967,7 +964,7 @@ func _visual_shield(frame: FrameMotionSignals) -> void:
 	var with_shield = _with_shield(frame.vertical_force_signals)
 	_shield_mesh_instance.visible = with_shield
 	if with_shield:
-		var porcent :float = _get_shield_porcent()
+		var porcent :float = get_shield_ratio()
 		_shield_sphere.radius = _init_shield_radius * porcent
 		_shield_sphere.height = _init_shield_height * porcent
 

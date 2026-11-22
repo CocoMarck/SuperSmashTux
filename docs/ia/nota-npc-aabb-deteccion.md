@@ -6,7 +6,7 @@ Mejorar la detección de objetos del NPC para considerar sus bordes reales (AABB
 
 ## Estado actual
 
-- `scripts/characters/npc_controller.gd` guarda solo plataformas en `_detected_platforms: Array[Platform]`.
+- `scripts/controllers/npc_controller.gd` guarda solo plataformas en `_detected_platforms: Array[Platform]`.
 - Utiliza `_get_nodes_positions()` + `_get_nearest_platform_position()` para obtener la plataforma más cercana por su centro.
 - Durante el recovery, el NPC apunta al centro de la plataforma.
 - `scripts/platforms/platform.gd` ya cuenta con `get_aabb_global()` (líneas 79-88), que devuelve un `AABB` en coordenadas globales respetando rotación y escala.

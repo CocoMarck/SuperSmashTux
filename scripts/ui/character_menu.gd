@@ -351,10 +351,10 @@ func _start_match() -> void:
 			data.config_id = entry.config_id
 			if slot.kind == SlotKind.PLAYER:
 				data.control = GlobalUtils.ControlType.PLAYER
-				data.player_id = i
+				data.player_id = i as GlobalUtils.PlayerId
 			else:
 				data.control = GlobalUtils.ControlType.NPC
-				data.player_id = npc_count
+				data.npc_id = npc_count as GlobalUtils.NPCId # En orden de aparición.
 				npc_count += 1
 			level.power_fighter_slots.set_slot(i, data)
 	

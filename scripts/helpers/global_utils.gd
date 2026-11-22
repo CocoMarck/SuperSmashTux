@@ -24,15 +24,6 @@ static var PLAYER_INPUT_MAPS: Dictionary[PlayerId, PlayerInputMap] = {
 	),
 }
 
-# Material de cada jugador segun su ID, usado por Player (cuando no hay material puesto a mano en el editor).
-const PLAYER_MATERIALS: Dictionary[PlayerId, Material] = {
-	PlayerId.PLAYER_1: preload("res://materials/mat_red.tres"),
-	PlayerId.PLAYER_2: preload("res://materials/mat_blue.tres"),
-}
-
-# Material de los NPC, usado por NPC (cuando no hay material puesto a mano en el editor).
-const NPC_MATERIAL: Material = preload("res://materials/mat_yellow.tres")
-
 # Funciones | Cajas de colision
 static func get_first_collision_shape(node: Node) -> CollisionShape3D:
 	'''Primer CollisionShape3D hijo directo del nodo, o null si no tiene.'''

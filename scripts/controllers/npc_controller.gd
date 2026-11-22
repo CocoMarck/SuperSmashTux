@@ -15,6 +15,9 @@ enum NPCIntention { # Intención de NPC
 	IDLE, RUN, WALK, CROUCH, TURBO_JUMP, SINGLE_JUMP, DOUBLE_JUMP
 }
 
+# Identificación del NPC, en orden de aparición (NPC_1, NPC_2...). Para etiquetas y debug.
+@export var npc_id: GlobalUtils.NPCId
+
 # NPC
 var _try_recovery = false
 var _npc_horizontal_move = true
@@ -30,6 +33,7 @@ var _pin_walk = false
 		show_detection_area = value
 		if _detection_mesh:
 			_detection_mesh.visible = value
+
 var _detection_mesh : MeshInstance3D
 var _detection_area : Area3D
 var _detection_counter : float = 0
@@ -112,6 +116,11 @@ func _get_nearest_position(positions: Array[Vector3]) -> Vector3:
 	'''
 	Determina con el global position, la diferencia promedio entre varias posiciones. Y retorna la posición mas cercana.
 	'''
+	# Sin posiciones, retornar la propia, así la dirección resultante es cero.
+	# Evita que min() de un array vacío retorne null y truene al asignarlo a float.
+	if positions.is_empty():
+		return global_position
+
 	# Obtener diferencias
 	var average_differences :Array[float] = []
 	for position in positions:

@@ -122,7 +122,7 @@ func _discover_new_fighters() -> void:
 			continue
 		var is_player := power_fighter.controller is PlayerController
 		var slot: int = power_fighter.controller.player_id if is_player else _next_free_slot()
-		_register_fighter(power_fighter, slot, is_player, _game_manager.lives_per_character)
+		_register_fighter(power_fighter, slot, is_player, _game_manager.get_lives(power_fighter))
 
 func _next_free_slot() -> int:
 	var used: Array[int] = []

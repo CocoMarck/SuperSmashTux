@@ -80,7 +80,7 @@ func _spawn_all_power_fighters() -> void:
 		# SpawnPoint.spawn se encarga de instanciar y posicionar al peleador.
 		var spawn_point = spawn_points[i]
 		var power_fighter: PowerFighter = spawn_point.spawn( 
-			slot.config_id, slot.control, slot.player_id )
+			slot.config_id, slot.control, slot.player_id, slot.npc_id )
 
 		
 		var is_player: bool = slot.control == GlobalUtils.ControlType.PLAYER
@@ -196,6 +196,9 @@ func _end_match(winner: PowerFighter) -> void:
 		winner.process_mode = Node.PROCESS_MODE_DISABLED
 	match_ended.emit(winner)
 	_match_time.stop()
+
+func get_lives(power_fighter: PowerFighter) -> int:
+	return _lives_manager.get_lives(power_fighter)
 
 # Funciones | Handlers para `MatchLives`
 func _on_lives_changed(power_fighter: PowerFighter, lives: int) -> void:

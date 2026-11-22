@@ -23,7 +23,7 @@ var _lifetime :float = 0.0
 var _init_lifetime: float
 
 var _defaults: Dictionary = {
-	"parent": Node3D.new(),
+	"parent": null,
 	"id": 1,
 	"position": Vector3.ZERO,
 	"size": Vector3(1,1,1),

@@ -14,7 +14,8 @@ supersmashtux/
 │   │   └── character_menu/ # Componentes de la selección de personaje (slot_card, roster_tile...)
 │   └── themes/       # Theme Kernel (theme_kernel.tres)
 ├── scripts/          # GDScripts para nodos y lógica del juego
-│   ├── characters/   # Cadena de personajes: GravityBody3D -> Person -> Fighter -> PowerFighter. Controladores por composicion (nodo hijo): PersonController3D -> PlayerController / NpcController
+│   ├── characters/   # Cadena de personajes: GravityBody3D -> Person -> Fighter -> PowerFighter
+│   ├── controllers/  # Controladores por composicion (nodo hijo de Person): PersonController3D -> PlayerController / NpcController
 │   ├── combat/       # Hitboxes (nodos): AreaGravity3D -> Hitbox -> HitboxDamage / HitboxGrab
 │   ├── platforms/    # Plataformas: Platform, GroundPlatform, OneWayPlatform
 │   ├── match/        # Módulos de la partida, uno por concern (GameManager, LivesManager, MatchTime, MatchCountdown, PowerFighterSlots, CameraFollow, SpawnPoint, PowerFighterConfigurer, PersonConfig)

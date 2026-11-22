@@ -42,21 +42,21 @@ func _start_debug_match() -> void:
 	data_p1.lives = 1
 	data_p1.config_id = "tux"
 	data_p1.control = GlobalUtils.ControlType.PLAYER
-	data_p1.player_id = 0
+	data_p1.player_id = GlobalUtils.PlayerId.PLAYER_1
 	level.power_fighter_slots.set_slot(2, data_p1)
 	
 	var data_p2 : PowerFighterData = PowerFighterData.new()
 	data_p2.lives = 1
 	data_p2.config_id = "standard"
 	data_p2.control = GlobalUtils.ControlType.PLAYER
-	data_p2.player_id = 1
+	data_p2.player_id = GlobalUtils.PlayerId.PLAYER_2
 	level.power_fighter_slots.set_slot(3, data_p2)
 
 	var data_p3 : PowerFighterData = PowerFighterData.new()
 	data_p3.lives = 1
 	data_p3.config_id = "tux"
 	data_p3.control = GlobalUtils.ControlType.NPC
-	data_p3.player_id = 0
+	data_p3.npc_id = GlobalUtils.NPCId.NPC_1
 	#level.power_fighter_slots.set_slot(0, data_p3)
 
 	get_tree().change_scene_to_node(level)
