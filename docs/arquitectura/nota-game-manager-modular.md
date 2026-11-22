@@ -41,14 +41,16 @@ cambian**. Nada de reglas depende de que la cámara exista.
 | Módulo | `class_name` | Concern | Estado |
 |---|---|---|---|
 | Reglas de partida | `GameManager` | lineup, spawn, fin, cámara y orquestación de la cuenta inicial y el reloj | **LISTO** |
-| Datos de lineup | `PowerFighterSlots` | datos por slot: control, config, vidas y `player_id` | **LISTO** |
+| Datos de lineup | `PowerFighterSlots` | datos por slot: control, `config_id`, vidas y `player_id` | **LISTO** |
 | Vidas | `LivesManager` | vidas, muerte por salir del `PlayArea`, respawn y eliminación | **LISTO** |
 | Reloj | `MatchTime` | tiempo límite o transcurrido; avisa cada segundo y al agotarse | **LISTO** |
 | Cuenta inicial | `MatchCountdown` | 3-2-1 previo a la pelea; no congela ni muestra letrero | **LISTO** |
 | Encuadre | `CameraFollow` | sigue a los peleadores, zoom, temblor al morir alguien (escucha `lives_changed`) | **LISTO** |
 | Colocación | `SpawnPoint` | instancia peleadores configurados | **LISTO** |
 | Config de persona | `PersonConfig` | `RefCounted` con identidad, model/offset, momentum, movimiento, salto, intervals y `air_jump_duration` | **LISTO** |
-| Armado | `PowerFighterConfigurer` | lee `data/power_fighters/tux.person.cfg` con `ConfigFile` (sin validación) y aplica la config al prefab; ataques siguen hardcodeados (FALTA) | **LISTO/PARCIAL** |
+| Registro de personajes | `CharacterRegistry` | helper (no nodo): lee `identities.cfg`, valida ids y expone `playable_ids()` / `display_name()` | **LISTO** |
+| Catálogo de selección | `CharacterCatalog` | helper (no nodo): arma `Entry` con `config_id`, nombre, glifo, modelo y flag de selección | **LISTO** |
+| Armado | `PowerFighterConfigurer` | recibe `config_id`, lee el `.person.cfg` con `ConfigFile` (sin validación) y aplica la config al prefab; ataques siguen hardcodeados (FALTA) | **LISTO/PARCIAL** |
 
 `GameManager` también spawnea a los peleadores. El lineup sale de `power_fighter_slots`
 (`PowerFighterSlots`), que llena `CharacterMenu` antes de cambiar de escena. **No hay respaldo**: si
@@ -111,14 +113,14 @@ congela a los peleadores durante la cuenta. Ver
 ## `PowerFighterSlots` — lineup por slot
 
 `PowerFighterData` (`scripts/helpers/power_fighter_data.gd`) es un `RefCounted` con los datos de un
-slot: `control`, `config`, `lives` y `player_id`.
+slot: `control`, `config_id`, `lives` y `player_id`.
 
 `PowerFighterSlots` (`scripts/match/power_fighter_slots.gd`) es un `Node` que guarda un
 `Dictionary[int, PowerFighterData]`. El `GameManager` lo instancia con `PowerFighterSlots.new()` como
 propiedad (`power_fighter_slots`); **no** se cuelga del árbol.
 
-- `set_slot(id, data)`: valida que sea `PowerFighterData` y que `config` esté en
-  `GlobalUtils.CONFIG_OPTIONS`.
+- `set_slot(id, data)`: valida que sea `PowerFighterData` y que `config_id` esté en
+  `CharacterRegistry.playable_ids()`. Ya no hay enum `PowerFighterConfig` ni `CONFIG_OPTIONS`.
 - `get_slot(id)`: devuelve los datos; si el slot no existe, falla a propósito.
 - `has_slot(id)`: dice si ese slot está ocupado.
 - `get_slots()`: devuelve el diccionario completo. A diferencia de una lista compactada, conserva el
@@ -183,7 +185,7 @@ muerte por `hp == 0` (que es la que dispararía el ragdoll) sigue pendiente.
 
 - **`MatchHUD`**: puente entre las reglas y el `FightHud`, para sacar del manager el contrato de señales.
 - **`GameSpeed`**: cámara lenta o freeze al dar un golpe killer.
-- **Nombre visible en HUD/menu (decisión actual)**: `Person` guarda solo `id`; `character_name` existe en `PersonConfig` (`data/power_fighters/tux.person.cfg`) y queda disponible para HUD/menú en el futuro. Hoy `FightHUD` muestra `power_fighter.id` (`fight_hud.gd:158`). No declarar `var name` en `Person` porque choca con `Node.name`.
+- **Nombre visible en HUD/menu (decisión actual)**: `Person` guarda solo `id`; el texto visible vive en `data/power_fighters/identities.cfg` y sale por `CharacterRegistry.display_name()` / `CharacterCatalog`. `FightHUD` resuelve el nombre con `CharacterCatalog.get_entry_by_config_id(power_fighter.id)` (`fight_hud.gd:268`). `character_name` ya salió del `.person.cfg` y solo queda como campo muerto en `PersonConfig`. No declarar `var name` en `Person` porque choca con `Node.name`.
 - **`ScoreManager`** o similar: quién va ganando, para el HUD.
 - **`AudioManager`**: sonidos de golpe, muerte, KO. Mismo patrón que el comentarista.
 

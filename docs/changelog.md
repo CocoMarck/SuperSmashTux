@@ -101,12 +101,15 @@
 
 #### Identidad y configuración de personajes
 - `Person.id` **LISTO**: `StringName` en vez de `character_name`; el prefab trae `id = &"standard"` y `HitboxDamage` loguea `body.id` (`2026-11-20`).
-- `PersonConfig` **LISTO**: `RefCounted` con `id`, `character_name`, `model`, `position_offset`; momentum (`ground_acceleration`, `ground_friction`, `air_acceleration`, `knockback_friction`); `walking_speed`, `running_speed`, `jump_impulse`; `walk_step_interval`, `run_step_interval`, `crouch_move_step_interval` y `air_jump_duration` (`2026-11-21`).
-- `PowerFighterConfigurer` **LISTO**: `TUX_PERSON_CONFIG` apunta a `data/power_fighters/tux.person.cfg`; `_load_person()` usa `ConfigFile` y no valida nada a propósito (data mala = crash) (`2026-11-21`).
-- `tux.person.cfg` **LISTO**: secciones `[identity]`, `[momentum]`, `[horizontal_movement]`, `[vertical_movement]`, `[interval]` y `[duration_of_anims]` (`2026-11-21`).
+- `PersonConfig` **LISTO**: `RefCounted` con `id`, `model`, `position_offset`; momentum (`ground_acceleration`, `ground_friction`, `air_acceleration`, `knockback_friction`); `walking_speed`, `running_speed`, `jump_impulse`; `walk_step_interval`, `run_step_interval`, `crouch_move_step_interval` y `air_jump_duration`. El campo `character_name` sigue en la clase como deuda, pero ya no se lee del cfg (`2026-11-21`).
+- `identities.cfg` **LISTO**: manifiesto global en `data/power_fighters/identities.cfg`; la sección es el id y `name` es el texto visible. Hoy trae `[tux]`; `standard` no vive en el archivo (`2026-11-21`).
+- `CharacterRegistry` **LISTO**: helper que valida ids `snake_case`, expone `playable_ids()`, `display_name()`, rutas de `.person.cfg` y carga configs con `ConfigFile` sin validación a propósito. `standard` y su nombre quedan hardcoded porque no tienen cfg (`2026-11-21`).
+- `CharacterCatalog` **LISTO**: reemplaza al enum `PowerFighterConfig`. `Entry` usa `config_id: StringName`, `display_name`, `glyph` y `model`; los nombres vienen del registry (`2026-11-21`).
+- `config_id` **LISTO**: `PowerFighterData`, `PowerFighterSlots`, `GameManager`, `SpawnPoint`, `PowerFighterConfigurer` y `CharacterMenu` migrados de enum a `config_id: StringName` (`2026-11-21`).
+- `FightHUD` **LISTO**: resuelve el nombre con `CharacterCatalog.get_entry_by_config_id(power_fighter.id)`; dejó de mostrar el id crudo (`2026-11-21`).
+- `CharacterMenu` **LISTO**: tablas y datos por `entry.config_id`; el preview de `SlotCard` ya no tiene el offset/hardcodeo de Tux (`2026-11-21`).
+- `tux.person.cfg` y plantillas **LISTO**: `character_name` salió del cfg; quedan `[identity]`, `[momentum]`, `[horizontal_movement]`, `[vertical_movement]`, `[interval]` y `[duration_of_anims]` (`2026-11-21`).
 - Movimiento desde cfg **LISTO**: `_apply_tux_config()` aplica momentum, velocidades, `jump_impulse`, intervalos de pasos y `air_jump_duration`; `_build_instance()` toma `model` y `position_offset` del cfg (`2026-11-21`).
-- Nombre visible **LISTO**: se queda en `power_fighter.id` (p. ej. `tux`). `PersonConfig.character_name` (`"Tux"`) queda disponible para uso futuro; hoy HUD/menu no lo consumen (`2026-11-21`).
-- Plantillas de persona **LISTO**: `name.person.cfg` usa secciones válidas (`[horizontal_movement]`, `[vertical_movement]`, `[interval]`) y sirve de base para copiar (`2026-11-21`).
 
 ### FALTA / en progreso
 
@@ -119,5 +122,13 @@
 - SFX de `Person` **EN PROGRESO**: bandera `_first_jump_frame` (en `_move`) ya dispara el sonido de salto sin inferirlo de `last_force <= 0`; `_process_sound` asigna `stream_*` y hace `play()`, pero sigue con `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D`. Los `.wav` ya entraron (commit `7a2ff1f`).
 
 - `PowerFighterConfigurer` **FALTA**: los ataques siguen hardcodeados en `_apply_tux_config()` (desde ~línea 120); `name.fighter.cfg` y `name.power_fighter.cfg` existen, pero el configurer no las carga (`2026-11-21`).
+
+#### Internacionalización de UI
+- UI full inglés **FALTA**: la UI ya trae textos en inglés sueltos (`Start`, `Controls`, `Back to menu`), pero siguen muchos literales en español en `.gd` y `.tscn` (`2026-11-21`).
+- `get_text(tag)` **FALTA**: envoltorio sobre `tr()` con tags `lower-kebab-case` ASCII, normalización previa (`Hello pipol_ Gg` → `hello-pipol-gg`, `¡Pelea!` → `pelea`), fallback al texto original con `push_warning` si no existe la traducción y placeholders con `String.format()` (`2026-11-21`).
+- Idioma **FALTA**: override configurable en `user://settings.cfg` (`[language] locale = "auto" | "en" | "es"`), con `auto` usando `OS.get_locale_language()` y fallback `en` (`2026-11-21`).
+- Traducciones **FALTA**: CSV en `data/locale/strings.csv` (`keys,en,es`), registrado en Project Settings → Localization → Translations (`2026-11-21`).
+- Nombres propios **FALTA**: `Tux` y `Bob` no se traducen; las etiquetas de UI sí pasan por tag. El glyph debe ser estable, no derivado del texto traducido (`2026-11-21`).
+- Detalle y fases en [docs/ui/nota-internacionalizacion-ui.md](ui/nota-internacionalizacion-ui.md).
 
 - **FALTA** `NpcController`: Detección de posiciones con `AABB detection`.

@@ -23,23 +23,25 @@ supersmashtux/
 │       ├── combat/   # Datos de ataques: Attacks, PowerAttacks, FightMove, HitboxMove
 │       ├── frame/    # Señales-objeto y estados por frame: MoveSignals, MoveStates, FrameMotionSignals, VerticalForceSignals, JumpSignals, MoveInput
 │       ├── input/    # Controles: InputSettings (autoload), PlayerInputMap
-│       └── ...       # Sueltos en la raíz: game_balance.gd (constantes de balance), global_utils.gd, power_fighter_data.gd
+│       ├── ui/       # Helpers de UI: CharacterCatalog (Entry con config_id, display_name, glyph, model)
+│       └── ...       # Sueltos en la raíz: game_balance.gd, global_utils.gd, power_fighter_data.gd, character_registry.gd
 ├── materials/        # Materiales (.tres)
 ├── environments/     # Entornos de mundo (.tres)
 ├── assets/           # Assets raw (modelos, audios, fuentes)
 │   ├── audio/        # Audios fuente
 │   │   └── sfx/      # SFX (wavs) y sus randomizers (.tres)
 │   └── fonts/        # Fuentes
-├── data/             # Configs de personajes en texto (.cfg)
+├── data/             # Configs en texto (.cfg) y, en el futuro, CSV de traducciones
 │   ├── templates/    # Plantillas: name.person.cfg, name.fighter.cfg, name.power_fighter.cfg
-│   └── power_fighters/  # Configs por personaje (tux.person.cfg)
+│   ├── locale/       # (FALTA) strings.csv con columnas keys,en,es
+│   └── power_fighters/  # identities.cfg (manifiesto) + configs por personaje (tux.person.cfg)
 ├── addons/           # Plugins de Godot (godot_ai: MCP de Godot para agentes de IA)
 ├── docs/             # Documentación, notas, ideas (estructura.md y changelog.md viven en la raíz de docs/)
 │   ├── arquitectura/ # Jerarquía de clases, UML y decisiones de diseño (GameManager, process vs physics_process)
 │   ├── combate/      # Hitboxes, ataques normales y power
 │   ├── ia/           # NPCs: comportamiento y detección
 │   ├── controles/    # Configuración de controles e InputSettings
-│   ├── ui/           # Interfaz y UI responsiva
+│   ├── ui/           # Interfaz, UI responsiva e internacionalización (nota-internacionalizacion-ui.md)
 │   └── arte/         # Assets, modelos, animaciones y nombres para personajes
 ├── .claude/          # Config local de Claude Code (agentes, skills, settings)
 ├── AGENTS.md         # Archivo principal de instrucciones para agentes de IA
@@ -60,9 +62,11 @@ supersmashtux/
 | Escenas | `snake_case.tscn` | `player.tscn`, `main_menu.tscn` |
 | Scripts | `snake_case.gd` | `player.gd`, `camera_follow.gd` |
 | Assets | `snake_case.ext` | `ground_texture.png`, `jump_sfx.wav` |
-| Configs | `<personaje_o_plantilla>.<dominio>.cfg` | `tux.person.cfg`, `name.person.cfg`, `name.fighter.cfg`, `name.power_fighter.cfg` |
+| Configs | `<personaje>.<dominio>.cfg`, plantillas `name.*.cfg` o `identities.cfg` para el manifiesto global | `tux.person.cfg`, `name.fighter.cfg`, `identities.cfg` |
 | Recursos | `prefijo_nombre.tres` | `mat_red.tres`, `env_game.tres` |
 | Docs | `lower-kebab-case.md` (agrupados por dominio en `docs/<dominio>/`) | `estructura.md`, `titulo-descriptivo.md` |
+
+> `identities.cfg` rompe la convención `<personaje>.<dominio>.cfg` a propósito: es un manifiesto global, no la config de un personaje. Cada sección es un id `snake_case` con `name` visible.
 
 > Los docs se agrupan por dominio en `docs/<dominio>/` (`arquitectura`, `combate`, `ia`, `controles`, `ui`, `arte`). Solo `estructura.md` y `changelog.md` van en la raíz de `docs/`.
 
