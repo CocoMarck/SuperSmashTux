@@ -18,24 +18,27 @@ supersmashtux/
 │   ├── controllers/  # Controladores por composicion (nodo hijo de Person): PersonController3D -> PlayerController / NpcController
 │   ├── combat/       # Hitboxes (nodos): AreaGravity3D -> Hitbox -> HitboxDamage / HitboxGrab
 │   ├── platforms/    # Plataformas: Platform, GroundPlatform, OneWayPlatform
-│   ├── match/        # Módulos de la partida, uno por concern (GameManager, LivesManager, MatchTime, MatchCountdown, PowerFighterSlots, CameraFollow, SpawnPoint, PowerFighterConfigurer, PersonConfig)
+│   ├── match/        # Módulos de la partida, uno por concern (GameManager, LivesManager, MatchTime, MatchCountdown, PowerFighterSlots, CameraFollow, SpawnPoint, PowerFighterConfigurer)
 │   ├── ui/           # Scripts de las pantallas de UI en ui/; components/ refleja ui/components/ (common, hud, character_menu)
 │   └── helpers/      # Clases de apoyo que NO son nodos: RefCounted y contenedores de datos/constantes
 │       ├── combat/   # Datos de ataques: Attacks, PowerAttacks, FightMove, HitboxMove
 │       ├── frame/    # Señales-objeto y estados por frame: MoveSignals, MoveStates, FrameMotionSignals, VerticalForceSignals, JumpSignals, MoveInput
 │       ├── input/    # Controles: InputSettings (autoload), PlayerInputMap
 │       ├── ui/       # Helpers de UI: CharacterCatalog (Entry con config_id, display_name, glyph, model)
-│       └── ...       # Sueltos en la raíz: game_balance.gd, global_utils.gd, power_fighter_data.gd, character_registry.gd
+│       ├── characters/ # Fichas de personaje: CharacterRegistry (lee los .cfg), PersonConfig (ficha ya leída)
+│       ├── match/    # Datos de partida: PowerFighterData (un slot)
+│       └── ...       # Sueltos en la raíz (globales): game_balance.gd, global_utils.gd
 ├── materials/        # Materiales (.tres)
 ├── environments/     # Entornos de mundo (.tres)
 ├── assets/           # Assets raw (modelos, audios, fuentes)
+│   ├── models/       # Modelos .glb (y sus texturas), una carpeta por personaje: models/<id>/ (standard, tux)
 │   ├── audio/        # Audios fuente
 │   │   └── sfx/      # SFX (wavs) y sus randomizers (.tres)
 │   └── fonts/        # Fuentes
 ├── data/             # Configs en texto (.cfg) y, en el futuro, CSV de traducciones
 │   ├── templates/    # Plantillas: name.person.cfg, name.fighter.cfg, name.power_fighter.cfg
 │   ├── locale/       # (FALTA) strings.csv con columnas keys,en,es
-│   └── power_fighters/  # identities.cfg (manifiesto) + configs por personaje (tux.person.cfg)
+│   └── power_fighters/  # identities.cfg (manifiesto, admite hidden) + configs por personaje <id>.person.cfg (standard, tux)
 ├── addons/           # Plugins de Godot (godot_ai: MCP de Godot para agentes de IA)
 ├── docs/             # Documentación, notas, ideas (estructura.md y changelog.md viven en la raíz de docs/)
 │   ├── arquitectura/ # Jerarquía de clases, UML y decisiones de diseño (GameManager, process vs physics_process)

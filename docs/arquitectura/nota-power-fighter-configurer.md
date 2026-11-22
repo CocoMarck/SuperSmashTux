@@ -3,10 +3,10 @@
 > Cómo se separa el "quién controla" del "qué personaje es", qué hace `PowerFighterConfigurer`,
 > cómo lo usa `SpawnPoint` y cómo debería el `GameManager` repartir las configuraciones.
 > Verificado el 2026-11-07; actualizado el 2026-11-21. Rutas: `scripts/helpers/global_utils.gd`,
-> `scripts/helpers/power_fighter_data.gd`, `scripts/helpers/character_registry.gd`,
+> `scripts/helpers/match/power_fighter_data.gd`, `scripts/helpers/characters/character_registry.gd`,
 > `scripts/helpers/ui/character_catalog.gd`, `data/power_fighters/identities.cfg`,
 > `scripts/match/power_fighter_slots.gd`, `scripts/match/power_fighter_configurer.gd`,
-> `scripts/match/person_config.gd`, `scripts/match/spawn_point.gd`, `scripts/match/game_manager.gd`,
+> `scripts/helpers/characters/person_config.gd`, `scripts/match/spawn_point.gd`, `scripts/match/game_manager.gd`,
 > `scripts/match/match_time.gd`, `scripts/match/match_countdown.gd`,
 > `scripts/ui/character_menu.gd`, `scripts/ui/fight_hud.gd`,
 > `scripts/ui/components/character_menu/slot_card.gd`,
@@ -62,7 +62,7 @@ La identidad sale de tres piezas:
 | Pieza | Archivo | Qué hace |
 |---|---|---|
 | `identities.cfg` | `data/power_fighters/identities.cfg` | Manifiesto global: cada sección es un id `snake_case` y `name` es el texto visible. `standard` no aparece: está hardcoded en el registry. |
-| `CharacterRegistry` | `scripts/helpers/character_registry.gd` | Lee el manifiesto, valida ids, expone `playable_ids()` / `display_name()` y resuelve rutas `.person.cfg`. |
+| `CharacterRegistry` | `scripts/helpers/characters/character_registry.gd` | Lee el manifiesto, valida ids, expone `playable_ids()` / `display_name()` y resuelve rutas `.person.cfg`. |
 | `CharacterCatalog` | `scripts/helpers/ui/character_catalog.gd` | Ordena el roster para la UI. `Entry` trae `config_id`, `display_name`, `glyph`, `is_random` y `model`. |
 
 `standard` es especial: siempre existe y no tiene cfg. Los demás ids deben estar en `identities.cfg`
@@ -129,7 +129,7 @@ con `CharacterRegistry.person_config_path()` (por ejemplo
 preview de selección. Hoy hay dos loaders con el mismo esquema (`PowerFighterConfigurer._load_person()`
 y `CharacterRegistry.load_person_config()`); unificarlos es deuda pendiente.
 
-`scripts/match/person_config.gd`:
+`scripts/helpers/characters/person_config.gd`:
 
 ```gdscript
 class_name PersonConfig
@@ -175,7 +175,7 @@ Ejemplo (`data/power_fighters/tux.person.cfg`):
 ```ini
 [identity]
 id = "tux"
-model = "res://assets/tux_fighter.glb" ; Ruta del `res://assets//personaje.glb`. Remplaza malla del `prefab`
+model = "res://assets/models/tux/tux_fighter.glb" ; Ruta `res://assets/models/<id>/<modelo>.glb`. Remplaza malla del `prefab`
 position_offset = Vector3(0.0,-1.2,0.0)
 
 [momentum]
@@ -469,13 +469,13 @@ al nodo `MatchTime`; la cuenta inicial la maneja `MatchCountdown` y el letrero d
 | Archivo | Cambio |
 |---|---|
 | `scripts/helpers/global_utils.gd` | Conserva `ControlType`; el enum de configuraciones y `CONFIG_OPTIONS` desaparecieron |
-| `scripts/helpers/character_registry.gd` | Nuevo: lee `identities.cfg`, valida ids y expone `playable_ids()` / `display_name()` / rutas de cfg |
+| `scripts/helpers/characters/character_registry.gd` | Nuevo: lee `identities.cfg`, valida ids y expone `playable_ids()` / `display_name()` / rutas de cfg |
 | `scripts/helpers/ui/character_catalog.gd` | Nuevo: `Entry` con `config_id`, `display_name`, `glyph`, `is_random` y `model`; reemplaza al enum en la selección |
 | `data/power_fighters/identities.cfg` | Nuevo: manifiesto global; hoy solo `[tux] name = "Tux"` |
-| `scripts/helpers/power_fighter_data.gd` | Datos de un slot: `control`, `config_id`, `lives`, `player_id` |
+| `scripts/helpers/match/power_fighter_data.gd` | Datos de un slot: `control`, `config_id`, `lives`, `player_id` |
 | `scripts/match/power_fighter_slots.gd` | Guarda `PowerFighterData` por id de slot y valida contra `CharacterRegistry.playable_ids()` |
 | `scripts/match/power_fighter_configurer.gd` | `create(config_id, control_type)`; carga `.person.cfg`; deuda: `id` vía `PersonConfig.id` |
-| `scripts/match/person_config.gd` | `RefCounted` con identidad, model/offset, momentum, movimiento, salto, intervals y `air_jump_duration`; `character_name` es campo muerto |
+| `scripts/helpers/characters/person_config.gd` | `RefCounted` con identidad, model/offset, momentum, movimiento, salto, intervals y `air_jump_duration`; `character_name` es campo muerto |
 | `scripts/match/spawn_point.gd` | `spawn(config_id, ...)`: delega la creación, posiciona y asigna `player_id` |
 | `scripts/match/game_manager.gd` | Lee `power_fighter_slots` con `has_slot`/`get_slot` y pasa `slot.config_id` a `spawn()`; sin respaldo |
 | `scripts/ui/character_menu.gd` | Crea `PowerFighterData` con `entry.config_id`, llena `level.power_fighter_slots` y pasa `TIME_OPTIONS[time_index]` antes de cambiar de escena |

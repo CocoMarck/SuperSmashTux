@@ -4,19 +4,20 @@ extends RefCounted
 '''
 - Lee `identities.cfg`, este archivo almacena `id` como sección, y `nombre`. En el futuro quizás almacene `description`
 - Los id son string tipo `snake_case`, si no lo son, manda error/ignora.
+- `hidden = true` (opcional) saca al personaje de la selección, pero sigue siendo creable.
 '''
 
 # Constantes
 const IDENTITIES_PATH := "res://data/power_fighters/identities.cfg"
 const DATA_DIR := "res://data/power_fighters/"
 
-# Constantes | Standard character. Necesario
+# Constantes | Personaje base (el del prefab). Vive en `identities.cfg` como los demás.
 const STANDARD_ID := &"standard"
-const STANDARD_NAME := &"Bob"
 
 # Propiedades privadas
 static var _ids: Array[StringName] = []
 static var _names: Dictionary[StringName, String] = {}
+static var _hidden: Array[StringName] = []
 static var _snake_regex: RegEx = null
 static var _loaded := false
 
@@ -42,8 +43,6 @@ static func _ensure_loaded():
 	'''
 	if _loaded:
 		return
-	_names[STANDARD_ID] = STANDARD_NAME
-
 	var cfg := ConfigFile.new()
 	var err := cfg.load(IDENTITIES_PATH)
 	if err != OK:
@@ -65,17 +64,24 @@ static func _ensure_loaded():
 		
 		_names[id] = String(value)
 		_ids.append(id)
+		if bool(cfg.get_value(section, "hidden", false)):
+			_hidden.append(id)
 	
+	if not _names.has(STANDARD_ID):
+		_fail("missing base id `%s` in %s" % [STANDARD_ID, IDENTITIES_PATH])
+
 	_loaded = true
 
 # Funcs data public
 static func playable_ids() -> Array[StringName]:
 	'''
-	Obtener los id jugables.
+	Obtener los id que se muestran en la selección (sin los `hidden`), en orden de `identities.cfg`.
 	'''
 	_ensure_loaded()
-	var result: Array[StringName] = [STANDARD_ID]
-	result.append_array(_ids)
+	var result: Array[StringName] = []
+	for id: StringName in _ids:
+		if not _hidden.has(id):
+			result.append(id)
 	return result
 
 static func display_name(id: StringName) -> String:
@@ -86,17 +92,16 @@ static func display_name(id: StringName) -> String:
 	return _names[id]
 
 static func is_playable(id: StringName) -> bool:
+	# Incluye ocultos: se pueden crear aunque no salgan en la selección.
 	_ensure_loaded()
-	return id == STANDARD_ID or _ids.has(id)
+	return _ids.has(id)
 
 # Funcs data person/fighter/power_fighter/ cfg.
 static func person_config_path(id: StringName) -> String:
 	'''
-	Obtener archivo de configuración, standard no tiene.
+	Obtener archivo de configuración del personaje.
 	'''
 	_ensure_loaded()
-	if id == STANDARD_ID:
-		return ""
 	if not is_playable(id):
 		_fail("parson config don't exist for: %s" % id)
 		return ""

@@ -2,6 +2,7 @@ class_name PowerFighterConfigurer
 
 # Constantes prefab
 const POWER_FIGHTER_PREFAB = preload("res://prefabs/standard_power_fighter.tscn")
+const PREFAB_MODEL_PATH := "res://assets/models/standard/standard_character_a_pose.glb" # Malla que ya trae el prefab.
 
 # Funciones
 static func create( 
@@ -10,12 +11,12 @@ static func create(
 	# Preparar instancia
 	var power_fighter = POWER_FIGHTER_PREFAB.instantiate()
 	var person_config: PersonConfig
-	var have_character_registy: bool = (
-		CharacterRegistry.is_playable(config_id) and config_id != "standard" )
+	var have_character_registy: bool = CharacterRegistry.is_playable(config_id)
 	if have_character_registy:
 		var path: String = CharacterRegistry.person_config_path(config_id)
-		person_config = _load_person(path)
-	if person_config != null:
+		person_config = CharacterRegistry.load_person_config(path)
+	# Solo cambiar la malla si el cfg pide otra distinta a la del prefab.
+	if person_config != null and person_config.model != PREFAB_MODEL_PATH:
 		_build_instance(power_fighter, person_config)
 	
 	# Asignar script
@@ -28,50 +29,12 @@ static func create(
 			pass
 	
 	if have_character_registy:
-		_apply_tux_config(power_fighter as PowerFighter, person_config)
+		_apply_person_config(power_fighter as PowerFighter, person_config)
+		# Ataques aún hardcodeados por personaje; los demás usan los del prefab.
+		if config_id == &"tux":
+			_apply_tux_attacks(power_fighter as PowerFighter)
 	
 	return power_fighter as PowerFighter
-
-# Texto de config a clase de config
-static func _load_person(path: String) -> PersonConfig:
-	'''
-	No validar nada, el crash es bueno. Data mala, crash por mal educado. GG.
-	'''
-	var cfg: ConfigFile = ConfigFile.new()
-	cfg.load(path)
-
-	var config := PersonConfig.new()
-	
-	# Identity
-	config.id  = String(cfg.get_value("identity", "id"))
-	config.model = String( cfg.get_value("identity", "model") )
-	config.position_offset = Vector3( cfg.get_value("identity", "position_offset") )
-	
-	# Momentum
-	config.ground_acceleration = float(
-		cfg.get_value("momentum", "ground_acceleration"))
-	config.ground_friction = float(cfg.get_value("momentum", "ground_friction"))
-	config.air_acceleration = float(cfg.get_value("momentum", "air_acceleration"))
-	config.knockback_friction = float(cfg.get_value("momentum", "knockback_friction"))
-
-	# Horizontal movement
-	config.walking_speed = int(cfg.get_value("horizontal_movement", "walking_speed"))
-	config.running_speed = int(cfg.get_value("horizontal_movement", "running_speed"))
-
-	# Vertical movement
-	config.jump_impulse = int(cfg.get_value("vertical_movement", "jump_impulse"))
-
-	# Interval
-	config.walk_step_interval = float(cfg.get_value("interval", "walk_step_interval"))
-	config.run_step_interval = float(cfg.get_value("interval", "run_step_interval"))
-	config.crouch_move_step_interval = float(
-		cfg.get_value("interval", "crouch_move_step_interval"))
-
-	# Duration of anims
-	config.air_jump_duration = float(
-		cfg.get_value("duration_of_anims", "air_jump_duration"))
-
-	return config
 
 # Construir instancia
 static func _build_instance(power_fighter: Node3D, config: PersonConfig) -> void:
@@ -92,8 +55,11 @@ static func _build_instance(power_fighter: Node3D, config: PersonConfig) -> void
 	asset.queue_free()
 
 # Aplicar configuración
-static func _apply_tux_config(
+static func _apply_person_config(
 	power_fighter: PowerFighter, person_config: PersonConfig) -> void:
+	'''
+	Movimiento e identidad desde `<id>.person.cfg`. Aplica a cualquier personaje.
+	'''
 	power_fighter.id = person_config.id
 	
 	# Person config
@@ -111,6 +77,10 @@ static func _apply_tux_config(
 	power_fighter.run_step_interval = person_config.run_step_interval
 	power_fighter.crouch_move_step_interval = person_config.crouch_move_step_interval
 
+static func _apply_tux_attacks(power_fighter: PowerFighter) -> void:
+	'''
+	Ataques de Tux, hardcodeados hasta que se lean de `tux.power_fighter.cfg`/`tux.fighter.cfg`.
+	'''
 	# attacks on floor
 	power_fighter.attacks.neutral1.duration = 0.33
 	power_fighter.attacks.neutral1.hitboxes_moves[0].init_time_ratio = 0.45

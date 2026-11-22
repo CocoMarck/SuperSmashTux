@@ -265,8 +265,8 @@ func _fighter_name(power_fighter: PowerFighter) -> String:
 	'''
 	Nombre del personaje: el que se eligió para ese slot en la selección (PowerFightersSetup).
 	'''
-	var catalog_entry: CharacterCatalog.Entry = CharacterCatalog.get_entry_by_config_id( power_fighter.id )
-	return catalog_entry.display_name
+	# Del registry y no del catálogo: el catálogo no trae a los personajes ocultos.
+	return CharacterRegistry.display_name(power_fighter.id)
 
 func _on_power_fighter_spawned(power_fighter: PowerFighter, slot: int, is_player: bool, max_lives: int) -> void:
 	_register_fighter(power_fighter, slot, is_player, max_lives)

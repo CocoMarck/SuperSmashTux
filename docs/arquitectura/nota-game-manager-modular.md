@@ -112,7 +112,7 @@ congela a los peleadores durante la cuenta. Ver
 
 ## `PowerFighterSlots` — lineup por slot
 
-`PowerFighterData` (`scripts/helpers/power_fighter_data.gd`) es un `RefCounted` con los datos de un
+`PowerFighterData` (`scripts/helpers/match/power_fighter_data.gd`) es un `RefCounted` con los datos de un
 slot: `control`, `config_id`, `lives` y `player_id`.
 
 `PowerFighterSlots` (`scripts/match/power_fighter_slots.gd`) es un `Node` que guarda un

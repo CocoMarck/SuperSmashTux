@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://c6g6jtlp7653d" path="res://ui/themes/theme_kernel.tres" id="1_theme"]
 [ext_resource type="Script" path="res://scripts/ui/components/character_menu/slot_card.gd" id="2_script"]
-[ext_resource type="PackedScene" uid="uid://dhfu76dvlacbw" path="res://assets/standard_character_a_pose.glb" id="3_sample_model"]
+[ext_resource type="PackedScene" uid="uid://dhfu76dvlacbw" path="res://assets/models/standard/standard_character_a_pose.glb" id="3_sample_model"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_chip"]
 content_margin_left = 8.0

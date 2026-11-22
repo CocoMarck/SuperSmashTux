@@ -7,7 +7,6 @@ Catálogo de personajes del roster de la pantalla de selección, en el orden en 
 
 # Constantes
 const RANDOM_ID := &"random"
-const STANDARD_MODEL: PackedScene = preload("res://assets/standard_character_a_pose.glb")
 
 # Clases
 class Entry:
@@ -35,8 +34,6 @@ static func _make(
 	return entry
 
 static func _model_for(id: StringName) -> PackedScene:
-	if id == CharacterRegistry.STANDARD_ID:
-		return STANDARD_MODEL
 	var config_path: String = CharacterRegistry.person_config_path(id)
 	var person_config: PersonConfig = CharacterRegistry.load_person_config(
 		config_path)
