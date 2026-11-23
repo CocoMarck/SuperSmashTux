@@ -27,3 +27,6 @@ var crouch_move_step_interval: float
 
 # Duration of anims
 var air_jump_duration: float
+
+# Offset of anims
+var hanging_anim_offset: Vector3

@@ -108,8 +108,9 @@
 - `config_id` **LISTO**: `PowerFighterData`, `PowerFighterSlots`, `GameManager`, `SpawnPoint`, `PowerFighterConfigurer` y `CharacterMenu` migrados de enum a `config_id: StringName` (`2026-11-21`).
 - `FightHUD` **LISTO**: resuelve el nombre con `CharacterCatalog.get_entry_by_config_id(power_fighter.id)`; dejó de mostrar el id crudo (`2026-11-21`).
 - `CharacterMenu` **LISTO**: tablas y datos por `entry.config_id`; el preview de `SlotCard` ya no tiene el offset/hardcodeo de Tux (`2026-11-21`).
-- `tux.person.cfg` y plantillas **LISTO**: `character_name` salió del cfg; quedan `[identity]`, `[momentum]`, `[horizontal_movement]`, `[vertical_movement]`, `[interval]` y `[duration_of_anims]` (`2026-11-21`).
+- `tux.person.cfg` y plantillas **LISTO**: `character_name` salió del cfg; quedan `[identity]`, `[momentum]`, `[horizontal_movement]`, `[vertical_movement]`, `[interval]`, `[duration_of_anims]` y `[anim_offset]` (`2026-11-21`).
 - Movimiento desde cfg **LISTO**: `_apply_tux_config()` aplica momentum, velocidades, `jump_impulse`, intervalos de pasos y `air_jump_duration`; `_build_instance()` toma `model` y `position_offset` del cfg (`2026-11-21`).
+- Offset de colgamiento **LISTO**: `hanging_anim_offset` se lee de `[anim_offset]` en `.person.cfg`, vive en `PersonConfig` y lo aplica `PowerFighterConfigurer` con `set_anim_offset()`; antes estaba quemado en el configurer (`2026-11-22`).
 
 ### FALTA / en progreso
 
@@ -121,7 +122,7 @@
 
 - SFX de `Person` **EN PROGRESO**: bandera `_first_jump_frame` (en `_move`) ya dispara el sonido de salto sin inferirlo de `last_force <= 0`; `_process_sound` asigna `stream_*` y hace `play()`, pero sigue con `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D`. Los `.wav` ya entraron (commit `7a2ff1f`).
 
-- `PowerFighterConfigurer` **FALTA**: los ataques siguen hardcodeados en `_apply_tux_config()` (desde ~línea 120); `name.fighter.cfg` y `name.power_fighter.cfg` existen, pero el configurer no las carga (`2026-11-21`).
+- `PowerFighterConfigurer` **FALTA**: los ataques siguen hardcodeados en `_apply_tux_attacks()` (desde ~línea 120); `name.fighter.cfg` y `name.power_fighter.cfg` existen, pero el configurer no las carga (`2026-11-21`).
 
 #### Internacionalización de UI
 - UI full inglés **FALTA**: la UI ya trae textos en inglés sueltos (`Start`, `Controls`, `Back to menu`), pero siguen muchos literales en español en `.gd` y `.tscn` (`2026-11-21`).

@@ -147,6 +147,9 @@ static func load_person_config(path: String) -> PersonConfig:
 	# Duration of anims
 	config.air_jump_duration = float(
 		cfg.get_value("duration_of_anims", "air_jump_duration"))
+	
+	# Offset of anims
+	config.hanging_anim_offset = Vector3(cfg.get_value("anim_offset", "hanging_anim_offset"))
 
 	return config
 

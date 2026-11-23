@@ -71,8 +71,7 @@ static func _apply_person_config(
 		person_config.air_acceleration, person_config.knockback_friction)
 	# ^
 	# | ground_acceleration, ground_friction, air_acceleration, knockback_friction
-	power_fighter.set_anim_offset(
-		Vector3(0.0,-0.2,0.0))
+	power_fighter.set_anim_offset(person_config.hanging_anim_offset)
 
 	power_fighter.jump_impulse = person_config.jump_impulse
 	power_fighter.walking_speed = person_config.walking_speed
