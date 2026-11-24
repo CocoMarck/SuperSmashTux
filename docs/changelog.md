@@ -114,6 +114,11 @@
 - `FighterConfig` **LISTO**: los 15 ataques normales salen de `data/characters/tux.fighter.cfg`, con loader único en `CharacterRegistry` y asignación directa vía `_apply_fighter_config()`; la plantilla `data/templates/name.fighter.cfg` quedó alineada con el loader (`2026-11-23`).
 - Config de peleador **LISTO (por ahora)**: no hay `PowerFighterConfig` separado; `FighterConfig` se usa para fighter y power fighter. La separación de archivos queda diferida hasta que haya parámetros distintos de verdad (`2026-11-23`).
 
+#### Audio y cfg de peleador (`2026-11-24`)
+- SFX de ataque **LISTO (parcial)**: `Fighter` implementa `_attack_sounds()` con `stream_attack` y las listas `fight_moves_with_simple_sound` / `fight_moves_with_hitstun_sound`; `Person::_process_sound()` corre `_movement_sounds()` y luego el hook. Known issues: 4 power attacks mudos, hit suena al spawnear y escudo suena hit aunque bloquee (`2026-11-24`).
+- Secciones `*_attack` renombradas en fighter cfg **LISTO**: la sección es la anim y ya no se lee `name`; `CharacterRegistry._fight_move()` arma `name` desde la key de sección (`2026-11-24`).
+- `set_damage(dmg, dir)` **LISTO**: entrada única de daño en `Person`; `HitboxDamage` ya manda daño + dirección y el primer frame de daño dispara el SFX de golpe (`2026-11-24`).
+
 ### FALTA / en progreso
 
 #### `2026-11`
@@ -122,9 +127,13 @@
 
 - `GameManager` **FALTA**: tratar `Person` (el papá) en vez de `PowerFighter`, para crecer a más modos de juego.
 
-- SFX de `Person` **EN PROGRESO**: bandera `_first_jump_frame` (en `_move`) ya dispara el sonido de salto sin inferirlo de `last_force <= 0`; `_process_sound` asigna `stream_*` y hace `play()`, pero sigue con `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D`. Los `.wav` ya entraron (commit `7a2ff1f`).
+- SFX de movimiento **EN PROGRESO**: bandera `_first_jump_frame` (en `_move`) ya dispara el sonido de salto sin inferirlo de `last_force <= 0`; `_process_sound()` asigna `stream_*` y hace `play()`, pero sigue con `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D`. Ya hay 15 `.wav` y 5 randomizers.
 
-- `PowerFighterConfigurer` **FALTA**: los power attacks siguen hardcodeados en `_apply_tux_attacks()`; `name.power_fighter.cfg` existe como plantilla huérfana y todavía no tiene loader (`2026-11-23`).
+- Known issues de SFX de ataque: 4 power attacks mudos, el hit suena al spawnear hitbox y el escudo suena hit aunque bloquee (`2026-11-24`).
+
+- `PowerFighterConfigurer` **FALTA**: los power attacks de Tux siguen con overrides hardcodeados en `_apply_tux_attacks()`; `standard` ya trae defaults estables en el prefab (`down_power_attack` y `air_down_power_attack` en `fight_moves_with_hitstun_sound`); falta loader/cfg y `name.power_fighter.cfg` sigue siendo plantilla huérfana (`2026-11-24`).
+
+- Heavy hitstun **KNOWN ISSUE / TUNEO**: el umbral actual no es una decisión fija; puede migrar a porcentaje de daño o a una propiedad dedicada para hitstun acumulativo (`2026-11-24`).
 
 - UI full inglés **FALTA**: la UI ya trae textos en inglés sueltos (`Start`, `Controls`, `Back to menu`), pero siguen muchos literales en español en `.gd` y `.tscn` (`2026-11-21`).
 

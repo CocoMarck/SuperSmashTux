@@ -54,7 +54,7 @@ func _init(
 Es el comportamiento **actual** de `hitbox.gd`: hace daño y empuja.
 
 - En `_on_hitbox_body_entered` ignora a `_parent` y, si pega a un `Person`,
-  aplica `set_damage_percentage()` y `set_damage_move()`.
+  aplica `set_damage(_damage, _direction)` una sola vez (porcentaje + hp + knockback).
 - Parámetros de daño (`_damage`, `_direction`) los sigue pasando el `Fighter`
   desde el `FightMove`, igual que hoy.
 

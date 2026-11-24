@@ -174,71 +174,46 @@ de colgado siempre gana.
 ## Animación de ataque
 
 `_attack_anim()` reproduce `_current_attack.name` en el `AnimationPlayer` (si el nombre estuviera
-vacío, lo detiene). Los nombres de animación son los de `docs/arte/asset-personaje.md` (fuente de verdad);
-el `name` del `FightMove` **es** el nombre de la animación, por eso son `snake_case`. Es de **solo
-lectura** (getter sobre `_name`), así que se fija al construir el `FightMove` y no se puede reasignar.
+vacío, lo detiene). `FightMove.name` tiene getter y setter: **no es de solo lectura**. El loader de
+fighter cfg (`CharacterRegistry.load_fighter_config()`) le asigna el nombre desde la clave de sección
+(`*_attack`), así que el cfg manda sobre el valor inicial. El `name` del `FightMove` **es** el nombre
+de la animación; los nombres válidos están en `docs/arte/asset-personaje.md` (fuente de verdad) y son
+`snake_case`.
 
 ## Daño recibido
 
 `HitboxDamage._on_hitbox_body_entered` (`scripts/combat/hitbox_damage.gd`), si el cuerpo es `Person` y no es
-su propio `_parent`, llama:
+su propio `_parent`, llama una sola vez:
 
 ```gdscript
-body.set_damage_percentage( _damage )
-body.set_damage_move( _damage, _direction )
+body.set_damage(_damage, _direction)
 ```
 
-`Person.set_damage_move()` fija la dirección de knockback, calcula el hitstun
-(`BASE_HITSTUN_DURATION` + `damage * damage_percentage * 0.02`, tope `MAX_HITSTUN_DURATION`) y, si el
-daño supera `STUN_DAMAGE_THRESHOLD * hp`, activa heavy hitstun (tumbado en piso,
-`STUN_DURATION_ON_FLOOR`). Durante `KNOCKBACK_DECAY_TIME` la velocidad se acelera con
-`_normal_damage_power * damage_percentage`, así que **mientras más `damage_percentage` acumulado,
-más lejos vuela**. Los valores están en `scripts/helpers/game_balance.gd`.
+`Person.set_damage()` (`scripts/characters/person.gd`) es la entrada única: en el mismo llamado suma
+hp, porcentaje de daño y knockback. Los helpers quedaron privados (`_set_damage_hp()`,
+`_set_damage_percentage()`, `_set_damage_move()`). `set_thrown_move()` ya no suma porcentaje aparte:
+usa `set_damage()` y después ajusta dirección y hitstun del lanzamiento.
+
+El hitstun se calcula con `BASE_HITSTUN_DURATION` + `damage * damage_percentage * 0.02` (tope
+`MAX_HITSTUN_DURATION`). Durante `KNOCKBACK_DECAY_TIME` la aceleración escala con `damage_percentage`,
+así que **mientras más porcentaje acumulado, más lejos vuela**. Los valores están en
+`scripts/helpers/game_balance.gd`.
+
+> **KNOWN ISSUE / tuneo**: el gate de heavy hitstun hoy depende del daño del golpe, no de un porcentaje
+> ni de una propiedad dedicada. No es decisión fija: es el tuneo vigente. Se puede probar con
+> porcentaje de daño o con una propiedad nueva solo para hitstun acumulativo; ver
+> [nota-knockback-acumulativo.md](nota-knockback-acumulativo.md).
 
 > **FALTA**: hacer que `Person` acumule knockback. Por ahora cada golpe reinicia el knockback
 > (dirección, hitstun y ventana de decaimiento), y si el personaje está en el aire también cancela
 > `_target_velocity.y`. En partidas FFA de 4, un golpe débil a mitad del vuelo "salva" al que ya iba
 > volando. Detalle y opciones en [nota-knockback-acumulativo.md](nota-knockback-acumulativo.md).
 
-## Los 15 ataques — valores reales
+## Valores de ataques
 
-Todos tienen **un solo `HitboxMove`** salvo `air_neutral` (4). `hitbox_size` es `(0.5,0.5,0.5)` salvo
-las excepciones de abajo. `override_vertical_move = false` en todos, `speed` es `(0,0,0)` salvo donde
-se indica. Cada fila: `init_time_ratio` (cuándo sale el hitbox, fracción de la duración) y `dur.
-hitbox` (cuánto vive el hitbox).
-
-| Ataque | Animación (`name`) | `duration` | `air_attack` | `override_h` | `speed` | daño | `hitbox_position` | `direction` | `init_time_ratio` | dur. hitbox |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `neutral1` | `neutral_attack1` | 0.5 | no | sí | (0,0,0) | 10 | (0.8, 0.3, 0) | (0.25, 0.3, 0) | 0.6 | 0.2 |
-| `neutral2` | `neutral_attack2` | 0.5 | no | sí | (0.25,0,0) | 10 | (1.0, 0.3, 0) | (0.25, 0.3, 0) | 0.6 | 0.2 |
-| `neutral3` | `neutral_attack3` | 0.6667 | no | sí | (0.25,0,0) | 15 | (0.8, 0.1, 0) | (0.4, 0.5, 0) | 0.5 | 0.2 |
-| `down` | `down_attack` | 0.5 | no | sí | (0,0,0) | 8 | (1.0, -1.0, 0) | (0.25, 0.75, 0) | 0.5 | 0.2 |
-| `up` | `up_attack` | 0.4583 | no | sí | (0,0,0) | 7 | (0.3, 0.9, 0) | (0.25, 1.0, 0) | 0.5 | 0.2 |
-| `dash` | `dash_attack` | 0.8333 | no | sí | (7,0,0) | 5 | (0.8, -1.0, 0) | (0.5, 0.8, 0) | 0.2 | 0.3 |
-| `forward` | `forward_attack` | 0.4583 | no | sí | (0,0,0) | 6 | (1.0, -0.2, 0) | (1.0, 0.5, 0) | 0.5 | 0.1 |
-| `heavy_side` | `heavy_side_attack` | 0.7083 | no | sí | (0,0,0) | 20 | (0.8, 0.1, 0) | (1, 0.75, 0) | 0.5 | 0.2 |
-| `heavy_up` | `heavy_up_attack` | 0.5833 | no | sí | (0,0,0) | 20 | (0.1, 0.8, 0) | (0.25, 1.0, 0) | 0.5 | 0.2 |
-| `heavy_down` | `heavy_down_attack` | 0.625 | no | sí | (0,0,0) | 10 | (0.0, -1.0, 0) | (1, 1, 0) | 0.5 | 0.2 |
-| `air_neutral` | `air_neutral_attack` | 0.9167 | sí | no | (0,0,0) | 5 (x4) | ver abajo | ver abajo | 0.5 | 0.2 |
-| `air_down` | `air_down_attack` | 0.5 | sí | no | (0,0,0) | 20 | (0.1, -1.1, 0) | (0.25, -1.0, 0) | 0.5 | 0.2 |
-| `air_up` | `air_up_attack` | 0.5833 | sí | no | (0,0,0) | 5 | (0.15, 0.8, 0) | (0.5, 1.25, 0) | 0.5 | 0.2 |
-| `air_forward` | `air_forward_attack` | 0.6667 | sí | no | (0,0,0) | 10 | (0.75, 0.0, 0) | (1.2, 1, 0) | 0.5 | 0.2 |
-| `air_back` | `air_back_attack` | 0.5833 | sí | no | (0,0,0) | 10 | (-0.7, 0.0, 0) | (-1.0, 1, 0) | 0.5 | 0.2 |
-
-Excepciones de `hitbox_size`: `forward` (0.5, 0.5, 1.0), `heavy_down` (0.5, 0.5, 2.0), `air_up`
-(0.5, 0.5, 0.8), `air_forward` (0.5, 0.5, 0.9).
-
-`air_neutral` lanza 4 hitboxes a la vez (ids 9 a 12, uno por esquina, cada uno empuja hacia su
-lado): posiciones/direcciones `(0.9,-0.9)/(1,-1)`, `(-0.9,-0.9)/(-1,-1)`, `(0.9,0.5)/(1,1)`,
-`(-0.9,0.5)/(-1,1)`.
-
-Los `id` de hitbox **solo importan dentro de un mismo ataque** (por eso hay ids repetidos entre
-ataques, ej. los 3 neutrales usan `id` 1): `_spawned_hitbox_ids` se limpia al arrancar cada ataque.
-
-Las duraciones "raras" (0.4583, 0.5833, 0.6667, 0.7083, 0.8333, 0.9167) no son arbitrarias: son
-fracciones de segundo que cuadran con animaciones a 24 fps (11, 14, 16, 17, 20 y 22 frames). La
-duración del ataque se afinó para calzar con el clip real de animación; las redondas (0.5, 0.625)
-equivalen a 12 y 15 frames.
+Los valores de los ataques viven en `data/characters/tux.fighter.cfg` (fuente de verdad); no se
+duplican aquí porque cambian seguido. Las duraciones se afinan para calzar con las animaciones a
+24 fps.
 
 ## PowerFighter: cómo extiende esto
 

@@ -1,32 +1,35 @@
 # Audio
 
-Documenta los sonidos deseados de personaje (placeholders / uso por defecto) y la convención de formatos de audio del proyecto. No describe todavía una integración completa; aterriza qué se necesita y con qué formato conviene guardarlo.
+Documenta los SFX de personaje (placeholders / uso por defecto), la integración parcial ya metida y la convención de formatos. Falta cerrar la arquitectura de players.
 
 ## Estado actual
 
-- **Archivos**: los nueve wavs ya viven en `assets/audio/sfx/`, cada categoría con su randomizer (`rand_jump.tres`, `rand_step.tres`, `rand_land.tres`).
-- **`Person`**: `person.gd` declara `@export var stream_jump` / `stream_step` / `stream_land` (`AudioStreamRandomizer`) y cachea el nodo con `@onready var _audio_stream_player: AudioStreamPlayer3D = $AudioStreamPlayer3D`.
-- **Prefab**: `standard_power_fighter.tscn` ya trae un nodo `AudioStreamPlayer3D` (sin `stream` asignado).
-- **Detección de eventos**: `person.gd::_process_sound` calcula los momentos (paso, salto y aterrizaje) y asigna el `stream` correspondiente.
-- **Reproducción real**: ya llama `play()`, pero aún trae un `print` de placeholder. Falta decidir 1 vs 3 `AudioStreamPlayer3D` (un `AudioStreamPlayer3D` tiene un solo `stream`).
-- **`set_script` resuelto**: el prefab ya trae `script = power_fighter.gd` en el root y el configurer asigna `controller` (nodo hijo) en vez de `set_script`, así que los `@export` de escena (el grupo `SFX`) sobreviven y `stream_jump` ya no llega `null`. Ver [nota-power-fighter-controller.md](../arquitectura/nota-power-fighter-controller.md).
+- **Archivos**: 15 WAV en `assets/audio/sfx/`, cinco categorías con tres variantes y su randomizer: `rand_step.tres`, `rand_jump.tres`, `rand_land.tres`, `rand_attack.tres`, `rand_hit.tres`.
+- **`Person`**: `person.gd` exporta `stream_jump` / `stream_step` / `stream_land` / `stream_hit` (`AudioStreamRandomizer`) y cachea `_audio_stream_player: AudioStreamPlayer3D`.
+- **`Fighter`**: `fighter.gd` exporta `stream_attack` y define `fight_moves_with_simple_sound` / `fight_moves_with_hitstun_sound` para elegir cuándo suena.
+- **Prefab**: `standard_power_fighter.tscn` trae el nodo `AudioStreamPlayer3D` y, en la root, defaults estables de power attacks en `fight_moves_with_hitstun_sound` (`prefabs/standard_power_fighter.tscn:21`). Usan el stream genérico `stream_attack`.
+- **Detección de eventos**: `Person::_process_sound()` corre `_movement_sounds()` y luego el hook `_attack_sounds()`; `Person` lo deja vacío y `Fighter` lo implementa. Movimiento = paso/salto/caída/golpe recibido; ataque = first frame o primer frame de hitbox según lista.
+- **Reproducción real**: ya llama `play()`, pero sigue el `print` de placeholder. Pendiente decidir 1 vs 3 `AudioStreamPlayer3D` (un player tiene un solo `stream`).
+- **`set_script` resuelto**: el prefab ya trae `script = power_fighter.gd` en el root y el configurer asigna `controller` (nodo hijo) en vez de `set_script`, así que los `@export` de escena (grupos `SFX`) sobreviven y los `stream_*` ya no llegan `null`. Ver [nota-power-fighter-controller.md](../arquitectura/nota-power-fighter-controller.md).
 - Los sonidos listados aquí son placeholders: sirven como comportamiento por defecto hasta que cada personaje tenga sus propios SFX.
 
-## Sonidos deseados (ahora)
+## Sonidos placeholders (ahora)
 
-Se necesitan **nueve** sonidos placeholder, tres variantes por categoría:
+Son **15** WAV, tres variantes por categoría:
 
 | Categoría | Cantidad | Archivos | Cuándo se dispara |
 |---|---|---|---|
 | Pasos | 3 | `step_01`, `step_02`, `step_03` | Al caminar, correr o caminar agachado (`walking`, `running`, `crouch_move`). |
 | Salto | 3 | `jump_01`, `jump_02`, `jump_03` | Primer frame de salto, tanto desde el piso como en el aire (incluye el doble salto de `PowerFighter`). |
 | Caída | 3 | `land_01`, `land_02`, `land_03` | Primer frame al tocar el piso tras venir del aire. No debe dispararse mientras el personaje recibe daño. |
+| Ataque | 3 | `attack_01`, `attack_02`, `attack_03` | `Fighter`: first frame de `fight_moves_with_simple_sound` o primer frame de hitbox de `fight_moves_with_hitstun_sound`. Siempre `stream_attack`. |
+| Golpe recibido | 3 | `hit_01`, `hit_02`, `hit_03` | Primer frame de daño vía `set_damage(dmg, dir)`. No es el sonido del ataque que pega. |
 
 Notas:
 
 - Las tres variantes existen para alternarlas y evitar el efecto "metralleta" al repetir el mismo pasito.
 - La cadencia de los pasos ya está parametrizada en `person.gd` con `walk_step_interval`, `run_step_interval` y `crouch_move_step_interval`.
-- A futuro se contemplan más SFX de personaje (daño recibido, golpe contra techo y pared), pero no son parte de esta tanda.
+- Idea futura (sin diseño): SFX específicos por ataque (proyectil/fuego); no hay nombres, cantidades ni contrato de datos definidos.
 
 ## Formato recomendado: WAV vs Ogg Vorbis
 
@@ -76,9 +79,17 @@ assets/audio/sfx/
 ├── land_01.wav
 ├── land_02.wav
 ├── land_03.wav
+├── attack_01.wav
+├── attack_02.wav
+├── attack_03.wav
+├── hit_01.wav
+├── hit_02.wav
+├── hit_03.wav
 ├── rand_step.tres    # AudioStreamRandomizer con las 3 variantes de paso
 ├── rand_jump.tres    # AudioStreamRandomizer con las 3 variantes de salto
-└── rand_land.tres    # AudioStreamRandomizer con las 3 variantes de caída
+├── rand_land.tres    # AudioStreamRandomizer con las 3 variantes de caída
+├── rand_attack.tres  # AudioStreamRandomizer con las 3 variantes de ataque
+└── rand_hit.tres     # AudioStreamRandomizer con las 3 variantes de golpe recibido
 
 assets/audio/music/
 └── <nombre>.ogg
@@ -107,11 +118,18 @@ assets/audio/music/
 
 ## Uso en runtime
 
-- **`AudioStreamRandomizer`**: un recurso por categoría (`rand_step.tres`, `rand_jump.tres`, `rand_land.tres`) con las tres variantes; elige una al azar en cada reproducción. Permite variar pitch y volumen, y usar modo "random no repeats" para no repetir el mismo paso seguido.
+- **`AudioStreamRandomizer`**: un recurso por categoría (`rand_step.tres`, `rand_jump.tres`, `rand_land.tres`, `rand_attack.tres`, `rand_hit.tres`) con tres variantes; elige una al azar en cada reproducción. Permite variar pitch y volumen, y usar modo "random no repeats" para no repetir el mismo paso seguido.
 - **`AudioStreamPlayer3D`**: para que el sonido se posicione en el mundo. Ubicar el nodo cerca de los pies del personaje y ajustar `max_polyphony` para permitir traslapes.
-- **Hook actual**: `person.gd::_process_sound` es el punto donde se decide qué sonido toca; hoy imprime y mañana llamará a los players correspondientes.
-- **Un player vs tres**: con un solo `AudioStreamPlayer3D` hay que cambiar `stream` por categoría, y asignar `stream` llama `stop()`, así que se corta el sonido anterior. Con tres nodos (uno por categoría) los sonidos traslapan. Decisión pendiente.
-- Prioridad actual de eventos en el mismo frame: aterrizaje > salto > paso.
+- **Hook real**: `Person::_process_sound()` llama `_movement_sounds()` y luego `_attack_sounds()`; `Fighter` lo sobrescribe y usa `_current_attack.name` contra las dos listas. El hook de `Person` sigue vacío.
+- **Un player vs tres**: con un solo `AudioStreamPlayer3D` hay que cambiar `stream` por categoría, y asignar `stream` llama `stop()`, así que se corta el sonido anterior. Con tres nodos hay canales para traslapar. Decisión pendiente (1 vs 3).
+- Prioridad real en el mismo frame (última asignación gana): ataque > golpe recibido > salto > caída > paso.
+
+## Known issues
+
+- Sigue el `print` de placeholder en `_movement_sounds()`.
+- Un solo `AudioStreamPlayer3D` corta el sonido anterior al reasignar `stream`; por eso sigue abierto el 1 vs 3.
+- Power attacks: `down_power_attack` y `air_down_power_attack` ya suenan por defaults estables del prefab `standard`; los otros 4 power attacks siguen mudos. El stream sigue siendo `stream_attack`.
+- El hit de ataque suena al spawnear hitbox, no al conectar; el escudo suena hit aunque bloquee.
 
 ## Licencias
 

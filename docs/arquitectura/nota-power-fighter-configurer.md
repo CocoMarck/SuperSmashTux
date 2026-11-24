@@ -73,10 +73,12 @@ que el configurador nunca recibe un id no jugable.
 
 > **Invariante**: `standard` es el personaje base/dummy de dependencia, **jugable**, hardcodeado a
 > propósito. No tiene entrada en `identities.cfg` ni archivos `.person.cfg` / `.fighter.cfg`: su id
-> y su modelo viven en `CharacterRegistry` y en `standard_power_fighter.tscn`. Su moveset final vive
-> en code (`scripts/characters/power_fighter.gd`); ajustarlo desde la GUI del prefab es solo temporal.
-> No migrarlo a cfg "por higiene": solo se cambia con una decisión explícita de diseño. Por eso
-> `PowerFighterConfigurer.create()` lo excluye del flujo de configs y lo deja con el prefab base.
+> y su modelo viven en `CharacterRegistry` y en `standard_power_fighter.tscn`.
+> Su moveset final ya no vive solo en code: los defaults están en los exports del prefab base, además
+> de lo que hace `scripts/characters/power_fighter.gd`. Nada de eso sale de cfg. Ajustarlo desde la
+> GUI del prefab es solo temporal. No migrarlo a cfg "por higiene": solo se cambia con una decisión
+> explícita de diseño. Por eso `PowerFighterConfigurer.create()` lo excluye del flujo de configs y lo
+> deja con el prefab base.
 
 ### Por qué importa
 
@@ -107,7 +109,7 @@ Flujo real, en orden:
 2. Pregunta `CharacterRegistry.has_person_config(config_id)` y
    `CharacterRegistry.has_fighter_config(config_id)`. Si hay, resuelve las rutas con
    `person_config_path()` / `fighter_config_path()` y carga cada una con su `load_*_config()`.
-   - `standard`: no hace nada, se queda el prefab base y su moveset de code.
+   - `standard`: no carga cfg; se queda el prefab base con sus defaults.
 3. Si hay config de persona, `_build_instance()` reemplaza el modelo visual.
 4. Si hay config de persona, `_apply_person_config()` aplica id, duraciones, momentum, movimiento,
    saltos, intervals y offset de colgamiento.
@@ -238,10 +240,13 @@ var attacks: Attacks
 ```
 
 `CharacterRegistry.load_fighter_config()` crea `Attacks`, lee 15 secciones y muta cada `FightMove`
-en su lugar (incluido `name`, que ya tiene setter). Las secciones son: `neutral1`, `neutral2`,
-`neutral3`, `dash`, `up`, `down`, `forward`, `heavy_side`, `heavy_down`, `heavy_up`, `air_neutral`,
-`air_forward`, `air_back`, `air_up` y `air_down`. La plantilla `data/templates/name.fighter.cfg`
-está alineada con ese contrato. Igual que en `.person.cfg`: no hay validación, data mala revienta.
+en su lugar. El nombre de la sección **ya es el clip de animación**: `_fight_move()` deriva
+`StringName(p_name)` (`character_registry.gd:163-176`) y la key `name` salió del cfg. Las secciones
+son: `neutral_attack1`, `neutral_attack2`, `neutral_attack3`, `dash_attack`, `up_attack`,
+`down_attack`, `forward_attack`, `heavy_side_attack`, `heavy_down_attack`, `heavy_up_attack`,
+`air_neutral_attack`, `air_forward_attack`, `air_back_attack`, `air_up_attack` y `air_down_attack`.
+`data/characters/tux.fighter.cfg` y `data/templates/name.fighter.cfg` están alineados con ese
+contrato. Igual que en `.person.cfg`: no hay validación, data mala revienta.
 
 No existe `PowerFighterConfig` ni `<id>.power_fighter.cfg`. `FighterConfig` es hoy el config
 compartido por fighter y power fighter; separar ambos está diferido hasta que haya parámetros
@@ -314,9 +319,13 @@ static func _apply_tux_attacks(power_fighter: PowerFighter) -> void:
   `air_standard`, `air_up`, `air_down`): tiempos, speed, `jump_power`, hitboxes y variantes
   multigolpe.
 
-> **FALTA**: los power attacks siguen hardcodeados en `_apply_tux_attacks()`. Los ataques normales
-> ya salen de `<id>.fighter.cfg`; `name.power_fighter.cfg` sigue siendo plantilla huérfana porque no
-> existe `PowerFighterConfig` ni loader para ese dominio.
+> **FALTA (solo Tux)**: los overrides de los power attacks de Tux siguen hardcodeados en
+> `_apply_tux_attacks()`; no hay loader ni cfg para esa capa. Los ataques normales ya salen de
+> `<id>.fighter.cfg`; `name.power_fighter.cfg` sigue siendo plantilla huérfana porque no existe
+> `PowerFighterConfig`.
+> `standard` ya trae sus defaults en el prefab base: `down_power_attack` y
+> `air_down_power_attack` están en `fight_moves_with_hitstun_sound` con SFX genérico; los otros
+> 4 power attacks siguen mudos. Eso no depende de cfg.
 
 ### Contrato de nodos del modelo
 
@@ -508,8 +517,10 @@ al nodo `MatchTime`; la cuenta inicial la maneja `MatchCountdown` y el letrero d
   debe pasar a tomarse del `config_id` para borrar `id` del cfg y `character_name` de la clase.
 - **Ataques normales por cfg (LISTO)**: `FighterConfig`/`tux.fighter.cfg` ya cargan los 15 ataques
   normales y `_apply_fighter_config()` los aplica.
-- **Power attacks por cfg (FALTA)**: `name.power_fighter.cfg` existe como plantilla huérfana; no hay
-  `PowerFighterConfig` ni loader. Los power attacks siguen en `_apply_tux_attacks()`.
+- **Overrides de power attacks de Tux por cfg (FALTA)**: `name.power_fighter.cfg` existe como
+  plantilla huérfana; no hay `PowerFighterConfig` ni loader. Los overrides de Tux siguen en
+  `_apply_tux_attacks()`. `standard` ya trae defaults en el prefab base (2 con SFX genérico,
+  4 mudos); eso no pasa por cfg.
 
 ---
 

@@ -25,15 +25,15 @@ y el segundo golpe (aunque sea `neutral1`) corta el vuelo del primero.
 
 ### Flujo de un golpe
 
-1. `HitboxDamage._on_hitbox_body_entered()` detecta un `Person` y llama
-   (`scripts/combat/hitbox_damage.gd:29-30`):
+1. `HitboxDamage._on_hitbox_body_entered()` detecta un `Person` y llama una sola vez
+   (`scripts/combat/hitbox_damage.gd:29`):
 
    ```gdscript
-   body.set_damage_percentage( _damage )
-   body.set_damage_move( _damage, _direction )
+   body.set_damage(_damage, _direction)
    ```
 
-2. `Person.set_damage_move()` (`scripts/characters/person.gd:728-753`):
+2. `Person.set_damage()` (`scripts/characters/person.gd:747-752`) suma hp + porcentaje y pasa por su
+   helper privado `_set_damage_move()` (`:786-811`):
    - `_knockback_direction = direction`: **sobrescribe** la dirección.
    - `_hitstun_time = _get_hitstun_time(damage)`: **sobrescribe** el hitstun; uno débil puede
      acortar el que ya estaba activo.
@@ -91,6 +91,13 @@ El vertical sí se borra por completo.
 El daño acumulado sí escala el knockback (`accel` es proporcional a `damage_percentage`), pero el
 reset de dirección, ventana y velocidad vertical pesa más en el caso que nos interesa.
 
+### KNOWN ISSUE / tuneo: umbral de heavy hitstun
+
+Hoy `_set_damage_move()` activa heavy hitstun comparando el daño del golpe contra un valor de tuneo,
+sin porcentaje de daño ni propiedad dedicada. No es decisión fija: es tuneo. La alternativa es pasar
+el gate a porcentaje de daño o a una propiedad nueva solo para hitstun acumulativo. Si se mueve el
+umbral, revisar también [nota-ataques.md](nota-ataques.md).
+
 ## Qué debería pasar
 
 Regla propuesta: **el knockback es un estado acumulativo**.
@@ -105,7 +112,7 @@ Regla propuesta: **el knockback es un estado acumulativo**.
 
 ## Opciones de diseño
 
-### A. Cambio mínimo en `set_damage_move()`
+### A. Cambio mínimo en `set_damage()`
 
 - Si ya hay hitstun activo y la ventana de knockback sigue viva:
   - no sobrescribir `_knockback_direction` sin más; sumar o combinar.
@@ -121,7 +128,7 @@ Regla propuesta: **el knockback es un estado acumulativo**.
 - Cada golpe suma un vector de impulso; el estado decae con el tiempo.
 - `_target_velocity` se compone de movimiento + knockback.
 - Pros: modela bien el vuelo, es fácil de capar y no se mezcla con la fricción normal.
-- Contras: toca `set_damage_move()`, `_apply_hitstun()`, `_move()` y `_commit_frame()`.
+- Contras: toca `set_damage()`, `_apply_hitstun()`, `_move()` y `_commit_frame()`.
 
 ### C. Dirección dominante y suma de magnitudes
 
@@ -151,8 +158,8 @@ Regla propuesta: **el knockback es un estado acumulativo**.
 
 | Archivo | Rol |
 |---|---|
-| `scripts/combat/hitbox_damage.gd` | Detecta el golpe y llama `set_damage_percentage()` + `set_damage_move()` |
-| `scripts/characters/person.gd` | `set_damage_move()`, `_apply_hitstun()`, `_move()` |
+| `scripts/combat/hitbox_damage.gd` | Detecta el golpe y llama `set_damage()` |
+| `scripts/characters/person.gd` | `set_damage()`, `_apply_hitstun()`, `_move()` |
 | `scripts/characters/gravity_body_3d.gd` | Acumula gravedad en `_target_velocity.y` |
 | `scripts/helpers/game_balance.gd` | Constantes de hitstun y knockback |
 
