@@ -790,25 +790,25 @@ func _set_damage_move(damage:int, direction:Vector3) -> void:
 	Establecer movimiento por golpe. 
 	Y establecer si el golpe te quito saltos o no.
 	'''
-	if not _immunity_to_damage:
-		_taking_damage_count = 0
-		_knockback_direction = direction
-		_hitstun_time = _get_hitstun_time(damage)
-		_knockback_decay_time = 0.0
+	_taking_damage_count = 0
+	_knockback_direction = direction
+	_hitstun_time = _get_hitstun_time(damage)
+	_knockback_decay_time = 0.0
 
-		# Heavy hitstun. Cuando entra.
-		_clean_heavy_hitstun_state()
-		if damage >= hp*GameBalance.STUN_DAMAGE_THRESHOLD:
-			# Movimiento stun solo si se hace el porcentaje de daño indicado.
-			_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
-		
-		# No poder saltar. Y cancelar salto
-		if not is_on_floor():
-			# Al recibir trancasos en el aire, ya no poder saltar.
-			# Si bien en realidad simplemente solo se puede poner el maximo de saltos sin este if, porque cuando estas en el piso se reinicia el conteo de saltos. 
-			# Lo que pasa que estando en el piso y recibes un golpe que te manda a volar, si deberias poder saltar.
-			#_set_jumps_to_max() # Mejor no, demasiado castigo.
-			_target_velocity.y = 0 # Cancelar velocidad vertical
+	# Heavy hitstun. Cuando entra.
+	_clean_heavy_hitstun_state()
+	#if damage >= hp*GameBalance.STUN_DAMAGE_THRESHOLD: # Antes usando hp, pero es demaciado, mejor que de igual eso.
+	if damage >= 100*GameBalance.STUN_DAMAGE_THRESHOLD:
+		# Movimiento stun solo si se hace el porcentaje de daño indicado.
+		_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
+	
+	# No poder saltar. Y cancelar salto
+	if not is_on_floor():
+		# Al recibir trancasos en el aire, ya no poder saltar.
+		# Si bien en realidad simplemente solo se puede poner el maximo de saltos sin este if, porque cuando estas en el piso se reinicia el conteo de saltos. 
+		# Lo que pasa que estando en el piso y recibes un golpe que te manda a volar, si deberias poder saltar.
+		#_set_jumps_to_max() # Mejor no, demasiado castigo.
+		_target_velocity.y = 0 # Cancelar velocidad vertical
 
 
 func set_thrown_move(damage: int, direction: Vector3) -> void:
