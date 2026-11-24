@@ -38,7 +38,9 @@ static func create(
 	if has_person_config:
 		_apply_person_config(power_fighter as PowerFighter, person_config)
 	if has_fighter_config:
-		_apply_tux_attacks(power_fighter as PowerFighter, fighter_config)
+		_apply_fighter_config(power_fighter, fighter_config)
+		if config_id == "tux":
+			_apply_tux_attacks(power_fighter as PowerFighter)
 	
 	return power_fighter as PowerFighter
 
@@ -84,73 +86,17 @@ static func _apply_person_config(
 	power_fighter.run_step_interval = person_config.run_step_interval
 	power_fighter.crouch_move_step_interval = person_config.crouch_move_step_interval
 
-static func _apply_tux_attacks(power_fighter: PowerFighter, fighter_config: FighterConfig) -> void:
+static func _apply_fighter_config(
+	power_fighter: PowerFighter, fighter_config: FighterConfig) -> void:
 	'''
-	Ataques de Tux, hardcodeados hasta que se lean de `tux.power_fighter.cfg`/`tux.fighter.cfg`.
+	Aca se podria usar un validado de ataques por cada ataque, pero creo que es mejor crash si esta mal el `FightMove`.
 	'''
-	# attacks on floor
-	power_fighter.attacks.neutral1 = fighter_config.attacks.neutral1
-	power_fighter.attacks.neutral2 = fighter_config.attacks.neutral2
-	power_fighter.attacks.neutral3 = fighter_config.attacks.neutral3
-	
-	power_fighter.attacks.dash = fighter_config.attacks.dash
-	#power_fighter.attacks.dash.duration = 0.375
-	#power_fighter.attacks.dash.hitboxes_moves[0].damage = 7
-	#power_fighter.attacks.dash.hitboxes_moves[0].duration = 0.3
-	#power_fighter.attacks.dash.hitboxes_moves[0].init_time_ratio = 0.3
-	#power_fighter.attacks.dash.hitboxes_moves[0].position = Vector3(
-	#	0.45, -0.3, 0.0)
-	#power_fighter.attacks.dash.hitboxes_moves[0].direction = Vector3(
-	#	1.0, 0.9, 0.0)
-	
-	power_fighter.attacks.up.duration = 0.375
-	power_fighter.attacks.down.duration = 0.375
-	power_fighter.attacks.heavy_side.duration = 0.5417
-	power_fighter.attacks.heavy_up.duration = 0.5833
-	
-	power_fighter.attacks.heavy_down.duration = 0.5833
-	power_fighter.attacks.heavy_down.hitboxes_moves = [
-		HitboxMove.new({
-			"id": 1, "damage": 20, "size": Vector3(0.5,0.5,1.0),
-			"position": Vector3(0.7, -0.95, 0), "direction": Vector3(1.0,0.75,0.0),
-			"init_time_ratio": 0.4, "duration": 0.1
-		}),
-		HitboxMove.new({
-			"id": 2, "damage": 20, "size": Vector3(0.5,0.5,1.0),
-			"position": Vector3(-0.7, -0.95, 0), "direction": Vector3(-1.0,0.75,0.0),
-			"init_time_ratio": 0.4, "duration": 0.1
-		})
-	]
+	power_fighter.attacks = fighter_config.attacks
 
-	# attacks air
-	power_fighter.attacks.air_neutral.duration = 0.5
-	power_fighter.attacks.air_neutral.hitboxes_moves = [
-		HitboxMove.new({
-			"id": 1, "damage": 5, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(1.0, -0.45, 0), "direction": Vector3(1,-1,0),
-			"init_time_ratio": 0.3, "duration": 0.2
-		}),
-		HitboxMove.new({
-			"id": 2, "damage": 5, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(-0.8, -0.55, 0), "direction": Vector3(-1,-1,0),
-			"init_time_ratio": 0.3, "duration": 0.2
-		}),
-		HitboxMove.new({
-			"id": 3, "damage": 2, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.7, 0.2, 0.0), "direction": Vector3(1,1,0),
-			"init_time_ratio": 0.3, "duration": 0.2
-		}),
-		HitboxMove.new({
-			"id": 4, "damage": 2, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(-0.5, 0.2, 0.0), "direction": Vector3(-1,1,0),
-			"init_time_ratio": 0.3, "duration": 0.2
-		})
-	]
-	
-	power_fighter.attacks.air_forward.duration = 0.4583
-	power_fighter.attacks.air_back.duration = 0.4583
-	power_fighter.attacks.air_up.duration = 0.625
-
+static func _apply_tux_attacks(power_fighter: PowerFighter) -> void:
+	'''
+	Ataques de Tux, hardcodeados hasta que se lean de `tux.power_fighter.cfg`/`tux.power_fighter.cfg`.
+	'''
 	# power attacks on floor
 	power_fighter.power_attacks.standard.duration = 0.5
 	power_fighter.power_attacks.up.duration = 0.5

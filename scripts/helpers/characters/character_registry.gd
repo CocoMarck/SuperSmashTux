@@ -8,8 +8,8 @@ extends RefCounted
 '''
 
 # Constantes
-const IDENTITIES_PATH := "res://data/power_fighters/identities.cfg"
-const DATA_DIR := "res://data/power_fighters/"
+const IDENTITIES_PATH := "res://data/characters/identities.cfg"
+const DATA_DIR := "res://data/characters/"
 
 # Constantes | Personaje base/dummy hardcodeado. NO debe vivir en ningún `cfg`, o file data. Su movement final, moveset final, todo vive en code. GUI del prefab es solo ajuste temporal. No migrar a data solo por "higiene".
 const STANDARD_ID := &"standard"
@@ -188,6 +188,19 @@ static func load_fighter_config(path: String) -> FighterConfig:
 		config.attacks.neutral2: _fight_move(cfg, "neutral2"),
 		config.attacks.neutral3: _fight_move(cfg, "neutral3"),
 		config.attacks.dash: _fight_move(cfg, "dash"),
+		config.attacks.up: _fight_move(cfg, "up"),
+		config.attacks.down: _fight_move(cfg, "down"),
+		config.attacks.forward: _fight_move(cfg, "forward"),
+		config.attacks.heavy_side: _fight_move(cfg, "heavy_side"),
+		config.attacks.heavy_down: _fight_move(cfg, "heavy_down"),
+		config.attacks.heavy_up: _fight_move(cfg, "heavy_up"),
+
+		config.attacks.air_neutral: _fight_move(cfg, "air_neutral"),
+		config.attacks.air_forward: _fight_move(cfg, "air_forward"),
+		config.attacks.air_back: _fight_move(cfg, "air_back"),
+		config.attacks.air_up: _fight_move(cfg, "air_up"),
+		config.attacks.air_down: _fight_move(cfg, "air_down"),
+
 	}
 	for fight_move: FightMove in all_attacks.keys():
 		fight_move.name = all_attacks[fight_move]["name"]
