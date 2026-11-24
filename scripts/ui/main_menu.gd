@@ -17,8 +17,8 @@ const FIGHT_HUD_SCENE := "res://ui/fight_hud.tscn"
 
 # Funciones | Callbacks
 func _ready() -> void:
-	#_start_button.pressed.connect(_open_scene.bind(CHARACTER_MENU_SCENE))
-	_start_button.pressed.connect( _start_debug_match ) # Debug
+	_start_button.pressed.connect(_open_scene.bind(CHARACTER_MENU_SCENE))
+	#_start_button.pressed.connect( _start_debug_match ) # Debug
 	_controls_button.pressed.connect(_open_scene.bind(CONTROLS_MENU_SCENE))
 
 # Funciones

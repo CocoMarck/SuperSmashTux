@@ -37,9 +37,9 @@ supersmashtux/
 │   │   └── sfx/      # SFX (wavs) y sus randomizers (.tres)
 │   └── fonts/        # Fuentes
 ├── data/             # Configs en texto (.cfg) y, en el futuro, CSV de traducciones
-│   ├── templates/    # Plantillas: name.person.cfg, name.fighter.cfg, name.power_fighter.cfg
+│   ├── templates/    # Plantillas: name.person.cfg, name.fighter.cfg, name.power_fighter.cfg (huérfana)
 │   ├── locale/       # (FALTA) strings.csv con columnas keys,en,es
-│   └── power_fighters/  # identities.cfg (manifiesto, admite hidden) + configs <id>.person.cfg (p. ej. tux); standard es base hardcodeada sin cfg
+│   └── characters/      # identities.cfg (manifiesto, admite hidden) + configs <id>.person.cfg y <id>.fighter.cfg (p. ej. tux); standard es base hardcodeada sin cfg
 ├── addons/           # Plugins de Godot (godot_ai: MCP de Godot para agentes de IA)
 ├── docs/             # Documentación, notas, ideas (estructura.md y changelog.md viven en la raíz de docs/)
 │   ├── arquitectura/ # Jerarquía de clases, UML y decisiones de diseño (GameManager, process vs physics_process)
@@ -67,7 +67,7 @@ supersmashtux/
 | Escenas | `snake_case.tscn` | `player.tscn`, `main_menu.tscn` |
 | Scripts | `snake_case.gd` | `player.gd`, `camera_follow.gd` |
 | Assets | `snake_case.ext` | `ground_texture.png`, `jump_sfx.wav` |
-| Configs | `<personaje>.<dominio>.cfg`, plantillas `name.*.cfg` o `identities.cfg` para el manifiesto global | `tux.person.cfg`, `name.fighter.cfg`, `identities.cfg` |
+| Configs | `<personaje>.<dominio>.cfg`, plantillas `name.*.cfg` o `identities.cfg` para el manifiesto global | `tux.person.cfg`, `tux.fighter.cfg`, `name.fighter.cfg`, `identities.cfg` |
 | Recursos | `prefijo_nombre.tres` | `mat_red.tres`, `env_game.tres` |
 | Docs | `lower-kebab-case.md` (agrupados por dominio en `docs/<dominio>/`) | `estructura.md`, `titulo-descriptivo.md` |
 

@@ -2,11 +2,12 @@
 
 > Cómo se separa el "quién controla" del "qué personaje es", qué hace `PowerFighterConfigurer`,
 > cómo lo usa `SpawnPoint` y cómo debería el `GameManager` repartir las configuraciones.
-> Verificado el 2026-11-07; actualizado el 2026-11-22. Rutas: `scripts/helpers/global_utils.gd`,
+> Verificado el 2026-11-07; actualizado el 2026-11-23. Rutas: `scripts/helpers/global_utils.gd`,
 > `scripts/helpers/match/power_fighter_data.gd`, `scripts/helpers/characters/character_registry.gd`,
-> `scripts/helpers/ui/character_catalog.gd`, `data/power_fighters/identities.cfg`,
+> `scripts/helpers/ui/character_catalog.gd`, `data/characters/identities.cfg`,
 > `scripts/match/power_fighter_slots.gd`, `scripts/match/power_fighter_configurer.gd`,
-> `scripts/helpers/characters/person_config.gd`, `scripts/match/spawn_point.gd`, `scripts/match/game_manager.gd`,
+> `scripts/helpers/characters/person_config.gd`, `scripts/helpers/characters/fighter_config.gd`,
+> `data/characters/*.cfg`, `scripts/match/spawn_point.gd`, `scripts/match/game_manager.gd`,
 > `scripts/match/match_time.gd`, `scripts/match/match_countdown.gd`,
 > `scripts/ui/character_menu.gd`, `scripts/ui/fight_hud.gd`,
 > `scripts/ui/components/character_menu/slot_card.gd`,
@@ -27,7 +28,7 @@ desde el prefab base y le aplica el modelo, los datos y el controller según el 
 `ControlType`.
 
 El `config_id` ya no es un enum: lo emite `CharacterRegistry` desde
-`data/power_fighters/identities.cfg` y lo consume `CharacterCatalog` en la selección.
+`data/characters/identities.cfg` y lo consume `CharacterCatalog` en la selección.
 
 ---
 
@@ -61,14 +62,14 @@ La identidad sale de tres piezas:
 
 | Pieza | Archivo | Qué hace |
 |---|---|---|
-| `identities.cfg` | `data/power_fighters/identities.cfg` | Manifiesto global: cada sección es un id `snake_case` y `name` es el texto visible. `standard` no aparece: está hardcoded en el registry. |
-| `CharacterRegistry` | `scripts/helpers/characters/character_registry.gd` | Lee el manifiesto, valida ids, expone `playable_ids()` / `display_name()` y resuelve rutas `.person.cfg`. |
+| `identities.cfg` | `data/characters/identities.cfg` | Manifiesto global: cada sección es un id `snake_case` y `name` es el texto visible. `standard` no aparece: está hardcoded en el registry. |
+| `CharacterRegistry` | `scripts/helpers/characters/character_registry.gd` | Lee el manifiesto, valida ids, expone `playable_ids()` / `display_name()` y resuelve rutas `.person.cfg` y `.fighter.cfg`. |
 | `CharacterCatalog` | `scripts/helpers/ui/character_catalog.gd` | Ordena el roster para la UI. `Entry` trae `config_id`, `display_name`, `glyph`, `is_random` y `model`. |
 
 `standard` es especial: siempre existe y no tiene cfg. Los demás ids deben estar en `identities.cfg`
-y tener su `.person.cfg`. El catálogo también arma una entrada de selección aleatoria que es
-solo de UI: se resuelve en `CharacterMenu` antes de llenar `PowerFighterData`, así que el
-configurador nunca recibe un id no jugable.
+y tener su `.person.cfg` y su `.fighter.cfg`. El catálogo también arma una entrada de selección
+aleatoria que es solo de UI: se resuelve en `CharacterMenu` antes de llenar `PowerFighterData`, así
+que el configurador nunca recibe un id no jugable.
 
 > **Invariante**: `standard` es el personaje base/dummy de dependencia, **jugable**, hardcodeado a
 > propósito. No tiene entrada en `identities.cfg` ni archivos `.person.cfg` / `.fighter.cfg`: su id
@@ -81,7 +82,7 @@ configurador nunca recibe un id no jugable.
 
 - **Combinaciones libres**: `PLAYER + tux` y `NPC + standard` funcionan sin tocar enums ni duplicar clases.
 - **Crecimiento limpio**: agregar personaje es una sección en `identities.cfg` + su `.person.cfg`
-  (y su `.fighter.cfg` cuando el configurer lo cargue). No se toca `ControlType` ni un enum.
+  + su `.fighter.cfg`. No se toca `ControlType` ni un enum.
 - **Nombre visible separado**: `display_name` sale del registry; el `config_id` técnico queda estable.
 - **Responsabilidad clara**: el rol de control y la identidad del personaje se deciden por separado.
 
@@ -103,35 +104,38 @@ static func create(
 Flujo real, en orden:
 
 1. Instancia el prefab base `res://prefabs/standard_power_fighter.tscn`.
-2. Si `config_id` es jugable y no es `standard`, resuelve su `.person.cfg` con
-   `CharacterRegistry.person_config_path()` y lo carga con `CharacterRegistry.load_person_config()`;
-   luego llama a `_build_instance()` para cambiar el modelo visual.
-   - `standard`: no hace nada, se queda el modelo que trae el prefab.
-3. Asigna el **controller** según el control con un `match`:
+2. Pregunta `CharacterRegistry.has_person_config(config_id)` y
+   `CharacterRegistry.has_fighter_config(config_id)`. Si hay, resuelve las rutas con
+   `person_config_path()` / `fighter_config_path()` y carga cada una con su `load_*_config()`.
+   - `standard`: no hace nada, se queda el prefab base y su moveset de code.
+3. Si hay config de persona, `_build_instance()` reemplaza el modelo visual.
+4. Si hay config de persona, `_apply_person_config()` aplica id, duraciones, momentum, movimiento,
+   saltos, intervals y offset de colgamiento.
+5. Si hay config de fighter, `_apply_fighter_config()` asigna `power_fighter.attacks` desde
+   `FighterConfig`. Para `tux`, además, `_apply_tux_attacks()` ajusta los power attacks que siguen
+   hardcodeados.
+6. Asigna el **controller** según el control con un `match`:
    - `ControlType.PLAYER`: `power_fighter.controller = PlayerController.new()`.
    - `ControlType.NPC`: `power_fighter.controller = NpcController.new()`.
    - `ControlType.NONE`: `pass`.
-4. Si hay config de persona, llama a `_apply_tux_config()` (nombre viejo, **FALTA** renombrar) para
-   aplicar datos (id, duraciones, momentum, movimiento, saltos, intervals y, por ahora, ataques
-   hardcodeados).
-5. Retorna el `PowerFighter` ya configurado.
+7. Retorna el `PowerFighter` ya configurado.
 
 > **Deuda de identidad**: hoy `power_fighter.id` se toma de `person_config.id`, que todavía se lee
 > del `[identity]` del `.cfg`. La decisión es que el id canónico sea el `config_id`; cuando se
-> implemente, `_apply_tux_config()` dejará de depender de `PersonConfig.id`. Hoy funciona porque
+> implemente, `_apply_person_config()` dejará de depender de `PersonConfig.id`. Hoy funciona porque
 > ambos valores coinciden (`&"tux"`).
 
 > Antes se usaba `set_script()` (que borraba los `@export` del prefab); hoy el rol es un nodo hijo y el
 > prefab lleva `script = power_fighter.gd`. Ver [nota-power-fighter-controller.md](nota-power-fighter-controller.md).
 > `_build_instance()` corre antes de asignar el controller para que el modelo ya esté listo;
-> `_apply_tux_config()` corre después para llamar setters del personaje. `_ready()` corre hasta el
-> `add_child()` que hace `GameManager`, con todo ya aplicado.
+> `_apply_person_config()` y `_apply_fighter_config()` corren después para llamar setters del
+> personaje. `_ready()` corre hasta el `add_child()` que hace `GameManager`, con todo ya aplicado.
 
 ### Config de persona desde archivo `.cfg`
 
 `create()` ya no toma el modelo de una constante: para un `config_id` no-standard resuelve la ruta
 con `CharacterRegistry.person_config_path()` (por ejemplo
-`res://data/power_fighters/tux.person.cfg`), lee el `.cfg` con `ConfigFile` y obtiene un
+`res://data/characters/tux.person.cfg`), lee el `.cfg` con `ConfigFile` y obtiene un
 `PersonConfig`. `CharacterCatalog` usa el mismo loader del registry para sacar el `model` del
 preview de selección. Hoy la única función que parsea `.person.cfg` es
 `CharacterRegistry.load_person_config()`; no existe un `_load_person()` separado en el configurer.
@@ -182,7 +186,7 @@ colgamiento. `character_name` sigue declarado en `PersonConfig` pero ya no se le
 pendiente de borrar. Las plantillas base viven en `data/templates/`: `name.person.cfg`,
 `name.fighter.cfg` y `name.power_fighter.cfg`.
 
-Ejemplo (`data/power_fighters/tux.person.cfg`):
+Ejemplo (`data/characters/tux.person.cfg`):
 
 ```ini
 [identity]
@@ -222,8 +226,29 @@ hanging_anim_offset = Vector3(0.0,-0.2,0.0)
 > **Sin validación**: si falta el cfg o una key, revienta a propósito ("No validar nada, el crash es
 > bueno. Data mala, crash por mal educado. GG."). Es la decisión actual del código, no un descuido.
 
+### Config de fighter desde archivo `.cfg`
+
+`FighterConfig` es un `RefCounted` mínimo:
+
+```gdscript
+class_name FighterConfig
+extends RefCounted
+
+var attacks: Attacks
+```
+
+`CharacterRegistry.load_fighter_config()` crea `Attacks`, lee 15 secciones y muta cada `FightMove`
+en su lugar (incluido `name`, que ya tiene setter). Las secciones son: `neutral1`, `neutral2`,
+`neutral3`, `dash`, `up`, `down`, `forward`, `heavy_side`, `heavy_down`, `heavy_up`, `air_neutral`,
+`air_forward`, `air_back`, `air_up` y `air_down`. La plantilla `data/templates/name.fighter.cfg`
+está alineada con ese contrato. Igual que en `.person.cfg`: no hay validación, data mala revienta.
+
+No existe `PowerFighterConfig` ni `<id>.power_fighter.cfg`. `FighterConfig` es hoy el config
+compartido por fighter y power fighter; separar ambos está diferido hasta que haya parámetros
+distintos de verdad. `data/templates/name.power_fighter.cfg` es solo una plantilla huérfana.
+
 `Person` guarda solo `id` (`person.gd:18`): es la identidad técnica. El texto visible ya no vive en
-el `.person.cfg`: sale de `data/power_fighters/identities.cfg` vía `CharacterRegistry.display_name()`
+el `.person.cfg`: sale de `data/characters/identities.cfg` vía `CharacterRegistry.display_name()`
 y `CharacterCatalog`. `FightHUD` resuelve el nombre con
 `CharacterCatalog.get_entry_by_config_id(power_fighter.id)` (`fight_hud.gd:268`), así que dejó de
 mostrar el id crudo. `PersonConfig.character_name` queda como campo muerto por limpiar.
@@ -261,33 +286,37 @@ static func _build_instance(power_fighter: Node3D, config: PersonConfig) -> void
   el código: la calibración visual ahora vive en el cfg (`Vector3(0.0,-1.2,0.0)` para Tux).
 - El modelo viejo se saca de `Visual` y se libera.
 
-### `_apply_tux_config()`
+### `_apply_person_config()`, `_apply_fighter_config()` y `_apply_tux_attacks()`
 
-Firma actual:
+Firmas actuales:
 
 ```gdscript
-static func _apply_tux_config(
+static func _apply_person_config(
 	power_fighter: PowerFighter, person_config: PersonConfig) -> void:
+
+static func _apply_fighter_config(
+	power_fighter: PowerFighter, fighter_config: FighterConfig) -> void:
+
+static func _apply_tux_attacks(power_fighter: PowerFighter) -> void:
 ```
 
-Aplica la configuración de datos de Tux. Hoy hace dos bloques:
+- **`_apply_person_config()`**: aplica datos generales desde `PersonConfig`. Hoy hace:
+  - **Identidad**: `power_fighter.id = person_config.id`. **FALTA**: usar el `config_id` recibido en
+    `create()` como fuente canónica; así se puede borrar `id` del `.person.cfg` y el campo
+    `character_name` de `PersonConfig`. `Person` guarda solo ese `id`.
+  - **Anim/momentum**: `set_duration_of_anims(person_config.air_jump_duration)` y `set_momentum(...)`.
+  - **Offset de anims**: `set_anim_offset(person_config.hanging_anim_offset)`, desde `[anim_offset]`.
+  - **Movimiento**: `jump_impulse`, `walking_speed`, `running_speed`.
+  - **Intervals**: `walk_step_interval`, `run_step_interval`, `crouch_move_step_interval`.
+- **`_apply_fighter_config()`**: asigna `power_fighter.attacks = fighter_config.attacks`. No valida
+  cada `FightMove`: si el cfg está mal, se revienta a propósito.
+- **`_apply_tux_attacks()`**: solo ajusta los **power attacks** de Tux (`standard`, `up`, `down`,
+  `air_standard`, `air_up`, `air_down`): tiempos, speed, `jump_power`, hitboxes y variantes
+  multigolpe.
 
-1. **Datos desde `PersonConfig`**:
-   - **Identidad**: hoy `power_fighter.id = person_config.id`. **FALTA**: usar el `config_id` recibido
-     en `create()` como fuente canónica; así se puede borrar `id` del `.person.cfg` y el campo
-     `character_name` de `PersonConfig`. `Person` guarda solo ese `id`.
-    - **Anim/momentum**: `set_duration_of_anims(person_config.air_jump_duration)` y `set_momentum(person_config.ground_acceleration, person_config.ground_friction, person_config.air_acceleration, person_config.knockback_friction)`.
-    - **Offset de anims**: `set_anim_offset(person_config.hanging_anim_offset)`, desde `[anim_offset]` del cfg.
-    - **Movimiento**: `jump_impulse`, `walking_speed`, `running_speed`.
-   - **Intervals**: `walk_step_interval`, `run_step_interval`, `crouch_move_step_interval`.
-2. **Ataques hardcodeados (FALTA pasar a cfg)**:
-   - `attacks.neutral1/2/3`, `dash`, `up/down`, `heavy_side/up/down`, `air_neutral/forward/back/up`.
-   - `power_attacks.standard/up/down/air_standard/air_up/air_down`.
-   - Se ajustan tiempos, speed, jump_power, hitboxes y variantes multigolpe (por ejemplo `heavy_down`, `power_attacks.up/air_up`, `power_attacks.down/air_down`).
-
-> **FALTA**: los ataques siguen hardcodeados en `_apply_tux_config()`. Existen
-> `data/templates/name.fighter.cfg` y `data/templates/name.power_fighter.cfg`, pero **no se cargan**
-> todavía. Cuando se implemente, esos datos deberían salir de cfg y no del código.
+> **FALTA**: los power attacks siguen hardcodeados en `_apply_tux_attacks()`. Los ataques normales
+> ya salen de `<id>.fighter.cfg`; `name.power_fighter.cfg` sigue siendo plantilla huérfana porque no
+> existe `PowerFighterConfig` ni loader para ese dominio.
 
 ### Contrato de nodos del modelo
 
@@ -353,36 +382,39 @@ textura.
 expone `power_attacks` (`PowerAttacks`, 6 `FightMove`). Ambos son **públicos**: el configurador
 puede entrar directo a cada slot y ajustar sus valores.
 
-`FightMove.name` quedó como **solo lectura** (`scripts/helpers/combat/fight_move.gd:27-30`):
+`FightMove.name` tiene **getter y setter** (`scripts/helpers/combat/fight_move.gd:27-32`): el setter
+existe para que `CharacterRegistry.load_fighter_config()` pueda asignar el nombre leído de cada
+sección del `.fighter.cfg`.
 
 ```gdscript
 var _name: StringName
 var name: StringName:
 	get:
 		return _name
+	set(value):
+		_name = value
 ```
 
-El nombre se fija al construir el `FightMove` y ya no se puede reasignar desde fuera. Los demás
-campos (`duration`, `speed`, `direction`, `jump_power`, `hitboxes_moves`, etc.) siguen públicos.
-Eso permite cambiar números sin romper el nombre de animación, que es el clip que `_attack_anim()`
-reproduce (`scripts/characters/fighter.gd:595`).
+Los demás campos (`duration`, `speed`, `jump_power`, `hitboxes_moves`, etc.) siguen públicos.
+`direction` está comentado en la clase (`#var direction: Vector3 # NO SE USA`), así que no es parte
+del contrato. Ojo: `name` es el clip que `_attack_anim()` reproduce
+(`scripts/characters/fighter.gd:595`), así que cfg mal escrito = animación que no existe.
 
 Ejemplo de uso desde el configurador:
 
 ```gdscript
-var move := power_fighter.power_attacks.standard
+var move := power_fighter.attacks.neutral1
+move.name = &"idle"
 move.duration = 0.4
 move.hitboxes_moves[0].damage = 12
-# move.name = &"otra_cosa"  -> error: la propiedad es de solo lectura
 ```
 
 #### Límites actuales
 
-- `attacks` y `power_attacks` son contenedores públicos, así que todavía se puede reemplazar un slot
-  completo por otro `FightMove` (con el nombre que traiga) o por `null`. La protección del nombre
-  aplica solo si se muta el `FightMove` existente.
-- Si se quisiera blindar también el reemplazo de slots, harían falta setters por slot con validación
-  o slots de solo lectura. No es el caso hoy.
+- `attacks` y `power_attacks` son contenedores públicos, así que se puede reemplazar un slot
+  completo por otro `FightMove` o por `null`. Hoy no hay validación de nombre.
+- Si se quisiera blindar eso, harían falta setters por slot con validación o slots de solo lectura.
+  No es el caso hoy.
 
 #### Combo neutral
 
@@ -474,9 +506,10 @@ al nodo `MatchTime`; la cuenta inicial la maneja `MatchCountdown` y el letrero d
   y decidir si eso vive en la config del personaje o se queda como color por slot.
 - **Id canónico (FALTA)**: hoy `power_fighter.id` sigue viniendo de `PersonConfig.id` del `.cfg`;
   debe pasar a tomarse del `config_id` para borrar `id` del cfg y `character_name` de la clase.
-- **Ataques por cfg (FALTA)**: ya existe `PersonConfig`/`tux.person.cfg` para datos de persona, y
-  existen las plantillas `name.fighter.cfg` y `name.power_fighter.cfg`, pero `PowerFighterConfigurer`
-  todavía no las carga. Los ataques siguen hardcodeados en `_apply_tux_config()`.
+- **Ataques normales por cfg (LISTO)**: `FighterConfig`/`tux.fighter.cfg` ya cargan los 15 ataques
+  normales y `_apply_fighter_config()` los aplica.
+- **Power attacks por cfg (FALTA)**: `name.power_fighter.cfg` existe como plantilla huérfana; no hay
+  `PowerFighterConfig` ni loader. Los power attacks siguen en `_apply_tux_attacks()`.
 
 ---
 
@@ -487,11 +520,12 @@ al nodo `MatchTime`; la cuenta inicial la maneja `MatchCountdown` y el letrero d
 | `scripts/helpers/global_utils.gd` | Conserva `ControlType`; el enum de configuraciones y `CONFIG_OPTIONS` desaparecieron |
 | `scripts/helpers/characters/character_registry.gd` | Nuevo: lee `identities.cfg`, valida ids y expone `playable_ids()` / `display_name()` / rutas de cfg |
 | `scripts/helpers/ui/character_catalog.gd` | Nuevo: `Entry` con `config_id`, `display_name`, `glyph`, `is_random` y `model`; reemplaza al enum en la selección |
-| `data/power_fighters/identities.cfg` | Nuevo: manifiesto global; hoy solo `[tux] name = "Tux"` |
+| `data/characters/identities.cfg` | Nuevo: manifiesto global; hoy solo `[tux] name = "Tux"` |
 | `scripts/helpers/match/power_fighter_data.gd` | Datos de un slot: `control`, `config_id`, `lives`, `player_id` |
 | `scripts/match/power_fighter_slots.gd` | Guarda `PowerFighterData` por id de slot y valida contra `CharacterRegistry.playable_ids()` |
-| `scripts/match/power_fighter_configurer.gd` | `create(config_id, control_type)`; carga `.person.cfg`; deuda: `id` vía `PersonConfig.id` |
+| `scripts/match/power_fighter_configurer.gd` | `create(config_id, control_type)`; carga `.person.cfg` y `.fighter.cfg`; deuda: `id` vía `PersonConfig.id` |
 | `scripts/helpers/characters/person_config.gd` | `RefCounted` con identidad, model/offset, momentum, movimiento, salto, intervals, `air_jump_duration` y `hanging_anim_offset`; `character_name` es campo muerto |
+| `scripts/helpers/characters/fighter_config.gd` | `RefCounted` con `attacks: Attacks`; config compartida por fighter y power fighter |
 | `scripts/match/spawn_point.gd` | `spawn(config_id, ...)`: delega la creación, posiciona y asigna `player_id` |
 | `scripts/match/game_manager.gd` | Lee `power_fighter_slots` con `has_slot`/`get_slot` y pasa `slot.config_id` a `spawn()`; sin respaldo |
 | `scripts/ui/character_menu.gd` | Crea `PowerFighterData` con `entry.config_id`, llena `level.power_fighter_slots` y pasa `TIME_OPTIONS[time_index]` antes de cambiar de escena |
@@ -500,11 +534,12 @@ al nodo `MatchTime`; la cuenta inicial la maneja `MatchCountdown` y el letrero d
 | `scripts/characters/person.gd` | Resuelve nodos esenciales por índice; `_skeleton3d`; guarda solo `id` |
 | `scripts/characters/fighter.gd` | `attacks` público; ya no tiene `set_attacks()` |
 | `scripts/characters/power_fighter.gd` | `power_attacks` público; ya no tiene `set_power_attacks()` |
-| `scripts/helpers/combat/fight_move.gd` | `name` de solo lectura (`_name` + getter) |
-| `data/power_fighters/tux.person.cfg` | Config de Tux sin `character_name`, con `[identity]`, `[momentum]`, `[horizontal_movement]`, `[vertical_movement]`, `[interval]`, `[duration_of_anims]` y `[anim_offset]` |
+| `scripts/helpers/combat/fight_move.gd` | `name` con getter y setter; el setter lo usa el loader de `.fighter.cfg` |
+| `data/characters/tux.person.cfg` | Config de Tux sin `character_name`, con `[identity]`, `[momentum]`, `[horizontal_movement]`, `[vertical_movement]`, `[interval]`, `[duration_of_anims]` y `[anim_offset]` |
+| `data/characters/tux.fighter.cfg` | Config de Tux con las 15 secciones de ataques normales que pide el loader |
 | `data/templates/name.person.cfg` | Plantilla de persona con secciones válidas para `ConfigFile`, incluida `[anim_offset]` |
-| `data/templates/name.fighter.cfg` | Plantilla de ataques fighter; **FALTA**: existe, pero no se carga |
-| `data/templates/name.power_fighter.cfg` | Plantilla de power attacks; **FALTA**: existe, pero no se carga |
+| `data/templates/name.fighter.cfg` | Plantilla de ataques fighter alineada con el loader (15 secciones, `air_back`) |
+| `data/templates/name.power_fighter.cfg` | Plantilla de power attacks; **FALTA**: huérfana, no hay loader ni `<id>.power_fighter.cfg` |
 | `docs/arte/asset-personaje.md` | Documenta el orden obligatorio de nodos del modelo |
 
 ## Ver también

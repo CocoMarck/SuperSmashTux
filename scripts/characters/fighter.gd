@@ -463,10 +463,11 @@ func _cancel_attack(signals: VerticalForceSignals, states: MoveStates):
 	
 	# Lo que pasa con ataques genericos
 	if taking_damage() and signals.on_floor:
-		# Cancelar ataque saltarin si esta recibiendo daño. En el piso.
-		# El if no describe eso, pero es para eso que se menciona.
+		# Cancelar ataque saltarin si esta recibiendo daño en el piso.
+		# El if no describe eso, pero es por lo que se describe.
 		_current_attack = null
 	elif _grabbing() or grabbed:
+		# Cancelar ataque si esta agarrando o siendo agarrado.
 		_current_attack = null
 	elif signals.on_floor and _current_attack.air_attack:
 		# Cancelar ataque aerio si no esta en aire.

@@ -50,7 +50,7 @@ cambian**. Nada de reglas depende de que la cámara exista.
 | Config de persona | `PersonConfig` | `RefCounted` con identidad, model/offset, momentum, movimiento, salto, intervals y `air_jump_duration` | **LISTO** |
 | Registro de personajes | `CharacterRegistry` | helper (no nodo): lee `identities.cfg`, valida ids y expone `playable_ids()` / `display_name()` | **LISTO** |
 | Catálogo de selección | `CharacterCatalog` | helper (no nodo): arma `Entry` con `config_id`, nombre, glifo, modelo y flag de selección | **LISTO** |
-| Armado | `PowerFighterConfigurer` | recibe `config_id`, lee el `.person.cfg` con `ConfigFile` (sin validación) y aplica la config al prefab; ataques siguen hardcodeados (FALTA) | **LISTO/PARCIAL** |
+| Armado | `PowerFighterConfigurer` | recibe `config_id`, lee `.person.cfg` y `.fighter.cfg` con `ConfigFile` (sin validación) y aplica la config al prefab; power attacks siguen hardcodeados (FALTA) | **LISTO/PARCIAL** |
 
 `GameManager` también spawnea a los peleadores. El lineup sale de `power_fighter_slots`
 (`PowerFighterSlots`), que llena `CharacterMenu` antes de cambiar de escena. **No hay respaldo**: si
@@ -185,7 +185,7 @@ muerte por `hp == 0` (que es la que dispararía el ragdoll) sigue pendiente.
 
 - **`MatchHUD`**: puente entre las reglas y el `FightHud`, para sacar del manager el contrato de señales.
 - **`GameSpeed`**: cámara lenta o freeze al dar un golpe killer.
-- **Nombre visible en HUD/menu (decisión actual)**: `Person` guarda solo `id`; el texto visible vive en `data/power_fighters/identities.cfg` y sale por `CharacterRegistry.display_name()` / `CharacterCatalog`. `FightHUD` resuelve el nombre con `CharacterCatalog.get_entry_by_config_id(power_fighter.id)` (`fight_hud.gd:268`). `character_name` ya salió del `.person.cfg` y solo queda como campo muerto en `PersonConfig`. No declarar `var name` en `Person` porque choca con `Node.name`.
+- **Nombre visible en HUD/menu (decisión actual)**: `Person` guarda solo `id`; el texto visible vive en `data/characters/identities.cfg` y sale por `CharacterRegistry.display_name()` / `CharacterCatalog`. `FightHUD` resuelve el nombre con `CharacterCatalog.get_entry_by_config_id(power_fighter.id)` (`fight_hud.gd:268`). `character_name` ya salió del `.person.cfg` y solo queda como campo muerto en `PersonConfig`. No declarar `var name` en `Person` porque choca con `Node.name`.
 - **`ScoreManager`** o similar: quién va ganando, para el HUD.
 - **`AudioManager`**: sonidos de golpe, muerte, KO. Mismo patrón que el comentarista.
 

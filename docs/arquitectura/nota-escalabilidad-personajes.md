@@ -50,7 +50,7 @@
 
 ### 6. Animaciones atadas por nombre
 
-- `_attack_anim()` (`fighter.gd:595-599`) reproduce `_current_attack.name` en el `AnimationPlayer`. El nombre del `FightMove` **es** el nombre de la animación y es de solo lectura (getter), para que no se pueda cambiar por accidente.
+- `_attack_anim()` (`fighter.gd:595-599`) reproduce `_current_attack.name` en el `AnimationPlayer`. El nombre del `FightMove` **es** el nombre de la animación; ahora tiene setter porque el loader de `.fighter.cfg` lo asigna desde cfg, así que el cfg debe respetar esos nombres exactos.
 - Un modelo nuevo debe traer esos nombres exactos (lista en [asset-personaje.md](../arte/asset-personaje.md), sección Animaciones). Si falta uno, ese doc advierte que puede romperse.
 - *Efecto:* es una ventaja para variantes (cambiar de modelo no toca código) y un límite para personajes con animaciones distintas.
 

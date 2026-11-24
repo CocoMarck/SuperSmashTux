@@ -22,9 +22,17 @@ static func create(
 	if has_fighter_config:
 		fighter_config = CharacterRegistry.load_fighter_config(
 			CharacterRegistry.fighter_config_path(config_id) )
-	if person_config is PersonConfig:
+	if has_person_config:
 		_build_instance(power_fighter, person_config)
 	
+	# Establecer configuración al personaje
+	if has_person_config:
+		_apply_person_config(power_fighter, person_config)
+	if has_fighter_config:
+		_apply_fighter_config(power_fighter, fighter_config)
+		if config_id == "tux":
+			_apply_tux_attacks(power_fighter)
+
 	# Establecer tipo de control
 	match control_type:
 		GlobalUtils.ControlType.PLAYER:
@@ -34,15 +42,7 @@ static func create(
 		GlobalUtils.ControlType.NONE:
 			pass
 	
-	# Establecer configuración al personaje
-	if has_person_config:
-		_apply_person_config(power_fighter as PowerFighter, person_config)
-	if has_fighter_config:
-		_apply_fighter_config(power_fighter, fighter_config)
-		if config_id == "tux":
-			_apply_tux_attacks(power_fighter as PowerFighter)
-	
-	return power_fighter as PowerFighter
+	return power_fighter
 
 # Construir instancia
 static func _build_instance(power_fighter: Node3D, config: PersonConfig) -> void:
@@ -89,7 +89,7 @@ static func _apply_person_config(
 static func _apply_fighter_config(
 	power_fighter: PowerFighter, fighter_config: FighterConfig) -> void:
 	'''
-	Aca se podria usar un validado de ataques por cada ataque, pero creo que es mejor crash si esta mal el `FightMove`.
+	Aca se podria validar cada ataque (por motivos debug, o protejer el juego), pero creo que es mejor crash si esta mal el `FightMove`.
 	'''
 	power_fighter.attacks = fighter_config.attacks
 
