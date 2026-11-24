@@ -11,13 +11,18 @@ static func create(
 	# Preparar instancia
 	var power_fighter = POWER_FIGHTER_PREFAB.instantiate()
 	var person_config: PersonConfig
+	var fighter_config: FighterConfig
 
 	# Cambiar o no construcción de instancia
 	var has_person_config: bool = CharacterRegistry.has_person_config(config_id)
+	var has_fighter_config: bool = CharacterRegistry.has_fighter_config(config_id)
 	if has_person_config:
-		var path: String = CharacterRegistry.person_config_path(config_id)
-		person_config = CharacterRegistry.load_person_config(path)
-	if has_person_config:
+		person_config = CharacterRegistry.load_person_config(
+			CharacterRegistry.person_config_path(config_id) )
+	if has_fighter_config:
+		fighter_config = CharacterRegistry.load_fighter_config(
+			CharacterRegistry.fighter_config_path(config_id) )
+	if person_config is PersonConfig:
 		_build_instance(power_fighter, person_config)
 	
 	# Establecer tipo de control
@@ -32,9 +37,8 @@ static func create(
 	# Establecer configuración al personaje
 	if has_person_config:
 		_apply_person_config(power_fighter as PowerFighter, person_config)
-		# Ataques aún hardcodeados por personaje; los demás usan los del prefab.
-		if config_id == &"tux":
-			_apply_tux_attacks(power_fighter as PowerFighter)
+	if has_fighter_config:
+		_apply_tux_attacks(power_fighter as PowerFighter, fighter_config)
 	
 	return power_fighter as PowerFighter
 
@@ -80,48 +84,24 @@ static func _apply_person_config(
 	power_fighter.run_step_interval = person_config.run_step_interval
 	power_fighter.crouch_move_step_interval = person_config.crouch_move_step_interval
 
-static func _apply_tux_attacks(power_fighter: PowerFighter) -> void:
+static func _apply_tux_attacks(power_fighter: PowerFighter, fighter_config: FighterConfig) -> void:
 	'''
 	Ataques de Tux, hardcodeados hasta que se lean de `tux.power_fighter.cfg`/`tux.fighter.cfg`.
 	'''
 	# attacks on floor
-	power_fighter.attacks.neutral1.duration = 0.33
-	power_fighter.attacks.neutral1.hitboxes_moves[0].init_time_ratio = 0.45
-	power_fighter.attacks.neutral1.hitboxes_moves[0].duration = 0.1
-	power_fighter.attacks.neutral1.hitboxes_moves[0].damage = 5
-	power_fighter.attacks.neutral1.hitboxes_moves[0].direction = Vector3(
-		0.4, 0.25, 0.0)
-	power_fighter.attacks.neutral1.hitboxes_moves[0].position = Vector3(
-		0.6, 0.4, 0.0)
+	power_fighter.attacks.neutral1 = fighter_config.attacks.neutral1
+	power_fighter.attacks.neutral2 = fighter_config.attacks.neutral2
+	power_fighter.attacks.neutral3 = fighter_config.attacks.neutral3
 	
-	
-	power_fighter.attacks.neutral2.duration = 0.4583
-	power_fighter.attacks.neutral2.speed = Vector3(0,0,0)
-	power_fighter.attacks.neutral2.hitboxes_moves[0].init_time_ratio = 0.5
-	power_fighter.attacks.neutral2.hitboxes_moves[0].duration = 0.1
-	power_fighter.attacks.neutral2.hitboxes_moves[0].damage = 5
-	power_fighter.attacks.neutral2.hitboxes_moves[0].direction = Vector3(
-		0.4, 0.25, 0.0)
-	power_fighter.attacks.neutral2.hitboxes_moves[0].position = Vector3(
-		0.6, 0.5, 0.0)
-	
-	power_fighter.attacks.neutral3.duration = 0.4167
-	power_fighter.attacks.neutral3.hitboxes_moves[0].duration = 0.2
-	power_fighter.attacks.neutral3.hitboxes_moves[0].init_time_ratio = 0.5
-	power_fighter.attacks.neutral3.hitboxes_moves[0].damage = 20
-	power_fighter.attacks.neutral3.hitboxes_moves[0].direction = Vector3(
-		0.75, 0.75, 0.0)
-	power_fighter.attacks.neutral3.hitboxes_moves[0].position = Vector3(
-		0.65, 0.05, 0.0)
-	
-	power_fighter.attacks.dash.duration = 0.375
-	power_fighter.attacks.dash.hitboxes_moves[0].damage = 7
-	power_fighter.attacks.dash.hitboxes_moves[0].duration = 0.3
-	power_fighter.attacks.dash.hitboxes_moves[0].init_time_ratio = 0.3
-	power_fighter.attacks.dash.hitboxes_moves[0].position = Vector3(
-		0.45, -0.3, 0.0)
-	power_fighter.attacks.dash.hitboxes_moves[0].direction = Vector3(
-		1.0, 0.9, 0.0)
+	power_fighter.attacks.dash = fighter_config.attacks.dash
+	#power_fighter.attacks.dash.duration = 0.375
+	#power_fighter.attacks.dash.hitboxes_moves[0].damage = 7
+	#power_fighter.attacks.dash.hitboxes_moves[0].duration = 0.3
+	#power_fighter.attacks.dash.hitboxes_moves[0].init_time_ratio = 0.3
+	#power_fighter.attacks.dash.hitboxes_moves[0].position = Vector3(
+	#	0.45, -0.3, 0.0)
+	#power_fighter.attacks.dash.hitboxes_moves[0].direction = Vector3(
+	#	1.0, 0.9, 0.0)
 	
 	power_fighter.attacks.up.duration = 0.375
 	power_fighter.attacks.down.duration = 0.375

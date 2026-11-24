@@ -28,15 +28,18 @@ var _name: StringName
 var name: StringName:
 	get:
 		return _name
+	set(value):
+		_name = value
 var duration: float
 var speed: Vector3
-var direction: Vector3
+
 var jump_power: float
 var air_attack: bool
 var grab_attack: bool
 var override_horizontal_move: bool
 var override_vertical_move: bool
 var immortal: bool
+#var direction: Vector3 # NO SE USA
 
 # Propidedes publicas hitbox
 var hitboxes_moves : Array # <-- Array de `HitboxMove`
@@ -46,7 +49,6 @@ var _defaults := {
 	"name": &"snake_case",
 	"duration": 0.5,
 	"speed": Vector3(0,0,0),
-	"direction": Vector3(0,0,0),
 	"jump_power": 0.0,
 	"air_attack": false,
 	"grab_attack": false,
@@ -58,7 +60,7 @@ var _defaults := {
 
 
 func _init( 
-	p_config: Dictionary
+	p_config: Dictionary = {}
 ) -> void:
 	# Config fixeado con defaults
 	var config := _defaults.duplicate()
@@ -68,7 +70,6 @@ func _init(
 	_name = config["name"]
 	duration = config["duration"]
 	speed = config["speed"]
-	direction = config["direction"]
 	jump_power = config["jump_power"]
 	air_attack = config["air_attack"]
 	grab_attack = config["grab_attack"]

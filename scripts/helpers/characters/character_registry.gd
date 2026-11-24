@@ -107,9 +107,16 @@ static func person_config_path(id: StringName) -> String:
 	'''
 	_ensure_loaded()
 	if not is_playable(id):
-		_fail("parson config don't exist for: %s" % id)
+		_fail("person config don't exist for: %s" % id)
 		return ""
 	return DATA_DIR + String(id) + ".person.cfg"
+
+static func fighter_config_path(id: StringName) -> String:
+	_ensure_loaded()
+	if not is_playable(id):
+		_fail("fighter config don't exist for: %s" % id)
+		return ""
+	return DATA_DIR + String(id) + ".fighter.cfg"
 
 static func load_person_config(path: String) -> PersonConfig:
 	'''
@@ -152,12 +159,65 @@ static func load_person_config(path: String) -> PersonConfig:
 	config.hanging_anim_offset = Vector3(cfg.get_value("anim_offset", "hanging_anim_offset"))
 
 	return config
+	
+static func _fight_move(cfg: ConfigFile, p_name: String) -> Dictionary:
+	return {
+		"name": StringName(cfg.get_value(p_name, "name")),
+		"duration": float(cfg.get_value(p_name, "duration")),
+		"speed": Vector3(cfg.get_value(p_name, "speed")),
+		"jump_power": float(cfg.get_value(p_name, "jump_power")),
+		"air_attack": bool(cfg.get_value(p_name, "air_attack")),
+		"grab_attack": bool(cfg.get_value(p_name, "grab_attack")),
+		"override_horizontal_move": bool(
+			cfg.get_value(p_name, "override_horizontal_move")),
+		"override_vertical_move": bool(
+			cfg.get_value(p_name, "override_vertical_move")),
+		"immortal": bool(cfg.get_value(p_name, "immortal")),
+		"hitboxes_moves": Array( cfg.get_value(p_name, "hitboxes_moves") ) }
+
+static func load_fighter_config(path: String) -> FighterConfig:
+	var cfg: ConfigFile = ConfigFile.new()
+	cfg.load(path)
+
+	var config: FighterConfig = FighterConfig.new()
+	config.attacks = Attacks.new()
+	
+	# Parte pesada attacks
+	var all_attacks: Dictionary[FightMove, Dictionary] = {
+		config.attacks.neutral1: _fight_move(cfg, "neutral1"),
+		config.attacks.neutral2: _fight_move(cfg, "neutral2"),
+		config.attacks.neutral3: _fight_move(cfg, "neutral3"),
+		config.attacks.dash: _fight_move(cfg, "dash"),
+	}
+	for fight_move: FightMove in all_attacks.keys():
+		fight_move.name = all_attacks[fight_move]["name"]
+		fight_move.duration = all_attacks[fight_move]["duration"]
+		fight_move.speed = all_attacks[fight_move]["speed"]
+		fight_move.jump_power = all_attacks[fight_move]["jump_power"]
+		fight_move.air_attack = all_attacks[fight_move]["air_attack"]
+		fight_move.grab_attack = all_attacks[fight_move]["grab_attack"]
+		fight_move.override_horizontal_move = all_attacks[fight_move]["override_horizontal_move"]
+		fight_move.override_vertical_move = all_attacks[fight_move]["override_vertical_move"]
+		fight_move.immortal = all_attacks[fight_move]["immortal"]
+		
+		# Parte sensible, hitboxes moves
+		var hitboxes_moves: Array = all_attacks[fight_move]["hitboxes_moves"]
+		for x in hitboxes_moves:
+			var dict: Dictionary = Dictionary(x)
+			fight_move.hitboxes_moves.append( HitboxMove.new(dict) )
+
+	return config
 
 static func has_person_config(id: StringName) -> bool:
-	if id == STANDARD_ID:
-		return false
+	if id == STANDARD_ID: return false
 	var path: String = person_config_path(id)
-	return path != "" and FileAccess.file_exists(path)
+	return path != "" and FileAccess.file_exists( path )
+
+static func has_fighter_config(id: StringName) -> bool:
+	if id == STANDARD_ID: return false
+	var path: String = fighter_config_path(id)
+	return path != "" and FileAccess.file_exists( path )
+
 
 static func model_path(id: StringName) -> String:
 	'''

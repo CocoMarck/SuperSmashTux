@@ -22,23 +22,23 @@ var air_up : FightMove
 
 func _init(
 	# Ataques en el piso.
-	p_neutral1 : FightMove,
-	p_neutral2 : FightMove,
-	p_neutral3 : FightMove,
-	p_down : FightMove,
-	p_up : FightMove,
-	p_dash : FightMove,
-	p_forward : FightMove,
-	p_heavy_side : FightMove,
-	p_heavy_up : FightMove,
-	p_heavy_down : FightMove,
+	p_neutral1 : FightMove = FightMove.new(),
+	p_neutral2 : FightMove = FightMove.new(),
+	p_neutral3 : FightMove = FightMove.new(),
+	p_down : FightMove = FightMove.new(),
+	p_up : FightMove = FightMove.new(),
+	p_dash : FightMove = FightMove.new(),
+	p_forward : FightMove = FightMove.new(),
+	p_heavy_side : FightMove = FightMove.new(),
+	p_heavy_up : FightMove = FightMove.new(),
+	p_heavy_down : FightMove = FightMove.new(),
 
 	# Ataques en el aire.
-	p_air_neutral : FightMove,
-	p_air_down : FightMove,
-	p_air_up : FightMove,
-	p_air_forward : FightMove,
-	p_air_back : FightMove
+	p_air_neutral : FightMove = FightMove.new(),
+	p_air_down : FightMove = FightMove.new(),
+	p_air_up : FightMove = FightMove.new(),
+	p_air_forward : FightMove = FightMove.new(),
+	p_air_back : FightMove = FightMove.new()
 ):
 	# Ataques en el piso.
 	neutral1 = p_neutral1
