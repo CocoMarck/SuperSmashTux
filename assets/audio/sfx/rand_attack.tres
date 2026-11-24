@@ -1,0 +1,11 @@
+[gd_resource type="AudioStreamRandomizer" format=3 uid="uid://vkjj8aignocg"]
+
+[ext_resource type="AudioStream" uid="uid://nl66lonyqs78" path="res://assets/audio/sfx/attack_01.wav" id="1_06ucb"]
+[ext_resource type="AudioStream" uid="uid://cum06ynfh7dkc" path="res://assets/audio/sfx/attack_02.wav" id="2_b2tr4"]
+[ext_resource type="AudioStream" uid="uid://c4vlurhlcu607" path="res://assets/audio/sfx/attack_03.wav" id="3_vf3uv"]
+
+[resource]
+streams_count = 3
+stream_0/stream = ExtResource("1_06ucb")
+stream_1/stream = ExtResource("2_b2tr4")
+stream_2/stream = ExtResource("3_vf3uv")

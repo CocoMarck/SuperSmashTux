@@ -34,12 +34,14 @@ Objeto de persona. Tiene lo necesario para tener fisicas 2D en un mundo 3D.
 @export var run_step_interval: float = 0.32
 @export var crouch_move_step_interval: float = 0.4
 
-var block_move :bool = false
-
 @export_group("SFX")
 @export var stream_jump: AudioStreamRandomizer = preload("res://assets/audio/sfx/rand_jump.tres")
 @export var stream_step: AudioStreamRandomizer = preload("res://assets/audio/sfx/rand_step.tres")
 @export var stream_land: AudioStreamRandomizer = preload("res://assets/audio/sfx/rand_land.tres")
+@export var stream_hit: AudioStreamRandomizer = preload("res://assets/audio/sfx/rand_hit.tres")
+
+# Propiedades publicas no export
+var block_move :bool = false
 
 # Propiedades privadas | Intervals sounds effects
 var _step_time: float = 0.0
@@ -103,6 +105,7 @@ var _last_damage_percentage :float = 0.0
 var _taking_damage_count : float = 0.0
 
 # Propiedades privadas | Stun damage
+var _first_frame_of_damage: bool = false
 var _heavy_hitstun_time: float = 0.0
 var _heavy_hitstun_get_up_time: float = 0.0
 var _heavy_hitstun_wait_to_get_up: bool = false
@@ -741,15 +744,21 @@ func _set_pivot_direction(signals: MoveSignals) -> void:
 		_last_x_direction = _x_not_zero_value
 
 # Funciones | Damage recibido
-func set_damage(damage:int):
+func set_damage(damage: int=0, direction: Vector3 =Vector3.ZERO) -> void:
 	if not _immunity_to_damage:
-		hp -= damage
-		_last_damage = damage
+		_first_frame_of_damage = true
+		_set_damage_hp(damage)
+		_set_damage_percentage(damage)
+		_set_damage_move(damage, direction)
 
-func set_damage_percentage(damage:int) -> void:
-	if not _immunity_to_damage:
-		_last_damage_percentage = damage*0.01
-		damage_percentage += _last_damage_percentage
+
+func _set_damage_hp(damage:int):
+	hp -= damage
+	_last_damage = damage
+
+func _set_damage_percentage(damage:int) -> void:
+	_last_damage_percentage = damage*0.01
+	damage_percentage += _last_damage_percentage
 
 func _ignore_last_damage() -> void:
 	if damage_percentage > 0:
@@ -774,7 +783,7 @@ func _get_hitstun_time(damage:int) ->float:
 		time = GameBalance.MAX_HITSTUN_DURATION
 	return time
 
-func set_damage_move(damage:int, direction:Vector3) -> void:
+func _set_damage_move(damage:int, direction:Vector3) -> void:
 	'''
 	Recibir un trancazo
 
@@ -810,7 +819,6 @@ func set_thrown_move(damage: int, direction: Vector3) -> void:
 		_clean_heavy_hitstun_state()
 		grabbed = false
 		set_damage(damage)
-		set_damage_percentage(damage)
 		_knockback_direction = direction
 		_hitstun_time = GameBalance.BASE_HITSTUN_DURATION
 		_heavy_hitstun_time = GameBalance.STUN_DURATION_ON_FLOOR
@@ -1112,12 +1120,13 @@ func _process_effects(delta) -> void:
 func _commit_frame(delta, frame) -> void:
 	'''
 	Procesar todo.
-	Push + Velocity + Move and slide
+	Push + Velocity + Move and slide + Reset de first frames
 	'''
 	_push_bodies_apart(delta, frame.move_states)
 	velocity = _target_velocity
 	move_and_slide()
 	_ensure_safe_z_coord()
+	_first_frame_of_damage = false
 
 # Fucniones | Sonido
 func _get_step_interval(states: MoveStates) -> float:
@@ -1126,11 +1135,7 @@ func _get_step_interval(states: MoveStates) -> float:
 	elif states.crouch_move: 	return crouch_move_step_interval
 	else:						return 0.0
 
-func _process_sound(delta:float, frame: FrameMotionSignals) -> void:
-	'''
-	- first frame on floor, solo se usa cuando no se esta recibiendo daño (porque repite mucho el sonido en mini saltos imperseptibles).
-	- stepping: Solo cuando se esta en el piso moviendose.
-	'''
+func _movement_sounds(delta: float, frame: FrameMotionSignals) -> void:
 	var first_frame_on_floor: bool = (
 		frame.vertical_force_signals.last_air_count > 0 and 
 		frame.vertical_force_signals.on_floor and
@@ -1165,10 +1170,28 @@ func _process_sound(delta:float, frame: FrameMotionSignals) -> void:
 		_audio_stream_player.stream = stream_jump
 		sound_name = "Sonido de salto"
 	
+	# primer frame de hitstun
+	if _first_frame_of_damage:
+		_audio_stream_player.stream = stream_hit
+		sound_name = "Sonido de hit"
+	
 	# Reproducir
 	if not sound_name == "":
 		print(sound_name)
 		_audio_stream_player.play()
+
+func _attack_sounds(delta: float, frame: FrameMotionSignals) -> void:
+	# Función remplazable para Fighter/PowerFighter
+	return
+
+func _process_sound(delta:float, frame: FrameMotionSignals) -> void:
+	'''
+	- first frame on floor, solo se usa cuando no se esta recibiendo daño (porque repite mucho el sonido en mini saltos imperseptibles).
+	- stepping: Solo cuando se esta en el piso moviendose.
+	'''
+	_movement_sounds(delta, frame)
+	_attack_sounds(delta, frame)
+
 	
 
 # Funciones | Remplazables

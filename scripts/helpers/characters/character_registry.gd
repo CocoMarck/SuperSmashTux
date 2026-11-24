@@ -91,7 +91,7 @@ static func playable_ids() -> Array[StringName]:
 static func display_name(id: StringName) -> String:
 	_ensure_loaded()
 	if not _names.has(id):
-		_fail("don't exists: %s" % id)
+		_fail("don't exists: `%s`" % id)
 		return id
 	return _names[id]
 
@@ -162,7 +162,7 @@ static func load_person_config(path: String) -> PersonConfig:
 	
 static func _fight_move(cfg: ConfigFile, p_name: String) -> Dictionary:
 	return {
-		"name": StringName(cfg.get_value(p_name, "name")),
+		"name": StringName(p_name),
 		"duration": float(cfg.get_value(p_name, "duration")),
 		"speed": Vector3(cfg.get_value(p_name, "speed")),
 		"jump_power": float(cfg.get_value(p_name, "jump_power")),
@@ -184,22 +184,22 @@ static func load_fighter_config(path: String) -> FighterConfig:
 	
 	# Parte pesada attacks
 	var all_attacks: Dictionary[FightMove, Dictionary] = {
-		config.attacks.neutral1: _fight_move(cfg, "neutral1"),
-		config.attacks.neutral2: _fight_move(cfg, "neutral2"),
-		config.attacks.neutral3: _fight_move(cfg, "neutral3"),
-		config.attacks.dash: _fight_move(cfg, "dash"),
-		config.attacks.up: _fight_move(cfg, "up"),
-		config.attacks.down: _fight_move(cfg, "down"),
-		config.attacks.forward: _fight_move(cfg, "forward"),
-		config.attacks.heavy_side: _fight_move(cfg, "heavy_side"),
-		config.attacks.heavy_down: _fight_move(cfg, "heavy_down"),
-		config.attacks.heavy_up: _fight_move(cfg, "heavy_up"),
+		config.attacks.neutral1: _fight_move(cfg, "neutral_attack1"),
+		config.attacks.neutral2: _fight_move(cfg, "neutral_attack2"),
+		config.attacks.neutral3: _fight_move(cfg, "neutral_attack3"),
+		config.attacks.dash: _fight_move(cfg, "dash_attack"),
+		config.attacks.up: _fight_move(cfg, "up_attack"),
+		config.attacks.down: _fight_move(cfg, "down_attack"),
+		config.attacks.forward: _fight_move(cfg, "forward_attack"),
+		config.attacks.heavy_side: _fight_move(cfg, "heavy_side_attack"),
+		config.attacks.heavy_down: _fight_move(cfg, "heavy_down_attack"),
+		config.attacks.heavy_up: _fight_move(cfg, "heavy_up_attack"),
 
-		config.attacks.air_neutral: _fight_move(cfg, "air_neutral"),
-		config.attacks.air_forward: _fight_move(cfg, "air_forward"),
-		config.attacks.air_back: _fight_move(cfg, "air_back"),
-		config.attacks.air_up: _fight_move(cfg, "air_up"),
-		config.attacks.air_down: _fight_move(cfg, "air_down"),
+		config.attacks.air_neutral: _fight_move(cfg, "air_neutral_attack"),
+		config.attacks.air_forward: _fight_move(cfg, "air_forward_attack"),
+		config.attacks.air_back: _fight_move(cfg, "air_back_attack"),
+		config.attacks.air_up: _fight_move(cfg, "air_up_attack"),
+		config.attacks.air_down: _fight_move(cfg, "air_down_attack"),
 
 	}
 	for fight_move: FightMove in all_attacks.keys():

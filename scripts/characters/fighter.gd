@@ -3,6 +3,19 @@ extends Person
 
 # Constantes Shield en `GameBalance`
 
+# Publicas export
+@export_group("SFX")
+@export var stream_attack: AudioStreamRandomizer = preload("res://assets/audio/sfx/rand_attack.tres")
+
+# Publicas sin export
+@export_group("Fight Moves")
+@export var fight_moves_with_simple_sound: Array[StringName] = [ # Solo en first frame: suena stream attack.
+	"neutral_attack1", "neutral_attack2", "neutral_attack3", "down_attack", "forward_attack",
+	"up_attack", "heavy_up_attack", "heavy_down_attack", "heavy_side_attack", 
+	"air_forward_attack", "air_back_attack", "air_up_attack", "air_neutral_attack", "air_down_attack"] 
+@export var fight_moves_with_hitstun_sound: Array[StringName] = [ 
+	"dash_attack" ] # Para play de sound solo en hitbox, y probablemente se use otro stream.
+
 # Propiedades privadas | Input
 var _attack: bool = false
 var _grab: bool = false
@@ -41,6 +54,8 @@ var _init_shield_height : float
 var _shield_blockstun_time : float = 0.0
 
 # Propiedades privadas | Ataque
+var _first_attack_frame: bool = false
+var _first_frame_of_spawned_hitbox: bool = false
 var _attack_count: float = 0.0
 var _current_attack: FightMove = null
 var _attack_jump_count :int = 0
@@ -387,15 +402,12 @@ func _get_current_neutral_combo_move() -> FightMove:
 		return _neutral_combo_attacks[index]
 
 # Funciones | Pelear
-func _first_attack_frame() -> bool:
-	return _attack_count == 0
-
 func _attack_jump_limit_reached() -> bool:
 	return _attack_jump_count > 1
 func _is_attack_jump() -> bool:
 	return _current_attack.jump_power > 0.0
 func _can_attack_jump() -> bool:
-	return _is_attack_jump() and (not _attack_jump_limit_reached()) and _first_attack_frame()
+	return _is_attack_jump() and (not _attack_jump_limit_reached()) and _attack_count == 0
 
 func _init_attack_by_move(direction_buffered: bool, states: MoveStates):
 	if not _attack:
@@ -434,7 +446,6 @@ func _process_attack(direction_buffered: bool, states: MoveStates) -> void:
 	Función remplazable. La remplazara power fighter
 	'''
 	_init_attack_by_move(direction_buffered, states)
-
 
 func _set_attack(states: MoveStates) -> void:
 	'''
@@ -520,7 +531,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		return
 		
 	# Necesarios
-	var first_attack_frame :bool = _first_attack_frame()
+	_first_attack_frame = _attack_count == 0
 	var is_attack_jump :bool = _is_attack_jump()
 	
 	# Sobrescribir movimiento a al atacar. Modo normal
@@ -534,7 +545,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 	# Lo que pasa cuando el movimiento de ataque es de salto
 	if is_attack_jump:
 		# Contar saltos
-		if first_attack_frame:
+		if _first_attack_frame:
 			_attack_jump_count += 1
 		# Determinar limite
 		if _attack_jump_limit_reached():
@@ -542,7 +553,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		else:
 			if _current_attack.override_horizontal_move:
 				_target_velocity.x = _current_attack.speed.x * _last_x_direction
-			if first_attack_frame:
+			if _first_attack_frame:
 				# Saltar solo una vez. Y Poner los saltos al maximo.
 				print(_current_attack.jump_power)
 				_target_velocity.y = _current_attack.jump_power
@@ -567,7 +578,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 	else:
 		_attack_count += delta
 	
-	_process_neutral_combo(first_attack_frame, states)
+	_process_neutral_combo(_first_attack_frame, states)
 
 	# Verificar que no sea null
 	if _current_attack == null:
@@ -588,9 +599,10 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 				if not _spawned_hitbox_ids.has(hitbox_move.id):
 					_spawned_hitbox_ids[hitbox_move.id] = true
 					_spawn_hitboxes_damages( hitbox_move, direction )
+					_first_frame_of_spawned_hitbox = true
 
 	# Debug
-	if first_attack_frame:
+	if _first_attack_frame:
 		print(_current_attack.name)
 
 func _attack_anim(delta:float) -> void:
@@ -904,6 +916,8 @@ func _process_action(delta: float, frame: FrameMotionSignals) -> void:
 	var grab_or_shield = (
 		_waiting_grab_move() or with_shield
 	)
+	_first_attack_frame = false
+	_first_frame_of_spawned_hitbox = false
 	if grab_or_shield or _rolling():
 		# Anular ataque si se hace grab, escudo, o rueda.
 		_current_attack = null
@@ -1013,6 +1027,17 @@ func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 
 func _process_visual(frame: FrameMotionSignals) -> void:
 	_visual_shield(frame)
+
+func _attack_sounds(delta, frame: FrameMotionSignals) -> void:
+	if _attacking():
+		if _first_attack_frame:
+			if _current_attack.name in fight_moves_with_simple_sound:
+				_audio_stream_player.stream = stream_attack
+				_audio_stream_player.play()
+		if _first_frame_of_spawned_hitbox:
+			if _current_attack.name in fight_moves_with_hitstun_sound:
+				_audio_stream_player.stream = stream_attack
+				_audio_stream_player.play()
 
 # _physics_process, vive en `Person`
 

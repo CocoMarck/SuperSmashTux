@@ -26,7 +26,6 @@ func _on_hitbox_body_entered(body: Node3D) -> void:
 	if body is Person:
 		print("HitboxDamage: ", body.name, body.id, " recibio trancazo")
 		print("HitboxDamage: ", body.damage_percentage)
-		body.set_damage_percentage( _damage )
-		body.set_damage_move( _damage, _direction )
+		body.set_damage( _damage, _direction )
 		if use_gravity and not body.is_immune_to_damage():
 			self.queue_free()
