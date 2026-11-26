@@ -12,9 +12,9 @@ extends Person
 @export var fight_moves_with_simple_sound: Array[StringName] = [ # Solo en first frame: suena stream attack.
 	"neutral_attack1", "neutral_attack2", "neutral_attack3", "down_attack", "forward_attack",
 	"up_attack", "heavy_up_attack", "heavy_down_attack", "heavy_side_attack", 
-	"air_forward_attack", "air_back_attack", "air_up_attack", "air_neutral_attack", "air_down_attack"] 
-@export var fight_moves_with_hitstun_sound: Array[StringName] = [ 
-	"dash_attack" ] # Para play de sound solo en hitbox, y probablemente se use otro stream.
+	"air_forward_attack", "air_back_attack", "air_up_attack", "air_down_attack"] 
+@export var fight_moves_with_hitspawn_sound: Array[StringName] = [ 
+	"dash_attack", "air_neutral_attack" ] # Para play de sound solo en spawn de cada hitbox, y probablemente se use otro stream.
 
 # Propiedades privadas | Input
 var _attack: bool = false
@@ -1035,7 +1035,7 @@ func _attack_sounds(delta, frame: FrameMotionSignals) -> void:
 				_audio_stream_player.stream = stream_attack
 				_audio_stream_player.play()
 		if _first_frame_of_spawned_hitbox:
-			if _current_attack.name in fight_moves_with_hitstun_sound:
+			if _current_attack.name in fight_moves_with_hitspawn_sound:
 				_audio_stream_player.stream = stream_attack
 				_audio_stream_player.play()
 

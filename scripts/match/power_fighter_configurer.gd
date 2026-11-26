@@ -99,6 +99,11 @@ static func _apply_fighter_config(
 	'''
 	Aca se podria validar cada ataque (por motivos debug, o protejer el juego), pero creo que es mejor crash si esta mal el `FightMove`.
 	'''
+	# Fight moves
+	power_fighter.fight_moves_with_simple_sound = fighter_config.fight_moves_with_simple_sound
+	power_fighter.fight_moves_with_hitspawn_sound = fighter_config.fight_moves_with_hitspawn_sound
+	
+	# Attacks
 	power_fighter.attacks = fighter_config.attacks
 
 static func _apply_power_fighter_config(

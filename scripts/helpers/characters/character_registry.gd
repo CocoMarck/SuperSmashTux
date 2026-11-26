@@ -200,12 +200,22 @@ static func _config_fight_moves(
 		for x in hitboxes_moves:
 			var dict: Dictionary = Dictionary(x)
 			fight_move.hitboxes_moves.append( HitboxMove.new(dict) )
+		
+static func _array_to_array_string_name(p_array: Array) -> Array[StringName]:
+	var new_array: Array[StringName]
+	for i in p_array:
+		new_array.append( StringName(i) )
+	return new_array
 
 static func load_fighter_config(path: String) -> FighterConfig:
 	var cfg: ConfigFile = ConfigFile.new()
 	cfg.load(path)
 
 	var config: FighterConfig = FighterConfig.new()
+	config.fight_moves_with_simple_sound = _array_to_array_string_name(
+		Array(cfg.get_value("fight_moves", "fight_moves_with_simple_sound")) )
+	config.fight_moves_with_hitspawn_sound = _array_to_array_string_name(
+		Array(cfg.get_value("fight_moves", "fight_moves_with_hitspawn_sound")) )
 	config.attacks = Attacks.new()
 	
 	# Parte pesada attacks
