@@ -118,6 +118,13 @@ static func fighter_config_path(id: StringName) -> String:
 		return ""
 	return DATA_DIR + String(id) + ".fighter.cfg"
 
+static func power_fighter_config_path(id: StringName) -> String:
+	_ensure_loaded()
+	if not is_playable(id):
+		_fail("power fighter config don't exist for: %s" % id)
+		return ""
+	return DATA_DIR + String(id) + ".power_fighter.cfg"
+
 static func load_person_config(path: String) -> PersonConfig:
 	'''
 	No validar nada, el crash es bueno. Data mala, crash por mal educado. GG.
@@ -175,6 +182,25 @@ static func _fight_move(cfg: ConfigFile, p_name: String) -> Dictionary:
 		"immortal": bool(cfg.get_value(p_name, "immortal")),
 		"hitboxes_moves": Array( cfg.get_value(p_name, "hitboxes_moves") ) }
 
+static func _config_fight_moves(
+	all_attacks: Dictionary[FightMove, Dictionary]) -> void:
+	for fight_move: FightMove in all_attacks.keys():
+		fight_move.name = all_attacks[fight_move]["name"]
+		fight_move.duration = all_attacks[fight_move]["duration"]
+		fight_move.speed = all_attacks[fight_move]["speed"]
+		fight_move.jump_power = all_attacks[fight_move]["jump_power"]
+		fight_move.air_attack = all_attacks[fight_move]["air_attack"]
+		fight_move.grab_attack = all_attacks[fight_move]["grab_attack"]
+		fight_move.override_horizontal_move = all_attacks[fight_move]["override_horizontal_move"]
+		fight_move.override_vertical_move = all_attacks[fight_move]["override_vertical_move"]
+		fight_move.immortal = all_attacks[fight_move]["immortal"]
+		
+		# Parte sensible, hitboxes moves
+		var hitboxes_moves: Array = all_attacks[fight_move]["hitboxes_moves"]
+		for x in hitboxes_moves:
+			var dict: Dictionary = Dictionary(x)
+			fight_move.hitboxes_moves.append( HitboxMove.new(dict) )
+
 static func load_fighter_config(path: String) -> FighterConfig:
 	var cfg: ConfigFile = ConfigFile.new()
 	cfg.load(path)
@@ -200,37 +226,42 @@ static func load_fighter_config(path: String) -> FighterConfig:
 		config.attacks.air_back: _fight_move(cfg, "air_back_attack"),
 		config.attacks.air_up: _fight_move(cfg, "air_up_attack"),
 		config.attacks.air_down: _fight_move(cfg, "air_down_attack"),
-
 	}
-	for fight_move: FightMove in all_attacks.keys():
-		fight_move.name = all_attacks[fight_move]["name"]
-		fight_move.duration = all_attacks[fight_move]["duration"]
-		fight_move.speed = all_attacks[fight_move]["speed"]
-		fight_move.jump_power = all_attacks[fight_move]["jump_power"]
-		fight_move.air_attack = all_attacks[fight_move]["air_attack"]
-		fight_move.grab_attack = all_attacks[fight_move]["grab_attack"]
-		fight_move.override_horizontal_move = all_attacks[fight_move]["override_horizontal_move"]
-		fight_move.override_vertical_move = all_attacks[fight_move]["override_vertical_move"]
-		fight_move.immortal = all_attacks[fight_move]["immortal"]
-		
-		# Parte sensible, hitboxes moves
-		var hitboxes_moves: Array = all_attacks[fight_move]["hitboxes_moves"]
-		for x in hitboxes_moves:
-			var dict: Dictionary = Dictionary(x)
-			fight_move.hitboxes_moves.append( HitboxMove.new(dict) )
+	_config_fight_moves(all_attacks)
+
+	return config
+
+static func load_power_fighter_config(path: String) -> PowerFighterConfig:
+	var cfg: ConfigFile = ConfigFile.new()
+	cfg.load(path)
+
+	var config: PowerFighterConfig = PowerFighterConfig.new()
+	config.power_attacks = PowerAttacks.new()
+	
+	# Parte pesada attacks
+	var all_attacks: Dictionary[FightMove, Dictionary] = {
+		config.power_attacks.standard: _fight_move(cfg, "power_attack"),
+		config.power_attacks.up: _fight_move(cfg, "up_power_attack"),
+		config.power_attacks.down: _fight_move(cfg, "down_power_attack"),
+		config.power_attacks.air_standard: _fight_move(cfg, "air_power_attack"),
+		config.power_attacks.air_up: _fight_move(cfg, "air_up_power_attack"),
+		config.power_attacks.air_down: _fight_move(cfg, "air_down_power_attack"),
+	}
+	_config_fight_moves(all_attacks)
 
 	return config
 
 static func has_person_config(id: StringName) -> bool:
-	if id == STANDARD_ID: return false
 	var path: String = person_config_path(id)
 	return path != "" and FileAccess.file_exists( path )
 
 static func has_fighter_config(id: StringName) -> bool:
-	if id == STANDARD_ID: return false
 	var path: String = fighter_config_path(id)
 	return path != "" and FileAccess.file_exists( path )
 
+static func has_power_fighter_config(id: StringName) -> bool:
+	var path: String = power_fighter_config_path(id)
+	return path != "" and FileAccess.file_exists( path )
 
 static func model_path(id: StringName) -> String:
 	'''
@@ -238,7 +269,6 @@ static func model_path(id: StringName) -> String:
 	'''
 	if id == STANDARD_ID:
 		return STANDARD_MODEL_PATH
-	else:
-		var config_path: String = person_config_path(id)
-		var config: PersonConfig = load_person_config(config_path)
-		return config.model
+	var config_path: String = person_config_path(id)
+	var config: PersonConfig = load_person_config(config_path)
+	return config.model

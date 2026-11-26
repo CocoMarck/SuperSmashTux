@@ -12,16 +12,24 @@ static func create(
 	var power_fighter = POWER_FIGHTER_PREFAB.instantiate()
 	var person_config: PersonConfig
 	var fighter_config: FighterConfig
+	var power_fighter_config: PowerFighterConfig
 
-	# Cambiar o no construcción de instancia
+	# Obtener configs
 	var has_person_config: bool = CharacterRegistry.has_person_config(config_id)
 	var has_fighter_config: bool = CharacterRegistry.has_fighter_config(config_id)
+	var has_power_fighter_config: bool = CharacterRegistry.has_power_fighter_config(config_id)
+
 	if has_person_config:
 		person_config = CharacterRegistry.load_person_config(
 			CharacterRegistry.person_config_path(config_id) )
 	if has_fighter_config:
 		fighter_config = CharacterRegistry.load_fighter_config(
 			CharacterRegistry.fighter_config_path(config_id) )
+	if has_power_fighter_config:
+		power_fighter_config = CharacterRegistry.load_power_fighter_config(
+			CharacterRegistry.power_fighter_config_path(config_id) )
+	
+	# Construir instancia solo si existe person. Mínimo requisito.
 	if has_person_config:
 		_build_instance(power_fighter, person_config)
 	
@@ -30,8 +38,8 @@ static func create(
 		_apply_person_config(power_fighter, person_config)
 	if has_fighter_config:
 		_apply_fighter_config(power_fighter, fighter_config)
-		if config_id == "tux":
-			_apply_tux_attacks(power_fighter)
+	if has_power_fighter_config:
+		_apply_power_fighter_config(power_fighter, power_fighter_config)
 
 	# Establecer tipo de control
 	match control_type:
@@ -93,177 +101,8 @@ static func _apply_fighter_config(
 	'''
 	power_fighter.attacks = fighter_config.attacks
 
-static func _apply_tux_attacks(power_fighter: PowerFighter) -> void:
+static func _apply_power_fighter_config(
+	power_fighter: PowerFighter, power_fighter_config: PowerFighterConfig) -> void:
 	'''
-	Ataques de Tux, hardcodeados hasta que se lean de `tux.power_fighter.cfg`/`tux.power_fighter.cfg`.
 	'''
-	# power attacks on floor
-	power_fighter.power_attacks.standard.duration = 0.5
-	power_fighter.power_attacks.up.duration = 0.5
-	power_fighter.power_attacks.up.speed = Vector3(6,0,0)
-	
-	power_fighter.power_attacks.up.jump_power = 11.0
-	power_fighter.power_attacks.up.hitboxes_moves = [
-		HitboxMove.new({
-			"id": 1, "damage": 5, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
-			"init_time_ratio": 0.3, "duration": 0.05
-		}),
-		HitboxMove.new({
-			"id": 2, "damage": 5, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
-			"init_time_ratio": 0.4, "duration": 0.05
-		}),
-		HitboxMove.new({
-			"id": 3, "damage": 5, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
-			"init_time_ratio": 0.5, "duration": 0.05
-		}),
-		HitboxMove.new({
-			"id": 4, "damage": 5.0, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.75,1.0,0),
-			"init_time_ratio": 0.6, "duration": 0.05
-		}),
-	]
-	
-	power_fighter.power_attacks.down.duration = 1.0417
-	power_fighter.power_attacks.down.hitboxes_moves = [
-		# Frente
-		HitboxMove.new({
-			"id": 1, "damage": 5, "size": Vector3(0.5,0.5,0.75),
-			"position": Vector3(1.0,-0.15,0.0), "direction": Vector3(-1.0,0.25,0.0),
-			"init_time_ratio": 0.5, "duration": 0.08
-		}),
-		HitboxMove.new({
-			"id": 2, "damage": 5, "size": Vector3(0.5,0.5,0.75),
-			"position": Vector3(1.0,-0.15,0.0), "direction": Vector3(-1.0,0.25,0.0),
-			"init_time_ratio": 0.6, "duration": 0.08
-		}),
-		HitboxMove.new({
-			"id": 3, "damage": 5, "size": Vector3(0.5,0.5,0.75),
-			"position": Vector3(1.0,-0.15,0.0), "direction": Vector3(-1.0,0.25,0.0),
-			"init_time_ratio": 0.7, "duration": 0.08
-		}),
-		HitboxMove.new({
-			"id": 4, "damage": 10, "size": Vector3(0.5,0.5,0.75),
-			"position": Vector3(1.0,-0.15,0.0), "direction": Vector3(0.0,0.75,0.0),
-			"init_time_ratio": 0.8, "duration": 0.08
-		}),
-		# Espalda
-		HitboxMove.new({
-			"id": 5, "damage": 5, "size": Vector3(0.5,0.5,0.75),
-			"position": Vector3(-1.0,-0.15,0.0), "direction": Vector3(1.0,0.25,0.0),
-			"init_time_ratio": 0.5, "duration": 0.08
-		}),
-		HitboxMove.new({
-			"id": 6, "damage": 5, "size": Vector3(0.5,0.5,0.75),
-			"position": Vector3(-1.0,-0.15,0.0), "direction": Vector3(1.0,0.25,0.0),
-			"init_time_ratio": 0.6, "duration": 0.08
-		}),
-		HitboxMove.new({
-			"id": 7, "damage": 5, "size": Vector3(0.5,0.5,0.75),
-			"position": Vector3(-1.0,-0.15,0.0), "direction": Vector3(1.0,0.25,0.0),
-			"init_time_ratio": 0.7, "duration": 0.08
-		}),
-		HitboxMove.new({
-			"id": 8, "damage": 10, "size": Vector3(0.5,0.5,0.75),
-			"position": Vector3(-1.0,-0.15,0.0), "direction": Vector3(0.0,0.75,0.0),
-			"init_time_ratio": 0.8, "duration": 0.08
-		})
-	]
-
-	# power attacks air
-	power_fighter.power_attacks.air_standard.duration = 0.5
-	power_fighter.power_attacks.air_up.duration = 0.5
-	power_fighter.power_attacks.air_up.speed = Vector3(6,0,0)
-	
-	power_fighter.power_attacks.air_up.jump_power = 11.0
-	power_fighter.power_attacks.air_up.hitboxes_moves = [
-		HitboxMove.new({
-			"id": 1, "damage": 5, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
-			"init_time_ratio": 0.3, "duration": 0.05
-		}),
-		HitboxMove.new({
-			"id": 2, "damage": 5, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
-			"init_time_ratio": 0.4, "duration": 0.05
-		}),
-		HitboxMove.new({
-			"id": 3, "damage": 5, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.5,1.0,0),
-			"init_time_ratio": 0.5, "duration": 0.05
-		}),
-		HitboxMove.new({
-			"id": 4, "damage": 5.0, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.0, 1.2, 0), "direction": Vector3(0.75,1.0,0),
-			"init_time_ratio": 0.6, "duration": 0.05
-		}),
-	]
-	
-	power_fighter.power_attacks.air_down.duration = 1.0417
-	power_fighter.power_attacks.air_down.hitboxes_moves = [
-		# Frente
-		HitboxMove.new({
-			"id": 1, "damage": 2, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.7,0.6,0.0), "direction": Vector3(-1.0,-1.0,0.0),
-			"init_time_ratio": 0.2, "duration": 0.18
-		}),
-		HitboxMove.new({
-			"id": 2, "damage": 2, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.8,-0.5,0.0), "direction": Vector3(-1.0,1.0,0.0),
-			"init_time_ratio": 0.2, "duration": 0.18
-		}),
-		HitboxMove.new({
-			"id": 3, "damage": 2, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.7,0.6,0.0), "direction": Vector3(-1.0,-1.0,0.0),
-			"init_time_ratio": 0.4, "duration": 0.18
-		}),
-		HitboxMove.new({
-			"id": 4, "damage": 2, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.8,-0.5,0.0), "direction": Vector3(-1.0,1.0,0.0),
-			"init_time_ratio": 0.4, "duration": 0.18
-		}),
-		HitboxMove.new({
-			"id": 5, "damage": 3, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.7,0.6,0.0), "direction": Vector3(1.0,1.0,0.0),
-			"init_time_ratio": 0.6, "duration": 0.18
-		}),
-		HitboxMove.new({
-			"id": 6, "damage": 3, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(0.8,-0.5,0.0), "direction": Vector3(1.0,-1.0,0.0),
-			"init_time_ratio": 0.6, "duration": 0.18
-		}),
-		
-		# Espalda
-		HitboxMove.new({
-			"id": 7, "damage": 2, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(-0.7,0.6,0.0), "direction": Vector3(-1.0,-1.0,0.0),
-			"init_time_ratio": 0.2, "duration": 0.18
-		}),
-		HitboxMove.new({
-			"id": 8, "damage": 2, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(-0.8,-0.5,0.0), "direction": Vector3(-1.0,1.0,0.0),
-			"init_time_ratio": 0.2, "duration": 0.18
-		}),
-		HitboxMove.new({
-			"id": 9, "damage": 2, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(-0.7,0.6,0.0), "direction": Vector3(-1.0,-1.0,0.0),
-			"init_time_ratio": 0.4, "duration": 0.18
-		}),
-		HitboxMove.new({
-			"id": 10, "damage": 2, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(-0.8,-0.5,0.0), "direction": Vector3(-1.0,1.0,0.0),
-			"init_time_ratio": 0.4, "duration": 0.18
-		}),
-		HitboxMove.new({
-			"id": 11, "damage": 3, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(-0.7,0.6,0.0), "direction": Vector3(-1.0,1.0,0.0),
-			"init_time_ratio": 0.6, "duration": 0.18
-		}),
-		HitboxMove.new({
-			"id": 12, "damage": 3, "size": Vector3(0.5,0.5,0.5),
-			"position": Vector3(-0.8,-0.5,0.0), "direction": Vector3(-1.0,-1.0,0.0),
-			"init_time_ratio": 0.6, "duration": 0.18
-		}),
-	]
+	power_fighter.power_attacks = power_fighter_config.power_attacks

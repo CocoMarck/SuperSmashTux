@@ -21,7 +21,7 @@ var _defaults :Dictionary = {
 	"air_up": FightMove.new({}),
 }
 
-func _init( p_config: Dictionary ) -> void:
+func _init( p_config: Dictionary={} ) -> void:
 	# Config fixeado con defaults
 	var config :Dictionary = _defaults.duplicate()
 	config.merge(p_config, true)  # true = p_config gana
