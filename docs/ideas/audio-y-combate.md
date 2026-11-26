@@ -14,9 +14,7 @@
 ## Tipo de hitbox
 
 - Idea: agregar metadata de tipo a `HitboxMove` y propagarla al hitbox instanciado.
-- El hitbox decide el sonido al conectar, no al spawnear, y distingue cuerpo, escudo, pared y futuro item.
-- Para no crear una matriz, resolver dos ejes: `hitbox_type` + `surface_type`, con fallback a un sonido genérico.
-- Estado: hoy el hit de daño lo dispara el receptor y el ataque suena al spawnear.
+- Atributo `type: HitboxType` o `type: String`. Con este el objeto golpeado ejemplo `Person` detecta que `Hitbox` le dio, pos reproduce sonido relacionado con su `type`.
 
 ## Carga de ataques
 
