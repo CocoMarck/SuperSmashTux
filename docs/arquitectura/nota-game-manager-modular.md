@@ -50,7 +50,7 @@ cambian**. Nada de reglas depende de que la cámara exista.
 | Config de persona | `PersonConfig` | `RefCounted` con identidad, model/offset, momentum, movimiento, salto, intervals y `air_jump_duration` | **LISTO** |
 | Registro de personajes | `CharacterRegistry` | helper (no nodo): lee `identities.cfg`, valida ids y expone `playable_ids()` / `display_name()` | **LISTO** |
 | Catálogo de selección | `CharacterCatalog` | helper (no nodo): arma `Entry` con `config_id`, nombre, glifo, modelo y flag de selección | **LISTO** |
-| Armado | `PowerFighterConfigurer` | recibe `config_id`, lee `.person.cfg` y `.fighter.cfg` con `ConfigFile` (sin validación) y aplica la config al prefab; power attacks siguen hardcodeados (FALTA) | **LISTO/PARCIAL** |
+| Armado | `PowerFighterConfigurer` | recibe `config_id`, lee `.person.cfg`, `.fighter.cfg` y `.power_fighter.cfg` con `ConfigFile` (sin validación) y aplica la config al prefab; Tux ya no tiene overrides hardcodeados | **LISTO** |
 
 `GameManager` también spawnea a los peleadores. El lineup sale de `power_fighter_slots`
 (`PowerFighterSlots`), que llena `CharacterMenu` antes de cambiar de escena. **No hay respaldo**: si

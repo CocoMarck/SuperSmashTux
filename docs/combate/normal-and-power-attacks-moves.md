@@ -1,38 +1,40 @@
 # Normal and power attacks moves
-No se usa prefijo attack en ningun lado porque las clases ya tienen contextalmente que son `Attacks`.
+
+Los nombres son los de la sección del `.cfg` y, por lo tanto, el clip de animación que reproduce `Fighter`. Ya se usa el sufijo `attack` en el contrato real; el texto viejo que decía lo contrario quedó obsoleto.
+
+En `PowerAttacks`, las propiedades internas `standard` y `air_standard` se llenan desde las secciones `power_attack` y `air_power_attack`.
 
 ## Fighter
-Estos ataques los contendra una clase `Attacks`. Que simplemente de propiedades tendra `FightMove` con estos nombres.
+
+Estos ataques los contiene `Attacks`; cada propiedad es un `FightMove`.
 
 ### En el piso
-- `ground_neutral`: Cuando no se mueve y esta parado.
-- `down`: Cuando esta agachado y sin moverse.
-- `dash`: Corriendo y atacar.
-- `forward`: Caminando y attack.
-- `up`: Sin moverse, y precionar ataque arriba.
-- `heavy_side`: Cuando se preciona al mismo tiempo ataque y der o izq.
-- `heavy_up`: Sin moverse, y precionar al mismo tiempo ataque y arriba.
-- `heavy_down`: Sin moverse, y precionar al mismo tiempo ataque y abajo.
+- `neutral_attack1`, `neutral_attack2`, `neutral_attack3`: cuando no se mueve y está parado.
+- `down_attack`: agachado y sin moverse.
+- `dash_attack`: corriendo y atacar.
+- `forward_attack`: caminando y atacar.
+- `up_attack`: sin moverse y presionar ataque arriba.
+- `heavy_side_attack`: presionar al mismo tiempo ataque y der/izq.
+- `heavy_up_attack`: presionar al mismo tiempo ataque y arriba.
+- `heavy_down_attack`: presionar al mismo tiempo ataque y abajo.
 
 ### En el aire
-- `air_neutral`: En el aire, sin moverse y atacar.
-- `air_back`: En el aire moviendose a de espaldas y atacar.
-- `air_forward`: En el aire moviendose a un lado y atacar.
-- `air_down`: En el aire y atacar precionando abajo. Ya sea moviendose o no.
-- `air_up`: En el aire y atacar precionando arriba. Ya sea moviendose o no.
+- `air_neutral_attack`: en el aire, sin moverse y atacar.
+- `air_back_attack`: en el aire, moviéndose de espaldas y atacar.
+- `air_forward_attack`: en el aire, moviéndose a un lado y atacar.
+- `air_down_attack`: en el aire y atacar presionando abajo, moviéndose o no.
+- `air_up_attack`: en el aire y atacar presionando arriba, moviéndose o no.
 
----
 ## PowerFighter
-Estos ataques los contendra una clase `PowerAttacks`. Que simplemente de propiedades tendra `FightMove` con estos nombres.
+
+Estos ataques los contiene `PowerAttacks`; cada propiedad es un `FightMove`.
 
 ### En el piso
-- `power_neutral`: Proyectil, rafaga de energia, o carga de ataque.
-- `power_side`: Poder hacia un lado.
-- `power_up`: Poder hacia arriba que da propulicón. Puede hacer daño o no.
-- `power_down`: Poder hacia abajo, puede ser ataque o no.
+- `power_attack`: proyectil, ráfaga de energía o carga de ataque.
+- `down_power_attack`: poder hacia abajo, puede ser ataque o no.
+- `up_power_attack`: poder hacia arriba que da propulsión. Puede hacer daño o no.
 
 ### En el aire
-- `air_jump`: Salto en el aire.
-- `power_air_up`: Lo mismo que power up. Pero animacion en el aire.
-- `power_air_down`: Lo mismo que power down. Pero animacion en el aire.
-- `power_air_side`: Lo mismo que power side. Pero animacion en el aire.
+- `air_power_attack`: igual que `power_attack`, con animación en el aire.
+- `air_down_power_attack`: igual que `down_power_attack`, con animación en el aire.
+- `air_up_power_attack`: igual que `up_power_attack`, con animación en el aire.

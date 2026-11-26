@@ -4,32 +4,34 @@ Documenta los SFX de personaje (placeholders / uso por defecto), la integración
 
 ## Estado actual
 
-- **Archivos**: 15 WAV en `assets/audio/sfx/`, cinco categorías con tres variantes y su randomizer: `rand_step.tres`, `rand_jump.tres`, `rand_land.tres`, `rand_attack.tres`, `rand_hit.tres`.
+- **Archivos**: 18 WAV en `assets/audio/sfx/`. Cinco categorías con tres variantes y su randomizer: `rand_step.tres`, `rand_jump.tres`, `rand_land.tres`, `rand_attack.tres`, `rand_hit.tres`. `whip_01/02/03.wav` son placeholders sin randomizer ni uso en código.
 - **`Person`**: `person.gd` exporta `stream_jump` / `stream_step` / `stream_land` / `stream_hit` (`AudioStreamRandomizer`) y cachea `_audio_stream_player: AudioStreamPlayer3D`.
-- **`Fighter`**: `fighter.gd` exporta `stream_attack` y define `fight_moves_with_simple_sound` / `fight_moves_with_hitstun_sound` para elegir cuándo suena.
-- **Prefab**: `standard_power_fighter.tscn` trae el nodo `AudioStreamPlayer3D` y, en la root, defaults estables de power attacks en `fight_moves_with_hitstun_sound` (`prefabs/standard_power_fighter.tscn:21`). Usan el stream genérico `stream_attack`.
+- **`Fighter`**: `fighter.gd` exporta `stream_attack` y define `fight_moves_with_simple_sound` / `fight_moves_with_hitspawn_sound` para elegir cuándo suena.
+- **Prefab**: `standard_power_fighter.tscn` trae el nodo `AudioStreamPlayer3D`; ya no guarda defaults de listas de sonido en la root (`prefabs/standard_power_fighter.tscn:19-35`).
+- **Config de Tux**: las listas de sonido viven en `data/characters/tux.fighter.cfg:3-11`, dentro de `[fight_moves]`, y las aplica `PowerFighterConfigurer` con `_apply_fighter_config()`.
 - **Detección de eventos**: `Person::_process_sound()` corre `_movement_sounds()` y luego el hook `_attack_sounds()`; `Person` lo deja vacío y `Fighter` lo implementa. Movimiento = paso/salto/caída/golpe recibido; ataque = first frame o primer frame de hitbox según lista.
-- **Reproducción real**: ya llama `play()`, pero sigue el `print` de placeholder. Pendiente decidir 1 vs 3 `AudioStreamPlayer3D` (un player tiene un solo `stream`).
+- **Reproducción real**: ya llama `play()`, pero sigue el `print` de placeholder. Pendiente decidir players fijos o un esquema dinámico; ver [audio-y-combate.md](../ideas/audio-y-combate.md).
 - **`set_script` resuelto**: el prefab ya trae `script = power_fighter.gd` en el root y el configurer asigna `controller` (nodo hijo) en vez de `set_script`, así que los `@export` de escena (grupos `SFX`) sobreviven y los `stream_*` ya no llegan `null`. Ver [nota-power-fighter-controller.md](../arquitectura/nota-power-fighter-controller.md).
 - Los sonidos listados aquí son placeholders: sirven como comportamiento por defecto hasta que cada personaje tenga sus propios SFX.
 
 ## Sonidos placeholders (ahora)
 
-Son **15** WAV, tres variantes por categoría:
+Son **18** WAV: cinco categorías usadas con tres variantes cada una y un sexto set de látigo aún sin usar.
 
 | Categoría | Cantidad | Archivos | Cuándo se dispara |
 |---|---|---|---|
 | Pasos | 3 | `step_01`, `step_02`, `step_03` | Al caminar, correr o caminar agachado (`walking`, `running`, `crouch_move`). |
 | Salto | 3 | `jump_01`, `jump_02`, `jump_03` | Primer frame de salto, tanto desde el piso como en el aire (incluye el doble salto de `PowerFighter`). |
 | Caída | 3 | `land_01`, `land_02`, `land_03` | Primer frame al tocar el piso tras venir del aire. No debe dispararse mientras el personaje recibe daño. |
-| Ataque | 3 | `attack_01`, `attack_02`, `attack_03` | `Fighter`: first frame de `fight_moves_with_simple_sound` o primer frame de hitbox de `fight_moves_with_hitstun_sound`. Siempre `stream_attack`. |
+| Ataque | 3 | `attack_01`, `attack_02`, `attack_03` | `Fighter`: first frame de `fight_moves_with_simple_sound` o primer frame de hitbox de `fight_moves_with_hitspawn_sound`. Siempre `stream_attack`. |
 | Golpe recibido | 3 | `hit_01`, `hit_02`, `hit_03` | Primer frame de daño vía `set_damage(dmg, dir)`. No es el sonido del ataque que pega. |
+| Látigo | 3 | `whip_01`, `whip_02`, `whip_03` | Placeholder: sin randomizer ni referencia en código. |
 
 Notas:
 
 - Las tres variantes existen para alternarlas y evitar el efecto "metralleta" al repetir el mismo pasito.
 - La cadencia de los pasos ya está parametrizada en `person.gd` con `walk_step_interval`, `run_step_interval` y `crouch_move_step_interval`.
-- Idea futura (sin diseño): SFX específicos por ataque (proyectil/fuego); no hay nombres, cantidades ni contrato de datos definidos.
+- Idea futura (sin diseño): SFX específicos por ataque (proyectil/fuego) y centralización en `AudioStreamLayerPlayer3D`; detalle superficial en [audio-y-combate.md](../ideas/audio-y-combate.md).
 
 ## Formato recomendado: WAV vs Ogg Vorbis
 
@@ -121,15 +123,15 @@ assets/audio/music/
 - **`AudioStreamRandomizer`**: un recurso por categoría (`rand_step.tres`, `rand_jump.tres`, `rand_land.tres`, `rand_attack.tres`, `rand_hit.tres`) con tres variantes; elige una al azar en cada reproducción. Permite variar pitch y volumen, y usar modo "random no repeats" para no repetir el mismo paso seguido.
 - **`AudioStreamPlayer3D`**: para que el sonido se posicione en el mundo. Ubicar el nodo cerca de los pies del personaje y ajustar `max_polyphony` para permitir traslapes.
 - **Hook real**: `Person::_process_sound()` llama `_movement_sounds()` y luego `_attack_sounds()`; `Fighter` lo sobrescribe y usa `_current_attack.name` contra las dos listas. El hook de `Person` sigue vacío.
-- **Un player vs tres**: con un solo `AudioStreamPlayer3D` hay que cambiar `stream` por categoría, y asignar `stream` llama `stop()`, así que se corta el sonido anterior. Con tres nodos hay canales para traslapar. Decisión pendiente (1 vs 3).
+- **Un player vs varios**: con un solo `AudioStreamPlayer3D` hay que cambiar `stream` por categoría, y asignar `stream` llama `stop()`, así que se corta el sonido anterior. La decisión entre canales fijos y `AudioStreamLayerPlayer3D` sigue pendiente.
 - Prioridad real en el mismo frame (última asignación gana): ataque > golpe recibido > salto > caída > paso.
 
 ## Known issues
 
 - Sigue el `print` de placeholder en `_movement_sounds()`.
-- Un solo `AudioStreamPlayer3D` corta el sonido anterior al reasignar `stream`; por eso sigue abierto el 1 vs 3.
-- Power attacks: `down_power_attack` y `air_down_power_attack` ya suenan por defaults estables del prefab `standard`; los otros 4 power attacks siguen mudos. El stream sigue siendo `stream_attack`.
-- El hit de ataque suena al spawnear hitbox, no al conectar; el escudo suena hit aunque bloquee.
+- Un solo `AudioStreamPlayer3D` corta el sonido anterior al reasignar `stream`; por eso sigue abierta la decisión de players.
+- En Tux, cuatro power attacks suenan al spawnear desde `tux.fighter.cfg`: `down_power_attack`, `up_power_attack`, `air_down_power_attack` y `air_up_power_attack`. Siguen mudos `power_attack` y `air_power_attack`. El stream sigue siendo `stream_attack`.
+- El hit de ataque suena al spawnear hitbox, no al conectar; el escudo suena hit aunque bloquee. La dirección futura está en [audio-y-combate.md](../ideas/audio-y-combate.md).
 
 ## Licencias
 

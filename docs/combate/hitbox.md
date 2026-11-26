@@ -92,7 +92,6 @@ Ganancia: robustez (auto-cleanup) sin perder el control fino del `Fighter`.
 
 ## Pendientes / a decidir
 
-- Migrar `hitbox.gd` actual → `Hitbox` papa y crear `hitbox_damage.gd` y `hitbox_grab.gd`.
 - Decidir si `HitboxGrab` notifica al `_parent` por método o por señal.
 - Definir si el grab usa `FightMove` con `grab_attack = true` o un flujo propio.
-- `HitboxGrab` aún no existe en código; solo está diseñado.
+- Idea no implementada: tipo de hitbox para clasificar el impacto y sonido al conectar; ver [audio-y-combate.md](../ideas/audio-y-combate.md).

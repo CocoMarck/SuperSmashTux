@@ -37,17 +37,18 @@ supersmashtux/
 │   │   └── sfx/      # SFX (wavs) y sus randomizers (.tres)
 │   └── fonts/        # Fuentes
 ├── data/             # Configs en texto (.cfg) y, en el futuro, CSV de traducciones
-│   ├── templates/    # Plantillas: name.person.cfg, name.fighter.cfg, name.power_fighter.cfg (huérfana)
+│   ├── templates/    # Plantillas: name.person.cfg, name.fighter.cfg y name.power_fighter.cfg
 │   ├── locale/       # (FALTA) strings.csv con columnas keys,en,es
-│   └── characters/      # identities.cfg (manifiesto, admite hidden) + configs <id>.person.cfg y <id>.fighter.cfg (p. ej. tux); standard es base hardcodeada sin cfg
+│   └── characters/   # identities.cfg + configs <id>.person.cfg, <id>.fighter.cfg y <id>.power_fighter.cfg (p. ej. tux); standard es base hardcodeada sin cfg
 ├── addons/           # Plugins de Godot (godot_ai: MCP de Godot para agentes de IA)
-├── docs/             # Documentación, notas, ideas (estructura.md y changelog.md viven en la raíz de docs/)
+├── docs/             # Documentación (estructura.md y changelog.md viven en la raíz de docs/)
 │   ├── arquitectura/ # Jerarquía de clases, UML y decisiones de diseño (GameManager, process vs physics_process)
 │   ├── combate/      # Hitboxes, ataques normales y power
 │   ├── ia/           # NPCs: comportamiento y detección
 │   ├── controles/    # Configuración de controles e InputSettings
 │   ├── ui/           # Interfaz, UI responsiva e internacionalización (nota-internacionalizacion-ui.md)
-│   └── arte/         # Assets, modelos, animaciones y nombres para personajes
+│   ├── arte/         # Assets, modelos, animaciones y nombres para personajes
+│   └── ideas/        # Ideas futuras no implementadas (audio-y-combate.md)
 ├── .claude/          # Config local de Claude Code (agentes, skills, settings)
 ├── AGENTS.md         # Archivo principal de instrucciones para agentes de IA
 ├── README.md         # Documento de presentación del proyecto

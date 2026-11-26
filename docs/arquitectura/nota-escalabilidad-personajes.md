@@ -19,9 +19,9 @@
 
 ### 1. Moveset dentro del script
 
-- `fighter.gd:48` define 15 `FightMove` (líneas 48-292) y `power_fighter.gd:8` define 6 (líneas 8-131). No hay movesets en `.tres`: el proyecto solo tiene `.tres` de entorno y materiales.
-- Hay duplicación en `power_fighter.gd`: `down`/`air_down`, `standard`/`air_standard` y `up`/`air_up` tienen los mismos hitboxes y solo difieren en `name` y en flags de aire (`air_attack`, `override_horizontal_move`).
-- *Efecto:* un personaje nuevo con moveset propio son unas 370 líneas que copiar y ajustar. *Por qué pesa:* un ajuste de balance hay que replicarlo a mano en cada par.
+- `fighter.gd` y `power_fighter.gd` siguen trayendo los defaults hardcodeados del moveset base; el proyecto no usa `.tres` de movesets.
+- Tux ya no necesita copiarlos: `tux.fighter.cfg` y `tux.power_fighter.cfg` cargan los 15 ataques normales y los 6 power attacks vía `CharacterRegistry`. `standard` queda como base/dummy y conserva sus defaults en code/prefab.
+- *Efecto:* la duplicación de `power_fighter.gd` (`down`/`air_down`, `standard`/`air_standard`, `up`/`air_up`) sigue en los defaults, pero ya no se replica para configurar Tux.
 
 ### 2. Slots fijos
 
@@ -46,7 +46,7 @@
 ### 5. Los datos solo cubren golpes
 
 - Hoy los datos cubren golpes, saltos de ataque (`jump_power`, usado por `up` y `air_up` de `PowerFighter`) y proyectiles con gravedad y rebote (`use_gravity`, `bounce`, `fighter.gd:350-358`).
-- Mecánicas como teletransporte, contraataque o carga no tienen campo en el dato: requieren código nuevo en `Fighter` o en una subclase.
+- Mecánicas como teletransporte, contraataque o carga no tienen campo en el dato: requieren código nuevo en `Fighter` o en una subclase. La dirección propuesta para carga está en [audio-y-combate.md](../ideas/audio-y-combate.md).
 
 ### 6. Animaciones atadas por nombre
 
@@ -94,3 +94,4 @@ flowchart LR
 - [nota-ataques.md](../combate/nota-ataques.md): cómo se elige y ejecuta un ataque.
 - [hitbox.md](../combate/hitbox.md): construcción y ciclo de vida del hitbox.
 - [asset-personaje.md](../arte/asset-personaje.md): nombres de animación fijos.
+- [audio-y-combate.md](../ideas/audio-y-combate.md): ideas no implementadas de audio, tipo de hitbox y carga.
