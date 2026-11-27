@@ -30,6 +30,7 @@ prefab sobreviven y el prefab se configura sin pedos.
 
 > Nota: el [problema 2 de escalabilidad](nota-escalabilidad-personajes.md) ya planteaba
 > "Player/NPC como controladores por composición". Esta nota aterriza el diseño y las decisiones.
+> Las fichas de [Person](clase-person.md), [Fighter](clase-fighter.md) y [PowerFighter](clase-power-fighter.md) consolidan hooks y superficie pública.
 
 ## Qué resuelve
 

@@ -1,6 +1,6 @@
 # UML — Arquitectura de código
 
-> Mapa de clases del proyecto. Para la explicación de personajes ver `docs/arquitectura/arquitectura-personajes.md`.
+> Mapa de clases del proyecto. Para la explicación de personajes ver [arquitectura-personajes.md](arquitectura-personajes.md); para el estado detallado ver [clase-person.md](clase-person.md), [clase-fighter.md](clase-fighter.md) y [clase-power-fighter.md](clase-power-fighter.md).
 
 ## Personajes
 

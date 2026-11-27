@@ -1,6 +1,6 @@
 # Normal and power attacks moves
 
-Los nombres son los de la sección del `.cfg` y, por lo tanto, el clip de animación que reproduce `Fighter`. Ya se usa el sufijo `attack` en el contrato real; el texto viejo que decía lo contrario quedó obsoleto.
+Los nombres son los de la sección del `.cfg` y, por lo tanto, el clip de animación que reproduce `Fighter`. Ya se usa el sufijo `attack` en el contrato real; el texto viejo que decía lo contrario quedó obsoleto. Mapa de clases: [Fighter](../arquitectura/clase-fighter.md) y [PowerFighter](../arquitectura/clase-power-fighter.md).
 
 En `PowerAttacks`, las propiedades internas `standard` y `air_standard` se llenan desde las secciones `power_attack` y `air_power_attack`.
 

@@ -15,6 +15,7 @@
 > `scripts/characters/person.gd`, `scripts/characters/fighter.gd`,
 > `scripts/characters/power_fighter.gd`, `scripts/helpers/combat/attacks.gd`,
 > `scripts/helpers/combat/power_attacks.gd`, `scripts/helpers/combat/fight_move.gd`.
+> Fichas de estado de las clases: [Person](clase-person.md), [Fighter](clase-fighter.md) y [PowerFighter](clase-power-fighter.md).
 
 ## Resumen
 

@@ -1297,7 +1297,7 @@ func _physics_process(delta: float) -> void:
 	# Cometer cambios.
 	_commit_frame(delta, frame)
 
-	# Para la AI
+	# Para la AI (Al ultimo por si alguna func se le ocurre remplazar cosas del `frame` construido)
 	_last_frame = frame
 
 

@@ -2,7 +2,8 @@
 
 > Cómo se elige, ejecuta y termina un ataque (`FightMove`). Para el hitbox en sí (construcción, ciclo
 > de vida) ver `docs/combate/hitbox.md`. Para dónde encaja esto en la jerarquía de clases ver
-> `docs/arquitectura/arquitectura-personajes.md`. La idea de carga de ataques está en
+> [arquitectura-personajes.md](../arquitectura/arquitectura-personajes.md) y la ficha de estado de
+> [Fighter](../arquitectura/clase-fighter.md). La idea de carga de ataques está en
 > [audio-y-combate.md](../ideas/audio-y-combate.md); aún no está implementada.
 
 El sistema de ataques vive en **`scripts/characters/fighter.gd`** (clase `Fighter`, hija de `Person`). Lo

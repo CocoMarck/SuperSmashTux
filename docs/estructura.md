@@ -42,7 +42,7 @@ supersmashtux/
 │   └── characters/   # identities.cfg + configs <id>.person.cfg, <id>.fighter.cfg y <id>.power_fighter.cfg (p. ej. tux); standard es base hardcodeada sin cfg
 ├── addons/           # Plugins de Godot (godot_ai: MCP de Godot para agentes de IA)
 ├── docs/             # Documentación (estructura.md y changelog.md viven en la raíz de docs/)
-│   ├── arquitectura/ # Jerarquía de clases, UML y decisiones de diseño (GameManager, process vs physics_process)
+│   ├── arquitectura/ # Jerarquía de clases, UML, fichas de Person/Fighter/PowerFighter y decisiones de diseño (GameManager, process vs physics_process)
 │   ├── combate/      # Hitboxes, ataques normales y power
 │   ├── ia/           # NPCs: comportamiento y detección
 │   ├── controles/    # Configuración de controles e InputSettings

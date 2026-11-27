@@ -126,6 +126,9 @@
 - SFX de power attacks **LISTO (parcial)**: en Tux suenan cuatro al spawnear (`down`, `up`, `air_down`, `air_up`); siguen mudos `power_attack` y `air_power_attack` (`2026-11-25`).
 - Ideas de audio y combate **IDEA / NO IMPLEMENTADO**: `AudioStreamLayerPlayer3D`, tipo de hitbox y carga de ataques registrados en [docs/ideas/audio-y-combate.md](ideas/audio-y-combate.md) (`2026-11-25`).
 
+#### Fichas de estado de clases (`2026-11-26`)
+- `Person`, `Fighter` y `PowerFighter` **LISTO**: fichas nuevas en [clase-person.md](arquitectura/clase-person.md), [clase-fighter.md](arquitectura/clase-fighter.md) y [clase-power-fighter.md](arquitectura/clase-power-fighter.md), con hooks, estado interno, invariantes y deudas de refactor; enlaces cruzados mínimos.
+
 ### FALTA / en progreso
 
 #### `2026-11`

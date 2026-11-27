@@ -29,7 +29,7 @@ static func create(
 		power_fighter_config = CharacterRegistry.load_power_fighter_config(
 			CharacterRegistry.power_fighter_config_path(config_id) )
 	
-	# Construir instancia solo si existe person. Mínimo requisito.
+	# Construir instancia solo si existe person. `<id>.person.cfg` es el requisito mínimo para un nuevo personaje.
 	if has_person_config:
 		_build_instance(power_fighter, person_config)
 	

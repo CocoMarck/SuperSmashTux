@@ -2,6 +2,8 @@
 
 > Jerarquía real (aplicada) de los personajes. Reemplazó al viejo `Character` (ya borrado) con tres capas: `Person` (moverse y recibir daño), `Fighter` (dar trancazos) y `PowerFighter` (golpes con poder + doble salto). El mapa de clases completo vive en `docs/arquitectura/uml-arquitectura.md`.
 >
+> Fichas de estado para el futuro refactor: [clase-person.md](clase-person.md), [clase-fighter.md](clase-fighter.md) y [clase-power-fighter.md](clase-power-fighter.md).
+>
 > El **rol** (jugador/NPC) ya no es herencia: es un **nodo hijo** `PersonController3D` (`PlayerController` / `NpcController`). Ver [nota-power-fighter-controller.md](nota-power-fighter-controller.md).
 
 ## Jerarquía
