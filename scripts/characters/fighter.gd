@@ -54,11 +54,11 @@ var _init_shield_height : float
 var _shield_blockstun_time : float = 0.0
 
 # Propiedades privadas | Ataque
-var _first_attack_frame: bool = false
-var _first_frame_of_spawned_hitbox: bool = false
 var _attack_count: float = 0.0
 var _current_attack: FightMove = null
+var _last_attack: FightMove = null
 var _attack_jump_count :int = 0
+var _having_to_detect_attack_jump: bool = false
 
 var attacks: Attacks = Attacks.new(
 	# En el piso
@@ -321,6 +321,10 @@ var _spawned_hitboxes_damages: Array = []
 var _spawned_hitbox_grab: HitboxGrab = null
 var _spawned_hitbox_ids: Dictionary = {}
 
+# Propiedades privadas | First frame of events
+var _first_attack_frame: bool = false
+var _first_frame_of_spawned_hitbox: bool = false
+
 # Override funcs
 func _false_inputs() -> void:
 	super()
@@ -404,10 +408,17 @@ func _get_current_neutral_combo_move() -> FightMove:
 # Funciones | Pelear
 func _attack_jump_limit_reached() -> bool:
 	return _attack_jump_count > 1
-func _is_attack_jump() -> bool:
-	return _current_attack.jump_power > 0.0
-func _can_attack_jump() -> bool:
-	return _is_attack_jump() and (not _attack_jump_limit_reached()) and _attack_count == 0
+func _is_attack_jump(attack: FightMove) -> bool:
+	return attack.jump_power > 0.0
+func _is_last_attack_jump() -> bool:
+	if _last_attack is FightMove:
+		return _is_attack_jump(_last_attack)
+	return false
+func _can_attack():
+	# No poder atacar si se esta haciendo ataque de salto.
+	if _first_frame_on_floor:
+		_having_to_detect_attack_jump = false
+	return not (_having_to_detect_attack_jump and _is_last_attack_jump())
 
 func _init_attack_by_move(direction_buffered: bool, states: MoveStates):
 	if not _attack:
@@ -441,11 +452,18 @@ func _init_attack_by_move(direction_buffered: bool, states: MoveStates):
 	elif states.air_back:
 		_current_attack = attacks.air_back
 
+func _init_power_attack_by_move(direction_buffered: bool, states: MoveStates) -> void:
+	# Hook super descarado para power fighter
+	pass
+
 func _process_attack(direction_buffered: bool, states: MoveStates) -> void:
 	'''
 	Función remplazable. La remplazara power fighter
 	'''
+	if not _can_attack():
+		return
 	_init_attack_by_move(direction_buffered, states)
+	_init_power_attack_by_move(direction_buffered, states)
 
 func _set_attack(states: MoveStates) -> void:
 	'''
@@ -501,12 +519,12 @@ func _tick_neutral_combo_reset(delta:float):
 	if _neutral_combo_reset_time > 0:
 		_neutral_combo_reset_time -= delta
 
-func _process_neutral_combo(first_attack_frame:bool, states: MoveStates) -> void:
+func _process_neutral_combo(states: MoveStates) -> void:
 	# Contar ataque neutral, solo en first frame.
 	if (_current_attack in _neutral_combo_attacks):
 		if _neutral_combo_limit_reached():
 			_neutral_combo_count = 0
-		if first_attack_frame:
+		if _first_attack_frame:
 			_neutral_combo_count += 1
 			_neutral_combo_reset_time = _neutral_combo_reset_duration
 	else:
@@ -532,7 +550,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 		
 	# Necesarios
 	_first_attack_frame = _attack_count == 0
-	var is_attack_jump :bool = _is_attack_jump()
+	var is_attack_jump :bool = _is_attack_jump(_current_attack)
 	
 	# Sobrescribir movimiento a al atacar. Modo normal
 	if not is_attack_jump:
@@ -578,7 +596,7 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 	else:
 		_attack_count += delta
 	
-	_process_neutral_combo(_first_attack_frame, states)
+	_process_neutral_combo(states)
 
 	# Verificar que no sea null
 	if _current_attack == null:
@@ -601,9 +619,11 @@ func _fight_move(delta: float, signals: VerticalForceSignals, states: MoveStates
 					_spawn_hitboxes_damages( hitbox_move, direction )
 					_first_frame_of_spawned_hitbox = true
 
-	# Debug
+	# Establecer ultimo ataque
 	if _first_attack_frame:
-		print(_current_attack.name)
+		_having_to_detect_attack_jump = is_attack_jump
+		_last_attack = _current_attack
+		print(_current_attack.name) # Debug
 
 func _attack_anim(delta:float) -> void:
 	if _current_attack.name != &"":
@@ -876,7 +896,7 @@ func _ready() -> void:
 	_neutral_combo_attacks = [attacks.neutral1, attacks.neutral2, attacks.neutral3]
 
 
-# Funciones | Dependencias del physics process
+# Funciones | Dependencias del physics process | Remplazando funciones | Person Hooks
 func _reset_counts_by_impact() -> void:
 	# Reiniciar contador de ataques saltarines
 	_attack_jump_count = 0

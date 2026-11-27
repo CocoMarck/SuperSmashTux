@@ -134,6 +134,7 @@ func _false_inputs() -> void:
 	super()
 	_power_attack = false
 
+# Remplazando funciones | Fighter Hooks
 func _init_power_attack_by_move(direction_buffered: bool, states: MoveStates):
 	if not _power_attack:
 		return
@@ -150,11 +151,6 @@ func _init_power_attack_by_move(direction_buffered: bool, states: MoveStates):
 		_current_attack = power_attacks.air_down
 	elif states.rising or states.falling or states.jumping:
 		_current_attack = power_attacks.air_standard
-
-# Remplazando funciones.
-func _process_attack(direction_buffered: bool, states: MoveStates) -> void:
-	_init_attack_by_move(direction_buffered, states)
-	_init_power_attack_by_move(direction_buffered, states)
 
 func _collect_controller_input(delta: float, frame: FrameMotionSignals) -> void:
 	var input :MoveInput = _controller.get_input(delta, frame)

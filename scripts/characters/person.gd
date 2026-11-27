@@ -75,7 +75,6 @@ var _knockback_friction: float = 20.0
 # Propiedades privadas | Saltos | Múltiples saltos
 var _max_jumps : int = 1
 var _jump_count : int = 0
-var _first_jump_frame: bool = false
 
 # Propiedades privadas | Bajar de plataforma, o bajar rápido.
 var _down_count : int = 0
@@ -105,7 +104,6 @@ var _last_damage_percentage :float = 0.0
 var _taking_damage_count : float = 0.0
 
 # Propiedades privadas | Stun damage
-var _first_frame_of_damage: bool = false
 var _heavy_hitstun_time: float = 0.0
 var _heavy_hitstun_get_up_time: float = 0.0
 var _heavy_hitstun_wait_to_get_up: bool = false
@@ -181,6 +179,11 @@ var controller: PersonController3D:
 
 # Propiedades privadas | Offset animations
 var _hanging_anim_offset: Vector3 = Vector3.ZERO
+
+# Propiedades privadas | First frame of event
+var _first_frame_of_damage: bool = false
+var _first_frame_on_floor: bool = false
+var _first_jump_frame: bool = false
 
 
 # Fuciones | Direccion
@@ -746,7 +749,6 @@ func _set_pivot_direction(signals: MoveSignals) -> void:
 # Funciones | Damage recibido
 func set_damage(damage: int=0, direction: Vector3 =Vector3.ZERO) -> void:
 	if not _immunity_to_damage:
-		_first_frame_of_damage = true
 		_set_damage_hp(damage)
 		_set_damage_percentage(damage)
 		_set_damage_move(damage, direction)
@@ -1126,7 +1128,20 @@ func _commit_frame(delta, frame) -> void:
 	velocity = _target_velocity
 	move_and_slide()
 	_ensure_safe_z_coord()
-	_first_frame_of_damage = false
+
+
+# Funciones | First frame of event
+func _process_first_frame_of_event(delta: float, frame: FrameMotionSignals) -> void:
+	'''
+	Aqui se determinan algunos first frame (NO TODOS), otros no porque la arquitectura, o la lógica no lo permiten. Pero la intención es que esten todos.
+
+	Pero tener esta func, creo que es buena practica. Así logramos tenerlo un poco mas ordenado.
+	'''
+	_first_frame_of_damage = _taking_damage_count == delta
+	_first_frame_on_floor = (
+		frame.vertical_force_signals.last_air_count > 0 and 
+		frame.vertical_force_signals.on_floor and
+		not taking_damage() )
 
 # Fucniones | Sonido
 func _get_step_interval(states: MoveStates) -> float:
@@ -1136,10 +1151,6 @@ func _get_step_interval(states: MoveStates) -> float:
 	else:						return 0.0
 
 func _movement_sounds(delta: float, frame: FrameMotionSignals) -> void:
-	var first_frame_on_floor: bool = (
-		frame.vertical_force_signals.last_air_count > 0 and 
-		frame.vertical_force_signals.on_floor and
-		not taking_damage() )
 	var stepping: bool = (
 			frame.move_states.walking or frame.move_states.running or 
 			frame.move_states.crouch_move)
@@ -1161,7 +1172,7 @@ func _movement_sounds(delta: float, frame: FrameMotionSignals) -> void:
 				sound_name = ("Sonido de paso. Intervalo de %s" %_step_time)
 
 	# caida en el piso
-	if first_frame_on_floor:
+	if _first_frame_on_floor:
 		_audio_stream_player.stream = stream_land
 		sound_name = "Sonido caida en piso"
 	
@@ -1254,6 +1265,9 @@ func _physics_process(delta: float) -> void:
 
 	# Animation
 	_animate(delta, frame)
+
+	# First frame of events
+	_process_first_frame_of_event(delta, frame)
 
 	# Effects
 	_process_effects(delta)
