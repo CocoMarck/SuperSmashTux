@@ -880,6 +880,15 @@ func _grabbing_move(signals: VerticalForceSignals) -> void:
 	else:
 		_clear_grabbing()
 
+func _visual_shield(frame: FrameMotionSignals) -> void:
+	# Visual | Escudo, para meterselo al remplazado `process_visual` de `Person`.
+	var with_shield = _with_shield(frame.vertical_force_signals)
+	_shield_mesh_instance.visible = with_shield
+	if with_shield:
+		var porcent :float = get_shield_ratio()
+		_shield_sphere.radius = _init_shield_radius * porcent
+		_shield_sphere.height = _init_shield_height * porcent
+
 # Funciones | Init
 func _ready() -> void:
 	super()
@@ -992,26 +1001,12 @@ func _cancel_action(frame: FrameMotionSignals) -> void:
 		else:
 			_current_attack = null
 			_clear_hitboxes_damages()
-			
 
-func _visual_shield(frame: FrameMotionSignals) -> void:
-	# Visual | Escudo
-	var with_shield = _with_shield(frame.vertical_force_signals)
-	_shield_mesh_instance.visible = with_shield
-	if with_shield:
-		var porcent :float = get_shield_ratio()
-		_shield_sphere.radius = _init_shield_radius * porcent
-		_shield_sphere.height = _init_shield_height * porcent
-
-func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
-	if _hitstun_active():
-		_apply_hitstun(delta)
-	elif _heavy_hitstun_active():
-		_apply_heavy_hitstun(delta, frame.vertical_force_signals)
-	elif _shield_blockstun_active():
+func _need_another_middle_stun(delta: float, frame: FrameMotionSignals) -> bool:
+	if _shield_blockstun_active():
 		_apply_shield_pushback(delta)
-	elif _hard_landing_active():
-		_apply_hard_landing(delta, frame.vertical_force_signals)
+		return true
+	return false
 
 func _not_normal_move_anim(delta: float, frame: FrameMotionSignals) -> bool:
 	var not_normal = true
@@ -1058,6 +1053,11 @@ func _attack_sounds(delta, frame: FrameMotionSignals) -> void:
 			if _current_attack.name in fight_moves_with_hitspawn_sound:
 				_audio_stream_player.stream = stream_attack
 				_audio_stream_player.play()
+
+func _clean_first_frame_of_event() -> void:
+	super()
+	_first_frame_of_spawned_hitbox = false
+	_first_attack_frame = false
 
 # _physics_process, vive en `Person`
 

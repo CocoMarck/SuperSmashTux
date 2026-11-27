@@ -184,6 +184,7 @@ var _hanging_anim_offset: Vector3 = Vector3.ZERO
 var _first_frame_of_damage: bool = false
 var _first_frame_on_floor: bool = false
 var _first_jump_frame: bool = false
+var _first_frame_on_foot: bool = false # Lo usa hard landing, y el get up de la caida. Para game feel; hacer que el hard landing no le importe el `can_jump`, solo en primer frame levantado. (En el futoro se puede usar como estado init/spawn)
 
 
 # Fuciones | Direccion
@@ -258,7 +259,9 @@ func respawn(at_position: Vector3) -> void:
 	_knockout_time = 0.0
 	_hitstun_time = 0.0
 	_hard_landing_time = 0.0
+	_clean_first_frame_of_event()
 	_set_x_not_zero_value( _get_initial_facing() )
+	
 	
 # Funciones | Agarre de orillas
 func _release_hanging_ledge() -> void:
@@ -471,14 +474,14 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 		grabbed = false
 
 	# Variables | Salto y moverse horizontalmente
-	var want_jump := false
-	var can_jump := false
+	var want_jump: bool = false
+	var can_jump: bool = false
 	if _block_inputs():
 		_false_inputs()
 	else:
 		# Flancos Salto
 		want_jump = (_jump or _move_up) # <--- El move up se usara para ataques hacia arriba.
-		can_jump = (want_jump and _allow_jump) and not _was_jumping
+		can_jump = (want_jump and _allow_jump) and not _was_jumping and not _first_frame_on_foot
 
 		# Flancos down, up right, left
 		_down_pressed = _move_down and not _was_move_down
@@ -553,8 +556,8 @@ func _move(delta: float, signals: VerticalForceSignals) -> MoveSignals:
 			speed_multiplier = 0.8
 
 	# Velocidad horizontal
-	var target_speed := _direction.x * (speed*speed_multiplier)
-	var accel := _air_acceleration
+	var target_speed: float = _direction.x * (speed*speed_multiplier)
+	var accel: float = _air_acceleration
 	if _hitstun_active():
 		accel = _knockback_friction
 	elif signals.on_floor:
@@ -838,6 +841,7 @@ func _hard_landing_active() -> bool:
 func _apply_hard_landing(delta: float, signals: VerticalForceSignals) -> void:
 	_hard_landing_time -= delta
 	if _hard_landing_time <= 0.0 or not signals.on_floor:
+		_first_frame_on_foot = true
 		_hard_landing_time = 0.0
 
 # Funciones | Hitstun
@@ -901,6 +905,7 @@ func _heavy_hitstun_get_up_move(delta: float, signals: VerticalForceSignals):
 		# Acrivar inmunidad
 		_immunity_to_damage = true
 		if (_heavy_hitstun_get_up_time <= 0.0):
+			_first_frame_on_foot = true
 			_pivot.rotation_degrees.x = 0
 			_immunity_to_damage = false
 			_ledge_release_count = 0.0 # Para poder agarrarse
@@ -1063,12 +1068,18 @@ func _process_stun(delta: float, frame: FrameMotionSignals) -> void:
 	Se hace referencia a stuns normales. NO los que no te dan efectos locos. Como invertirte los inputs o algo asi. Funcion remplazable por fighter.
 	- Se puede hacer esto menos HOOK para fighter, haciendo una función con lo que va en medio, y usar solo `if`, no `elif`.
 	'''
+	_first_frame_on_foot = false
 	if _hitstun_active():
 		_apply_hitstun(delta)
-	elif _heavy_hitstun_active():
+		return
+	if _heavy_hitstun_active():
 		_apply_heavy_hitstun(delta, frame.vertical_force_signals)
-	elif _hard_landing_active():
+		return
+	if _need_another_middle_stun(delta, frame):
+		return
+	if _hard_landing_active():
 		_apply_hard_landing(delta, frame.vertical_force_signals)
+		return
 
 func _process_damage(delta: float, frame: FrameMotionSignals) -> void:
 	'''
@@ -1191,10 +1202,6 @@ func _movement_sounds(delta: float, frame: FrameMotionSignals) -> void:
 		print(sound_name)
 		_audio_stream_player.play()
 
-func _attack_sounds(delta: float, frame: FrameMotionSignals) -> void:
-	# Función remplazable para Fighter/PowerFighter
-	return
-
 func _process_sound(delta:float, frame: FrameMotionSignals) -> void:
 	'''
 	- first frame on floor, solo se usa cuando no se esta recibiendo daño (porque repite mucho el sonido en mini saltos imperseptibles).
@@ -1203,9 +1210,7 @@ func _process_sound(delta:float, frame: FrameMotionSignals) -> void:
 	_movement_sounds(delta, frame)
 	_attack_sounds(delta, frame)
 
-	
-
-# Funciones | Remplazables
+# Funciones | Remplazables | Hooks
 func _process_action(delta: float, frame: FrameMotionSignals) -> void:
 	'''
 	Acciones especiales. Esta func la sobrescribira fighter.
@@ -1224,6 +1229,20 @@ func _process_visual(frame: FrameMotionSignals) -> void:
 	'''
 	pass
 
+func _attack_sounds(delta: float, frame: FrameMotionSignals) -> void:
+	# Función remplazable para Fighter/PowerFighter
+	return
+
+func _need_another_middle_stun(delta: float, frame: FrameMotionSignals) -> bool:
+	# Hook para `Fighter`, se usa en `process_stun`
+	return false
+	
+func _clean_first_frame_of_event() -> void:
+	# Remplazable para `Fighter`, se usa en `process_frist_frame_of_event`.
+	_first_frame_on_foot = false
+	_first_frame_of_damage = false
+	_first_jump_frame = false
+	_first_frame_on_floor = false
 
 # Controller | Functions
 func _collect_controller_input(delta: float, frame: FrameMotionSignals) -> void:
