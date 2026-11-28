@@ -28,6 +28,8 @@ func _open_scene(scene_path: String) -> void:
 func _start_debug_match() -> void:
 	# Para probar el juego de manera rápida
 
+	var lives: int = 2
+
 	# Instanciar
 	var level: GameManager = load(LEVEL_SCENE).instantiate() as GameManager
 	level.add_child(load(FIGHT_HUD_SCENE).instantiate())
@@ -39,7 +41,7 @@ func _start_debug_match() -> void:
 
 	# Agregar información de peleadores
 	var data_p1 : PowerFighterData = PowerFighterData.new()
-	data_p1.lives = 1
+	data_p1.lives = lives
 	data_p1.config_id = "tux"
 	data_p1.control = GlobalUtils.ControlType.PLAYER
 	data_p1.player_id = GlobalUtils.PlayerId.PLAYER_1
@@ -53,10 +55,10 @@ func _start_debug_match() -> void:
 	level.power_fighter_slots.set_slot(3, data_p2)
 
 	var data_p3 : PowerFighterData = PowerFighterData.new()
-	data_p3.lives = 1
+	data_p3.lives = lives
 	data_p3.config_id = "tux"
 	data_p3.control = GlobalUtils.ControlType.NPC
 	data_p3.npc_id = GlobalUtils.NPCId.NPC_1
-	#level.power_fighter_slots.set_slot(0, data_p3)
+	level.power_fighter_slots.set_slot(0, data_p3)
 
 	get_tree().change_scene_to_node(level)

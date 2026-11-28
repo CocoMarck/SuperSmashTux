@@ -3,7 +3,6 @@ extends Marker3D
 
 # Camara dinamica que encuadra a todos los peleadores con zoom. El pivot (Marker3D) se mueve en X/Y
 # y la Camera3D hija solo en Z. Cada frame: _update_target y luego _move_camera.
-# Busca a los peleadores entre los hijos de su padre (el GameManager), asi que tiene que colgar de el.
 # Se instancia desde prefabs/camera_follow.tscn; camera_area se asigna antes del add_child.
 
 # Propiedades publicas | Area de juego.
@@ -24,7 +23,6 @@ extends Marker3D
 # Propiedades publicas | Efectos | Temblor
 @export_group("Shake")
 @export var shake_strength: float = 0.1
-@export var shake_duration_ms: int = 500   # cuanto tiembla cada vez que muere alguien
 
 # Propiedades privadas | Encuadre
 @onready var _camera: Camera3D = $Camera3D    # la del prefab; ahi se ajustan fov y distancia inicial
@@ -33,6 +31,9 @@ var _position: Vector2 = Vector2.ZERO    # posicion actual del pivot, sin temblo
 var _distance: float = 0.0
 var _target_position: Vector2 = Vector2.ZERO
 var _target_distance: float = 0.0
+
+# Propiedades privadas | Encuadre | Cache
+var _focus_cache: Array[Node3D] = []
 
 # Propiedades privadas | Efectos | Temblor
 var _shake_end_time_msec: int = 0
@@ -43,22 +44,32 @@ func _distance_for_size(size: Vector2, aspect: float, half_fov_tan: float) -> fl
 	var half := size * 0.5
 	return maxf(half.y, half.x / aspect) / half_fov_tan
 
+# Funciones | Encuadre cache | Otras futuras funcs: clear, exists, remove dupliced
+func add_focus(target: Node3D):
+	if _focus_cache.has(target):
+		return
+	_focus_cache.append(target)
+
+func remove_focus(target: Node3D):
+	if _focus_cache.is_empty():
+		return
+	for i: int in range(0, len(_focus_cache)):
+		if _focus_cache.get(i) == target:
+			_focus_cache.remove_at(i)
+
 # Funciones | Encuadre y movimiento
 func _update_target() -> void:
 	'''
 	Recalcula el objetivo (centro y distancia) pa encuadrar a los peleadores dentro de camera_area.
-	Sin peleadores que encuadrar, el objetivo no cambia.
+	Sin focus que encuadrar, el objetivo no cambia.
 	'''
 	var has_camera_bounds := _camera_area_bounds.size != Vector3.ZERO
 
-	# Rect que encuadra a los peleadores dentro del area. Los PowerFighter son hermanos de la camara.
+	# Rect que encuadra a los `Node3D` con focus dentro del area. 
 	var rect := Rect2()
 	var rect_started := false
-	for child in get_parent().get_children():
-		var power_fighter := child as PowerFighter
-		if power_fighter == null:
-			continue
-		var pos := power_fighter.global_position
+	for target: Node3D in _focus_cache:
+		var pos := target.global_position
 		if has_camera_bounds and not _camera_area_bounds.has_point(pos):
 			continue
 		var point := Vector2(pos.x, pos.y)
@@ -119,13 +130,6 @@ func _move_camera(delta: float) -> void:
 func shake(milliseconds: int) -> void:
 	'''Hace temblar la camara durante N ms desde ahora.'''
 	_shake_end_time_msec = Time.get_ticks_msec() + int(milliseconds)
-
-func on_power_fighter_died(_power_fighter: PowerFighter, _lives: int) -> void:
-	'''
-	Escucha la señal lives_changed del GameManager (la conecta el al crear la camara).
-	La camara decide el efecto: hoy un temblor de shake_duration_ms en cada muerte.
-	'''
-	shake(shake_duration_ms)
 
 func is_shake_active() -> bool:
 	return Time.get_ticks_msec() < _shake_end_time_msec

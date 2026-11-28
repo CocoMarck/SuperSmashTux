@@ -28,6 +28,11 @@ const SLOT_4_MATERIAL: Material = preload("res://materials/mat_green.tres")
 # Constantes | Prefabs
 const CAMERA_FOLLOW_PREFAB: PackedScene = preload("res://prefabs/camera_follow.tscn")
 
+# Propiedades publicas CameraFollow | Efectos | Temblor
+@export_group("CameraFollow")
+@export var shake_strength: float = 0.1
+@export var shake_duration_ms: int = 500   # cuanto tiembla cada vez que muere alguien
+
 # Propiedades | Configuración de partida.
 @export_group("Match Settings")
 @export_range(0.0, 5.0, 0.1) var fight_sign_seconds: float = 1.2  # (1.2) segundos que dura el letrero ¡PELEA! con los peleadores congelados. Con 0 no hay letrero.
@@ -95,6 +100,9 @@ func _spawn_all_power_fighters() -> void:
 
 		# Apariencia despues de agregar al mapa. Por ahora nada.
 		#power_fighter.set_material( _get_all_materials()[i] )
+
+		# Agregar focus al camera
+		_camera_follow.add_focus(power_fighter)
 
 # Funciones | `PowerFighters`
 func get_valid_fighters() -> Dictionary[int, PowerFighter]:
@@ -203,9 +211,13 @@ func get_lives(power_fighter: PowerFighter) -> int:
 # Funciones | Handlers para `MatchLives`
 func _on_lives_changed(power_fighter: PowerFighter, lives: int) -> void:
 	lives_changed.emit(power_fighter, lives)
+	
+	# Usando `CameraFollow` shake de muerte.
+	_camera_follow.shake(shake_duration_ms)
 
 func _on_eliminated(power_fighter: PowerFighter) -> void:
 	power_fighter_eliminated.emit(power_fighter)
+	_camera_follow.remove_focus(power_fighter)
 
 func _on_death_resolved(remaining: Array[PowerFighter]) -> void:
 	if _match_over or remaining.size() > 1:
@@ -265,8 +277,6 @@ func _ready() -> void:
 	_camera_follow = CAMERA_FOLLOW_PREFAB.instantiate() as CameraFollow
 	_camera_follow.camera_area = _play_area # Antes del add_child: su _ready calcula la caja con esto.
 	add_child(_camera_follow)
-	# El manager solo conecta; que hacer al morir alguien (temblor) lo decide la camara.
-	lives_changed.connect(_camera_follow.on_power_fighter_died)
 	# Debug
 	if _play_area_bounds.size == Vector3.ZERO:
 		# Play_area sin configurar; no se detectaran muertes
